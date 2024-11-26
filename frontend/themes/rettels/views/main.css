@@ -1,0 +1,11 @@
+.main-view{
+	width: 100vw;
+    height: 100vh;
+    background-image: url('/images/partyservice-catering-rettel-saarland.jpg');
+	background-size: cover;
+    background-position: center;
+}
+[part='navbar'], [part='drawer'] {
+    background-color: var(--lumo-base-color);
+    background-clip: border-box;
+}

@@ -1,0 +1,23 @@
+.grid-filter{
+	width: 100%;
+	max-width: calc(100% - calc(2* var(--lumo-space-s)));
+    position: absolute;
+    background-color: var(--lumo-base-color);
+    border: 1px solid transparent;
+	gap: var(--lumo-space-s);
+ 	visibility: hidden;
+}
+
+.grid-filter[open]{
+	height: auto;
+	border: 1px solid var(--fc-border-color);
+    border-radius: var(--lumo-border-radius-s);
+    z-index: 10000;
+    visibility: visible;
+}
+
+.toggle{
+	position: absolute;
+    top: 0px;
+    right: 0px;
+}

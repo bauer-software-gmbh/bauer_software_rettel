@@ -1,0 +1,8 @@
+vaadin-horizontal-layout.groupby-header[empty]::after {
+    content: 'Drag here to set row groups';
+    color: var(--lumo-shade-40pct);
+    font-weight: 600;
+    width: 100%;
+    display: flex;
+    align-items: end;
+}

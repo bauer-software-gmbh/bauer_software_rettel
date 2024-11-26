@@ -1,0 +1,40 @@
+.login_view{    
+	width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+	background-image: url('/images/partyservice-catering-rettel-saarland.jpg');
+	background-size: cover;
+    background-position: center;
+}
+.login-form{
+	background-color: transparent;
+}
+
+vaadin-login-form-wrapper{
+	background: rgba(255 255 255 / 50%);
+	border: 1px solid white;
+    border-radius: var(--lumo-border-radius-s);
+    box-shadow: -.5rem .5rem var(--lumo-shade-20pct);
+}
+
+
+vaadin-login-form-wrapper>form{
+background: white;
+    padding: 1rem;
+    margin: -1rem;
+    border: 1px solid white;
+    border-radius: var(--lumo-border-radius-m);
+}
+
+vaadin-login-form-wrapper::part(form-title){
+	background-color: transparent;
+    background-image: url(./icons/icon.png);
+    background-size: auto;
+    background-repeat: no-repeat;
+    padding: 36px 0 20px 70px;
+    color: var(--lumo-body-text-color);
+    font-family: "Roboto", Helvetica, Arial, Verdana, sans-serif;
+}

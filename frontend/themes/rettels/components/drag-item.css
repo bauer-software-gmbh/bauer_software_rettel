@@ -1,0 +1,7 @@
+.drag-item{
+	border: 1px solid var(--lumo-contrast-60pct);
+    border-radius: var(--lumo-border-radius-s);
+    padding: var(--lumo-space-s);
+    min-width: 250px;
+    display: flex;
+}
