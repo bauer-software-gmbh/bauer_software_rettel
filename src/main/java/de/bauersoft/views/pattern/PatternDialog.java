@@ -13,7 +13,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 
-import de.bauersoft.data.entities.Pattern;
+import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.data.providers.PatternDataProvider;
 import de.bauersoft.services.PatternService;
 import de.bauersoft.views.DialogState;

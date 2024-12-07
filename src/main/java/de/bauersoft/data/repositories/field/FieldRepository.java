@@ -5,5 +5,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import de.bauersoft.data.entities.Field;
 
-public interface FieldRepository extends JpaRepository<Field, Long>, JpaSpecificationExecutor<Field>{
+public interface FieldRepository extends JpaRepository<Field, Long>, JpaSpecificationExecutor<Field>
+{
 }

@@ -5,5 +5,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import de.bauersoft.data.entities.Menu;
 
-public interface MenuRepository extends JpaRepository<Menu,Long>,JpaSpecificationExecutor<Menu>{
+public interface MenuRepository extends JpaRepository<Menu,Long>,JpaSpecificationExecutor<Menu>
+{
 }

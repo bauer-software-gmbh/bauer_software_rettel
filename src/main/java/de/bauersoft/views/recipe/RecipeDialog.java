@@ -19,7 +19,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 
 import de.bauersoft.data.entities.Formulation;
-import de.bauersoft.data.entities.Pattern;
+import de.bauersoft.data.entities.pattern.Pattern;
 
 import de.bauersoft.data.entities.Recipe;
 import de.bauersoft.data.providers.RecipeDataProvider;

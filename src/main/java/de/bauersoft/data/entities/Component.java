@@ -17,8 +17,7 @@ public class Component extends AbstractEntity {
 	
 	String name;
 	String description ="";
-	
-	
+
 	@OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
 	@JoinTable(name="components",joinColumns =@JoinColumn(name="component_id"),
 				inverseJoinColumns = @JoinColumn(name ="recipe_id"))

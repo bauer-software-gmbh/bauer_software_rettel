@@ -2,6 +2,7 @@ package de.bauersoft.data.entities;
 
 import java.util.Set;
 
+import de.bauersoft.data.entities.pattern.Pattern;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

@@ -35,6 +35,7 @@ import de.bauersoft.views.dashboard.DashboardView;
 import de.bauersoft.views.field.FieldView;
 import de.bauersoft.views.incredient.IngredientView;
 import de.bauersoft.views.institution.InstitutionView;
+import de.bauersoft.views.menuBuilder.MenuBuilderView;
 import de.bauersoft.views.menue.MenueView;
 import de.bauersoft.views.pattern.PatternView;
 import de.bauersoft.views.recipe.RecipeView;
@@ -50,12 +51,14 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
  * The main view is a top-level placeholder for other views.
  */
 @CssImport("./themes/rettels/views/main.css")
-public class MainLayout extends AppLayout {
+public class MainLayout extends AppLayout
+{
 	private H1 viewTitle;
 	private AuthenticatedUser authenticatedUser;
 	private AccessAnnotationChecker accessChecker;
 
-	public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
+	public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker)
+	{
 		this.authenticatedUser = authenticatedUser;
 		this.accessChecker = accessChecker;
 		this.setClassName("main-view");
@@ -65,7 +68,8 @@ public class MainLayout extends AppLayout {
 		this.setDrawerOpened(false);
 	}
 
-	private void addHeaderContent() {
+	private void addHeaderContent()
+	{
 		DrawerToggle toggle = new DrawerToggle();
 		toggle.setAriaLabel("Menu toggle");
 		viewTitle = new H1();
@@ -131,7 +135,8 @@ public class MainLayout extends AppLayout {
 			nav.addItem(new SideNavItem("dashboard", DashboardView.class, LineAwesomeIcon.CHART_AREA_SOLID.create()));
 		}
 		if (accessChecker.hasAccess(UsersView.class) || accessChecker.hasAccess(FieldView.class)
-				|| accessChecker.hasAccess(InstitutionView.class) || accessChecker.hasAccess(AddressView.class)) {
+				|| accessChecker.hasAccess(InstitutionView.class) || accessChecker.hasAccess(AddressView.class))
+		{
 			SideNavItem accounting = new SideNavItem("accounting");
 			if (accessChecker.hasAccess(UsersView.class)) {
 				accounting.addItem(new SideNavItem("users", UsersView.class, LineAwesomeIcon.USERS_SOLID.create()));
@@ -151,8 +156,13 @@ public class MainLayout extends AppLayout {
 		if (accessChecker.hasAccess(ComponentView.class) || accessChecker.hasAccess(RecipeView.class)
 				|| accessChecker.hasAccess(IngredientView.class) || accessChecker.hasAccess(CourseView.class)
 				|| accessChecker.hasAccess(AllergenView.class) || accessChecker.hasAccess(AdditiveView.class)
-				|| accessChecker.hasAccess(UnitView.class) || accessChecker.hasAccess(PatternView.class)) {
+				|| accessChecker.hasAccess(UnitView.class) || accessChecker.hasAccess(PatternView.class)
+				|| accessChecker.hasAccess(MenuBuilderView.class)) {
 			SideNavItem backend = new SideNavItem("backend");
+
+			if(accessChecker.hasAccess(MenuBuilderView.class))
+				backend.addItem(new SideNavItem("menue builder", MenuBuilderView.class, LineAwesomeIcon.BACON_SOLID.create()));
+
 			if (accessChecker.hasAccess(ComponentView.class)) {
 				backend.addItem(
 						new SideNavItem("component", ComponentView.class, LineAwesomeIcon.CARROT_SOLID.create()));
