@@ -9,6 +9,7 @@ import com.vaadin.flow.component.textfield.TextFieldVariant;
 import de.bauersoft.data.entities.Component;
 import de.bauersoft.data.entities.Course;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
+import de.bauersoft.data.repositories.component.ComponentRepository;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.*;
@@ -20,18 +21,21 @@ public class RowCluster extends FlexLayout
     private TextField boundField;
 
     private Button addButton;
-    private ComponentEventListener<ClickEvent<Button>> addButtonListener;
+    private ComponentEventListener<ClickEvent<Button>> addButtonClickListener;
 
     private Button removeButton;
-    private ComponentEventListener<ClickEvent<Button>> removeButtonListener;
+    private ComponentEventListener<ClickEvent<Button>> removeButtonClickListener;
 
     private List<ComponentBox> componentBoxes;
 
-    public RowCluster(Course bound)
+    private ComponentRepository componentRepository;
+
+    public RowCluster(Course bound, ComponentRepository componentRepository)
     {
         Objects.requireNonNull(bound);
 
         this.bound = bound;
+        this.componentRepository = componentRepository;
 
         boundField = new TextField();
         boundField.setValue(bound.getName());
@@ -44,9 +48,31 @@ public class RowCluster extends FlexLayout
         addButton.setIcon(LineAwesomeIcon.PLUS_SQUARE.create());
         addButton.getElement().getStyle().set("margin", "5px");
 
+        addButtonClickListener = event ->
+        {
+            Collection<Component> items = componentRepository.findAll();
+
+            items = getCourseMatchingComponents(items, bound);
+            items = getPatternMatchingComponents(items, DefaultPattern.VEGAN);
+
+            addComponentBox(items);
+
+            updateCluster();
+        };
+
+        addButton.addClickListener(addButtonClickListener);
+
         removeButton = new Button();
         removeButton.setIcon(LineAwesomeIcon.MINUS_SQUARE.create());
         removeButton.getElement().getStyle().set("margin", "5px");
+
+        removeButtonClickListener = event ->
+        {
+            componentBoxes.clear();
+            updateCluster();
+        };
+
+        removeButton.addClickListener(removeButtonClickListener);
 
         componentBoxes = new ArrayList<>();
 
@@ -79,6 +105,7 @@ public class RowCluster extends FlexLayout
         return this;
     }
 
+
     public Button getAddButton()
     {
         return addButton;
@@ -92,16 +119,12 @@ public class RowCluster extends FlexLayout
         return this;
     }
 
-    public Optional<ComponentEventListener<ClickEvent<Button>>> getAddButtonListener()
+    public ComponentEventListener<ClickEvent<Button>> getAddButtonClickListener()
     {
-        return Optional.ofNullable(addButtonListener);
+        return addButtonClickListener;
     }
 
-    public RowCluster setAddButtonListener(ComponentEventListener<ClickEvent<Button>> addButtonListener)
-    {
-        this.addButtonListener = addButtonListener;
-        return this;
-    }
+
 
     public Button getRemoveButton()
     {
@@ -116,17 +139,11 @@ public class RowCluster extends FlexLayout
         return this;
     }
 
-    public Optional<ComponentEventListener<ClickEvent<Button>>> getRemoveButtonListener()
+    public ComponentEventListener<ClickEvent<Button>> getRemoveButtonClickListener()
     {
-
-        return Optional.ofNullable(removeButtonListener);
+        return removeButtonClickListener;
     }
 
-    public RowCluster setRemoveButtonListener(ComponentEventListener<ClickEvent<Button>> removeButtonListener)
-    {
-        this.removeButtonListener = removeButtonListener;
-        return this;
-    }
 
     public List<ComponentBox> getComponentBoxes()
     {
@@ -149,8 +166,13 @@ public class RowCluster extends FlexLayout
         this.add(boundField);
         this.add(componentBoxes.stream().collect(Collectors.toSet()));
 
-        //TODO Button add
-        ruler();
+
+        if(componentBoxes.size() < 1)
+            this.add(addButton);
+        else
+            this.add(removeButton);
+
+        //ruler();
     }
 
     private void ruler()
@@ -159,50 +181,27 @@ public class RowCluster extends FlexLayout
             this.add(addButton);
     }
 
-    public void initDefaultAddButtonListener()
+
+    private ComponentBox addComponentBox(Collection<Component> items)
     {
-        addButtonListener = event ->
-        {
-
-        };
-    }
-
-    public void initDefaultRemoveButtonListener()
-    {
-        removeButtonListener = event ->
-        {
-
-        };
-    }
-
-    private ComponentBox generateComponentBox(Collection<Component> items, int index)
-    {
-        ComponentBox componentBox = new ComponentBox();
-        componentBox.setBound(bound);
+        ComponentBox componentBox = new ComponentBox(bound);
         componentBox.setItems(items);
 
-        addElseSet(componentBoxes, index, componentBox);
+        componentBox.setItemLabelGenerator(component -> component.getName());
+
+        componentBoxes.add(componentBox);
         return componentBox;
     }
 
-    /**
-     * Returns a collection of {@link de.bauersoft.data.entities.Component} objects where all recipes in each component
-     * have at least one pattern that matches the given {@link DefaultPattern}.
-     *
-     * The method filters the provided collection of components. For each component, it checks all of its recipes to ensure
-     * that every recipe has at least one pattern that matches the provided {@link DefaultPattern}. Only components where
-     * all recipes meet this condition will be included in the returned collection.
-     *
-     * @param components the collection of {@link de.bauersoft.data.entities.Component} objects to be filtered
-     * @param toMatch the {@link DefaultPattern} that the component's recipe patterns should match
-     * @return a collection of components where all recipes contain at least one pattern that matches the specified {@link DefaultPattern}
-     * @throws NullPointerException if the {@code components} is {@code null}
-     */
-    public static Collection<Component> getPatternMatchingComponents(Collection<de.bauersoft.data.entities.Component> components, DefaultPattern toMatch)
+    public static Collection<Component> getPatternMatchingComponents(Collection<Component> components, DefaultPattern toMatch)
     {
-        Objects.requireNonNull(components, "components cannot be null.");
+        Objects.requireNonNull(components, "components cannot be null");
+        if(components.contains(null))
+            throw new NullPointerException("components contains null");
 
-        Collection<de.bauersoft.data.entities.Component> matching = components.stream()
+        Objects.requireNonNull(toMatch, "toMatch cannot be null");
+
+        Collection<Component> matching = components.stream()
                 .filter(component -> component.getRecipes().stream()
                         .allMatch(recipe -> recipe.getPatterns().stream()
                                 .anyMatch(pattern -> pattern.equalsDefault(toMatch))))
@@ -211,18 +210,21 @@ public class RowCluster extends FlexLayout
         return matching;
     }
 
-    /**
-     * Adds an element at the specified position in a copy of the given list.
-     * If the index is equal to the size of the list, the element will be added at the end.
-     * All subsequent elements will be shifted one position to the right.
-     *
-     * @param collection the collection to which the element will be added
-     * @param index the position in the collection where the element will be added
-     * @param element the element to add
-     * @return a copy of the original collection with the added element
-     * @param <E> the type of the element
-     * @throws IndexOutOfBoundsException if index < 0 or index > size
-     */
+    public static Collection<Component> getCourseMatchingComponents(Collection<Component> components, Course toMatch)
+    {
+        Objects.requireNonNull(components, "components cannot be null");
+        if(components.contains(null))
+            throw new NullPointerException("components contains null");
+
+        Objects.requireNonNull(toMatch, "course cannot be null");
+
+        Collection<Component> matching = components.stream()
+                .filter(component -> component.getCourse().equals(toMatch))
+                .collect(Collectors.toList());
+
+        return matching;
+    }
+
     public static  <E> List<E> addElseSet(List<E> collection, int index, E element)
     {
         List<E> copy = new ArrayList<>(collection);

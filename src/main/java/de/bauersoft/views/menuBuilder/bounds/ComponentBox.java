@@ -7,60 +7,49 @@ import de.bauersoft.data.entities.pattern.DefaultPattern;
 
 import java.util.Collection;
 
-public class ComponentBox extends ComboBox<Component>
+public class ComponentBox extends BoundComboBox<Course, Component>
 {
-    private Course bound;
     private DefaultPattern matcher;
     private int sectionIndex;
 
-    public ComponentBox(int pageSize)
+    public ComponentBox(int pageSize, Course bound)
     {
-        super(pageSize);
+        super(pageSize, bound);
     }
 
-    public ComponentBox()
+    public ComponentBox(Course bound)
     {
+        super(bound);
     }
 
-    public ComponentBox(String label)
+    public ComponentBox(String label, Course bound)
     {
-        super(label);
+        super(label, bound);
     }
 
-    public ComponentBox(String label, Collection<Component> items)
+    public ComponentBox(String label, Collection<Component> items, Course bound)
     {
-        super(label, items);
+        super(label, items, bound);
     }
 
-    public ComponentBox(String label, Component... items)
+    public ComponentBox(String label, Course bound, Component... items)
     {
-        super(label, items);
+        super(label, bound, items);
     }
 
-    public ComponentBox(ValueChangeListener<ComponentValueChangeEvent<ComboBox<Component>, Component>> listener)
+    public ComponentBox(ValueChangeListener<ComponentValueChangeEvent<ComboBox<Component>, Component>> listener, Course bound)
     {
-        super(listener);
+        super(listener, bound);
     }
 
-    public ComponentBox(String label, ValueChangeListener<ComponentValueChangeEvent<ComboBox<Component>, Component>> listener)
+    public ComponentBox(String label, ValueChangeListener<ComponentValueChangeEvent<ComboBox<Component>, Component>> listener, Course bound)
     {
-        super(label, listener);
+        super(label, listener, bound);
     }
 
-    public ComponentBox(String label, ValueChangeListener<ComponentValueChangeEvent<ComboBox<Component>, Component>> listener, Component... items)
+    public ComponentBox(String label, ValueChangeListener<ComponentValueChangeEvent<ComboBox<Component>, Component>> listener, Course bound, Component... items)
     {
-        super(label, listener, items);
-    }
-
-    public Course getBound()
-    {
-        return bound;
-    }
-
-    public ComponentBox setBound(Course bound)
-    {
-        this.bound = bound;
-        return this;
+        super(label, listener, bound, items);
     }
 
     public DefaultPattern getMatcher()
@@ -68,10 +57,9 @@ public class ComponentBox extends ComboBox<Component>
         return matcher;
     }
 
-    public ComponentBox setMatcher(DefaultPattern matcher)
+    public void setMatcher(DefaultPattern matcher)
     {
         this.matcher = matcher;
-        return this;
     }
 
     public int getSectionIndex()
@@ -79,10 +67,8 @@ public class ComponentBox extends ComboBox<Component>
         return sectionIndex;
     }
 
-    public ComponentBox setSectionIndex(int sectionIndex)
+    public void setSectionIndex(int sectionIndex)
     {
-
         this.sectionIndex = sectionIndex;
-        return this;
     }
 }

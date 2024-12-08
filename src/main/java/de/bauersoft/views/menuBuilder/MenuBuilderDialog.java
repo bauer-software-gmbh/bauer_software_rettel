@@ -121,7 +121,7 @@ public class MenuBuilderDialog extends Dialog
 
         courseRepository.findAll().forEach(course ->
         {
-            RowCluster rowCluster = new RowCluster(course);
+            RowCluster rowCluster = new RowCluster(course, componentRepository);
             rowClusters.add(rowCluster);
         });
 
@@ -233,8 +233,7 @@ public class MenuBuilderDialog extends Dialog
         Objects.requireNonNull(course , "course cannot be null.");
         Objects.requireNonNull(items , "items cannot be null.");
 
-        ComponentBox componentBox = new ComponentBox();
-        componentBox.setBound(course);
+        ComponentBox componentBox = new ComponentBox(course);
         componentBox.setItems(items);
 
         addElseSet(sectionComponents.get(course), index, componentBox);
