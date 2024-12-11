@@ -36,6 +36,7 @@ import de.bauersoft.views.field.FieldView;
 import de.bauersoft.views.incredient.IngredientView;
 import de.bauersoft.views.institution.InstitutionView;
 import de.bauersoft.views.menue.MenueView;
+import de.bauersoft.views.offers.OffersView;
 import de.bauersoft.views.pattern.PatternView;
 import de.bauersoft.views.recipe.RecipeView;
 import de.bauersoft.views.unit.UnitView;
@@ -189,10 +190,13 @@ public class MainLayout extends AppLayout {
 				}
 				backend.addItem(parameters);
 			}
+
+			if (accessChecker.hasAccess(OffersView.class)) {
+				backend.addItem(
+						new SideNavItem("offer", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
+			}
 			
 			nav.addItem(backend);
-			
-			nav.addItem(new SideNavItem("offer", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
 		}
 		return nav;
 	}
