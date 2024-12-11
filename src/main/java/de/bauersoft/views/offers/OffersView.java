@@ -53,13 +53,10 @@ public class OffersView extends Div {
         filterWeek.setMax(53); // Maximale Anzahl der Wochen
         filterWeek.setStep(1); // Schritte in Ganzzahlen
         filterWeek.setValue(4); // Standardwert
-        filterWeek.setStepButtonsVisible(true);
 
         filterWeek.addValueChangeListener(event -> {
-            if(Objects.equals(filterWeek.getEmptyValue(),event.getValue())) {
-                if(IntegerRange.of(1,53).contains(event.getValue())) {
-                    updateGrid(event.getValue());
-                }
+            if (event.getValue() != null && IntegerRange.of(1,53).contains(event.getValue())) {
+                updateGrid(event.getValue());
             }
         });
 
