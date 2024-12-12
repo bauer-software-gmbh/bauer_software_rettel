@@ -21,7 +21,9 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import de.bauersoft.data.entities.Menu;
 import de.bauersoft.data.entities.Week;
-import de.bauersoft.data.repositories.menu.MenuRepository;
+import de.bauersoft.services.DayService;
+import de.bauersoft.services.MenuService;
+import de.bauersoft.services.WeekService;
 import de.bauersoft.tools.DatePickerLocaleGerman;
 import de.bauersoft.views.MainLayout;
 import com.vaadin.flow.component.html.Div;
@@ -41,7 +43,7 @@ import java.util.function.Function;
 public class OffersView extends Div {
     private final ListDataProvider<Week> dataProvider;
 
-    public OffersView(MenuRepository menuRepository) {
+    public OffersView(MenuService menuService, DayService dayService, WeekService weekService) {
         setClassName("content");
         VerticalLayout pageVerticalLayout = new VerticalLayout();
         pageVerticalLayout.setSizeFull();
@@ -107,15 +109,8 @@ public class OffersView extends Div {
             DragSource.create(container);
             return container;
         }));
-        List<Menu> list = menuRepository.findAll();
+        List<Menu> list = menuService.findAll();
         ListDataProvider<Menu> provider = new ListDataProvider<>(list);
-
-        DropTarget.create(virtualList).addDropListener(event-> event.getDragSourceComponent().ifPresent(source->{
-                    if(source instanceof MenuDiv menuDiv) {
-                        System.out.println(menuDiv.getItem().getId());
-                    }
-                }
-        ));
 
         virtualList.setDataProvider(provider);
         virtualList.setSizeFull();
@@ -234,6 +229,14 @@ public class OffersView extends Div {
                     // Aktualisiere die Drop-Zone
                     updateDropTargets(container);
                 }
+
+                Menu menu = copy.getItem();
+
+                System.out.println(menu.getId());
+                System.out.println(menu.getName());
+                System.out.println(menu.getDescription());
+                System.out.println(menu.getVersion());
+
             }
         }));
 

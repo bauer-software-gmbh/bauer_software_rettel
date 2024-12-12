@@ -2,15 +2,15 @@ package de.bauersoft.data.entities;
 
 import jakarta.persistence.*;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "week")
-public class Week extends AbstractEntity implements Serializable {
+public class Week extends AbstractEntity {
 
+    @Column(nullable = false)
     private int kw;
 
     @OneToMany(mappedBy = "week", cascade = CascadeType.ALL, orphanRemoval = true)
