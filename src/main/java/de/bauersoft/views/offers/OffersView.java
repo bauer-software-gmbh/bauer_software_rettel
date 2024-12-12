@@ -19,6 +19,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import de.bauersoft.data.entities.Day;
 import de.bauersoft.data.entities.Menu;
 import de.bauersoft.data.entities.Week;
 import de.bauersoft.services.DayService;
@@ -42,14 +43,20 @@ import java.util.function.Function;
 @AnonymousAllowed
 public class OffersView extends Div {
     private final ListDataProvider<Week> dataProvider;
+    private final DayService dayService;
+    private final MenuService menuService;
+    private final WeekService weekService;
 
     public OffersView(MenuService menuService, DayService dayService, WeekService weekService) {
+        this.dayService = dayService;
+        this.menuService = menuService;
+        this.weekService = weekService;
+
         setClassName("content");
         VerticalLayout pageVerticalLayout = new VerticalLayout();
         pageVerticalLayout.setSizeFull();
 
         // Filter-Komponente
-
         IntegerField filterWeek = new IntegerField("Wochenanzahl:");
         filterWeek.setMin(1); // Minimale Anzahl der Wochen
         filterWeek.setMax(53); // Maximale Anzahl der Wochen
@@ -66,7 +73,6 @@ public class OffersView extends Div {
         filterDate.setValue(LocalDate.now());
         filterDate.setWeekNumbersVisible(true);
         filterDate.setI18n(new DatePickerLocaleGerman());
-
 
         // Startdatum und initiale Daten
         LocalDate startOfWeek = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
@@ -101,7 +107,6 @@ public class OffersView extends Div {
 
         HorizontalLayout mainLayout = new HorizontalLayout();
         mainLayout.setSizeFull();
-
 
         VirtualList<Menu> virtualList = new VirtualList<>();
         virtualList.setRenderer(new ComponentRenderer<Div,Menu>(component->{
@@ -162,15 +167,16 @@ public class OffersView extends Div {
         Div container = new Div();
 
         NativeLabel dateLabel = new NativeLabel(date.format(formatter));
-        Div dropZone = createDropZone();
+        Div dropZone = createDropZone(date);
 
         container.add(dateLabel, dropZone);
         return container;
     }
 
-    private Div createDropZone() {
+    private Div createDropZone(LocalDate date) {
         Div dropZone = new Div();
         dropZone.setClassName("offer_target");
+        dropZone.getElement().setAttribute("date", date.toString());  // Setze das Datum als Attribut
 
         // Initial-Update der Dropzone
         updateDropTargets(dropZone);
@@ -210,6 +216,7 @@ public class OffersView extends Div {
     private Div createThinDropTarget(Div container, int position) {
         Div thinTarget = new Div();
         thinTarget.setClassName("thin-drop-target");
+        thinTarget.getElement().setAttribute("date", container.getElement().getAttribute("date"));
 
         // Erstellen des DropTargets
         DropTarget<Div> dropTarget = DropTarget.create(thinTarget);
@@ -230,13 +237,47 @@ public class OffersView extends Div {
                     updateDropTargets(container);
                 }
 
+                // Hole das Datum und berechne die Kalenderwoche
+                String dateString = thinTarget.getElement().getAttribute("date");
+                if (dateString == null || dateString.isEmpty()) {
+                    System.out.println("Kein gültiges Datum gefunden.");
+                    return;
+                }
+
+                LocalDate dropDate = LocalDate.parse(dateString);
+                int calendarWeek = dropDate.get(WeekFields.ISO.weekOfWeekBasedYear());
+                int year = dropDate.getYear();
+
+                // Prüfe, ob die Woche existiert
+                Optional<Week> optionalWeek = weekService.findByCalendarWeekAndYear(calendarWeek, year);
+                Week week = optionalWeek.orElseGet(() -> {
+                    // Falls nicht vorhanden, erstelle eine neue Woche
+                    Week newWeek = new Week();
+                    newWeek.setKw(calendarWeek);
+                    newWeek.setYear(year);
+                    weekService.saveWeek(newWeek);
+                    return newWeek;
+                });
+
+                // Prüfe, ob der Tag existiert
+                Optional<Day> optionalDay = dayService.findByDate(dropDate);
+                Day day = optionalDay.orElseGet(() -> {
+                    // Falls nicht vorhanden, erstelle einen neuen Tag
+                    Day newDay = new Day();
+                    newDay.setDate(dropDate);
+                    newDay.setWeek(week);
+                    dayService.saveDay(newDay);
+                    return newDay;
+                });
+
+                // Füge das Menü zum Tag hinzu
+                menuService.addMenuToDay(day, copy.getItem());
+
+                // Debugging
                 Menu menu = copy.getItem();
-
-                System.out.println(menu.getId());
-                System.out.println(menu.getName());
-                System.out.println(menu.getDescription());
-                System.out.println(menu.getVersion());
-
+                System.out.println("Menü hinzugefügt:");
+                System.out.println("ID: " + menu.getId());
+                System.out.println("Name: " + menu.getName());
             }
         }));
 

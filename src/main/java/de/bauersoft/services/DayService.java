@@ -5,6 +5,8 @@ import de.bauersoft.data.entities.Menu;
 import de.bauersoft.data.repositories.day.DayRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +39,10 @@ public class DayService {
         Day day = repository.findById(dayId).orElseThrow(() -> new RuntimeException("Tag nicht gefunden"));
         day.getMenus().add(menu);
         repository.save(day);
+    }
+
+    public Optional<Day> findByDate(LocalDate date) {
+        return repository.findByDate(date);
     }
 }
 

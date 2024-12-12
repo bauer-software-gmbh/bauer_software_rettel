@@ -51,4 +51,18 @@ public class Day extends AbstractEntity {
     public void setMenus(List<Menu> menus) {
         this.menus = menus;
     }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public void addMenu(Menu menu) {
+        if (menu != null && !menus.contains(menu)) {
+            menus.add(menu);
+        }
+    }
 }

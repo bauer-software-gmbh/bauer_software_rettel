@@ -1,6 +1,8 @@
 package de.bauersoft.services;
 
+import de.bauersoft.data.entities.Day;
 import de.bauersoft.data.entities.Menu;
+import de.bauersoft.data.repositories.day.DayRepository;
 import de.bauersoft.data.repositories.menu.MenuRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,9 +13,11 @@ import java.util.Optional;
 public class MenuService {
 
     private final MenuRepository repository;
+    private final DayRepository dayRepository;
 
-    public MenuService(MenuRepository repository) {
+    public MenuService(MenuRepository repository, DayRepository dayRepository) {
         this.repository = repository;
+        this.dayRepository = dayRepository;
     }
 
     public Menu saveMenu(Menu menu) {
@@ -30,6 +34,17 @@ public class MenuService {
 
     public void deleteById(Long id) {
         repository.deleteById(id);
+    }
+
+    public void addMenuToDay(Day day, Menu menu) {
+        // Stelle sicher, dass das Menü und der Tag existieren
+        if (day != null && menu != null) {
+            // Füge das Menü zum Tag hinzu
+            day.addMenu(menu);
+
+            // Speichere den Tag mit dem hinzugefügten Menü
+            dayRepository.save(day);  // Dies speichert den Tag und aktualisiert die Many-to-Many-Beziehung in der DB
+        }
     }
 
 }

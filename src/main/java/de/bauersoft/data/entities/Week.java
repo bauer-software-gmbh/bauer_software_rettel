@@ -13,6 +13,9 @@ public class Week extends AbstractEntity {
     @Column(nullable = false)
     private int kw;
 
+    @Column(nullable = false)
+    private int year; // Jahr
+
     @OneToMany(mappedBy = "week", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Day> days = new ArrayList<>();
 
@@ -38,6 +41,14 @@ public class Week extends AbstractEntity {
 
     public void setDays(List<Day> days) {
         this.days = days;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
     }
 
     public LocalDate getMon() {
