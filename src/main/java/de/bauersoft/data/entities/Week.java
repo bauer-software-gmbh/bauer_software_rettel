@@ -2,9 +2,12 @@ package de.bauersoft.data.entities;
 
 import jakarta.persistence.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "week")
@@ -34,6 +37,9 @@ public class Week extends AbstractEntity {
     @Transient
     private LocalDate sun;
 
+    @Transient
+    private Map<DayOfWeek, Day> dayOfWeekMap;
+
     public int getKw() {
         return kw;
     }
@@ -48,6 +54,7 @@ public class Week extends AbstractEntity {
 
     public void setDays(List<Day> days) {
         this.days = days;
+        refreshDayOfWeekMap(); // Map aktualisieren
     }
 
     public int getYear() {
@@ -112,5 +119,32 @@ public class Week extends AbstractEntity {
 
     public void setSun(LocalDate sun) {
         this.sun = sun;
+    }
+
+    private void refreshDayOfWeekMap() {
+        dayOfWeekMap = days.stream()
+                .collect(Collectors.toMap(day -> day.getDate().getDayOfWeek(), day -> day));
+    }
+
+    public Day getDayFor(DayOfWeek dayOfWeek) {
+        if (dayOfWeekMap == null) {
+            refreshDayOfWeekMap();
+        }
+        return dayOfWeekMap.get(dayOfWeek);
+    }
+
+    public void addDay(Day day) {
+        days.add(day);
+        if (dayOfWeekMap == null) {
+            refreshDayOfWeekMap();
+        }
+        dayOfWeekMap.put(day.getDate().getDayOfWeek(), day);
+    }
+
+    public void removeDay(Day day) {
+        days.remove(day);
+        if (dayOfWeekMap != null) {
+            dayOfWeekMap.remove(day.getDate().getDayOfWeek());
+        }
     }
 }

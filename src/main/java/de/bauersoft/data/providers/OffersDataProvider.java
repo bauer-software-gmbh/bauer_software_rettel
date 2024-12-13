@@ -6,14 +6,15 @@ import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.shared.Registration;
 import de.bauersoft.data.entities.Day;
-import de.bauersoft.data.entities.Recipe;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.services.DayService;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Service
 public class OffersDataProvider implements DataProvider<Day, Void> {
 
     private List<SerializableFilter<Day,?>> filter;

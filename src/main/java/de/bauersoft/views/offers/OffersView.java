@@ -38,7 +38,6 @@ import java.time.DayOfWeek;
 import java.time.temporal.TemporalField;
 import java.time.temporal.WeekFields;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 @PageTitle("offers")
@@ -103,12 +102,6 @@ public class OffersView extends Div {
                     this.yearComboBox.setEnabled(false);
                     this.filterDate.setEnabled(true);
 
-                    // Wähle nur den Teil des Monats, der innerhalb der angezeigten Zeitspanne liegt
-                    if (this.filterDate.getValue().isBefore(this.vonDate)) {
-                        this.vonDate = vonDate; // Wenn das Startdatum vor dem aktuellen Monat liegt, den Start auf den ersten Tag des Monats setzen
-                    } else {
-                        this.vonDate = vonDate; // Belassen
-                    }
                     break;
                 case "3 Monate":
                     // Erster Tag des Monats
@@ -316,7 +309,7 @@ public class OffersView extends Div {
                 // Prüfe, ob die Woche existiert
                 Optional<Week> optionalWeek = this.weekService.findByCalendarWeekAndYear(calendarWeek, year);
                 Week week = optionalWeek.orElseGet(() -> {
-                    // Falls nicht vorhanden, erstelle eine neue Woche
+                    // Falls nicht vorhanden erstelle eine neue Woche
                     Week newWeek = new Week();
                     newWeek.setKw(calendarWeek);
                     newWeek.setYear(year);
@@ -327,7 +320,7 @@ public class OffersView extends Div {
                 // Prüfe, ob der Tag existiert
                 Optional<Day> optionalDay = this.dayService.findByDate(dropDate);
                 Day day = optionalDay.orElseGet(() -> {
-                    // Falls nicht vorhanden, erstelle einen neuen Tag
+                    // Falls nicht vorhanden erstelle einen neuen Tag
                     Day newDay = new Day();
                     newDay.setDate(dropDate);
                     newDay.setWeek(week);
