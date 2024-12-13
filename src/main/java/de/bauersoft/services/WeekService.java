@@ -4,7 +4,6 @@ import de.bauersoft.data.entities.Week;
 import de.bauersoft.data.repositories.week.WeekRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 

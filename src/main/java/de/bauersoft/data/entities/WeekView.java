@@ -1,53 +1,37 @@
 package de.bauersoft.data.entities;
 
-import jakarta.persistence.*;
-
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
-@Entity
-@Table(name = "week")
-public class Week extends AbstractEntity {
-
-    @Column(nullable = false)
-    private int kw;
-
-    @Column(nullable = false)
-    private int year; // Jahr
-
-    @OneToMany(mappedBy = "week", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Day> days = new ArrayList<>();
-
-    @Transient
+public class WeekView {
+    private int kw;          // Kalenderwoche
+    private int year;        // Jahr
     private LocalDate mon;
-    @Transient
     private LocalDate tue;
-    @Transient
     private LocalDate wed;
-    @Transient
     private LocalDate thu;
-    @Transient
     private LocalDate fri;
-    @Transient
     private LocalDate sat;
-    @Transient
     private LocalDate sun;
 
+    public WeekView(int kw, int year, LocalDate mon, LocalDate tue, LocalDate wed, LocalDate thu, LocalDate fri, LocalDate sat, LocalDate sun) {
+        this.kw = kw;
+        this.year = year;
+        this.mon = mon;
+        this.tue = tue;
+        this.wed = wed;
+        this.thu = thu;
+        this.fri = fri;
+        this.sat = sat;
+        this.sun = sun;
+    }
+
+    // Getter und Setter
     public int getKw() {
         return kw;
     }
 
     public void setKw(int kw) {
         this.kw = kw;
-    }
-
-    public List<Day> getDays() {
-        return days;
-    }
-
-    public void setDays(List<Day> days) {
-        this.days = days;
     }
 
     public int getYear() {
