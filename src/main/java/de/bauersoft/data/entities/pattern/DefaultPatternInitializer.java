@@ -5,9 +5,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * This class is used to create the DefaultPatterns to ensure the consistency of their existence.
- */
 @Configuration
 public class DefaultPatternInitializer
 {
@@ -17,7 +14,8 @@ public class DefaultPatternInitializer
     {
         return args ->
         {
-            for (DefaultPattern defPattern : DefaultPattern.values()) {
+            for(DefaultPattern defPattern : DefaultPattern.values())
+            {
                 Pattern pattern = new Pattern();
                 pattern.setName(defPattern.getName());
                 pattern.setDescription(defPattern.getDescription());

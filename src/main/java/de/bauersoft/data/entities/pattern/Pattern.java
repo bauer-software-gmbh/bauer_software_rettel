@@ -5,11 +5,7 @@ import java.util.Set;
 
 import de.bauersoft.data.entities.AbstractEntity;
 import de.bauersoft.data.entities.Recipe;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "pattern")
@@ -18,9 +14,6 @@ public class Pattern extends AbstractEntity
 	private String name;
 	private String description ="";
 	private Character religious ='N';
-	
-	@ManyToMany(mappedBy = "patterns",fetch = FetchType.EAGER,cascade = CascadeType.ALL)
-    private Set<Recipe> recipes;
 
 	public String getName()
 	{
@@ -54,18 +47,39 @@ public class Pattern extends AbstractEntity
 		this.religious = religious;
 	}
 
-	public Set<Recipe> getRecipes()
+	@Override
+	public boolean equals(Object o)
 	{
-		return recipes;
+		if(o == null || getClass() != o.getClass())
+		{
+			return false;
+		}
+		if(!super.equals(o))
+		{
+			return false;
+		}
+		Pattern pattern = (Pattern) o;
+		return Objects.equals(name, pattern.name) && Objects.equals(description, pattern.description) && Objects.equals(religious, pattern.religious);
 	}
 
-	public void setRecipes(Set<Recipe> recipes)
+	@Override
+	public int hashCode()
 	{
-		this.recipes = recipes;
+		return Objects.hash(super.hashCode(), name, description, religious);
+	}
+
+	@Override
+	public String toString()
+	{
+		return "Pattern{" +
+				"religious=" + religious +
+				", description='" + description + '\'' +
+				", name='" + name + '\'' +
+				'}';
 	}
 
 	public boolean equalsDefault(DefaultPattern defaultPattern)
 	{
-		return name.equals(defaultPattern.getName());
+		return (name == null || defaultPattern == null) ? false : name.equals(defaultPattern.getName());
 	}
 }

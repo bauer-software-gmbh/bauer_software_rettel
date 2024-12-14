@@ -3,35 +3,37 @@ package de.bauersoft.data.entities;
 import java.util.Objects;
 import java.util.Set;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "course")
-public class Course extends AbstractEntity {
+public class Course extends AbstractEntity
+{
 
 	private String name;
 
-	@ManyToMany(mappedBy = "course",fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "course", fetch = FetchType.EAGER)
 	private Set<Component> component;
 	
-	public String getName() {
+	public String getName()
+	{
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(String name)
+	{
 		this.name = name;
 	}
 
-	public Set<Component> getInstitution() {
+	public Set<Component> getComponent()
+	{
 		return component;
 	}
 
-	public void setInstitution(Set<Component> component)
+	public Course setComponent(Set<Component> component)
 	{
 		this.component = component;
+		return this;
 	}
 
 	@Override
@@ -49,5 +51,13 @@ public class Course extends AbstractEntity {
 
 		Course course = (Course) o;
 		return Objects.equals(name, course.name);
+	}
+
+	@Override
+	public String toString()
+	{
+		return "Course{" +
+				"name='" + name + '\'' +
+				'}';
 	}
 }

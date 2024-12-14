@@ -1,37 +1,31 @@
 package de.bauersoft.views.menuBuilder;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.textfield.TextFieldVariant;
-import de.bauersoft.data.entities.Course;
-import de.bauersoft.data.entities.Menu;
-import de.bauersoft.data.entities.pattern.DefaultPattern;
-import de.bauersoft.data.entities.pattern.Pattern;
+import com.vaadin.flow.data.binder.Binder;
+import de.bauersoft.data.entities.Component;
+import de.bauersoft.data.entities.menu.Menu;
+import de.bauersoft.data.entities.menu.MenuPatternComponents;
+import de.bauersoft.data.entities.menu.MenuPatternComponentsId;
 import de.bauersoft.data.providers.MenuDataProvider;
 import de.bauersoft.data.repositories.component.ComponentRepository;
 import de.bauersoft.data.repositories.course.CourseRepository;
+import de.bauersoft.data.repositories.menu.MenuPatternComponentsRepository;
 import de.bauersoft.data.repositories.menu.MenuRepository;
 import de.bauersoft.data.repositories.pattern.PatternRepository;
 import de.bauersoft.data.repositories.recipe.RecipeRepository;
 import de.bauersoft.services.MenuService;
-import de.bauersoft.services.RecipeService;
 import de.bauersoft.views.DialogState;
-import de.bauersoft.views.menuBuilder.bounds.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.lineawesome.LineAwesomeIcon;
+import de.bauersoft.views.menuBuilder.cluster.*;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 public class MenuBuilderDialog extends Dialog
 {
@@ -41,28 +35,20 @@ public class MenuBuilderDialog extends Dialog
     private CourseRepository courseRepository;
     private ComponentRepository componentRepository;
     private PatternRepository patternRepository;
+    private RecipeRepository recipeRepository;
 
     private MenuDataProvider menuDataProvider;
 
     private Menu menu;
     private DialogState dialogState;
 
-    private Map<Course, Set<Component>> courseComponentMap;
-
-    private Map<Course, FlexLayout> sectionLayouts;
-    private Map<Course, List<Component>> sectionComponents;
-
-    private List<RowCluster> rowClusters;
-
-
-    /**For Debug Purpose*/
-    private RecipeRepository recipeRepository;
+    private MenuBuilderClusterManager menuBuilderClusterManager;
 
     public MenuBuilderDialog(MenuService menuService, MenuRepository menuRepository, CourseRepository courseRepository,
                              ComponentRepository componentRepository, PatternRepository patternRepository,
                              MenuDataProvider menuDataProvider, Menu menu,
                              DialogState dialogState,
-                             RecipeRepository recipeRepository)
+                             RecipeRepository recipeRepository, MenuPatternComponentsRepository menuPatternComponentsRepository)
     {
         this.menuService = menuService;
         this.menuRepository = menuRepository;
@@ -75,15 +61,11 @@ public class MenuBuilderDialog extends Dialog
 
         this.recipeRepository = recipeRepository;
 
-        courseComponentMap = new HashMap<>();
-        sectionComponents = new HashMap<>();
-        sectionLayouts = new HashMap<>();
-
-        rowClusters = new ArrayList<>();
-
         this.setHeaderTitle(dialogState.toString());
 
         String defaultWidth = "50vw";
+
+        Binder<Menu> binder = new Binder<>(Menu.class);
 
         FormLayout inputLayout = new FormLayout();
         inputLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
@@ -110,29 +92,94 @@ public class MenuBuilderDialog extends Dialog
 
         Button debugButton = new Button("Debug");
         inputLayout.add(debugButton);
-
         debugButton.addClickListener(event ->
         {
-            Collection<de.bauersoft.data.entities.Component> vegans = getPatternMatchingComponents(componentRepository.findAll(), DefaultPattern.VEGAN);
+//            List<Component> componentIds = menuPatternComponentsRepository.findComponentIdsByIds(1l, 5l);
+//            componentIds.forEach(aLong ->
+//            {
+//                System.out.println(aLong.getName());
+//            });
+//
+//            System.out.println("----------------------");
+//
+//            List<Component> components2 = menuPatternComponentsRepository.findComponentIdsByIds(1l, 5l, 1l);
+//            components2.forEach(component ->
+//            {
+//                System.out.println(component.getName());
+//            });
 
-            vegans.forEach(component -> System.out.println(component.getName()));
+//            for(Map.Entry<Pattern, MenuPatternComponents> entry : menu.getPatternComponentsMap().entrySet())
+//            {
+//                System.out.println(entry.getKey().getName() + " - " + entry.getValue());
+//            }
+
+//            for(Map.Entry<Pattern, MenuPatternComponents> entry : menu.getMenuPatternComponents().get().entrySet())
+//            {
+//                System.out.println("key: " + entry.getKey().getName());
+//                System.out.println("value pattern: " + entry.getValue().getPattern().getName());
+//                entry.getValue().getComponents().forEach(component ->
+//                {
+//                    System.out.println("value component: " + component.getName());
+//                });
+//
+//                System.out.println("---------------------------");;
+//            }
+
+//            List<MenuPatternComponents> menuPatternComponents = menuPatternComponentsRepository.findMenuPatternComponentsByIds(1l, null);
+//            if(menuPatternComponents == null)
+//            {
+//                System.out.println("Nullllllllllllllll");
+//
+//            }else
+//            {
+//                menuPatternComponents.forEach(menuPatternComponent ->
+//                {
+//                    if(menuPatternComponent == null)
+//                    {
+//                        System.out.println("null 2");
+//                    }else
+//                    {
+//                        menuPatternComponent.getComponents().forEach(component ->
+//                        {
+//                            System.out.println(component.getName());
+//                        });
+//                    }
+//
+//                });
+//            }
+
+            MenuPatternComponentsId id = new MenuPatternComponentsId();
+            id.setMenuId(1l);
+            id.setPatternId(null);
+
+            MenuPatternComponents menuPatternComponent = new MenuPatternComponents();
+            menuPatternComponent.setId(id);
+
+            Set<Component> componentss = new HashSet<>();
+            componentss.addAll(componentRepository.findAll());
+
+            menuPatternComponent.setComponents(componentss);
+
+            menuPatternComponentsRepository.save(menuPatternComponent);
         });
 
+        Div menuBuilderDiv = new Div();
 
-        courseRepository.findAll().forEach(course ->
-        {
-            RowCluster rowCluster = new RowCluster(course, componentRepository);
-            rowClusters.add(rowCluster);
-        });
+        menuBuilderClusterManager = new MenuBuilderClusterManager(menu, componentRepository, courseRepository, patternRepository);
 
+        menuBuilderDiv.add(menuBuilderClusterManager);
 
 
+
+        binder.forField(nameTextField).asRequired().bind("name");
+        binder.bind(descriptionTextArea, "description");
+
+        binder.setBean(menu);
 
 
         Button saveButton = new Button("Speichern");
         saveButton.addClickShortcut(Key.ENTER);
 
-        //saveButton.setMinWidth("2em * " + saveButton.getText().toCharArray().length);
         saveButton.addClickListener(event ->
         {
             //TODO bean save
@@ -142,7 +189,6 @@ public class MenuBuilderDialog extends Dialog
         Button cancelButton = new Button("Abbruch");
         cancelButton.addClickShortcut(Key.ESCAPE);
 
-        //cancelButton.setWidth("calc(2em * 1000 + " + cancelButton.getText().toCharArray().length + ")");
         cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         cancelButton.addClickListener(event ->
         {
@@ -151,120 +197,17 @@ public class MenuBuilderDialog extends Dialog
         });
 
         this.add(inputLayout);
+        this.add(menuBuilderDiv);
 
-        //sectionLayouts.values().forEach(flexLayout -> this.add(flexLayout));
-        rowClusters.forEach(rowCluster -> this.add(rowCluster));
+        this.setWidth("65vw");
+        this.setMaxWidth("65vw");
 
         this.getFooter().add(new HorizontalLayout(cancelButton, saveButton));
         this.setCloseOnEsc(false);
         this.setCloseOnOutsideClick(false);
         this.setModal(true);
         this.open();
-
-        /**code trash**/
-
-        /*FormLayout layout = new FormLayout();
-        layout.setWidth(defaultWidth);
-        layout.setMaxWidth(defaultWidth);
-
-        layout.setResponsiveSteps
-                (
-                        new FormLayout.ResponsiveStep("0", 6),
-                        new FormLayout.ResponsiveStep("900px", 8)
-                );*/
-    }
-
-    private void updateSectionComponents()
-    {
-        courseRepository.findAll().forEach(course -> updateSectionComponents(course));
-    }
-
-    private void updateSectionComponents(Course course)
-    {
-        Objects.requireNonNull(course, "course cannot be null.");
-
-        FlexLayout sectionLayout = sectionLayouts.get(course);
-        if(sectionLayout == null)
-            return;
-
-        sectionLayout.removeAll();
-        sectionLayout.add(sectionComponents.get(course));
-
-    }
-
-    /**
-     * Returns a collection of {@link de.bauersoft.data.entities.Component} objects where all recipes in each component
-     * have at least one pattern that matches the given {@link DefaultPattern}.
-     *
-     * The method filters the provided collection of components. For each component, it checks all of its recipes to ensure
-     * that every recipe has at least one pattern that matches the provided {@link DefaultPattern}. Only components where
-     * all recipes meet this condition will be included in the returned collection.
-     *
-     * @param components the collection of {@link de.bauersoft.data.entities.Component} objects to be filtered
-     * @param toMatch the {@link DefaultPattern} that the component's recipe patterns should match
-     * @return a collection of components where all recipes contain at least one pattern that matches the specified {@link DefaultPattern}
-     * @throws NullPointerException if the {@code components} is {@code null}
-     */
-    private Collection<de.bauersoft.data.entities.Component> getPatternMatchingComponents(Collection<de.bauersoft.data.entities.Component> components, DefaultPattern toMatch)
-    {
-        Objects.requireNonNull(components, "components cannot be null.");
-
-        Collection<de.bauersoft.data.entities.Component> matching = components.stream()
-                .filter(component -> component.getRecipes().stream()
-                        .allMatch(recipe -> recipe.getPatterns().stream()
-                                .anyMatch(pattern -> pattern.equalsDefault(toMatch))))
-                .collect(Collectors.toList());
-
-        return matching;
-    }
-
-    //INFORMATIONSE flexLayout.add(Components...) <- List: index in der list ist die reihenfolge der items im bound
-    /**
-     * Adds a {@link ComponentBox} containing a collection of components to a specific course row at the specified index.
-     * If a component box already exists at the given index, it and all subsequent component boxes are shifted one position upwards to make space for the new one.
-     *
-     * @param course the {@link Course} object to which the component box will be bound
-     * @param items the collection of {@link de.bauersoft.data.entities.Component} to be added to the component box
-     * @param index the index in the course row at which the component box will be inserted
-     * @return the newly created {@link ComponentBox} instance containing the provided components
-     */
-    private ComponentBox addComponentBox(Course course, Collection<de.bauersoft.data.entities.Component> items, int index)
-    {
-        Objects.requireNonNull(course , "course cannot be null.");
-        Objects.requireNonNull(items , "items cannot be null.");
-
-        ComponentBox componentBox = new ComponentBox(course);
-        componentBox.setItems(items);
-
-        addElseSet(sectionComponents.get(course), index, componentBox);
-        return componentBox;
-    }
-
-    /**
-     * Adds an element at the specified position in a copy of the given list.
-     * If the index is equal to the size of the list, the element will be added at the end.
-     * All subsequent elements will be shifted one position to the right.
-     *
-     * @param collection the collection to which the element will be added
-     * @param index the position in the collection where the element will be added
-     * @param element the element to add
-     * @return a copy of the original collection with the added element
-     * @param <E> the type of the element
-     * @throws IndexOutOfBoundsException if index < 0 or index > size
-     */
-    private <E> List<E> addElseSet(List<E> collection, int index, E element)
-    {
-        List<E> copy = new ArrayList<>(collection);
-        if(index < 0 || index > copy.size())
-            throw new IndexOutOfBoundsException("Index out of bounds: " + index);
-
-        if(index == copy.size())
-        {
-            copy.add(element);
-
-        }else copy.add(index, element);
-
-        return copy;
     }
 
 }
+

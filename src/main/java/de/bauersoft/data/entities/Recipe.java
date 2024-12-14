@@ -23,12 +23,13 @@ public class Recipe extends AbstractEntity{
 	@Transient
 	private Set<Formulation> formulation;
 
-	@ManyToMany(mappedBy = "recipes",fetch = FetchType.EAGER,cascade = {CascadeType.PERSIST,CascadeType.MERGE})
-	private Set<Component> components;
-		
-	@OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
-	@JoinTable(name="patterns",joinColumns = @JoinColumn(name ="recipe_id"),inverseJoinColumns = @JoinColumn(name ="pattern_id"))
-	Set<Pattern> patterns;
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@JoinTable(
+			name = "recipe_patterns",
+			joinColumns = @JoinColumn(name = "recipe_id"),
+			inverseJoinColumns = @JoinColumn(name = "pattern_id")
+	)
+	private Set<Pattern> patterns;
 
 	public String getName() {
 		return name;
@@ -46,15 +47,7 @@ public class Recipe extends AbstractEntity{
 		this.description = description;
 	}
 
-	
 
-	public Set<Component> getComponents() {
-		return components;
-	}
-
-	public void setComponents(Set<Component> components) {
-		this.components = components;
-	}
 
 	public Set<Formulation> getFormulation() {
 		return formulation;

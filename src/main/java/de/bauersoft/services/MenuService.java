@@ -1,7 +1,7 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.Menu;
+import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.menu.MenuGridDataRepository;
 import de.bauersoft.data.repositories.menu.MenuRepository;

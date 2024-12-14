@@ -20,10 +20,12 @@ public class ComponentService {
 
     private final ComponentRepository repository;
     private final ComponentGridDataRepository customRepository;
-    
-    public ComponentService(ComponentRepository repository,ComponentGridDataRepository customRepository) {
+    private final ComponentRepository componentRepository;
+
+    public ComponentService(ComponentRepository repository, ComponentGridDataRepository customRepository, ComponentRepository componentRepository) {
         this.repository = repository;
         this.customRepository = customRepository;
+        this.componentRepository = componentRepository;
     }
 
     public Optional<Component> get(Long id) {

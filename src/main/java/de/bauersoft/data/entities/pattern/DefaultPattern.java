@@ -2,15 +2,13 @@ package de.bauersoft.data.entities.pattern;
 
 import de.bauersoft.data.repositories.pattern.PatternRepository;
 
+import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 
 public enum DefaultPattern
 {
-    /**
-     * To ensure the consistency of patterns that are used for hard-coded relationships, these patterns are now available as an enum.
-     * These enums are automatically written to the database and do not have to be created manually.
-     */
-
+    DEFAULT("Default", "Default", 'N'),
     VEGAN("Vegan", "Vegan", 'N'),
     HALAL("Halal", "Halal", 'Y');
 
@@ -42,8 +40,20 @@ public enum DefaultPattern
 
     public Optional<Pattern> getPattern(PatternRepository patternRepository)
     {
-        return patternRepository.findAll().stream()
-                .filter(pattern -> !pattern.getName().equals(name))
-                .findFirst();
+        return Optional.ofNullable(patternRepository.findByName(name));
+    }
+
+    public boolean equalsDefault(Pattern pattern)
+    {
+        return (pattern == null) ? false : name.equals(pattern.getName());
+    }
+
+    public static Collection<Pattern> removeDefaultPattern(Collection<Pattern> patterns, DefaultPattern toRemove)
+    {
+        Objects.requireNonNull(patterns, "patterns cannot be null");
+        Objects.requireNonNull(toRemove, "toRemove cannot be null");
+
+        patterns.removeIf(pattern -> pattern.equalsDefault(toRemove));
+        return patterns;
     }
 }

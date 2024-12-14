@@ -10,7 +10,6 @@ import java.util.Collection;
 public class ComponentBox extends BoundComboBox<Course, Component>
 {
     private DefaultPattern matcher;
-    private int sectionIndex;
 
     public ComponentBox(int pageSize, Course bound)
     {
@@ -60,15 +59,5 @@ public class ComponentBox extends BoundComboBox<Course, Component>
     public void setMatcher(DefaultPattern matcher)
     {
         this.matcher = matcher;
-    }
-
-    public int getSectionIndex()
-    {
-        return sectionIndex;
-    }
-
-    public void setSectionIndex(int sectionIndex)
-    {
-        this.sectionIndex = sectionIndex;
     }
 }

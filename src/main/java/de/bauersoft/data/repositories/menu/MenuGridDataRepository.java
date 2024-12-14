@@ -1,6 +1,6 @@
 package de.bauersoft.data.repositories.menu;
 
-import de.bauersoft.data.entities.Menu;
+import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.repositories.griddata.AbstractGridDataRepository;
 import org.springframework.stereotype.Service;
 

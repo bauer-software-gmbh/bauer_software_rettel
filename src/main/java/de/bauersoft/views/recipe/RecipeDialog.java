@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -18,21 +19,28 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 
+import de.bauersoft.data.entities.Component;
+import de.bauersoft.data.entities.Course;
 import de.bauersoft.data.entities.Formulation;
 import de.bauersoft.data.entities.pattern.Pattern;
 
 import de.bauersoft.data.entities.Recipe;
 import de.bauersoft.data.providers.RecipeDataProvider;
+import de.bauersoft.data.repositories.component.ComponentRepository;
+import de.bauersoft.data.repositories.course.CourseRepository;
 import de.bauersoft.data.repositories.formulation.FormulationRepository;
 import de.bauersoft.data.repositories.ingredient.IngredientRepository;
 import de.bauersoft.data.repositories.pattern.PatternRepository;
 import de.bauersoft.services.RecipeService;
 import de.bauersoft.views.DialogState;
 
-public class RecipeDialog extends Dialog {
+public class RecipeDialog extends Dialog
+{
 	public RecipeDialog(RecipeService service, IngredientRepository ingredientRepository,
-			FormulationRepository formulationRepository, PatternRepository patternRepository,
-			RecipeDataProvider provider, Recipe item, DialogState state) {
+						FormulationRepository formulationRepository, PatternRepository patternRepository,
+						RecipeDataProvider provider, Recipe item, DialogState state
+			, ComponentRepository componentRepository, CourseRepository courseRepository)
+	{
 		this.setHeaderTitle(state.toString());
 		Binder<Recipe> binder = new Binder<Recipe>(Recipe.class);
 		FormLayout inputLayout = new FormLayout();
@@ -62,28 +70,56 @@ public class RecipeDialog extends Dialog {
 		formulationComponent.setValues(item.getFormulation());
 		formulationComponent.setHeight("50vh");
 		binder.setBean(item);
+
 		Button saveButton = new Button("save");
+		saveButton.addClickShortcut(Key.ENTER);
+
 		saveButton.setMinWidth("150px");
 		saveButton.setMaxWidth("180px");
-		saveButton.addClickListener(e -> {
-			if (binder.isValid()) {
+
+		saveButton.addClickListener(e ->
+		{
+			if (binder.isValid())
+			{
 				Set<Formulation> oldFormulations = binder.getBean().getFormulation();
 				formulationComponent.accept(binder.getBean());
 				updateFormulations(oldFormulations,formulationComponent.getFormulations(),formulationRepository) ;
 				service.update(binder.getBean());
 				provider.refreshAll();
+
+				//TODO REMOVE
+				//erstellt für das recipe automatisch eine passende component
+//				Course course = courseRepository.findById(5l).get();
+//
+//				Component component = new Component();
+//				component.setName(nameTextField.getValue());
+//				component.setDescription(descriptionTextArea.getValue());
+//				component.setRecipes(Set.of(binder.getBean()));
+//				component.setCourse(course);
+//
+//				componentRepository.save(component);
+				//----
+
+
+
+
 				Notification.show("Data updated");
 				this.close();
 			}
 		});
+
 		Button cancelButton = new Button("cancel");
+		cancelButton.addClickShortcut(Key.ESCAPE);
+
 		cancelButton.setMinWidth("150px");
 		cancelButton.setMaxWidth("180px");
 		cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-		cancelButton.addClickListener(e -> {
+		cancelButton.addClickListener(e ->
+		{
 			binder.removeBean();
 			this.close();
 		});
+
 		inputLayout.setWidth("50vw");
 		inputLayout.setMaxWidth("50em");
 		inputLayout.setHeight("50vh");
