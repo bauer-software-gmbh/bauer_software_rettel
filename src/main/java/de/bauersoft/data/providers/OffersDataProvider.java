@@ -94,7 +94,7 @@ public class OffersDataProvider implements DataProvider<Week, Void> {
         if(endDate.isAfter(startDate)) {
             TemporalField woy = WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear();
 
-            int endWeek = endDate.get(woy);
+            // int endWeek = endDate.get(woy);
             int startWeek = startDate.get(woy);
             // this.size = (endWeek - startWeek) + 1;
             this.size = (int) ChronoUnit.WEEKS.between(startDate, endDate) + 1;
