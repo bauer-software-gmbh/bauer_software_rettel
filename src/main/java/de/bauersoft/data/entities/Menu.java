@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "menu")
@@ -40,4 +41,13 @@ public class Menu extends AbstractEntity{
 	public void setDays(List<Day> days) {
 		this.days = days;
 	}
+
+	@Override
+	public String toString() {
+		return "Menu{" +
+				"name='" + name + '\'' +
+				", description='" + description + '\'' +
+				'}';
+	}
+
 }

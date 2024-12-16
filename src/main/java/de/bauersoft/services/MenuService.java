@@ -38,9 +38,10 @@ public class MenuService {
 
     public void addMenuToDay(Day day, Menu menu) {
         // Stelle sicher, dass das Menü und der Tag existieren
-        if (day != null && menu != null) {
+        if (!day.getMenus().contains(menu)) {
             // Füge das Menü zum Tag hinzu
             day.addMenu(menu);
+            menu.setDays(List.of(day));  // Füge den Tag zum
 
             // Speichere den Tag mit dem hinzugefügten Menü
             dayRepository.save(day);  // Dies speichert den Tag und aktualisiert die Many-to-Many-Beziehung in der DB

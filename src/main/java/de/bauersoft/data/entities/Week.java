@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,22 +24,26 @@ public class Week extends AbstractEntity {
     private List<Day> days = new ArrayList<>();
 
     @Transient
-    private LocalDate mon;
-    @Transient
-    private LocalDate tue;
-    @Transient
-    private LocalDate wed;
-    @Transient
-    private LocalDate thu;
-    @Transient
-    private LocalDate fri;
-    @Transient
-    private LocalDate sat;
-    @Transient
-    private LocalDate sun;
+    private Map<DayOfWeek, Day> dayOfWeekMap = new HashMap<>();
 
     @Transient
-    private Map<DayOfWeek, Day> dayOfWeekMap;
+    private LocalDate startDate;
+
+    public Week(LocalDate date) {
+        startDate = date;
+        dayOfWeekMap.put(DayOfWeek.MONDAY, new Day(startDate));
+        dayOfWeekMap.put(DayOfWeek.TUESDAY, new Day(startDate.plusDays(1)));
+        dayOfWeekMap.put(DayOfWeek.WEDNESDAY, new Day(startDate.plusDays(2)));
+        dayOfWeekMap.put(DayOfWeek.THURSDAY, new Day(startDate.plusDays(3)));
+        dayOfWeekMap.put(DayOfWeek.FRIDAY, new Day(startDate.plusDays(4)));
+        dayOfWeekMap.put(DayOfWeek.SATURDAY, new Day(startDate.plusDays(5)));
+        dayOfWeekMap.put(DayOfWeek.SUNDAY, new Day(startDate.plusDays(6)));
+
+    }
+
+    public Week() {
+        this(LocalDate.now());
+    }
 
     public int getKw() {
         return kw;
@@ -46,15 +51,6 @@ public class Week extends AbstractEntity {
 
     public void setKw(int kw) {
         this.kw = kw;
-    }
-
-    public List<Day> getDays() {
-        return days;
-    }
-
-    public void setDays(List<Day> days) {
-        this.days = days;
-        refreshDayOfWeekMap(); // Map aktualisieren
     }
 
     public int getYear() {
@@ -65,86 +61,27 @@ public class Week extends AbstractEntity {
         this.year = year;
     }
 
-    public LocalDate getMon() {
-        return mon;
-    }
-
-    public void setMon(LocalDate mon) {
-        this.mon = mon;
-    }
-
-    public LocalDate getTue() {
-        return tue;
-    }
-
-    public void setTue(LocalDate tue) {
-        this.tue = tue;
-    }
-
-    public LocalDate getWed() {
-        return wed;
-    }
-
-    public void setWed(LocalDate wed) {
-        this.wed = wed;
-    }
-
-    public LocalDate getThu() {
-        return thu;
-    }
-
-    public void setThu(LocalDate thu) {
-        this.thu = thu;
-    }
-
-    public LocalDate getFri() {
-        return fri;
-    }
-
-    public void setFri(LocalDate fri) {
-        this.fri = fri;
-    }
-
-    public LocalDate getSat() {
-        return sat;
-    }
-
-    public void setSat(LocalDate sat) {
-        this.sat = sat;
-    }
-
-    public LocalDate getSun() {
-        return sun;
-    }
-
-    public void setSun(LocalDate sun) {
-        this.sun = sun;
-    }
-
-    private void refreshDayOfWeekMap() {
-        dayOfWeekMap = days.stream()
-                .collect(Collectors.toMap(day -> day.getDate().getDayOfWeek(), day -> day));
-    }
-
     public Day getDayFor(DayOfWeek dayOfWeek) {
-        if (dayOfWeekMap == null) {
-            refreshDayOfWeekMap();
-        }
         return dayOfWeekMap.get(dayOfWeek);
     }
 
     public void addDay(Day day) {
         days.add(day);
-        if (dayOfWeekMap == null) {
-            refreshDayOfWeekMap();
-        }
         dayOfWeekMap.put(day.getDate().getDayOfWeek(), day);
     }
 
-    public void removeDay(Day day) {
-        days.remove(day);
-        if (dayOfWeekMap != null) {
-            dayOfWeekMap.remove(day.getDate().getDayOfWeek());
-        }
+    public void clearDays() {
+        dayOfWeekMap.put(DayOfWeek.MONDAY, new Day(startDate));
+        dayOfWeekMap.put(DayOfWeek.TUESDAY, new Day(startDate.plusDays(1)));
+        dayOfWeekMap.put(DayOfWeek.WEDNESDAY, new Day(startDate.plusDays(2)));
+        dayOfWeekMap.put(DayOfWeek.THURSDAY, new Day(startDate.plusDays(3)));
+        dayOfWeekMap.put(DayOfWeek.FRIDAY, new Day(startDate.plusDays(4)));
+        dayOfWeekMap.put(DayOfWeek.SATURDAY, new Day(startDate.plusDays(5)));
+        dayOfWeekMap.put(DayOfWeek.SUNDAY, new Day(startDate.plusDays(6)));
+    }
+
+    @Override
+    public String toString() {
+        return "Week{id=" + getId() + ", kw='" + getKw() + "'}"; // Nur Felder, die sicher geladen sind
     }
 }

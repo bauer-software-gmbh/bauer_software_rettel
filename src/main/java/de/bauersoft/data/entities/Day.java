@@ -20,13 +20,20 @@ public class Day extends AbstractEntity {
     @JoinColumn(name = "week_id", nullable = false)
     private Week week; // Zugehörige Woche
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "day_menu",
             joinColumns = @JoinColumn(name = "day_id"),
             inverseJoinColumns = @JoinColumn(name = "menu_id")
     )
     private List<Menu> menus = new ArrayList<>(); // Menüs, die an diesem Tag verfügbar sind
+
+    public Day(){
+
+    }
+    public Day(LocalDate date) {
+        this.date = date;
+    }
 
     public String getName() {
         return name;
@@ -64,5 +71,15 @@ public class Day extends AbstractEntity {
         if (menu != null && !menus.contains(menu)) {
             menus.add(menu);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Day{" +
+                "name='" + name + '\'' +
+                ", date=" + date +
+                ", week=" + week +
+                ", menus=" + menus +
+                '}';
     }
 }

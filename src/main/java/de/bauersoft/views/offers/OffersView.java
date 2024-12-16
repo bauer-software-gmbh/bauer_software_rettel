@@ -22,137 +22,95 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import de.bauersoft.data.entities.Day;
 import de.bauersoft.data.entities.Menu;
 import de.bauersoft.data.entities.Week;
+import de.bauersoft.data.providers.OffersDataProvider;
 import de.bauersoft.services.DayService;
 import de.bauersoft.services.MenuService;
 import de.bauersoft.services.WeekService;
 import de.bauersoft.tools.DatePickerLocaleGerman;
-import de.bauersoft.tools.DynamicYearComboBox;
 import de.bauersoft.views.MainLayout;
 import com.vaadin.flow.component.html.Div;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAdjusters;
 import java.time.DayOfWeek;
-import java.time.temporal.TemporalField;
 import java.time.temporal.WeekFields;
 import java.util.*;
-import java.util.function.Function;
 
 @PageTitle("offers")
 @Route(value = "offers", layout = MainLayout.class)
 @AnonymousAllowed
 public class OffersView extends Div {
-    private final ListDataProvider<Week> dataProvider;
+    private final OffersDataProvider dataProvider;
     private final DayService dayService;
     private final MenuService menuService;
     private final WeekService weekService;
     private LocalDate vonDate, bisDate;
-    private DynamicYearComboBox yearComboBox;
-    private DatePicker filterDate;
+    private final DatePicker filterDate;
+    private Button deleteButton;
 
     public OffersView(MenuService menuService, DayService dayService, WeekService weekService) {
+        this.dataProvider = new OffersDataProvider(dayService, menuService);
         this.dayService = dayService;
         this.menuService = menuService;
         this.weekService = weekService;
+        this.deleteButton = new Button();
 
         setClassName("content");
         VerticalLayout pageVerticalLayout = new VerticalLayout();
         pageVerticalLayout.setSizeFull();
 
         this.filterDate = new DatePicker("Datum:");
-        this.filterDate.setValue(LocalDate.now());
+
         this.filterDate.setWeekNumbersVisible(true);
         this.filterDate.setI18n(new DatePickerLocaleGerman());
-        this.filterDate.addValueChangeListener(event-> {
-            TemporalField woy = WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear();
-            int weekNumber = event.getValue().get(woy);
-            System.out.println("week number:" + weekNumber);
-        });
 
-        this.yearComboBox = new DynamicYearComboBox("Jahr wählen:");
-        this.yearComboBox.checkAndUpdateYears();
-        this.yearComboBox.setEnabled(false);
-        this.yearComboBox.addValueChangeListener(event -> {
+        WeekSelector selector1 = new WeekSelector(1, ChronoUnit.WEEKS, "2 Wochen");
+        WeekSelector selector2 = new WeekSelector(1, ChronoUnit.MONTHS, "1 Monat");
+        WeekSelector selector3 = new WeekSelector(3, ChronoUnit.MONTHS, "3 Monate");
+        WeekSelector selector4 = new WeekSelector(1, ChronoUnit.YEARS, "1 Jahr");
 
-        });
-
-        this.vonDate = this.filterDate.getValue();
-        this.bisDate = this.vonDate.plusWeeks(1);
-
-        ComboBox<String> weekCombobox = new ComboBox<>("Anzeige auswählen:");
-        weekCombobox.setItems(Arrays.asList("2 Wochen", "1 Monat", "3 Monate", "1 Jahr"));
-        weekCombobox.setValue("2 Wochen");
+        ComboBox<WeekSelector> weekCombobox = new ComboBox<>("Anzeige auswählen:");
+        weekCombobox.setItemLabelGenerator(WeekSelector::name);
+        weekCombobox.setItems(selector1, selector2, selector3, selector4);
+        weekCombobox.setValue(selector1);
         weekCombobox.addValueChangeListener(event -> {
-            this.vonDate = this.filterDate.getValue();
-
-            switch (event.getValue()) {
-                case "2 Wochen":
-                    this.bisDate = this.vonDate.plusWeeks(1); // Exakt 2 Wochen
-                    this.yearComboBox.setEnabled(false);
-                    this.filterDate.setEnabled(true);
-                    break;
-                case "1 Monat":
-                    // Erster Tag des Monats
-                    this.vonDate = this.vonDate.withDayOfMonth(1);
-                    // Letzter Tag des Monats
-                    this.bisDate = this.vonDate.plusMonths(1).minusDays(1);
-
-                    this.yearComboBox.setEnabled(false);
-                    this.filterDate.setEnabled(true);
-
-                    break;
-                case "3 Monate":
-                    // Erster Tag des Monats
-                    this.vonDate = this.vonDate.withDayOfMonth(1);
-                    // Letzter Tag des Monats nach 3 Monaten
-                    this.bisDate = this.vonDate.plusMonths(3).minusDays(1);
-                    this.yearComboBox.setEnabled(false);
-                    this.filterDate.setEnabled(true);
-                    break;
-                case "1 Jahr":
-                default:
-                    // Erster Tag des Jahres
-                    this.vonDate = this.vonDate.withMonth(1).withDayOfMonth(1);
-                    // Letzter Tag des Jahres
-                    this.bisDate = this.vonDate.plusYears(1).minusDays(1);
-                    this.yearComboBox.setEnabled(true);
-                    this.filterDate.setEnabled(false);
-                    break;
+            if(!DayOfWeek.MONDAY.equals(this.filterDate.getValue().getDayOfWeek())){
+                this.vonDate =this.filterDate.getValue().minusDays  (this.filterDate.getValue().getDayOfWeek().getValue()-1);
             }
-
-            updateGrid(this.vonDate, this.bisDate);  // Zeige nur den gültigen Zeitraum
+            this.vonDate = this.filterDate.getValue();
+            WeekSelector value = event.getValue();
+            this.bisDate = this.vonDate.plus( value.amount(),value.unit());
+            this.dataProvider.setDateRange(this.vonDate, this.bisDate);
         });
 
-        // Startdatum und initiale Daten
-        LocalDate startOfWeek = this.vonDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        List<Week> weeks = generateWeeks(startOfWeek, this.bisDate);
-        this.dataProvider = new ListDataProvider<>(weeks);
+        this.filterDate.addValueChangeListener(event->{
+            this.vonDate = event.getValue().minusDays  (event.getValue().getDayOfWeek().getValue()-1);
+            var value = weekCombobox.getValue();
+            this.bisDate = this.vonDate.plus( value.amount(),value.unit());
+            this.dataProvider.setDateRange(this.vonDate, this.bisDate);
+        });
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
         // Grid-Setup
         Grid<Week> grid = new Grid<>(Week.class, false);
+        grid.addColumn(Week::getKw).setHeader("KW");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.MONDAY).getDate(), formatter))).setHeader("Montag");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.TUESDAY).getDate(), formatter))).setHeader("Dienstag");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.WEDNESDAY).getDate(), formatter))).setHeader("Mittwoch");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.THURSDAY).getDate(), formatter))).setHeader("Donnerstag");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.FRIDAY).getDate(), formatter))).setHeader("Freitag");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.SATURDAY).getDate(), formatter))).setHeader("Samstag");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.SUNDAY).getDate(), formatter))).setHeader("Sonntag");
 
-        // KW-Spalte hinzufügen
-        addKWColumn(grid);
-
-        Map<String, Function<Week, LocalDate>> dayMap = new LinkedHashMap<>();
-        dayMap.put("Montag", Week::getMon);
-        dayMap.put("Dienstag", Week::getTue);
-        dayMap.put("Mittwoch", Week::getWed);
-        dayMap.put("Donnerstag", Week::getThu);
-        dayMap.put("Freitag", Week::getFri);
-        dayMap.put("Samstag", Week::getSat);
-        dayMap.put("Sonntag", Week::getSun);
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        dayMap.forEach((header, dateMethod) -> addDayColumn(grid, header, dateMethod, formatter));
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setDataProvider(this.dataProvider);
         grid.setSizeFull();
 
         HorizontalLayout oben  = new HorizontalLayout();
-        oben.add(weekCombobox, this.yearComboBox, this.filterDate);
+        oben.add(weekCombobox, this.filterDate);
         oben.setAlignItems(FlexComponent.Alignment.CENTER); // Alles zentrieren
 
         HorizontalLayout mainLayout = new HorizontalLayout();
@@ -179,46 +137,9 @@ public class OffersView extends Div {
         pageVerticalLayout.add(oben, mainLayout);
         this.add(pageVerticalLayout);
         this.setSizeFull();
-    }
-
-    private void updateGrid(LocalDate startDate, LocalDate endDate) {
-        List<Week> updatedWeeks = generateWeeks(
-                startDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
-                endDate
-        );
-
-        // Grid-Daten aktualisieren
-        this.dataProvider.getItems().clear();
-        this.dataProvider.getItems().addAll(updatedWeeks);
-        this.dataProvider.refreshAll();
-    }
-
-    private List<Week> generateWeeks(LocalDate startDate, LocalDate endDate) {
-        List<Week> weeks = new ArrayList<>();
-
-        long weeksBetween = ChronoUnit.WEEKS.between(startDate, endDate) + 1; // Ensure inclusive range
-
-        for (int i = 0; i < weeksBetween; i++) {
-            LocalDate weekStart = startDate.plusWeeks(i);
-            if (!weekStart.isBefore(endDate)) break; // Avoid adding weeks beyond the endDate
-
-            Week week = new Week();
-            week.setMon(weekStart);
-            week.setTue(weekStart.plusDays(1));
-            week.setWed(weekStart.plusDays(2));
-            week.setThu(weekStart.plusDays(3));
-            week.setFri(weekStart.plusDays(4));
-            week.setSat(weekStart.plusDays(5));
-            week.setSun(weekStart.plusDays(6));
-            weeks.add(week);
-        }
-        return weeks;
-    }
+        this.filterDate.setValue(LocalDate.now());
 
 
-    private void addDayColumn(Grid<Week> grid, String header, Function<Week, LocalDate> dateGetter, DateTimeFormatter formatter) {
-        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(dateGetter.apply(item), formatter)))
-                .setHeader(header);
     }
 
     private Div createDayCell(LocalDate date, DateTimeFormatter formatter) {
@@ -235,6 +156,17 @@ public class OffersView extends Div {
         Div dropZone = new Div();
         dropZone.setClassName("offer_target");
         dropZone.getElement().setAttribute("date", date.toString());  // Setze das Datum als Attribut
+
+
+        Optional<Day> optionalDay = this.dayService.findByDate(date);
+        optionalDay.ifPresent(day -> {
+            this.deleteButton.setEnabled(day.getDate().isAfter(LocalDate.now()));
+            day.getMenus().forEach(menu -> {
+                MenuDiv menuDiv = new MenuDiv(menu);
+                Div wrapper = createWrapper(day, menuDiv);
+                dropZone.add(wrapper);
+            });
+        });
 
         // Initial-Update der Dropzone
         updateDropTargets(dropZone);
@@ -286,15 +218,6 @@ public class OffersView extends Div {
                 List<Component> children = container.getChildren().toList();
                 int dropPosition = children.indexOf(thinTarget); // Index des aktuellen Targets ermitteln
 
-                if (dropPosition != -1) {
-                    // Füge das neue Element an der richtigen Stelle hinzu
-                    Div wrapper = createWrapper(copy);
-                    container.addComponentAtIndex(dropPosition, wrapper);
-
-                    // Aktualisiere die Drop-Zone
-                    updateDropTargets(container);
-                }
-
                 // Hole das Datum und berechne die Kalenderwoche
                 String dateString = thinTarget.getElement().getAttribute("date");
                 if (dateString == null || dateString.isEmpty()) {
@@ -306,6 +229,18 @@ public class OffersView extends Div {
                 int calendarWeek = dropDate.get(WeekFields.ISO.weekOfWeekBasedYear());
                 int year = dropDate.getYear();
 
+                dayService.findByDate(dropDate).ifPresent(day ->
+                        {
+                            if (dropPosition != -1) {
+                                // Füge das neue Element an der richtigen Stelle hinzu
+                                Div wrapper = createWrapper(day, copy);
+                                container.addComponentAtIndex(dropPosition, wrapper);
+
+                                // Aktualisiere die Drop-Zone
+                                updateDropTargets(container);
+                            }
+                        }
+                );
                 // Prüfe, ob die Woche existiert
                 Optional<Week> optionalWeek = this.weekService.findByCalendarWeekAndYear(calendarWeek, year);
                 Week week = optionalWeek.orElseGet(() -> {
@@ -322,6 +257,7 @@ public class OffersView extends Div {
                 Day day = optionalDay.orElseGet(() -> {
                     // Falls nicht vorhanden erstelle einen neuen Tag
                     Day newDay = new Day();
+                    newDay.setName(dropDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.GERMANY));
                     newDay.setDate(dropDate);
                     newDay.setWeek(week);
                     this.dayService.saveDay(newDay);
@@ -342,18 +278,22 @@ public class OffersView extends Div {
         return thinTarget;
     }
 
-    private Div createWrapper(Component item) {
+    private Div createWrapper(Day day, MenuDiv item) {
         Div wrapper = new Div();
         wrapper.setClassName("item-wrapper");
 
         // Löschen-Button hinzufügen
-        Button deleteButton = new Button(VaadinIcon.TRASH.create());
-        deleteButton.addClickListener(event -> {
+        this.deleteButton = new Button(VaadinIcon.TRASH.create());
+        this.deleteButton.addClickListener(event -> {
             // Wrapper aus der Dropzone entfernen
             Div parent = (Div) wrapper.getParent().orElse(null);
             if (parent != null) {
                 parent.remove(wrapper);
                 updateDropTargets(parent); // Drop-Zone nach Löschung aktualisieren
+
+                dataProvider.deleteMenuFromDay(day.getId(), item.getItem().getId());
+                System.out.println(day.getId() + " : " + item.getItem().getId());
+
             }
         });
 
@@ -366,11 +306,9 @@ public class OffersView extends Div {
         // Den deleteButton ganz nach rechts verschieben
         layout.setWidthFull();  // Macht das Layout über die gesamte Breite
 
-
         wrapper.add(layout);
         return wrapper;
     }
-
 
     private static class MenuDiv extends Div {
         private final Menu item;
@@ -384,18 +322,12 @@ public class OffersView extends Div {
         public Menu getItem() {
             return this.item;
         }
+
     }
 
-    // Hinzufügen einer Spalte für die KW vor den Wochentagen
-    private void addKWColumn(Grid<Week> grid) {
-        grid.addColumn(new ComponentRenderer<>(item -> {
-            Div container = new Div();
-            // Berechnung der Kalenderwoche (KW)
-            int calendarWeek = item.getMon().get(WeekFields.ISO.weekOfWeekBasedYear());
-            NativeLabel kwLabel = new NativeLabel("" + calendarWeek);
-            container.add(kwLabel);
-            return container;
-        })).setHeader("KW").setAutoWidth(true).setFrozen(true); // Fixiert die KW-Spalte
+    private record WeekSelector(int amount, ChronoUnit unit, String name) {
+
     }
+
 }
 
