@@ -58,4 +58,8 @@ public class FieldService {
     public List<Field> fetchAll(List<SerializableFilter<Field, ?>> filters, List<QuerySortOrder> sortOrder){
     	return customRepository.fetchAll(filters,sortOrder);
     }
+
+    public List<Field> findAll(){
+        return repository.findAll();
+    }
 }

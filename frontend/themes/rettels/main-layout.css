@@ -29,3 +29,40 @@ vaadin-side-nav-item vaadin-icon {
 	border-radius: var(--lumo-border-radius-s);
 	width: 100%;
 }
+
+.kw-options {
+    display: flex;
+    justify-content: center; /* Horizontal zentrieren */
+    align-items: center; /* Vertikal zentrieren */
+    padding: var(--lumo-space-s);
+    border: 1px solid var(--lumo-shade-70pct);
+}
+
+.horizontal-boxes {
+    border: 1px solid var(--lumo-shade-70pct);
+}
+
+.thin-drop-target {
+    height: 10px;
+    background-color: lightgray;
+    margin: 5px 0;
+    cursor: pointer;
+}
+
+.thin-drop-target:hover {
+    background-color: darkgray;
+}
+
+.after-drop-target {
+    height: 10px;
+    background-color: lightblue;
+}
+
+.item-wrapper {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
