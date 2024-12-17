@@ -25,8 +25,10 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 @Theme(value = "rettels")
 @Push
-public class Application implements AppShellConfigurator {
-	public static void main(String[] args) {
+public class Application implements AppShellConfigurator
+{
+	public static void main(String[] args)
+	{
 		SpringApplication.run(Application.class, args);
 	} 
 	

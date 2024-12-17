@@ -7,7 +7,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
-import de.bauersoft.data.entities.Pattern;
+import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.data.providers.PatternDataProvider;
 import de.bauersoft.services.PatternService;
 import de.bauersoft.views.DialogState;

@@ -12,7 +12,7 @@ import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.shared.Registration;
 
-import de.bauersoft.data.entities.Pattern;
+import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.services.PatternService;
 

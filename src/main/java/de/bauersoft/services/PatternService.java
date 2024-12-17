@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 
-import de.bauersoft.data.entities.Pattern;
+import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.pattern.PatternGridDataRepository;
 import de.bauersoft.data.repositories.pattern.PatternRepository;

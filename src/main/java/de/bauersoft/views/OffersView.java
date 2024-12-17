@@ -14,7 +14,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-import de.bauersoft.data.entities.Menu;
+import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.repositories.menu.MenuRepository;
 
 

@@ -30,6 +30,7 @@ public class FieldDialog extends Dialog {
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
 		binder.bind(nameTextField, "name");
 		binder.setBean(item);
+
 		Button saveButton = new Button("save");
 		saveButton.setMinWidth("150px");
 		saveButton.setMaxWidth("180px");

@@ -12,6 +12,8 @@ import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
 import de.bauersoft.data.entities.Recipe;
 import de.bauersoft.data.providers.RecipeDataProvider;
+import de.bauersoft.data.repositories.component.ComponentRepository;
+import de.bauersoft.data.repositories.course.CourseRepository;
 import de.bauersoft.data.repositories.formulation.FormulationRepository;
 import de.bauersoft.data.repositories.ingredient.IngredientRepository;
 import de.bauersoft.data.repositories.pattern.PatternRepository;
@@ -27,7 +29,9 @@ public class RecipeView extends Div {
 	private final AutoFilterGrid<Recipe> grid = new AutoFilterGrid<>(Recipe.class, false, true);
 
 
-	public RecipeView(RecipeService recipeService,IngredientRepository ingredientRepository,FormulationRepository formulationRepository,PatternRepository patternRepository, RecipeDataProvider dataProvider) {
+	public RecipeView(RecipeService recipeService, IngredientRepository ingredientRepository, FormulationRepository formulationRepository,
+					  PatternRepository patternRepository, RecipeDataProvider dataProvider)
+	{
 		setClassName("content");
 		grid.addColumn("name");
 		grid.addColumn("description");

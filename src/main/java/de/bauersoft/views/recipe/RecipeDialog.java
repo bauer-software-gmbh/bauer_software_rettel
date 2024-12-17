@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -18,41 +19,54 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 
+import de.bauersoft.data.entities.Component;
+import de.bauersoft.data.entities.Course;
 import de.bauersoft.data.entities.Formulation;
-import de.bauersoft.data.entities.Pattern;
+import de.bauersoft.data.entities.pattern.Pattern;
 
 import de.bauersoft.data.entities.Recipe;
 import de.bauersoft.data.providers.RecipeDataProvider;
+import de.bauersoft.data.repositories.component.ComponentRepository;
+import de.bauersoft.data.repositories.course.CourseRepository;
 import de.bauersoft.data.repositories.formulation.FormulationRepository;
 import de.bauersoft.data.repositories.ingredient.IngredientRepository;
 import de.bauersoft.data.repositories.pattern.PatternRepository;
 import de.bauersoft.services.RecipeService;
 import de.bauersoft.views.DialogState;
 
-public class RecipeDialog extends Dialog {
+public class RecipeDialog extends Dialog
+{
 	public RecipeDialog(RecipeService service, IngredientRepository ingredientRepository,
-			FormulationRepository formulationRepository, PatternRepository patternRepository,
-			RecipeDataProvider provider, Recipe item, DialogState state) {
+						FormulationRepository formulationRepository, PatternRepository patternRepository,
+						RecipeDataProvider provider, Recipe item, DialogState state)
+	{
 		this.setHeaderTitle(state.toString());
+
 		Binder<Recipe> binder = new Binder<Recipe>(Recipe.class);
+
 		FormLayout inputLayout = new FormLayout();
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
+
 		TextField nameTextField = new TextField();
 		nameTextField.setMaxLength(64);
 		nameTextField.setRequired(true);
 		nameTextField.setMinWidth("20em");
+
 		TextArea descriptionTextArea = new TextArea();
 		descriptionTextArea.setMaxLength(512);
 		descriptionTextArea.setSizeFull();
 		descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 		descriptionTextArea.setWidthFull();
+
 		MultiSelectComboBox<Pattern> patternMultiSelectComboBox = new MultiSelectComboBox<Pattern>();
 		patternMultiSelectComboBox.setItemLabelGenerator(pattern -> pattern.getName());
 		patternMultiSelectComboBox.setItems(patternRepository.findAll());
 		patternMultiSelectComboBox.setWidthFull();
+
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "description"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(patternMultiSelectComboBox, "patterns"), 1);
+
 		binder.bind(nameTextField, "name");
 		binder.bind(descriptionTextArea, "description");
 		binder.bind(patternMultiSelectComboBox, "patterns");
@@ -61,29 +75,42 @@ public class RecipeDialog extends Dialog {
 		formulationComponent.setItems(ingredientRepository.findAll());
 		formulationComponent.setValues(item.getFormulation());
 		formulationComponent.setHeight("50vh");
+
 		binder.setBean(item);
+
 		Button saveButton = new Button("save");
+		saveButton.addClickShortcut(Key.ENTER);
+
 		saveButton.setMinWidth("150px");
 		saveButton.setMaxWidth("180px");
-		saveButton.addClickListener(e -> {
-			if (binder.isValid()) {
+
+		saveButton.addClickListener(e ->
+		{
+			if (binder.isValid())
+			{
 				Set<Formulation> oldFormulations = binder.getBean().getFormulation();
 				formulationComponent.accept(binder.getBean());
 				updateFormulations(oldFormulations,formulationComponent.getFormulations(),formulationRepository) ;
 				service.update(binder.getBean());
 				provider.refreshAll();
+
 				Notification.show("Data updated");
 				this.close();
 			}
 		});
+
 		Button cancelButton = new Button("cancel");
+		cancelButton.addClickShortcut(Key.ESCAPE);
+
 		cancelButton.setMinWidth("150px");
 		cancelButton.setMaxWidth("180px");
 		cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-		cancelButton.addClickListener(e -> {
+		cancelButton.addClickListener(e ->
+		{
 			binder.removeBean();
 			this.close();
 		});
+
 		inputLayout.setWidth("50vw");
 		inputLayout.setMaxWidth("50em");
 		inputLayout.setHeight("50vh");
