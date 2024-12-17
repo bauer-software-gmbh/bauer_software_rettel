@@ -6,7 +6,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
-import de.bauersoft.data.entities.menu.Menu;
+import de.bauersoft.data.entities.Menu;
 import de.bauersoft.data.providers.MenuDataProvider;
 import de.bauersoft.data.repositories.component.ComponentRepository;
 import de.bauersoft.data.repositories.course.CourseRepository;
@@ -21,7 +21,6 @@ import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
-import java.util.HashMap;
 
 @PageTitle("Menue Builder")
 @Route(value = "menubuilder", layout = MainLayout.class)

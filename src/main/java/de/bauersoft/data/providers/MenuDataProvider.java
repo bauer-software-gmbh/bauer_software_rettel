@@ -5,7 +5,7 @@ import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.shared.Registration;
-import de.bauersoft.data.entities.menu.Menu;
+import de.bauersoft.data.entities.Menu;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.services.MenuService;
 import org.springframework.stereotype.Service;

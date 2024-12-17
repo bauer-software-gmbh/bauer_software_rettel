@@ -1,6 +1,6 @@
 package de.bauersoft.data.repositories.menuBuilder;
 
-import de.bauersoft.data.entities.menu.Menu;
+import de.bauersoft.data.entities.Menu;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

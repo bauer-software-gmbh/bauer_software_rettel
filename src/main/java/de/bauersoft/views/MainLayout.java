@@ -35,12 +35,11 @@ import de.bauersoft.views.dashboard.DashboardView;
 import de.bauersoft.views.field.FieldView;
 import de.bauersoft.views.incredient.IngredientView;
 import de.bauersoft.views.institution.InstitutionView;
-import de.bauersoft.views.kitchen.KitchenView;
+import de.bauersoft.views.menuBuilder.MenuBuilderView;
 import de.bauersoft.views.menue.MenueView;
 import de.bauersoft.views.offers.OffersView;
 import de.bauersoft.views.pattern.PatternView;
 import de.bauersoft.views.recipe.RecipeView;
-import de.bauersoft.views.tour.TourView;
 import de.bauersoft.views.unit.UnitView;
 import de.bauersoft.views.users.UsersView;
 import de.bauersoft.views.welcome.WelcomeView;
@@ -149,20 +148,26 @@ public class MainLayout extends AppLayout {
 			if (accessChecker.hasAccess(FieldView.class)) {
 				accounting.addItem(new SideNavItem("field", FieldView.class, LineAwesomeIcon.USERS_SOLID.create()));
 			}
-			if (accessChecker.hasAccess(TourView.class)) {
-				accounting.addItem(new SideNavItem("tour", TourView.class, LineAwesomeIcon.USERS_SOLID.create()));
-			}
 			nav.addItem(accounting);
 		}
 		if (accessChecker.hasAccess(ComponentView.class) || accessChecker.hasAccess(RecipeView.class)
 				|| accessChecker.hasAccess(IngredientView.class) || accessChecker.hasAccess(CourseView.class)
 				|| accessChecker.hasAccess(AllergenView.class) || accessChecker.hasAccess(AdditiveView.class)
-				|| accessChecker.hasAccess(UnitView.class) || accessChecker.hasAccess(PatternView.class)) {
+				|| accessChecker.hasAccess(UnitView.class) || accessChecker.hasAccess(PatternView.class)
+				|| accessChecker.hasAccess(MenuBuilderView.class))
+		{
 			SideNavItem backend = new SideNavItem("backend");
-			if (accessChecker.hasAccess(ComponentView.class)) {
-				backend.addItem(
-						new SideNavItem("component", ComponentView.class, LineAwesomeIcon.CARROT_SOLID.create()));
+
+			if(accessChecker.hasAccess(MenuBuilderView.class))
+			{
+				backend.addItem(new SideNavItem("Menu Builder", MenuBuilderView.class, LineAwesomeIcon.BACON_SOLID.create()));
 			}
+
+			if(accessChecker.hasAccess(ComponentView.class))
+			{
+				backend.addItem(new SideNavItem("component", ComponentView.class, LineAwesomeIcon.CARROT_SOLID.create()));
+			}
+
 			if (accessChecker.hasAccess(RecipeView.class)) {
 				backend.addItem(new SideNavItem("recipe", RecipeView.class, LineAwesomeIcon.EDIT.create()));
 			}
@@ -199,11 +204,6 @@ public class MainLayout extends AppLayout {
 			if (accessChecker.hasAccess(OffersView.class)) {
 				backend.addItem(
 						new SideNavItem("offer", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
-			}
-
-			if (accessChecker.hasAccess(KitchenView.class)) {
-				backend.addItem(
-						new SideNavItem("kitchen", KitchenView.class));
 			}
 			
 			nav.addItem(backend);

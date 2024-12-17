@@ -10,7 +10,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import de.bauersoft.data.entities.menu.Menu;
+import de.bauersoft.data.entities.Menu;
 import de.bauersoft.data.providers.MenuDataProvider;
 import de.bauersoft.data.repositories.component.ComponentRepository;
 import de.bauersoft.data.repositories.course.CourseRepository;

@@ -2,7 +2,7 @@ package de.bauersoft.views.menuBuilder.cluster;
 
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import de.bauersoft.data.entities.menu.Menu;
+import de.bauersoft.data.entities.Menu;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
 import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.data.repositories.component.ComponentRepository;

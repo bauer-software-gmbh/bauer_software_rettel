@@ -4,7 +4,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import de.bauersoft.data.entities.Component;
 import de.bauersoft.data.entities.Course;
-import de.bauersoft.data.entities.menu.Menu;
+import de.bauersoft.data.entities.Menu;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
 import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.views.menuBuilder.bounds.BoundComboBox;
