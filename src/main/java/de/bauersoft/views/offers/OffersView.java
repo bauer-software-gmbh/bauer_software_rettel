@@ -66,24 +66,7 @@ public class OffersView extends Div {
         this.filterDate.setWeekNumbersVisible(true);
         this.filterDate.setI18n(new DatePickerLocaleGerman());
 
-        WeekSelector selector1 = new WeekSelector(1, ChronoUnit.WEEKS, "2 Wochen");
-        WeekSelector selector2 = new WeekSelector(1, ChronoUnit.MONTHS, "1 Monat");
-        WeekSelector selector3 = new WeekSelector(3, ChronoUnit.MONTHS, "3 Monate");
-        WeekSelector selector4 = new WeekSelector(1, ChronoUnit.YEARS, "1 Jahr");
-
-        ComboBox<WeekSelector> weekCombobox = new ComboBox<>("Anzeige auswählen:");
-        weekCombobox.setItemLabelGenerator(WeekSelector::name);
-        weekCombobox.setItems(selector1, selector2, selector3, selector4);
-        weekCombobox.setValue(selector1);
-        weekCombobox.addValueChangeListener(event -> {
-            if(!DayOfWeek.MONDAY.equals(this.filterDate.getValue().getDayOfWeek())){
-                this.vonDate =this.filterDate.getValue().minusDays  (this.filterDate.getValue().getDayOfWeek().getValue()-1);
-            }
-            this.vonDate = this.filterDate.getValue();
-            WeekSelector value = event.getValue();
-            this.bisDate = this.vonDate.plus( value.amount(),value.unit());
-            this.dataProvider.setDateRange(this.vonDate, this.bisDate);
-        });
+        ComboBox<WeekSelector> weekCombobox = getWeekSelectorComboBox();
 
         this.filterDate.addValueChangeListener(event->{
             this.vonDate = event.getValue().minusDays  (event.getValue().getDayOfWeek().getValue()-1);
@@ -140,6 +123,34 @@ public class OffersView extends Div {
         this.filterDate.setValue(LocalDate.now());
 
 
+    }
+
+    private ComboBox<WeekSelector> getWeekSelectorComboBox() {
+
+        ComboBox<WeekSelector> weekCombobox = getSelectorComboBox();
+        weekCombobox.addValueChangeListener(event -> {
+            if(!DayOfWeek.MONDAY.equals(this.filterDate.getValue().getDayOfWeek())){
+                this.vonDate =this.filterDate.getValue().minusDays  (this.filterDate.getValue().getDayOfWeek().getValue()-1);
+            }
+            this.vonDate = this.filterDate.getValue();
+            WeekSelector value = event.getValue();
+            this.bisDate = this.vonDate.plus( value.amount(),value.unit());
+            this.dataProvider.setDateRange(this.vonDate, this.bisDate);
+        });
+        return weekCombobox;
+    }
+
+    private static ComboBox<WeekSelector> getSelectorComboBox() {
+        WeekSelector selector1 = new WeekSelector(1, ChronoUnit.WEEKS, "2 Wochen");
+        WeekSelector selector2 = new WeekSelector(1, ChronoUnit.MONTHS, "1 Monat");
+        WeekSelector selector3 = new WeekSelector(3, ChronoUnit.MONTHS, "3 Monate");
+        WeekSelector selector4 = new WeekSelector(1, ChronoUnit.YEARS, "1 Jahr");
+
+        ComboBox<WeekSelector> weekCombobox = new ComboBox<>("Anzeige auswählen:");
+        weekCombobox.setItemLabelGenerator(WeekSelector::name);
+        weekCombobox.setItems(selector1, selector2, selector3, selector4);
+        weekCombobox.setValue(selector1);
+        return weekCombobox;
     }
 
     private Div createDayCell(LocalDate date, DateTimeFormatter formatter) {
@@ -203,10 +214,10 @@ public class OffersView extends Div {
                 .ifPresent(last -> last.getElement().setAttribute("class","after-drop-target"));
     }
 
-    private Div createThinDropTarget(Div container, int position) {
+    private Div createThinDropTarget(Div dropZone, int position) {
         Div thinTarget = new Div();
         thinTarget.setClassName("thin-drop-target");
-        thinTarget.getElement().setAttribute("date", container.getElement().getAttribute("date"));
+        thinTarget.getElement().setAttribute("date", dropZone.getElement().getAttribute("date"));
 
         // Erstellen des DropTargets
         DropTarget<Div> dropTarget = DropTarget.create(thinTarget);
@@ -215,7 +226,7 @@ public class OffersView extends Div {
                 MenuDiv copy = new MenuDiv(menuDiv.getItem());
 
                 // Position des DropTargets ermitteln
-                List<Component> children = container.getChildren().toList();
+                List<Component> children = dropZone.getChildren().toList();
                 int dropPosition = children.indexOf(thinTarget); // Index des aktuellen Targets ermitteln
 
                 // Hole das Datum und berechne die Kalenderwoche
@@ -231,16 +242,23 @@ public class OffersView extends Div {
 
                 dayService.findByDate(dropDate).ifPresent(day ->
                         {
+                            List<Menu> tempMenuList = dayService.getMenusByDayId(day.getId());
+
+                            if(tempMenuList.stream().anyMatch(menu -> Objects.equals(menu.getId(), copy.getItem().getId()))){
+                                return;
+                            }
+
                             if (dropPosition != -1) {
                                 // Füge das neue Element an der richtigen Stelle hinzu
                                 Div wrapper = createWrapper(day, copy);
-                                container.addComponentAtIndex(dropPosition, wrapper);
+                                dropZone.addComponentAtIndex(dropPosition, wrapper);
 
                                 // Aktualisiere die Drop-Zone
-                                updateDropTargets(container);
+                                updateDropTargets(dropZone);
                             }
                         }
                 );
+
                 // Prüfe, ob die Woche existiert
                 Optional<Week> optionalWeek = this.weekService.findByCalendarWeekAndYear(calendarWeek, year);
                 Week week = optionalWeek.orElseGet(() -> {
@@ -249,6 +267,8 @@ public class OffersView extends Div {
                     newWeek.setKw(calendarWeek);
                     newWeek.setYear(year);
                     this.weekService.saveWeek(newWeek);
+                    // Aktualisiere die Drop-Zone
+                    updateDropTargets(dropZone);
                     return newWeek;
                 });
 
@@ -261,11 +281,23 @@ public class OffersView extends Div {
                     newDay.setDate(dropDate);
                     newDay.setWeek(week);
                     this.dayService.saveDay(newDay);
+                    // Aktualisiere die Drop-Zone
+                    if (dropPosition != -1) {
+                        // Füge das neue Element an der richtigen Stelle hinzu
+                        Div wrapper = createWrapper(newDay, copy);
+                        dropZone.addComponentAtIndex(dropPosition, wrapper);
+
+                        // Aktualisiere die Drop-Zone
+                        updateDropTargets(dropZone);
+                    }
                     return newDay;
                 });
 
                 // Füge das Menü zum Tag hinzu
                 this.menuService.addMenuToDay(day, copy.getItem());
+
+                // Aktualisiere die Drop-Zone
+                updateDropTargets(dropZone);
 
                 // Debugging
                 Menu menu = copy.getItem();
