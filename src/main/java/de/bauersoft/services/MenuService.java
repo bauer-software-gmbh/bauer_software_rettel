@@ -17,7 +17,6 @@ import java.util.Optional;
 @Service
 public class MenuService
 {
-
     private final MenuRepository repository;
     private final MenuGridDataRepository gridRepository;
 
