@@ -29,18 +29,20 @@ public class RecipeView extends Div {
 	private final AutoFilterGrid<Recipe> grid = new AutoFilterGrid<>(Recipe.class, false, true);
 
 
-	public RecipeView(RecipeService recipeService, IngredientRepository ingredientRepository, FormulationRepository formulationRepository, PatternRepository patternRepository, RecipeDataProvider dataProvider, ComponentRepository componentRepository, CourseRepository courseRepository) {
+	public RecipeView(RecipeService recipeService, IngredientRepository ingredientRepository, FormulationRepository formulationRepository,
+					  PatternRepository patternRepository, RecipeDataProvider dataProvider)
+	{
 		setClassName("content");
 		grid.addColumn("name");
 		grid.addColumn("description");
 		grid.addColumn(item -> 
 		item.getFormulation().stream().map(formulation -> formulation.getIngredient().getName()).collect(Collectors.joining(",")));
 		grid.addItemDoubleClickListener(
-				event -> new RecipeDialog(recipeService,ingredientRepository,formulationRepository,patternRepository, dataProvider, event.getItem(), DialogState.EDIT, componentRepository, courseRepository));
+				event -> new RecipeDialog(recipeService,ingredientRepository,formulationRepository,patternRepository, dataProvider, event.getItem(), DialogState.EDIT));
 		grid.setDataProvider(dataProvider);
 		GridContextMenu<Recipe> contextMenu = grid.addContextMenu();
 		contextMenu.addItem("new recipe",
-				event -> new RecipeDialog(recipeService,ingredientRepository,formulationRepository,patternRepository, dataProvider, new Recipe(), DialogState.NEW, componentRepository, courseRepository));
+				event -> new RecipeDialog(recipeService,ingredientRepository,formulationRepository,patternRepository, dataProvider, new Recipe(), DialogState.NEW));
 		contextMenu.addItem("delete", event -> event.getItem().ifPresent(item -> {
 			
 			recipeService.delete(item.getId());

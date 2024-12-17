@@ -12,17 +12,17 @@ public interface MBMenuRepository extends JpaRepository<Menu, Long>, JpaSpecific
     @Modifying
     @Transactional
     @Query(value = """
-                INSERT INTO menu_pattern_components (menu_id, pattern_id, component_id)
-                VALUES (?1, ?2, ?3)
-                ON DUPLICATE KEY UPDATE menu_id = VALUES(menu_id), pattern_id = VALUES(pattern_id), component_id = VALUES(component_id)
-        """, nativeQuery = true)
+            INSERT INTO menu_pattern_components (menu_id, pattern_id, component_id)
+            VALUES (?1, ?2, ?3)
+            ON DUPLICATE KEY UPDATE menu_id = VALUES(menu_id), pattern_id = VALUES(pattern_id), component_id = VALUES(component_id)
+    """, nativeQuery = true)
     void upsertMenuPatternComponent(Long menuId, Long patternId, Long componentId);
 
     @Modifying
     @Transactional
     @Query(value = """
-                DELETE FROM menu_pattern_components
-                WHERE menu_id = ?1
-        """, nativeQuery = true)
+            DELETE FROM menu_pattern_components
+            WHERE menu_id = ?1
+    """, nativeQuery = true)
     void deleteByMenuId(Long menuId);
 }

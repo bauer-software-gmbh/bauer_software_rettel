@@ -38,29 +38,35 @@ public class RecipeDialog extends Dialog
 {
 	public RecipeDialog(RecipeService service, IngredientRepository ingredientRepository,
 						FormulationRepository formulationRepository, PatternRepository patternRepository,
-						RecipeDataProvider provider, Recipe item, DialogState state
-			, ComponentRepository componentRepository, CourseRepository courseRepository)
+						RecipeDataProvider provider, Recipe item, DialogState state)
 	{
 		this.setHeaderTitle(state.toString());
+
 		Binder<Recipe> binder = new Binder<Recipe>(Recipe.class);
+
 		FormLayout inputLayout = new FormLayout();
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
+
 		TextField nameTextField = new TextField();
 		nameTextField.setMaxLength(64);
 		nameTextField.setRequired(true);
 		nameTextField.setMinWidth("20em");
+
 		TextArea descriptionTextArea = new TextArea();
 		descriptionTextArea.setMaxLength(512);
 		descriptionTextArea.setSizeFull();
 		descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 		descriptionTextArea.setWidthFull();
+
 		MultiSelectComboBox<Pattern> patternMultiSelectComboBox = new MultiSelectComboBox<Pattern>();
 		patternMultiSelectComboBox.setItemLabelGenerator(pattern -> pattern.getName());
 		patternMultiSelectComboBox.setItems(patternRepository.findAll());
 		patternMultiSelectComboBox.setWidthFull();
+
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "description"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(patternMultiSelectComboBox, "patterns"), 1);
+
 		binder.bind(nameTextField, "name");
 		binder.bind(descriptionTextArea, "description");
 		binder.bind(patternMultiSelectComboBox, "patterns");
@@ -69,6 +75,7 @@ public class RecipeDialog extends Dialog
 		formulationComponent.setItems(ingredientRepository.findAll());
 		formulationComponent.setValues(item.getFormulation());
 		formulationComponent.setHeight("50vh");
+
 		binder.setBean(item);
 
 		Button saveButton = new Button("save");
@@ -86,22 +93,6 @@ public class RecipeDialog extends Dialog
 				updateFormulations(oldFormulations,formulationComponent.getFormulations(),formulationRepository) ;
 				service.update(binder.getBean());
 				provider.refreshAll();
-
-				//TODO REMOVE
-				//erstellt für das recipe automatisch eine passende component
-//				Course course = courseRepository.findById(5l).get();
-//
-//				Component component = new Component();
-//				component.setName(nameTextField.getValue());
-//				component.setDescription(descriptionTextArea.getValue());
-//				component.setRecipes(Set.of(binder.getBean()));
-//				component.setCourse(course);
-//
-//				componentRepository.save(component);
-				//----
-
-
-
 
 				Notification.show("Data updated");
 				this.close();

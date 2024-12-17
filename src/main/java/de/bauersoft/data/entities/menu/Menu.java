@@ -33,17 +33,6 @@ public class Menu extends AbstractEntity
 		this.description = description;
 	}
 
-//	public Optional<Map<Pattern, MenuPatternComponents>> getMenuPatternComponents()
-//	{
-//		return Optional.ofNullable(menuPatternComponents);
-//	}
-//
-//	public Menu setMenuPatternComponents(Map<Pattern, MenuPatternComponents> menuPatternComponents)
-//	{
-//		this.menuPatternComponents = menuPatternComponents;
-//		return this;
-//	}
-
 	@Override
 	public boolean equals(Object o)
 	{

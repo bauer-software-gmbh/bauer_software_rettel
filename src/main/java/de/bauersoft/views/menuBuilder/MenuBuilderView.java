@@ -64,8 +64,6 @@ public class MenuBuilderView extends Div
             {
                 mbMenuRepository.deleteByMenuId(menu.getId());
 
-                //menu.setMenuPatternComponents(new HashMap<>());//TODO problem, dass ansonsten das menu nicht gelöscht werden kann da sich das menu item die map nicht updated
-
                 menuRepository.delete(menu);
                 menuDataProvider.refreshAll();
             });

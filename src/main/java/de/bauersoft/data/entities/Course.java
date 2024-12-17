@@ -9,7 +9,6 @@ import jakarta.persistence.*;
 @Table(name = "course")
 public class Course extends AbstractEntity
 {
-
 	private String name;
 
 	@OneToMany(mappedBy = "course", fetch = FetchType.EAGER)
