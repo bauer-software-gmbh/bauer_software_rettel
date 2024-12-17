@@ -1,39 +1,25 @@
 package de.bauersoft.views.menuBuilder.cluster;
 
-import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import de.bauersoft.data.entities.Component;
 import de.bauersoft.data.entities.Course;
 import de.bauersoft.data.entities.menu.Menu;
-import de.bauersoft.data.entities.menu.MenuPatternComponent;
-import de.bauersoft.data.entities.menu.MenuPatternComponents;
 import de.bauersoft.data.entities.pattern.Pattern;
-import de.bauersoft.data.repositories.component.ComponentRepository;
-import de.bauersoft.data.repositories.course.CourseRepository;
-import de.bauersoft.data.repositories.pattern.PatternRepository;
-import de.bauersoft.views.menuBuilder.bounds.BoundComboBox;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
-import java.util.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PatternCluster extends ClusterLayout
 {
 
     private MenuBuilderClusterManager clusterManager;
-
     private Pattern pattern;
     private Menu item;
-
-    private ComponentRepository componentRepository;
-    private CourseRepository courseRepository;
-    private PatternRepository patternRepository;
 
     private Button removeButton;
 
@@ -47,10 +33,6 @@ public class PatternCluster extends ClusterLayout
 
         this.pattern = pattern;
         this.item = clusterManager.getItem();
-
-        this.componentRepository = clusterManager.getComponentRepository();
-        this.courseRepository = clusterManager.getCourseRepository();
-        this.patternRepository = clusterManager.getPatternRepository();
 
         removeButton = new Button();
         removeButton.setIcon(LineAwesomeIcon.MINUS_SQUARE.create());
@@ -67,36 +49,44 @@ public class PatternCluster extends ClusterLayout
 
         componentBoxesMap = new HashMap<>();
 
-        courseRepository.findAll().forEach(course -> setComponentBox(course));
+        clusterManager.getCourseRepository().findAll().forEach(course -> setComponentBox(course));
         addComponentBoxes();
+
+        loadPerhapsExistingData();
 
         updateComponents();
     }
 
-    private PatternCluster compareComponent(Course course)
+    public PatternCluster loadPerhapsExistingData()
     {
-        if(componentBoxesMap.get(course) == null) return this;
-        if(componentBoxesMap.get(course).getValue() != null) return  this;
+        if(item.getId() == null) return this;
 
-        DefaultCluster defaultCluster = clusterManager.getDefaultCluster();
+        List<Component> components = clusterManager.getMbComponentRepository().findMBComponentsByIds(item.getId(), pattern.getId());
+        if(components == null) return this;
 
-        Collection<Pattern> hisPatterns = getMatchingPatternsForComponent(defaultCluster.getComponentBoxesMap().get(course).getValue());
+        for(Component component : components)
+        {
+            ComboBox<Component> componentBox = componentBoxesMap.get(component.getCourse());
+            if(componentBox == null) continue;
+
+            componentBox.setValue(component);
+        }
 
         return this;
     }
 
-    public PatternCluster loadPerhapsExistingData()
+    public PatternCluster saveCertainlyExistingData()
     {
-        Optional<Map<Pattern, MenuPatternComponents>> map = item.getMenuPatternComponents();
-        if(map.isEmpty()) return this;
+        if(item.getId() == null)
+            throw new IllegalStateException("Please save a menu item first so that JPA can assign an ID to it. Only then can you save this data.");
 
-        MenuPatternComponents variant = map.get().get(pattern);
-        if(variant == null) return this;
-
-        variant.getComponents().forEach(component ->
+        for(ComboBox<Component> componentBox : componentBoxesMap.values())
         {
-            componentBoxesMap.get(component.getCourse()).setValue(component);
-        });
+            if(componentBox.getValue() == null) continue;
+
+            clusterManager.getMbMenuRepository()
+                    .upsertMenuPatternComponent(item.getId(), pattern.getId(), componentBox.getValue().getId());
+        }
 
         return this;
     }
@@ -104,8 +94,9 @@ public class PatternCluster extends ClusterLayout
     public ComboBox<Component> setComponentBox(Course course)
     {
         ComboBox<Component> componentBox = new ComboBox<>();
+        componentBox.setClearButtonVisible(true);
 
-        componentBox.setItems(getPatternMatchingComponents(getCourseMatchingComponents(componentRepository.findAll(), course), pattern));
+        componentBox.setItems(clusterManager.getMbComponentRepository().findComponentsByIds(pattern.getId(), course.getId()));
         componentBox.setItemLabelGenerator(item -> item.getName());
 
         componentBox.addValueChangeListener(event ->
@@ -131,14 +122,14 @@ public class PatternCluster extends ClusterLayout
 
 
 
-    public Menu getItem()
-    {
-        return item;
-    }
-
     public Pattern getPattern()
     {
         return pattern;
+    }
+
+    public Menu getItem()
+    {
+        return item;
     }
 
     public Button getRemoveButton()

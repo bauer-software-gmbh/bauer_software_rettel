@@ -2,18 +2,20 @@ package de.bauersoft.views.menuBuilder.cluster;
 
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import de.bauersoft.data.entities.Component;
-import de.bauersoft.data.entities.Course;
 import de.bauersoft.data.entities.menu.Menu;
-import de.bauersoft.data.entities.menu.MenuPatternComponents;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
 import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.data.repositories.component.ComponentRepository;
 import de.bauersoft.data.repositories.course.CourseRepository;
+import de.bauersoft.data.repositories.menuBuilder.MBComponentRepository;
+import de.bauersoft.data.repositories.menuBuilder.MBMenuRepository;
+import de.bauersoft.data.repositories.menuBuilder.MBPatternRepository;
 import de.bauersoft.data.repositories.pattern.PatternRepository;
 import de.bauersoft.views.menuBuilder.MenuBuilderPatternSelectorDialog;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class MenuBuilderClusterManager extends HorizontalLayout
@@ -21,6 +23,9 @@ public class MenuBuilderClusterManager extends HorizontalLayout
     private Menu item;
 
     private ComponentRepository componentRepository;
+    private MBMenuRepository mbMenuRepository;
+    private MBComponentRepository mbComponentRepository;
+    private MBPatternRepository mbPatternRepository;
     private CourseRepository courseRepository;
     private PatternRepository patternRepository;
 
@@ -31,10 +36,13 @@ public class MenuBuilderClusterManager extends HorizontalLayout
     private List<Pattern> patternPool;
     private ListDataProvider<Pattern> patternPoolDataProvider;
 
-    public MenuBuilderClusterManager(Menu item, ComponentRepository componentRepository, CourseRepository courseRepository, PatternRepository patternRepository)
+    public MenuBuilderClusterManager(Menu item, MBMenuRepository mbMenuRepository, MBComponentRepository mbComponentRepository, MBPatternRepository mbPatternRepository, ComponentRepository componentRepository, CourseRepository courseRepository, PatternRepository patternRepository)
     {
         this.item = item;
         this.componentRepository = componentRepository;
+        this.mbMenuRepository = mbMenuRepository;
+        this.mbComponentRepository = mbComponentRepository;
+        this.mbPatternRepository = mbPatternRepository;
         this.courseRepository = courseRepository;
         this.patternRepository = patternRepository;
 
@@ -60,43 +68,43 @@ public class MenuBuilderClusterManager extends HorizontalLayout
         updateClusters();
     }
 
-    /**
-     * Nur wenn ComboBox value in PatternCluster is null.
-     */
-    public boolean allesOke(Pattern pattern, Course course)
+    //Prototype
+//    public boolean allesOke(Pattern pattern, Course course)
+//    {
+//        Component defaultComponent = defaultCluster.getComponentBoxesMap().get(course).getValue();
+//        if(defaultComponent == null)
+//            return true;
+//
+//        if(patternClusters.stream().filter(patternCluster -> patternCluster.getPattern().equals(pattern)).findFirst().get().getComponentBoxesMap().get(course).getValue() != null)
+//            return true;
+//
+//        List<Pattern> matching = CourseCluster.getMatchingPatternsForComponent(defaultComponent);
+//
+//        if(matching.contains(pattern))
+//        {
+//            return true;
+//        }else
+//        {
+//            return false;
+//        }
+//    }
+
+    private MenuBuilderClusterManager loadPerhapsExistingData()
     {
-        Component defaultComponent = defaultCluster.getComponentBoxesMap().get(course).getValue();
-        if(defaultComponent == null)
-            return true;
+        if(item.getId() == null) return this;
 
-        if(patternClusters.stream().filter(patternCluster -> patternCluster.getPattern().equals(pattern)).findFirst().get().getComponentBoxesMap().get(course).getValue() != null)
-            return true;
-
-        List<Pattern> matching = CourseCluster.getMatchingPatternsForComponent(defaultComponent);
-
-        if(matching.contains(pattern))
+        List<Pattern> patterns = mbPatternRepository.findMBPatternsByMenuId(item.getId());
+        for(Pattern pattern : patterns)
         {
-            return true;
-        }else
-        {
-            return false;
-        }
-    }
+            if(DefaultPattern.DEFAULT.equalsDefault(pattern)) continue;
 
-    private void loadPerhapsExistingData()
-    {
-        Optional<Map<Pattern, MenuPatternComponents>> map = item.getMenuPatternComponents();
-        if(map.isEmpty()) return;
-
-        for(Map.Entry<Pattern, MenuPatternComponents> entry : map.get().entrySet())
-        {
-            if(DefaultPattern.DEFAULT.equalsDefault(entry.getKey())) continue;
-
-            addPatternCluster(entry.getKey()).loadPerhapsExistingData();
-            removePatternPool(entry.getKey());
+            addPatternCluster(pattern);
+            removePatternPool(pattern);
         }
 
         updateClusters();
+
+        return this;
     }
 
     public PatternCluster addPatternCluster(Pattern pattern)
@@ -196,9 +204,25 @@ public class MenuBuilderClusterManager extends HorizontalLayout
     }
 
 
+
     public Menu getItem()
     {
         return item;
+    }
+
+    public MBMenuRepository getMbMenuRepository()
+    {
+        return mbMenuRepository;
+    }
+
+    public MBComponentRepository getMbComponentRepository()
+    {
+        return mbComponentRepository;
+    }
+
+    public MBPatternRepository getMbPatternRepository()
+    {
+        return mbPatternRepository;
     }
 
     public ComponentRepository getComponentRepository()

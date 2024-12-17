@@ -1,10 +1,8 @@
 package de.bauersoft.data.entities;
 
-import java.util.List;
-import java.util.Set;
-
-import de.bauersoft.data.entities.menu.MenuPatternComponents;
 import jakarta.persistence.*;
+
+import java.util.Set;
 
 @Entity
 @Table(name="component")

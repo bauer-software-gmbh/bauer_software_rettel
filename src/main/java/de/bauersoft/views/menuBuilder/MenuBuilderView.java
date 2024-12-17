@@ -10,14 +10,18 @@ import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.providers.MenuDataProvider;
 import de.bauersoft.data.repositories.component.ComponentRepository;
 import de.bauersoft.data.repositories.course.CourseRepository;
-import de.bauersoft.data.repositories.menu.MenuPatternComponentsRepository;
 import de.bauersoft.data.repositories.menu.MenuRepository;
+import de.bauersoft.data.repositories.menuBuilder.MBComponentRepository;
+import de.bauersoft.data.repositories.menuBuilder.MBMenuRepository;
+import de.bauersoft.data.repositories.menuBuilder.MBPatternRepository;
 import de.bauersoft.data.repositories.pattern.PatternRepository;
 import de.bauersoft.data.repositories.recipe.RecipeRepository;
 import de.bauersoft.services.MenuService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
+
+import java.util.HashMap;
 
 @PageTitle("Menue Builder")
 @Route(value = "menubuilder", layout = MainLayout.class)
@@ -29,7 +33,8 @@ public class MenuBuilderView extends Div
     public MenuBuilderView(MenuService menuService, MenuRepository menuRepository, CourseRepository courseRepository,
                            ComponentRepository componentRepository, PatternRepository patternRepository,
                            MenuDataProvider menuDataProvider,
-                           RecipeRepository recipeRepository, MenuPatternComponentsRepository menuPatternComponentsRepository)
+                           RecipeRepository recipeRepository, MBMenuRepository mbMenuRepository,
+                           MBComponentRepository mbComponentRepository, MBPatternRepository mbPatternRepository)
     {
         setClassName("content");
         menuGrid.addColumn("name");
@@ -40,7 +45,7 @@ public class MenuBuilderView extends Div
 
            new MenuBuilderDialog(menuService, menuRepository, courseRepository, componentRepository, patternRepository,
                    menuDataProvider, event.getItem(), DialogState.EDIT,
-                   recipeRepository, menuPatternComponentsRepository)
+                   recipeRepository, mbMenuRepository, mbComponentRepository, mbPatternRepository)
         );
 
         menuGrid.setDataProvider(menuDataProvider);
@@ -50,14 +55,18 @@ public class MenuBuilderView extends Div
 
             new MenuBuilderDialog(menuService, menuRepository, courseRepository, componentRepository, patternRepository,
                     menuDataProvider, new Menu(), DialogState.NEW,
-                    recipeRepository, menuPatternComponentsRepository)
+                    recipeRepository, mbMenuRepository, mbComponentRepository, mbPatternRepository)
         );
 
         contextMenu.addItem("delete", event ->
         {
             event.getItem().ifPresent(menu ->
             {
-                menuService.delete(menu.getId());
+                mbMenuRepository.deleteByMenuId(menu.getId());
+
+                //menu.setMenuPatternComponents(new HashMap<>());//TODO problem, dass ansonsten das menu nicht gelöscht werden kann da sich das menu item die map nicht updated
+
+                menuRepository.delete(menu);
                 menuDataProvider.refreshAll();
             });
         });

@@ -10,22 +10,19 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import de.bauersoft.data.entities.Component;
 import de.bauersoft.data.entities.menu.Menu;
-import de.bauersoft.data.entities.menu.MenuPatternComponents;
-import de.bauersoft.data.entities.menu.MenuPatternComponentsId;
 import de.bauersoft.data.providers.MenuDataProvider;
 import de.bauersoft.data.repositories.component.ComponentRepository;
 import de.bauersoft.data.repositories.course.CourseRepository;
-import de.bauersoft.data.repositories.menu.MenuPatternComponentsRepository;
 import de.bauersoft.data.repositories.menu.MenuRepository;
+import de.bauersoft.data.repositories.menuBuilder.MBComponentRepository;
+import de.bauersoft.data.repositories.menuBuilder.MBMenuRepository;
+import de.bauersoft.data.repositories.menuBuilder.MBPatternRepository;
 import de.bauersoft.data.repositories.pattern.PatternRepository;
 import de.bauersoft.data.repositories.recipe.RecipeRepository;
 import de.bauersoft.services.MenuService;
 import de.bauersoft.views.DialogState;
-import de.bauersoft.views.menuBuilder.cluster.*;
-
-import java.util.*;
+import de.bauersoft.views.menuBuilder.cluster.MenuBuilderClusterManager;
 
 public class MenuBuilderDialog extends Dialog
 {
@@ -36,6 +33,9 @@ public class MenuBuilderDialog extends Dialog
     private ComponentRepository componentRepository;
     private PatternRepository patternRepository;
     private RecipeRepository recipeRepository;
+    private MBMenuRepository mbMenuRepository;
+    private MBComponentRepository mbComponentRepository;
+    private MBPatternRepository mbPatternRepository;
 
     private MenuDataProvider menuDataProvider;
 
@@ -48,13 +48,19 @@ public class MenuBuilderDialog extends Dialog
                              ComponentRepository componentRepository, PatternRepository patternRepository,
                              MenuDataProvider menuDataProvider, Menu menu,
                              DialogState dialogState,
-                             RecipeRepository recipeRepository, MenuPatternComponentsRepository menuPatternComponentsRepository)
+                             RecipeRepository recipeRepository, MBMenuRepository mbMenuRepository,
+                             MBComponentRepository mbComponentRepository, MBPatternRepository mbPatternRepository)
     {
         this.menuService = menuService;
         this.menuRepository = menuRepository;
         this.courseRepository = courseRepository;
         this.componentRepository = componentRepository;
         this.patternRepository = patternRepository;
+
+        this.mbMenuRepository = mbMenuRepository;
+        this.mbComponentRepository = mbComponentRepository;
+        this.mbPatternRepository = mbPatternRepository;
+
         this.menuDataProvider = menuDataProvider;
         this.menu = menu;
         this.dialogState = dialogState;
@@ -90,99 +96,34 @@ public class MenuBuilderDialog extends Dialog
         descriptionTextArea.setMinHeight("10rem");
         descriptionTextArea.setMaxHeight("10rem");
 
-        Button debugButton = new Button("Debug");
-        inputLayout.add(debugButton);
-        debugButton.addClickListener(event ->
-        {
-//            List<Component> componentIds = menuPatternComponentsRepository.findComponentIdsByIds(1l, 5l);
-//            componentIds.forEach(aLong ->
-//            {
-//                System.out.println(aLong.getName());
-//            });
-//
-//            System.out.println("----------------------");
-//
-//            List<Component> components2 = menuPatternComponentsRepository.findComponentIdsByIds(1l, 5l, 1l);
-//            components2.forEach(component ->
-//            {
-//                System.out.println(component.getName());
-//            });
-
-//            for(Map.Entry<Pattern, MenuPatternComponents> entry : menu.getPatternComponentsMap().entrySet())
-//            {
-//                System.out.println(entry.getKey().getName() + " - " + entry.getValue());
-//            }
-
-//            for(Map.Entry<Pattern, MenuPatternComponents> entry : menu.getMenuPatternComponents().get().entrySet())
-//            {
-//                System.out.println("key: " + entry.getKey().getName());
-//                System.out.println("value pattern: " + entry.getValue().getPattern().getName());
-//                entry.getValue().getComponents().forEach(component ->
-//                {
-//                    System.out.println("value component: " + component.getName());
-//                });
-//
-//                System.out.println("---------------------------");;
-//            }
-
-//            List<MenuPatternComponents> menuPatternComponents = menuPatternComponentsRepository.findMenuPatternComponentsByIds(1l, null);
-//            if(menuPatternComponents == null)
-//            {
-//                System.out.println("Nullllllllllllllll");
-//
-//            }else
-//            {
-//                menuPatternComponents.forEach(menuPatternComponent ->
-//                {
-//                    if(menuPatternComponent == null)
-//                    {
-//                        System.out.println("null 2");
-//                    }else
-//                    {
-//                        menuPatternComponent.getComponents().forEach(component ->
-//                        {
-//                            System.out.println(component.getName());
-//                        });
-//                    }
-//
-//                });
-//            }
-
-            MenuPatternComponentsId id = new MenuPatternComponentsId();
-            id.setMenuId(1l);
-            id.setPatternId(null);
-
-            MenuPatternComponents menuPatternComponent = new MenuPatternComponents();
-            menuPatternComponent.setId(id);
-
-            Set<Component> componentss = new HashSet<>();
-            componentss.addAll(componentRepository.findAll());
-
-            menuPatternComponent.setComponents(componentss);
-
-            menuPatternComponentsRepository.save(menuPatternComponent);
-        });
 
         Div menuBuilderDiv = new Div();
 
-        menuBuilderClusterManager = new MenuBuilderClusterManager(menu, componentRepository, courseRepository, patternRepository);
+        menuBuilderClusterManager = new MenuBuilderClusterManager(menu, mbMenuRepository, mbComponentRepository, mbPatternRepository, componentRepository, courseRepository, patternRepository);
 
         menuBuilderDiv.add(menuBuilderClusterManager);
-
-
 
         binder.forField(nameTextField).asRequired().bind("name");
         binder.bind(descriptionTextArea, "description");
 
         binder.setBean(menu);
 
-
         Button saveButton = new Button("Speichern");
         saveButton.addClickShortcut(Key.ENTER);
 
         saveButton.addClickListener(event ->
         {
-            //TODO bean save
+            binder.validate();
+            if(!binder.isValid()) return;
+
+            menuRepository.save(menu);
+
+            mbMenuRepository.deleteByMenuId(menu.getId());
+
+            menuBuilderClusterManager.getDefaultCluster().saveCertainlyExistingData();
+            menuBuilderClusterManager.getPatternClusters().forEach(patternCluster -> patternCluster.saveCertainlyExistingData());
+
+            menuDataProvider.refreshAll();
             this.close();
         });
 
@@ -192,7 +133,7 @@ public class MenuBuilderDialog extends Dialog
         cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         cancelButton.addClickListener(event ->
         {
-            //TODO bean remove
+            menuDataProvider.refreshAll();
             this.close();
         });
 
