@@ -23,8 +23,8 @@ public class CreateMenuPdf
 {
 
     public static final String resourceFileName = "SpeiseplanTemplate.pdf";
-    public static final String pdfTemplatePath = "C:/Development/Workspace/IntelliJ Workspace/Rettels_new_old/PDF/" + resourceFileName;
-    public final static String pdfOutputPath = "C:/Development/Workspace/IntelliJ Workspace/Rettels_new_old/PDF/%field%.pdf";
+    public static final String pdfTemplatePath = "C:/Rettel/PDF/" + resourceFileName;
+    public final static String pdfOutputPath = "C:/Rettel/PDF/%field%.pdf";
 
     public static void generatePdf(List<Map<String, Object>> menuList, String fieldName)
     {
