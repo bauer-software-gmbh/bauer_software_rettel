@@ -1,11 +1,16 @@
 package de.bauersoft.data.repositories.ingredient;
 
+import de.bauersoft.data.entities.ingredient.Ingredient;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import de.bauersoft.data.entities.Ingredient;
+import java.util.List;
 
+public interface IngredientRepository extends JpaRepository<Ingredient, Long>, JpaSpecificationExecutor<Ingredient>
+{
+    boolean existsByUnitId(Long id);
 
-public interface IngredientRepository extends JpaRepository<Ingredient, Long>, JpaSpecificationExecutor<Ingredient>{
+    boolean existsByAdditivesId(Long id);
 
+    boolean existsByAllergensId(Long id);
 }

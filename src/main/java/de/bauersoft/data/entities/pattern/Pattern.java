@@ -1,85 +1,34 @@
 package de.bauersoft.data.entities.pattern;
 
-import java.util.Objects;
-import java.util.Set;
-
 import de.bauersoft.data.entities.AbstractEntity;
-import de.bauersoft.data.entities.Recipe;
+import de.bauersoft.data.entities.recipe.Recipe;
+import de.bauersoft.data.entities.variant.Variant;
 import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "pattern")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
 public class Pattern extends AbstractEntity
 {
-	private String name;
-	private String description ="";
-	private Character religious ='N';
+    @Column(nullable = false, unique = true)
+    private String name;
 
-	public String getName()
-	{
-		return name;
-	}
+    @Column(length = 1024)
+    private String description;
 
-	public void setName(String name)
-	{
-		Objects.requireNonNull(name, "name cannot be null.");
-		this.name = name;
-	}
+    @Column(nullable = false, columnDefinition = "TINYINT(1) default 0")
+    private boolean religious;
 
-	public String getDescription()
-	{
-		return description;
-	}
+    @OneToMany(mappedBy = "pattern", fetch = FetchType.EAGER)
+    private Set<Variant> variants;
 
-	public void setDescription(String description)
-	{
-		this.description = description;
-	}
-
-	public Character getReligious()
-	{
-		return religious;
-	}
-
-	public void setReligious(Character religious)
-	{
-		Objects.requireNonNull(religious, "religious cannot be null.");
-		this.religious = religious;
-	}
-
-	@Override
-	public boolean equals(Object o)
-	{
-		if(o == null || getClass() != o.getClass())
-		{
-			return false;
-		}
-		if(!super.equals(o))
-		{
-			return false;
-		}
-		Pattern pattern = (Pattern) o;
-		return Objects.equals(name, pattern.name) && Objects.equals(description, pattern.description) && Objects.equals(religious, pattern.religious);
-	}
-
-	@Override
-	public int hashCode()
-	{
-		return Objects.hash(super.hashCode(), name, description, religious);
-	}
-
-	@Override
-	public String toString()
-	{
-		return "Pattern{" +
-				"religious=" + religious +
-				", description='" + description + '\'' +
-				", name='" + name + '\'' +
-				'}';
-	}
-
-	public boolean equalsDefault(DefaultPattern defaultPattern)
-	{
-		return (name == null || defaultPattern == null) ? false : name.equals(defaultPattern.getName());
-	}
+    @ManyToMany(mappedBy = "patterns", fetch = FetchType.EAGER)
+    private Set<Recipe> recipes;
 }

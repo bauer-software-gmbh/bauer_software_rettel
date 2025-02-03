@@ -1,13 +1,12 @@
 package de.bauersoft.components.filters;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.shared.Registration;
-
 import de.bauersoft.data.filters.TextFilter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GridTextFilter<T> extends TextFilter<T> implements GridFilter<T, String> {
 

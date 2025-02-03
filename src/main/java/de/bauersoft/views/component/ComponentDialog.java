@@ -10,20 +10,22 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-
-import de.bauersoft.data.entities.Component;
-import de.bauersoft.data.entities.Course;
-import de.bauersoft.data.entities.Recipe;
+import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.data.entities.component.Component;
+import de.bauersoft.data.entities.course.Course;
+import de.bauersoft.data.entities.recipe.Recipe;
 import de.bauersoft.data.providers.ComponentDataProvider;
 import de.bauersoft.data.repositories.component.ComponentRepository;
 import de.bauersoft.data.repositories.course.CourseRepository;
 import de.bauersoft.data.repositories.recipe.RecipeRepository;
 import de.bauersoft.services.ComponentService;
 import de.bauersoft.views.DialogState;
+import org.springframework.dao.DataIntegrityViolationException;
 
 public class ComponentDialog extends Dialog
 {
@@ -68,38 +70,59 @@ public class ComponentDialog extends Dialog
 		inputLayout.setColspan(inputLayout.addFormItem(courseComboBox, "course"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(recipeMultiSelectComboBox, "recipe"), 1);
 
-		binder.bind(nameTextField, "name");
+		binder.forField(nameTextField).asRequired((value, context) ->
+		{
+			return (value != null && !value.isBlank())
+					? ValidationResult.ok()
+					: ValidationResult.error("Name is required");
+
+		}).bind(Component::getName, Component::setName);
+
 		binder.bind(descriptionTextArea, "name");
+
+		binder.forField(courseComboBox).asRequired((value, context) ->
+		{
+			return (value != null)
+					? ValidationResult.ok()
+					: ValidationResult.error("Course is required");
+
+		}).bind(Component::getCourse, Component::setCourse);
+
 		binder.bind(recipeMultiSelectComboBox, "recipes");
-		binder.bind(courseComboBox, "course");
+
 
 		binder.setBean(item);
 
 		Button saveButton = new Button("save");
 		saveButton.addClickShortcut(Key.ENTER);
-
 		saveButton.setMinWidth("150px");
 		saveButton.setMaxWidth("180px");
-
 		saveButton.addClickListener(e ->
 		{
+			binder.validate();
 			if(binder.isValid())
 			{
-				service.update(binder.getBean());
-				provider.refreshAll();
+				try
+				{
+					service.update(binder.getBean());
+					provider.refreshAll();
 
-				Notification.show("Data updated");
-				this.close();
+					Notification.show("Data updated");
+					this.close();
+
+				}catch(DataIntegrityViolationException error)
+				{
+					Notification.show("Duplicate entry", 5000, Notification.Position.MIDDLE)
+							.addThemeVariants(NotificationVariant.LUMO_ERROR);
+				}
 			}
 		});
 
 		Button cancelButton = new Button("cancel");
 		cancelButton.addClickShortcut(Key.ESCAPE);
-
 		cancelButton.setMinWidth("150px");
 		cancelButton.setMaxWidth("180px");
 		cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-
 		cancelButton.addClickListener(e ->
 		{
 			binder.removeBean();

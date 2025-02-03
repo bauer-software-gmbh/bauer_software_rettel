@@ -1,6 +1,7 @@
 package de.bauersoft.security;
 
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
+import de.bauersoft.data.entities.role.Role;
 import de.bauersoft.views.login.LoginView;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +21,8 @@ public class SecurityConfiguration extends VaadinWebSecurity {
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
-
+    protected void configure(HttpSecurity http) throws Exception
+    {
         http.authorizeHttpRequests(
                 authorize -> authorize.requestMatchers(new AntPathRequestMatcher("/images/*.png"),
                 		new AntPathRequestMatcher("/images/*.jpg")).permitAll());

@@ -1,14 +1,13 @@
 package de.bauersoft.security;
 
 import com.vaadin.flow.spring.security.AuthenticationContext;
-
-import de.bauersoft.data.entities.User;
+import de.bauersoft.data.entities.user.User;
 import de.bauersoft.data.repositories.user.UserRepository;
-
-import java.util.Optional;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Component
 public class AuthenticatedUser {
@@ -24,7 +23,7 @@ public class AuthenticatedUser {
     @Transactional
     public Optional<User> get() {
         return authenticationContext.getAuthenticatedUser(UserDetails.class)
-                .map(userDetails -> userRepository.findByEmail(userDetails.getUsername()));
+                .map(userDetails -> userRepository.findUserByEmail(userDetails.getUsername()));
     }
 
     public void logout() {

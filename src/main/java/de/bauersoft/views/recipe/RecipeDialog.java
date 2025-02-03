@@ -1,10 +1,6 @@
 package de.bauersoft.views.recipe;
 
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -14,32 +10,58 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-
-import de.bauersoft.data.entities.Component;
-import de.bauersoft.data.entities.Course;
-import de.bauersoft.data.entities.Formulation;
+import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.data.entities.recipe.Recipe;
 import de.bauersoft.data.entities.pattern.Pattern;
-
-import de.bauersoft.data.entities.Recipe;
 import de.bauersoft.data.providers.RecipeDataProvider;
-import de.bauersoft.data.repositories.component.ComponentRepository;
-import de.bauersoft.data.repositories.course.CourseRepository;
 import de.bauersoft.data.repositories.formulation.FormulationRepository;
 import de.bauersoft.data.repositories.ingredient.IngredientRepository;
 import de.bauersoft.data.repositories.pattern.PatternRepository;
+import de.bauersoft.data.repositories.recipe.RecipeRepository;
+import de.bauersoft.services.FormulationService;
+import de.bauersoft.services.IngredientService;
+import de.bauersoft.services.PatternService;
 import de.bauersoft.services.RecipeService;
 import de.bauersoft.views.DialogState;
+import org.springframework.dao.DataIntegrityViolationException;
 
 public class RecipeDialog extends Dialog
 {
-	public RecipeDialog(RecipeService service, IngredientRepository ingredientRepository,
-						FormulationRepository formulationRepository, PatternRepository patternRepository,
-						RecipeDataProvider provider, Recipe item, DialogState state)
+
+	private final RecipeService recipeService;
+	private final RecipeRepository recipeRepository;
+	private final IngredientService ingredientService;
+	private final IngredientRepository ingredientRepository;
+	private final FormulationService formulationService;
+	private final FormulationRepository formulationRepository;
+	private final PatternService patternService;
+	private final PatternRepository patternRepository;
+	private final RecipeDataProvider recipeDataProvider;
+	private final Recipe item;
+	private final DialogState state;
+
+	public RecipeDialog(RecipeService recipeService, IngredientService ingredientService,
+						FormulationService formulationService, PatternService patternService,
+						RecipeDataProvider recipeDataProvider, Recipe item, DialogState state)
 	{
+		this.recipeService = recipeService;
+		this.ingredientService = ingredientService;
+		this.formulationService = formulationService;
+		this.patternService = patternService;
+		this.recipeDataProvider = recipeDataProvider;
+		this.item = item;
+		this.state = state;
+
+		this.recipeRepository = recipeService.getRepository();
+		this.ingredientRepository = ingredientService.getRepository();
+		this.formulationRepository = formulationService.getRepository();
+		this.patternRepository = patternService.getRepository();
+
 		this.setHeaderTitle(state.toString());
 
 		Binder<Recipe> binder = new Binder<Recipe>(Recipe.class);
@@ -67,13 +89,21 @@ public class RecipeDialog extends Dialog
 		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "description"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(patternMultiSelectComboBox, "patterns"), 1);
 
-		binder.bind(nameTextField, "name");
+		binder.forField(nameTextField).asRequired((value, context) ->
+		{
+			return (value != null && !value.isBlank())
+					? ValidationResult.ok()
+					: ValidationResult.error("Name is required");
+
+		}).bind("name");
+
 		binder.bind(descriptionTextArea, "description");
 		binder.bind(patternMultiSelectComboBox, "patterns");
 		
-		FormulationComponent formulationComponent = new FormulationComponent(item);
-		formulationComponent.setItems(ingredientRepository.findAll());
-		formulationComponent.setValues(item.getFormulation());
+		FormulationComponent formulationComponent = new FormulationComponent();
+		formulationComponent.setFormulations(formulationRepository.findAllByRecipeId(item.getId()));
+		formulationComponent.setIngredients(ingredientRepository.findAll());
+		formulationComponent.updateView();
 		formulationComponent.setHeight("50vh");
 
 		binder.setBean(item);
@@ -86,16 +116,34 @@ public class RecipeDialog extends Dialog
 
 		saveButton.addClickListener(e ->
 		{
-			if (binder.isValid())
+			binder.validate();
+			if(binder.isValid() && formulationComponent.isValid())
 			{
-				Set<Formulation> oldFormulations = binder.getBean().getFormulation();
-				formulationComponent.accept(binder.getBean());
-				updateFormulations(oldFormulations,formulationComponent.getFormulations(),formulationRepository) ;
-				service.update(binder.getBean());
-				provider.refreshAll();
+				try
+				{
+					Recipe recipe = binder.getBean();
+					recipeService.update(recipe);
 
-				Notification.show("Data updated");
-				this.close();
+					formulationComponent.accept(recipe);
+					formulationService.updateFormulations(recipe.getFormulations().stream().toList(), formulationComponent.getFormulationsMap().keySet().stream().toList());
+
+//					formulationRepository.deleteAllByRecipeId(recipe.getId());
+//
+//					formulationComponent.accept(recipe);
+//					recipe.setFormulations(formulationComponent.getFormulationsMap().keySet());
+
+//					recipeService.update(recipe);
+
+					recipeDataProvider.refreshAll();
+
+					Notification.show("Data updated");
+					this.close();
+
+				}catch(DataIntegrityViolationException error)
+				{
+					Notification.show("Duplicate entry", 5000, Notification.Position.MIDDLE)
+							.addThemeVariants(NotificationVariant.LUMO_ERROR);
+				}
 			}
 		});
 
@@ -117,31 +165,11 @@ public class RecipeDialog extends Dialog
 		inputLayout.setMaxHeight("16em");
 		Span spacer = new Span();
 		spacer.setWidthFull();
-		this.add(inputLayout,formulationComponent);
+		this.add(inputLayout, formulationComponent);
 		this.getFooter().add(new HorizontalLayout(spacer, saveButton, cancelButton));
 		this.setCloseOnEsc(false);
 		this.setCloseOnOutsideClick(false);
 		this.setModal(true);
 		this.open();
-	}
-
-	public Set<Formulation> updateFormulations(Collection<Formulation> oldValues, Collection<Formulation> newValues,
-			FormulationRepository formulationRepository) {
-		Set<Formulation> formulations = new HashSet<Formulation>();
-		Set<Formulation> tmp = new HashSet<Formulation>();
-		if (oldValues != null) {
-			formulations.addAll(oldValues);
-		}
-		formulations.removeAll(newValues);
-		for(Formulation formulation :formulations) {
-			formulationRepository.findById(formulation.getId()).ifPresent(item->
-				formulationRepository.deleteAllByRecipeId(item.getId().getRecipeId())
-			);
-		}
-		for (Formulation formulation : newValues) {
-			tmp.add(formulationRepository.save(formulation));
-		}	
-		formulations = tmp;
-		return formulations;
 	}
 }

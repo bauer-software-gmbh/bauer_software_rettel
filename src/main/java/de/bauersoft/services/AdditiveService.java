@@ -1,60 +1,88 @@
 package de.bauersoft.services;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import de.bauersoft.data.entities.additive.Additive;
+import de.bauersoft.data.filters.SerializableFilter;
+import de.bauersoft.data.repositories.griddata.GridDataRepository;
+import de.bauersoft.data.repositories.additive.AdditiveGridDataRepository;
+import de.bauersoft.data.repositories.additive.AdditiveRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.vaadin.flow.data.provider.QuerySortOrder;
-
-import de.bauersoft.data.entities.Additive;
-import de.bauersoft.data.filters.SerializableFilter;
-import de.bauersoft.data.repositories.additive.AdditiveGridDataRepository;
-import de.bauersoft.data.repositories.additive.AdditiveRepository;
+import java.util.List;
+import java.util.Optional;
 
 @Service
-public class AdditiveService {
+public class AdditiveService implements ServiceBase<Additive, Long>
+{
+    private final AdditiveRepository repository;
+    private final AdditiveGridDataRepository customRepository;
 
-	    private final AdditiveRepository repository;
-	    private final AdditiveGridDataRepository customRepository;
-	    
-	    public AdditiveService(AdditiveRepository repository,AdditiveGridDataRepository customRepository) {
-	        this.repository = repository;
-	        this.customRepository = customRepository;
-	    }
+    public AdditiveService(AdditiveRepository repository, AdditiveGridDataRepository customRepository)
+    {
+        this.repository = repository;
+        this.customRepository = customRepository;
+    }
 
-	    public Optional<Additive> get(Long id) {
-	        return repository.findById(id);
-	    }
+    @Override
+    public Optional<Additive> get(Long id)
+    {
+        return repository.findById(id);
+    }
 
-	    public Additive update(Additive entity) {
-	    	return repository.save(entity);
-	    }
+    @Override
+    public Additive update(Additive entity)
+    {
+        return repository.save(entity);
+    }
 
-	    public void delete(Long id) {
-	        repository.deleteById(id);
-	    }
+    @Override
+    public void delete(Long id)
+    {
+        repository.deleteById(id);
+    }
 
-	    public Page<Additive> list(Pageable pageable) {
-	        return repository.findAll(pageable);
-	    }
+    @Override
+    public Page<Additive> list(Pageable pageable)
+    {
+            return repository.findAll(pageable);
+    }
 
-	    public Page<Additive> list(Pageable pageable, Specification<Additive> filter) {
-	        return repository.findAll(filter, pageable);
-	    }
+    @Override
+    public Page<Additive> list(Pageable pageable, Specification<Additive> filter)
+    {
+        return repository.findAll(filter, pageable);
+    }
 
-	    public int count() {
-	        return (int) repository.count();
-	    }
-	    
-	    public int count (List<SerializableFilter<Additive, ?>> filters){
-	    	return (int) customRepository.count(filters);
-	    }
-	    
-	    public List<Additive> fetchAll(List<SerializableFilter<Additive, ?>> filters, List<QuerySortOrder> sortOrder){
-	    	return customRepository.fetchAll(filters,sortOrder);
-	    }
-	}
+    @Override
+    public long count()
+    {
+        return repository.count();
+    }
+
+    @Override
+    public long count(List<SerializableFilter<Additive, ?>> serializableFilters)
+    {
+        return customRepository.count(serializableFilters);
+    }
+
+    @Override
+    public List<Additive> fetchAll(List<SerializableFilter<Additive, ?>> serializableFilters, List<QuerySortOrder> sortOrder)
+    {
+        return customRepository.fetchAll(serializableFilters, sortOrder);
+    }
+
+    @Override
+    public AdditiveRepository getRepository()
+    {
+        return repository;
+    }
+
+    @Override
+    public GridDataRepository<Additive> getCustomRepository()
+    {
+        return customRepository;
+    }
+}

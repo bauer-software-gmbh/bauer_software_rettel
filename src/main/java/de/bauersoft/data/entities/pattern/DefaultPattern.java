@@ -2,19 +2,19 @@ package de.bauersoft.data.entities.pattern;
 
 import de.bauersoft.data.repositories.pattern.PatternRepository;
 
-import java.util.Collection;
-import java.util.Objects;
+import java.util.Arrays;
 import java.util.Optional;
 
 public enum DefaultPattern
 {
-    DEFAULT("Default", "Default", 'N');
+    DEFAULT("Normal", "Normale Variante", false),
+    VEGETARIAN("Vegetarisch", "Vegetarische Variante", false);
 
     private String name;
     private String description;
-    private Character religious;
+    private boolean religious;
 
-    private DefaultPattern(String name, String description, Character religious)
+    private DefaultPattern(String name, String description, boolean religious)
     {
         this.name = name;
         this.description = description;
@@ -31,18 +31,29 @@ public enum DefaultPattern
         return description;
     }
 
-    public Character getReligious()
+    public boolean getReligious()
     {
         return religious;
     }
 
-    public Optional<Pattern> getPattern(PatternRepository patternRepository)
+    public Optional<DefaultPattern> fromName(String name)
     {
-        return Optional.ofNullable(patternRepository.findByName(name));
+        return Optional.ofNullable
+                (
+                        Arrays.stream(DefaultPattern.values())
+                                .filter(defaultPattern -> defaultPattern.name.equals(name))
+                                .findFirst()
+                                .orElse(null)
+                );
     }
 
     public boolean equalsDefault(Pattern pattern)
     {
-        return (pattern == null) ? false : name.equals(pattern.getName());
+        return (pattern == null) ? false : this.name.equals(pattern.getName());
+    }
+
+    public Optional<Pattern> findPattern(PatternRepository patternRepository)
+    {
+        return Optional.ofNullable(patternRepository.findByName(this.getName()));
     }
 }

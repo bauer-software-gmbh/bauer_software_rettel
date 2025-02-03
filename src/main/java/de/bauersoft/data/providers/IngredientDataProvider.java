@@ -1,20 +1,18 @@
 package de.bauersoft.data.providers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
-import org.springframework.stereotype.Service;
-
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.shared.Registration;
-
-import de.bauersoft.data.entities.Ingredient;
+import de.bauersoft.data.entities.ingredient.Ingredient;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.services.IngredientService;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class IngredientDataProvider
@@ -40,7 +38,7 @@ public class IngredientDataProvider
 	
 	@Override
 	public int size(Query<Ingredient, Void> query) {
-		return this.service.count(filter);
+		return (int) this.service.count(filter);
 	}
 
 	@Override

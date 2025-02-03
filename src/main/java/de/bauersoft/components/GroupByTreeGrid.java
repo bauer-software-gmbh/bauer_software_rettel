@@ -1,10 +1,5 @@
 package de.bauersoft.components;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.vaadin.lineawesome.LineAwesomeIcon;
-
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dnd.DropTarget;
@@ -14,9 +9,12 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
-
 import de.bauersoft.data.entities.AbstractGroupByEntity;
 import de.bauersoft.data.providers.experimental.HasGroupBy;
+import org.vaadin.lineawesome.LineAwesomeIcon;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @CssImport(value = "./themes/rettels/components/group-by-grid.css")
 public class GroupByTreeGrid<T extends AbstractGroupByEntity<T>> extends TreeGrid<T> {

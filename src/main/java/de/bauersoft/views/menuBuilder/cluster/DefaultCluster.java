@@ -1,18 +1,22 @@
 package de.bauersoft.views.menuBuilder.cluster;
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
-import de.bauersoft.data.entities.Component;
-import de.bauersoft.data.entities.Course;
-import de.bauersoft.data.entities.Menu;
+import de.bauersoft.data.entities.component.Component;
+import de.bauersoft.data.entities.course.Course;
+import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
 import de.bauersoft.data.entities.pattern.Pattern;
+import de.bauersoft.data.entities.variant.Variant;
+import de.bauersoft.views.menuBuilder.MenuBuilderPatternDescriptionDialog;
 import de.bauersoft.views.menuBuilder.bounds.BoundComboBox;
+import lombok.Getter;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class DefaultCluster extends ClusterLayout
@@ -22,21 +26,49 @@ public class DefaultCluster extends ClusterLayout
     private Pattern pattern;
     private Menu item;
 
+    private MenuBuilderPatternDescriptionDialog descriptionDialog;
+
+    private Button descriptionButton;
     private TextField patternField;
 
     private Map<Course, BoundComboBox<Pattern, Component>> componentBoxesMap;
+    private Variant variant;
 
     public DefaultCluster(MenuBuilderClusterManager clusterManager)
     {
         this.clusterManager = clusterManager;
 
-        Optional<Pattern> defaultPattern = DefaultPattern.DEFAULT.getPattern(clusterManager.getPatternRepository());
+        componentBoxesMap = new HashMap<>();
+
+        Optional<Pattern> defaultPattern = DefaultPattern.DEFAULT.findPattern(clusterManager.getPatternRepository());
         if(defaultPattern.isEmpty())
-            throw new IllegalStateException("Default pattern could not be found. Try restarting the program.");
+            throw new IllegalStateException("Default pattern could not be found. Try restarting the programm.");
 
         pattern = defaultPattern.get();
-
         this.item = clusterManager.getItem();
+
+        Optional<Variant> variant = clusterManager.getVariantService().getRepository().findByMenuIdAndPatternId(item.getId(), pattern.getId());
+        if(variant.isPresent())
+        {
+            this.variant = variant.get();
+
+        }else
+        {
+            this.variant = new Variant();
+            this.variant.setMenu(item);
+            this.variant.setPattern(pattern);
+        }
+
+        descriptionDialog = new MenuBuilderPatternDescriptionDialog(clusterManager, this.variant);
+
+        descriptionButton = new Button("Beschreibung", LineAwesomeIcon.SCROLL_SOLID.create());
+        descriptionButton.addThemeVariants(ButtonVariant.LUMO_ICON);
+        descriptionButton.setAriaLabel("Add item");
+
+        descriptionButton.addClickListener(e ->
+        {
+            descriptionDialog.open();
+        });
 
         patternField = new TextField();
         patternField.setValue("Standard");
@@ -44,9 +76,7 @@ public class DefaultCluster extends ClusterLayout
         patternField.setReadOnly(true);
         patternField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_CENTER);
 
-        componentBoxesMap = new HashMap<>();
-
-        addComponents(getPlaceholder(), patternField);
+        addComponents(getPlaceholder(), descriptionButton, patternField);
         clusterManager.getCourseRepository().findAll().forEach(course ->
         {
             setComponentBox(course);
@@ -63,10 +93,7 @@ public class DefaultCluster extends ClusterLayout
     {
         if(item.getId() == null) return this;
 
-        List<Component> components = clusterManager.getMbComponentRepository().findMBComponentsByIds(item.getId(), pattern.getId());
-        if(components == null) return this;
-
-        for(Component component : components)
+        for(Component component : variant.getComponents())
         {
             BoundComboBox<Pattern, Component> componentBox = componentBoxesMap.get(component.getCourse());
             if(componentBox == null) continue;
@@ -82,21 +109,15 @@ public class DefaultCluster extends ClusterLayout
         if(item.getId() == null)
             throw new IllegalStateException("Please save a menu item first so that JPA can assign an ID to it. Only then can you save this data.");
 
-        for(BoundComboBox<Pattern, Component> componentBox : componentBoxesMap.values())
-        {
-            if(componentBox.getValue() == null) continue;
+        descriptionDialog.saveDescription();
 
-            clusterManager.getMbMenuRepository()
-                    .upsertMenuPatternComponent(item.getId(), pattern.getId(), componentBox.getValue().getId());
-        }
+        Set<Component> components = componentBoxesMap.values()
+                .stream()
+                .map(BoundComboBox::getValue)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
 
-        return this;
-    }
-
-    private DefaultCluster compareComponent(Course course)
-    {
-        DefaultCluster defaultCluster = clusterManager.getDefaultCluster();
-
+        variant.setComponents(components);
         return this;
     }
 
@@ -105,7 +126,7 @@ public class DefaultCluster extends ClusterLayout
         BoundComboBox<Pattern, Component> componentBox = new BoundComboBox<>();
         componentBox.setClearButtonVisible(true);
 
-        componentBox.setItems(clusterManager.getMbComponentRepository().findComponentsByCourseId(course.getId()));
+        componentBox.setItems(clusterManager.getComponentRepository().findByCourseId(course.getId()));
         componentBox.setItemLabelGenerator(item -> item.getName());
 
         componentBox.addValueChangeListener(event ->
@@ -130,6 +151,10 @@ public class DefaultCluster extends ClusterLayout
     }
 
 
+    public Variant getVariant()
+    {
+        return variant;
+    }
 
     public Pattern getPattern()
     {

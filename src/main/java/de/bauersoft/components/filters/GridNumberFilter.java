@@ -1,10 +1,5 @@
 package de.bauersoft.components.filters;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.vaadin.lineawesome.LineAwesomeIcon;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -13,9 +8,12 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.shared.Registration;
-
 import de.bauersoft.data.filters.NumberFilter;
 import de.bauersoft.data.filters.NumericOperations;
+import org.vaadin.lineawesome.LineAwesomeIcon;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @CssImport(value = "./themes/rettels/components/grid-filter.css")
 public class GridNumberFilter<T> extends NumberFilter<T, Double> implements GridFilter<T, Double> {

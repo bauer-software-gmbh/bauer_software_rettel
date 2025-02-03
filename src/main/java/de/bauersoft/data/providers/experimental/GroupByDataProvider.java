@@ -1,22 +1,20 @@
 package de.bauersoft.data.providers.experimental;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
-
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.shared.Registration;
-
 import de.bauersoft.data.entities.AbstractGroupByEntity;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.AbstractGridDataRepository;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 public abstract class GroupByDataProvider<T extends AbstractGroupByEntity<T>> implements HierarchicalConfigurableFilterDataProvider<T, Void, List<SerializableFilter<T, ?>>>, HasGroupBy {
 	private List<SerializableFilter<T, ?>> filter;

@@ -1,7 +1,6 @@
 package de.bauersoft.data.filters;
 
 import com.vaadin.flow.function.SerializablePredicate;
-
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;

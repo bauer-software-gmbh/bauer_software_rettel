@@ -39,7 +39,7 @@ public class MenuBuilderPatternSelectorDialog extends Dialog
 
 
 
-        selectButton = new Button("Select");
+        selectButton = new Button("Ok");
         selectButton.addClickShortcut(Key.ENTER);
 
         selectButton.addClickListener(event ->
@@ -58,7 +58,7 @@ public class MenuBuilderPatternSelectorDialog extends Dialog
             this.close();
         });
 
-        cancelButton = new Button("Cancel");
+        cancelButton = new Button("Abbruch");
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
 

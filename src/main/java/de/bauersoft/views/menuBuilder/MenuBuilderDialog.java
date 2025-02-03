@@ -3,14 +3,17 @@ package de.bauersoft.views.menuBuilder;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import de.bauersoft.data.entities.Menu;
+import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.data.entities.flesh.DefaultFlesh;
+import de.bauersoft.data.entities.flesh.Flesh;
+import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.providers.MenuDataProvider;
 import de.bauersoft.data.repositories.component.ComponentRepository;
 import de.bauersoft.data.repositories.course.CourseRepository;
@@ -20,9 +23,17 @@ import de.bauersoft.data.repositories.menuBuilder.MBMenuRepository;
 import de.bauersoft.data.repositories.menuBuilder.MBPatternRepository;
 import de.bauersoft.data.repositories.pattern.PatternRepository;
 import de.bauersoft.data.repositories.recipe.RecipeRepository;
+import de.bauersoft.services.FleshService;
 import de.bauersoft.services.MenuService;
+import de.bauersoft.services.OrderDataService;
+import de.bauersoft.services.VariantService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.menuBuilder.cluster.MenuBuilderClusterManager;
+import de.bauersoft.views.menuBuilder.cluster.PatternCluster;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MenuBuilderDialog extends Dialog
 {
@@ -33,9 +44,8 @@ public class MenuBuilderDialog extends Dialog
     private ComponentRepository componentRepository;
     private PatternRepository patternRepository;
     private RecipeRepository recipeRepository;
-    private MBMenuRepository mbMenuRepository;
-    private MBComponentRepository mbComponentRepository;
-    private MBPatternRepository mbPatternRepository;
+    private VariantService variantService;
+    private FleshService fleshService;
 
     private MenuDataProvider menuDataProvider;
 
@@ -48,8 +58,8 @@ public class MenuBuilderDialog extends Dialog
                              ComponentRepository componentRepository, PatternRepository patternRepository,
                              MenuDataProvider menuDataProvider, Menu menu,
                              DialogState dialogState,
-                             RecipeRepository recipeRepository, MBMenuRepository mbMenuRepository,
-                             MBComponentRepository mbComponentRepository, MBPatternRepository mbPatternRepository)
+                             RecipeRepository recipeRepository, VariantService variantService, FleshService fleshService,
+                             OrderDataService orderDataService)
     {
         this.menuService = menuService;
         this.menuRepository = menuRepository;
@@ -57,60 +67,56 @@ public class MenuBuilderDialog extends Dialog
         this.componentRepository = componentRepository;
         this.patternRepository = patternRepository;
 
-        this.mbMenuRepository = mbMenuRepository;
-        this.mbComponentRepository = mbComponentRepository;
-        this.mbPatternRepository = mbPatternRepository;
-
         this.menuDataProvider = menuDataProvider;
         this.menu = menu;
         this.dialogState = dialogState;
 
         this.recipeRepository = recipeRepository;
+        this.variantService = variantService;
+        this.fleshService = fleshService;
 
         this.setHeaderTitle(dialogState.toString());
-
-        String defaultWidth = "50vw";
 
         Binder<Menu> binder = new Binder<>(Menu.class);
 
         FormLayout inputLayout = new FormLayout();
         inputLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
-
-        inputLayout.setWidth(defaultWidth);
-        inputLayout.setMaxWidth(defaultWidth);
-        inputLayout.setHeight("15rem");
+        inputLayout.setWidth("50vw");
+        inputLayout.setMaxWidth("50em");
 
         TextField nameTextField = new TextField();
         inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
-        nameTextField.setMaxLength(50);
+        nameTextField.setMaxLength(64);
         nameTextField.setRequired(true);
+        nameTextField.setWidth("20em");
 
-        nameTextField.setWidth("20rem");
+        ComboBox<Flesh> fleshComboBox = new ComboBox<>();
+        inputLayout.setColspan(inputLayout.addFormItem(fleshComboBox, "Fleischsorte"), 1);
+        fleshComboBox.setClearButtonVisible(true);
+        fleshComboBox.setItems(fleshService.getRepository().findAll());
+        fleshComboBox.setItemLabelGenerator(Flesh::getName);
 
-        TextArea descriptionTextArea = new TextArea();
-        inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "description"), 1);
-        descriptionTextArea.setMaxLength(2048);
-
-        descriptionTextArea.setWidth("25rem");
-        descriptionTextArea.setMaxWidth("25rem");
-        descriptionTextArea.setMinHeight("10rem");
-        descriptionTextArea.setMaxHeight("10rem");
 
 
         Div menuBuilderDiv = new Div();
 
-        menuBuilderClusterManager = new MenuBuilderClusterManager(menu, mbMenuRepository, mbComponentRepository, mbPatternRepository, componentRepository, courseRepository, patternRepository);
+        menuBuilderClusterManager = new MenuBuilderClusterManager(menu, menuService, variantService, componentRepository, courseRepository, patternRepository, orderDataService);
 
         menuBuilderDiv.add(menuBuilderClusterManager);
 
-        binder.forField(nameTextField).asRequired().bind("name");
-        binder.bind(descriptionTextArea, "description");
+        binder.forField(nameTextField).asRequired((value, context) ->
+        {
+            return (value != null && !value.isBlank())
+                    ? ValidationResult.ok()
+                    : ValidationResult.error("Name is required");
+        }).bind("name");
+
+        binder.forField(fleshComboBox).bind("flesh");
 
         binder.setBean(menu);
 
         Button saveButton = new Button("Speichern");
         saveButton.addClickShortcut(Key.ENTER);
-
         saveButton.addClickListener(event ->
         {
             binder.validate();
@@ -118,10 +124,22 @@ public class MenuBuilderDialog extends Dialog
 
             menuRepository.save(menu);
 
-            mbMenuRepository.deleteByMenuId(menu.getId());
-
             menuBuilderClusterManager.getDefaultCluster().saveCertainlyExistingData();
             menuBuilderClusterManager.getPatternClusters().forEach(patternCluster -> patternCluster.saveCertainlyExistingData());
+
+            variantService.updateVariants(
+                    variantService.getRepository().findAllByMenuId(menu.getId()),
+                    Stream.of(
+                                    List.of(menuBuilderClusterManager.getDefaultCluster().getVariant()),
+                                    menuBuilderClusterManager.getPatternClusters()
+                                            .stream()
+                                            .map(PatternCluster::getVariant)
+                                            .collect(Collectors.toList())
+                            ).flatMap(List::stream)
+                            .collect(Collectors.toList())
+            );
+
+            //variantService.getRepository().deleteAllByMenuId(menu.getId());
 
             menuDataProvider.refreshAll();
             this.close();
@@ -137,11 +155,12 @@ public class MenuBuilderDialog extends Dialog
             this.close();
         });
 
+        inputLayout.add(menuBuilderDiv);
         this.add(inputLayout);
-        this.add(menuBuilderDiv);
+        //this.add(menuBuilderDiv);
 
-        this.setWidth("65vw");
-        this.setMaxWidth("65vw");
+//        this.setWidth("50vw");
+//        this.setMaxWidth("50vw");
 
         this.getFooter().add(new HorizontalLayout(cancelButton, saveButton));
         this.setCloseOnEsc(false);

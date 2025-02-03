@@ -5,7 +5,8 @@ public enum DialogState
 	NEW("Neu anlegen"),
 	EDIT("Editieren"),
 	COPY("Kopieren"),
-	VIEW("Anschauen");
+	VIEW("Anschauen"),
+	CUSTOM("Custom");
 
 	private String value;
 

@@ -3,7 +3,7 @@ package de.bauersoft.views.menuBuilder.cluster;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
-import de.bauersoft.data.entities.Course;
+import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.repositories.course.CourseRepository;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 

@@ -1,21 +1,15 @@
 package de.bauersoft.data.providers;
 
+import com.vaadin.flow.data.provider.*;
+import com.vaadin.flow.shared.Registration;
+import de.bauersoft.data.entities.unit.Unit;
+import de.bauersoft.data.filters.SerializableFilter;
+import de.bauersoft.services.UnitService;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-
-import org.springframework.stereotype.Service;
-
-import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
-import com.vaadin.flow.data.provider.DataChangeEvent;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.DataProviderListener;
-import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.shared.Registration;
-
-import de.bauersoft.data.entities.Unit;
-import de.bauersoft.data.filters.SerializableFilter;
-import de.bauersoft.services.UnitService;
 
 @Service
 public class UnitDataProvider implements ConfigurableFilterDataProvider<Unit, Void, List<SerializableFilter<Unit,?>>>, DataProvider<Unit, Void> {
@@ -34,7 +28,7 @@ public class UnitDataProvider implements ConfigurableFilterDataProvider<Unit, Vo
 
 	@Override
 	public int size(Query<Unit, Void> query) {
-		return this.service.count(filter);
+		return (int) this.service.count(filter);
 	}
 
 	@Override
@@ -43,14 +37,16 @@ public class UnitDataProvider implements ConfigurableFilterDataProvider<Unit, Vo
 	}
 
 	@Override
-	public void refreshItem(Unit item) {
-		// TODO Auto-generated method stub
+	public void refreshItem(Unit item)
+	{
+		DataChangeEvent<Unit> dataChangeEvent = new DataChangeEvent.DataRefreshEvent<>(this, item);
+		this.listeners.forEach(listener -> listener.onDataChange(dataChangeEvent));
 	}
 
 	@Override
 	public void refreshAll() {
 		DataChangeEvent<Unit> dataChangeEvent = new DataChangeEvent<Unit>(this);
-		this.listeners.forEach(listener->listener.onDataChange(dataChangeEvent));
+		this.listeners.forEach(listener-> listener.onDataChange(dataChangeEvent));
 	}
 
 	@Override

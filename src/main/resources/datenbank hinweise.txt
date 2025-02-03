@@ -1,0 +1,4 @@
+Nachdem Hibernate die Datenbank angelegt hat müssen manuell noch folgende dinge geändert werden:
+
+1. In der Tabelle "allergenic" muss der Foreign Key von ingredient "onDelete = CASCADE" gesetzt werden.
+2. In der Tabelle "additives" muss der Foreign Key von ingredient "onDelete = CASCADE" gesetzt werden.

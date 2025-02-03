@@ -19,88 +19,146 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import de.bauersoft.data.entities.Day;
-import de.bauersoft.data.entities.Menu;
-import de.bauersoft.data.entities.Week;
+import de.bauersoft.data.entities.field.DefaultField;
+import de.bauersoft.data.entities.field.Field;
+import de.bauersoft.data.entities.flesh.DefaultFlesh;
+import de.bauersoft.data.entities.flesh.Flesh;
+import de.bauersoft.data.entities.menu.Menu;
+import de.bauersoft.data.entities.offer.Offer;
+import de.bauersoft.data.entities.pattern.DefaultPattern;
+import de.bauersoft.data.entities.variant.Variant;
+import de.bauersoft.data.repositories.flesh.FleshRepository;
+import de.bauersoft.data.repositories.menu.MenuRepository;
 import de.bauersoft.data.providers.OffersDataProvider;
-import de.bauersoft.services.DayService;
+import de.bauersoft.services.FieldService;
 import de.bauersoft.services.MenuService;
-import de.bauersoft.services.WeekService;
+import de.bauersoft.services.offer.OfferService;
+import de.bauersoft.services.offer.Week;
 import de.bauersoft.tools.DatePickerLocaleGerman;
 import de.bauersoft.views.MainLayout;
 import com.vaadin.flow.component.html.Div;
+import de.bauersoft.views.menue.CreateMenuPdf;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.time.DayOfWeek;
-import java.time.temporal.WeekFields;
 import java.util.*;
 
 @PageTitle("offers")
 @Route(value = "offers", layout = MainLayout.class)
 @AnonymousAllowed
-public class OffersView extends Div {
+public class OffersView extends Div
+{
     private final OffersDataProvider dataProvider;
-    private final DayService dayService;
     private final MenuService menuService;
-    private final WeekService weekService;
+    private final OfferService offerService;
+    private final MenuRepository menuRepository;
+    private final FleshRepository fleshRepository;
     private LocalDate vonDate, bisDate;
     private final DatePicker filterDate;
-    private Button deleteButton;
+    private Button deleteButton, generatePDF;
+    private ComboBox<Field> fieldComboBox;
 
-    public OffersView(MenuService menuService, DayService dayService, WeekService weekService) {
-        this.dataProvider = new OffersDataProvider(dayService, menuService);
-        this.dayService = dayService;
+    public OffersView(MenuService menuService, FieldService fieldService, OfferService offerService, MenuRepository menuRepository, FleshRepository fleshRepository)
+    {
+        this.offerService = offerService;
+        this.fleshRepository = fleshRepository;
+        this.dataProvider = new OffersDataProvider(offerService, menuService);
         this.menuService = menuService;
-        this.weekService = weekService;
+        this.menuRepository = menuRepository;
         this.deleteButton = new Button();
+        this.generatePDF = new Button("Generate PDF"); // Initialisiere den Button
+        generatePDF.setVisible(true); // Standardmäßig unsichtbar
+        generatePDF.addClickListener(event ->
+        {
+            createMenuPdf();
+
+        }); // Button-Click-Listener hinzufügen
 
         setClassName("content");
         VerticalLayout pageVerticalLayout = new VerticalLayout();
         pageVerticalLayout.setSizeFull();
 
         this.filterDate = new DatePicker("Datum:");
-
         this.filterDate.setWeekNumbersVisible(true);
         this.filterDate.setI18n(new DatePickerLocaleGerman());
 
+        // Neue ComboBox für Field hinzufügen
+        fieldComboBox = new ComboBox<>("Field auswählen:");
+        fieldComboBox.setItemLabelGenerator(Field::getName); // Anzeige in der ComboBox
+        fieldComboBox.setItems(fieldService.findAll());
+        fieldComboBox.setValue(fieldService.findAll().get(0)); // Setze Standardwert
+
+        fieldComboBox.addValueChangeListener(event ->
+        {
+            Field selectedField = event.getValue();
+            if(selectedField != null)
+            {
+                //String fieldName = selectedField.getName().toLowerCase();
+                //boolean shouldShowButton = fieldName.matches("^(kit|kind|gri|gru).*");
+                boolean shouldShowButton = List.of(DefaultField.GRUNDSCHULE, DefaultField.KINDERTAGESSTÄTTE, DefaultField.KINDERGARTEN)
+                                .stream().anyMatch(defaultField -> defaultField.equalsDefault(selectedField));
+
+                generatePDF.setVisible(shouldShowButton);
+                // Setze die Field-ID und aktualisiere die Daten
+                dataProvider.setFieldId(selectedField.getId());
+                // Benachrichtige das Grid, dass es sich aktualisieren soll
+                dataProvider.refreshAll();
+            }else
+            {
+                generatePDF.setVisible(false); // Verstecke den Button, wenn nichts ausgewählt ist
+            }
+        });
+
+
         ComboBox<WeekSelector> weekCombobox = getWeekSelectorComboBox();
 
-        this.filterDate.addValueChangeListener(event->{
-            this.vonDate = event.getValue().minusDays  (event.getValue().getDayOfWeek().getValue()-1);
+        this.filterDate.addValueChangeListener(event ->
+        {
+            this.vonDate = event.getValue().minusDays(event.getValue().getDayOfWeek().getValue() - 1);
             var value = weekCombobox.getValue();
-            this.bisDate = this.vonDate.plus( value.amount(),value.unit());
+            this.bisDate = this.vonDate.plus(value.amount(), value.unit());
             this.dataProvider.setDateRange(this.vonDate, this.bisDate);
         });
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
         // Grid-Setup
-        Grid<Week> grid = new Grid<>(Week.class, false);
-        grid.addColumn(Week::getKw).setHeader("KW");
-        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.MONDAY).getDate(), formatter))).setHeader("Montag");
-        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.TUESDAY).getDate(), formatter))).setHeader("Dienstag");
-        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.WEDNESDAY).getDate(), formatter))).setHeader("Mittwoch");
-        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.THURSDAY).getDate(), formatter))).setHeader("Donnerstag");
-        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.FRIDAY).getDate(), formatter))).setHeader("Freitag");
-        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.SATURDAY).getDate(), formatter))).setHeader("Samstag");
-        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.SUNDAY).getDate(), formatter))).setHeader("Sonntag");
+//        Grid<Week> grid = new Grid<>(Week.class, false);
+//        grid.addColumn(Week::getKw).setHeader("KW");
+//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.MONDAY).getDate(), formatter))).setHeader("Montag");
+//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.TUESDAY).getDate(), formatter))).setHeader("Dienstag");
+//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.WEDNESDAY).getDate(), formatter))).setHeader("Mittwoch");
+//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.THURSDAY).getDate(), formatter))).setHeader("Donnerstag");
+//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.FRIDAY).getDate(), formatter))).setHeader("Freitag");
+//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.SATURDAY).getDate(), formatter))).setHeader("Samstag");
+//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.SUNDAY).getDate(), formatter))).setHeader("Sonntag");
+
+        Grid<LocalDate> grid = new Grid<>(LocalDate.class, false);
+        grid.addColumn(localDate -> Week.getKw(localDate)).setHeader("KW");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.MONDAY, item), formatter))).setHeader("Montag");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.TUESDAY, item), formatter))).setHeader("Dienstag");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.WEDNESDAY, item), formatter))).setHeader("Mittwoch");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.THURSDAY, item), formatter))).setHeader("Donnerstag");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.FRIDAY, item), formatter))).setHeader("Freitag");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.SATURDAY, item), formatter))).setHeader("Samstag");
+        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.SUNDAY, item), formatter))).setHeader("Sonntag");
 
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setDataProvider(this.dataProvider);
         grid.setSizeFull();
 
-        HorizontalLayout oben  = new HorizontalLayout();
-        oben.add(weekCombobox, this.filterDate);
+        HorizontalLayout oben = new HorizontalLayout();
+        oben.add(fieldComboBox, weekCombobox, this.filterDate, generatePDF); // Button hinzugefügt
         oben.setAlignItems(FlexComponent.Alignment.CENTER); // Alles zentrieren
 
         HorizontalLayout mainLayout = new HorizontalLayout();
         mainLayout.setSizeFull();
 
         VirtualList<Menu> virtualList = new VirtualList<>();
-        virtualList.setRenderer(new ComponentRenderer<Div,Menu>(component->{
+        virtualList.setRenderer(new ComponentRenderer<Div, Menu>(component ->
+        {
             MenuDiv container = new MenuDiv(component);
             DragSource.create(container);
             return container;
@@ -114,33 +172,123 @@ public class OffersView extends Div {
 
         // Layout zusammenfügen
         mainLayout.add(grid, virtualList);
-        // Setze explizit die Proportionen
         grid.setWidth("90%");
         virtualList.setWidth("10%");
         pageVerticalLayout.add(oben, mainLayout);
         this.add(pageVerticalLayout);
         this.setSizeFull();
         this.filterDate.setValue(LocalDate.now());
-
-
     }
 
-    private ComboBox<WeekSelector> getWeekSelectorComboBox() {
+    private void createMenuPdf()
+    {
+        LocalDate startDate = filterDate.getValue().with(DayOfWeek.MONDAY);
+        LocalDate endDate = startDate.plusWeeks(3).with(DayOfWeek.FRIDAY);
+
+        List<Map<String, Object>> menuList = new ArrayList<>();
+        Field field = fieldComboBox.getValue();
+
+        System.out.println(new StringBuilder().repeat("-", 500).append("Oben: ").append(field.getName()));
+
+        for(LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1))
+        {
+            if(date.getDayOfWeek().equals(DayOfWeek.SATURDAY) || date.getDayOfWeek().equals(DayOfWeek.SUNDAY))
+            {
+                continue;
+            }
+
+            Optional<Offer> offer = offerService.findByLocalDateAndFieldId(date, field.getId());
+            if(offer.isPresent())
+            {
+                Offer currentOffer = offer.get();
+                if(currentOffer.getMenus() != null && !currentOffer.getMenus().isEmpty())
+                {
+                    Optional<Menu> optionalMenu = currentOffer.getMenus().stream().findFirst();
+                    LocalDate finalDate = date;
+                    optionalMenu.ifPresent(menu ->
+                    {
+                        // Fleisch-Typ bestimmen
+                        String fleshType = "Vegetarisch"; // Standardwert
+                        Flesh flesh = menu.getFlesh();
+                        if(flesh != null)
+                        {
+                            if(DefaultFlesh.BEEF.equalsDefault(flesh))
+                            {
+                                fleshType = "Rindfleisch";
+                            }else if(DefaultFlesh.CHICKEN.equalsDefault(flesh))
+                            {
+                                fleshType = "Hähnchen";
+                            }else if(DefaultFlesh.FISH.equalsDefault(flesh))
+                            {
+                                fleshType = "Fisch";
+                            }
+                        }
+
+                        // Varianten extrahieren
+                        String normalDescription = "kein Menu";
+                        String vegetarianDescription = "Keine Beschreibung";
+
+                        Optional<Variant> normalVariant = menu.getVariants().stream()
+                                .filter(variant -> DefaultPattern.DEFAULT.equalsDefault(variant.getPattern()))
+                                .findFirst();
+
+                        if(normalVariant.isPresent())
+                            normalDescription = normalVariant.get().getDescription();
+
+                        Optional<Variant> vegetarianVariant = menu.getVariants().stream()
+                                .filter(variant -> DefaultPattern.VEGETARIAN.equalsDefault(variant.getPattern()))
+                                .findFirst();
+
+                        if(vegetarianVariant.isPresent())
+                            vegetarianDescription = vegetarianVariant.get().getDescription();
+
+                        // Menü-Daten speichern
+                        Map<String, Object> menuEntry = new HashMap<>();
+                        menuEntry.put("day", finalDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                        menuEntry.put("menu", normalDescription);
+                        menuEntry.put("type", fleshType);
+                        menuEntry.put("alternative", vegetarianDescription);
+                        menuList.add(menuEntry);
+                    });
+                    continue;
+                }
+
+            }
+
+            Map<String, Object> emptyDayEntry = new HashMap<>();
+            emptyDayEntry.put("day", date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+            emptyDayEntry.put("menu", "kein Menu");
+            emptyDayEntry.put("type", "");
+            emptyDayEntry.put("alternative", "Keine Beschreibung");
+            menuList.add(emptyDayEntry);
+        }
+
+        // PDF-Erstellung mit den gesammelten Daten
+        System.out.println(new StringBuilder().repeat("-", 500).append("Unten: ").append(field.getName()));
+        CreateMenuPdf.generatePdf(menuList, field.getName());
+    }
+
+
+    private ComboBox<WeekSelector> getWeekSelectorComboBox()
+    {
 
         ComboBox<WeekSelector> weekCombobox = getSelectorComboBox();
-        weekCombobox.addValueChangeListener(event -> {
-            if(!DayOfWeek.MONDAY.equals(this.filterDate.getValue().getDayOfWeek())){
-                this.vonDate =this.filterDate.getValue().minusDays  (this.filterDate.getValue().getDayOfWeek().getValue()-1);
+        weekCombobox.addValueChangeListener(event ->
+        {
+            if(!DayOfWeek.MONDAY.equals(this.filterDate.getValue().getDayOfWeek()))
+            {
+                this.vonDate = this.filterDate.getValue().minusDays(this.filterDate.getValue().getDayOfWeek().getValue() - 1);
             }
             this.vonDate = this.filterDate.getValue();
             WeekSelector value = event.getValue();
-            this.bisDate = this.vonDate.plus( value.amount(),value.unit());
+            this.bisDate = this.vonDate.plus(value.amount(), value.unit());
             this.dataProvider.setDateRange(this.vonDate, this.bisDate);
         });
         return weekCombobox;
     }
 
-    private static ComboBox<WeekSelector> getSelectorComboBox() {
+    private static ComboBox<WeekSelector> getSelectorComboBox()
+    {
         WeekSelector selector1 = new WeekSelector(1, ChronoUnit.WEEKS, "2 Wochen");
         WeekSelector selector2 = new WeekSelector(1, ChronoUnit.MONTHS, "1 Monat");
         WeekSelector selector3 = new WeekSelector(3, ChronoUnit.MONTHS, "3 Monate");
@@ -153,7 +301,8 @@ public class OffersView extends Div {
         return weekCombobox;
     }
 
-    private Div createDayCell(LocalDate date, DateTimeFormatter formatter) {
+    private Div createDayCell(LocalDate date, DateTimeFormatter formatter)
+    {
         Div container = new Div();
 
         NativeLabel dateLabel = new NativeLabel(date.format(formatter));
@@ -163,29 +312,40 @@ public class OffersView extends Div {
         return container;
     }
 
-    private Div createDropZone(LocalDate date) {
+    private Div createDropZone(LocalDate date)
+    {
         Div dropZone = new Div();
         dropZone.setClassName("offer_target");
-        dropZone.getElement().setAttribute("date", date.toString());  // Setze das Datum als Attribut
+        dropZone.getElement().setAttribute("date", date.toString());
 
+        Optional<Offer> optionalOffer = this.offerService.getByLocalDateAndField(date, fieldComboBox.getValue());
 
-        Optional<Day> optionalDay = this.dayService.findByDate(date);
-        optionalDay.ifPresent(day -> {
-            this.deleteButton.setEnabled(day.getDate().isAfter(LocalDate.now()));
-            day.getMenus().forEach(menu -> {
-                MenuDiv menuDiv = new MenuDiv(menu);
-                Div wrapper = createWrapper(day, menuDiv);
-                dropZone.add(wrapper);
-            });
+        Offer offer = optionalOffer.orElseGet(() ->
+        {
+            Offer newOffer = Offer.builder()
+                    .localDate(date)
+                    .field(fieldComboBox.getValue())
+                    .menus(new HashSet<>()) // Leere Menge für Menüs
+                    .build();
+            return offerService.update(newOffer); // Speichern und zurückgeben
         });
 
-        // Initial-Update der Dropzone
-        updateDropTargets(dropZone);
+        this.deleteButton.setEnabled(offer.getLocalDate().isAfter(LocalDate.now()));
 
+        offer.getMenus().forEach(menu ->
+        {
+            MenuDiv menuDiv = new MenuDiv(menu);
+            Div wrapper = createWrapper(offer, menuDiv);
+            dropZone.add(wrapper);
+        });
+
+        updateDropTargets(dropZone);
         return dropZone;
     }
 
-    private void updateDropTargets(Div dropZone) {
+
+    private void updateDropTargets(Div dropZone)
+    {
         // Speichere bestehende Wrapper-Items
         List<Component> items = dropZone.getChildren()
                 .filter(child -> child.getClassName().equals("item-wrapper"))
@@ -199,7 +359,8 @@ public class OffersView extends Div {
         dropZone.add(beforeTarget);
 
         // Füge Wrapper und Between-Linien ein
-        for (int i = 0; i < items.size(); i++) {
+        for(int i = 0; i < items.size(); i++)
+        {
             dropZone.add(items.get(i)); // Wrapper einfügen
 
             // Between-Linie nach jedem Item
@@ -211,153 +372,130 @@ public class OffersView extends Div {
         dropZone.getChildren()
                 .filter(child -> child.getClassName().equals("thin-drop-target"))
                 .reduce((first, second) -> second) // Letzte Linie finden
-                .ifPresent(last -> last.getElement().setAttribute("class","after-drop-target"));
+                .ifPresent(last -> last.getElement().setAttribute("class", "after-drop-target"));
     }
 
-    private Div createThinDropTarget(Div dropZone, int position) {
+    private Div createThinDropTarget(Div dropZone, int position)
+    {
         Div thinTarget = new Div();
         thinTarget.setClassName("thin-drop-target");
         thinTarget.getElement().setAttribute("date", dropZone.getElement().getAttribute("date"));
 
-        // Erstellen des DropTargets
+        LocalDate localDate = LocalDate.parse(dropZone.getElement().getAttribute("date"));
+        if(localDate.isBefore(LocalDate.now()))
+        {
+            thinTarget.setVisible(false);
+        }
+
         DropTarget<Div> dropTarget = DropTarget.create(thinTarget);
-        dropTarget.addDropListener(event -> event.getDragSourceComponent().ifPresent(source -> {
-            if (source instanceof MenuDiv menuDiv) {
+        dropTarget.addDropListener(event -> event.getDragSourceComponent().ifPresent(source ->
+        {
+            if(source instanceof MenuDiv menuDiv)
+            {
                 MenuDiv copy = new MenuDiv(menuDiv.getItem());
 
-                // Position des DropTargets ermitteln
                 List<Component> children = dropZone.getChildren().toList();
-                int dropPosition = children.indexOf(thinTarget); // Index des aktuellen Targets ermitteln
+                int dropPosition = children.indexOf(thinTarget);
 
-                // Hole das Datum und berechne die Kalenderwoche
                 String dateString = thinTarget.getElement().getAttribute("date");
-                if (dateString == null || dateString.isEmpty()) {
+                if(dateString == null || dateString.isEmpty())
+                {
                     System.out.println("Kein gültiges Datum gefunden.");
                     return;
                 }
 
                 LocalDate dropDate = LocalDate.parse(dateString);
-                int calendarWeek = dropDate.get(WeekFields.ISO.weekOfWeekBasedYear());
-                int year = dropDate.getYear();
+                Field selectedField = fieldComboBox.getValue(); // Field aus ComboBox holen
 
-                dayService.findByDate(dropDate).ifPresent(day ->
+                // `Offer` für das Datum und Field holen oder neu erstellen
+                Offer offer = offerService.getByLocalDateAndField(dropDate, selectedField)
+                        .orElseGet(() ->
                         {
-                            List<Menu> tempMenuList = dayService.getMenusByDayId(day.getId());
+                            Offer newOffer = Offer.builder()
+                                    .localDate(dropDate)
+                                    .field(selectedField)
+                                    .menus(new HashSet<>()) // Neues Offer hat noch keine Menüs
+                                    .build();
+                            return offerService.update(newOffer); // Speichern und zurückgeben
+                        });
 
-                            if(tempMenuList.stream().anyMatch(menu -> Objects.equals(menu.getId(), copy.getItem().getId()))){
-                                return;
-                            }
+                // Prüfen, ob das Menü schon vorhanden ist
+                if(offer.getMenus().stream().anyMatch(menu -> Objects.equals(menu.getId(), copy.getItem().getId())))
+                {
+                    return; // Falls das Menü schon existiert, nichts tun
+                }
 
-                            if (dropPosition != -1) {
-                                // Füge das neue Element an der richtigen Stelle hinzu
-                                Div wrapper = createWrapper(day, copy);
-                                dropZone.addComponentAtIndex(dropPosition, wrapper);
+                // Menü zum Offer hinzufügen
+                offer.getMenus().add(copy.getItem());
+                offerService.update(offer); // Speichern
 
-                                // Aktualisiere die Drop-Zone
-                                updateDropTargets(dropZone);
-                            }
-                        }
-                );
-
-                // Prüfe, ob die Woche existiert
-                Optional<Week> optionalWeek = this.weekService.findByCalendarWeekAndYear(calendarWeek, year);
-                Week week = optionalWeek.orElseGet(() -> {
-                    // Falls nicht vorhanden erstelle eine neue Woche
-                    Week newWeek = new Week();
-                    newWeek.setKw(calendarWeek);
-                    newWeek.setYear(year);
-                    this.weekService.saveWeek(newWeek);
-                    // Aktualisiere die Drop-Zone
+                if(dropPosition != -1)
+                {
+                    Div wrapper = createWrapper(offer, copy);
+                    dropZone.addComponentAtIndex(dropPosition, wrapper);
                     updateDropTargets(dropZone);
-                    return newWeek;
-                });
-
-                // Prüfe, ob der Tag existiert
-                Optional<Day> optionalDay = this.dayService.findByDate(dropDate);
-                Day day = optionalDay.orElseGet(() -> {
-                    // Falls nicht vorhanden erstelle einen neuen Tag
-                    Day newDay = new Day();
-                    newDay.setName(dropDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.GERMANY));
-                    newDay.setDate(dropDate);
-                    newDay.setWeek(week);
-                    this.dayService.saveDay(newDay);
-                    // Aktualisiere die Drop-Zone
-                    if (dropPosition != -1) {
-                        // Füge das neue Element an der richtigen Stelle hinzu
-                        Div wrapper = createWrapper(newDay, copy);
-                        dropZone.addComponentAtIndex(dropPosition, wrapper);
-
-                        // Aktualisiere die Drop-Zone
-                        updateDropTargets(dropZone);
-                    }
-                    return newDay;
-                });
-
-                // Füge das Menü zum Tag hinzu
-                this.menuService.addMenuToDay(day, copy.getItem());
-
-                // Aktualisiere die Drop-Zone
-                updateDropTargets(dropZone);
-
-                // Debugging
-                Menu menu = copy.getItem();
-                System.out.println("Menü hinzugefügt:");
-                System.out.println("ID: " + menu.getId());
-                System.out.println("Name: " + menu.getName());
+                }
             }
         }));
 
         return thinTarget;
     }
 
-    private Div createWrapper(Day day, MenuDiv item) {
+
+    private Div createWrapper(Offer offer, MenuDiv item)
+    {
         Div wrapper = new Div();
         wrapper.setClassName("item-wrapper");
 
-        // Löschen-Button hinzufügen
         this.deleteButton = new Button(VaadinIcon.TRASH.create());
-        this.deleteButton.addClickListener(event -> {
-            // Wrapper aus der Dropzone entfernen
+
+        this.deleteButton.setEnabled(offer.getLocalDate().isAfter(LocalDate.now()));
+
+        this.deleteButton.addClickListener(event ->
+        {
             Div parent = (Div) wrapper.getParent().orElse(null);
-            if (parent != null) {
+            if(parent != null)
+            {
                 parent.remove(wrapper);
-                updateDropTargets(parent); // Drop-Zone nach Löschung aktualisieren
+                updateDropTargets(parent);
 
-                dataProvider.deleteMenuFromDay(day.getId(), item.getItem().getId());
-                System.out.println(day.getId() + " : " + item.getItem().getId());
-
+                // Menü aus Offer entfernen
+                offerService.removeMenuFromOffer(offer.getId(), item.getItem().getId());
+                System.out.println(offer.getId() + " : " + item.getItem().getId());
             }
         });
 
-        // Layout für Item und Button
         HorizontalLayout layout = new HorizontalLayout(item, deleteButton);
-        layout.setAlignItems(FlexComponent.Alignment.CENTER); // Zentriert das Item und den Button
-        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN); // Schiebt den Button ganz nach rechts
-        layout.add(item, deleteButton);
-
-        // Den deleteButton ganz nach rechts verschieben
-        layout.setWidthFull();  // Macht das Layout über die gesamte Breite
+        layout.setAlignItems(FlexComponent.Alignment.CENTER);
+        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        layout.setWidthFull();
 
         wrapper.add(layout);
         return wrapper;
     }
 
-    private static class MenuDiv extends Div {
+
+    private static class MenuDiv extends Div
+    {
         private final Menu item;
 
-        public MenuDiv(Menu item) {
+        public MenuDiv(Menu item)
+        {
             this.item = item;
             Span name = new Span(item.getName());
+            //name.getElement().setAttribute("title", item.getDescription()); // Tooltip mit Beschreibung
             this.add(name);
         }
 
-        public Menu getItem() {
+        public Menu getItem()
+        {
             return this.item;
         }
 
     }
 
-    private record WeekSelector(int amount, ChronoUnit unit, String name) {
+    private record WeekSelector(int amount, ChronoUnit unit, String name)
+    {
 
     }
 

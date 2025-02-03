@@ -1,10 +1,9 @@
 package de.bauersoft.views.menuBuilder.cluster;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import de.bauersoft.data.entities.Course;
+import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.pattern.Pattern;
 
 import java.util.*;
@@ -21,7 +20,7 @@ public class ClusterLayout extends VerticalLayout
         this.setPadding(false);
         this.setSpacing(false);
         this.setWidth("200px");
-        this.setAlignItems(FlexComponent.Alignment.STRETCH);
+        this.setAlignItems(Alignment.STRETCH);
     }
 
     public <E extends Component> ClusterLayout addComponent(E component)
@@ -150,7 +149,7 @@ public class ClusterLayout extends VerticalLayout
 
 
 
-    public static Collection<de.bauersoft.data.entities.Component> getCourseMatchingComponents(Collection<de.bauersoft.data.entities.Component> components, Course toMatch)
+    public static Collection<de.bauersoft.data.entities.component.Component> getCourseMatchingComponents(Collection<de.bauersoft.data.entities.component.Component> components, Course toMatch)
     {
         Objects.requireNonNull(components, "components cannot be null");
         if(components.contains(null))
@@ -158,14 +157,14 @@ public class ClusterLayout extends VerticalLayout
 
         if(toMatch == null) return components;
 
-        Collection<de.bauersoft.data.entities.Component> matching = components.stream()
+        Collection<de.bauersoft.data.entities.component.Component> matching = components.stream()
                 .filter(component -> component.getCourse().equals(toMatch))
                 .collect(Collectors.toList());
 
         return matching;
     }
 
-    public static Collection<de.bauersoft.data.entities.Component> getPatternMatchingComponents(Collection<de.bauersoft.data.entities.Component> components, Pattern toMatch)
+    public static Collection<de.bauersoft.data.entities.component.Component> getPatternMatchingComponents(Collection<de.bauersoft.data.entities.component.Component> components, Pattern toMatch)
     {
         Objects.requireNonNull(components, "components cannot be null");
         if(components.contains(null))
@@ -173,7 +172,7 @@ public class ClusterLayout extends VerticalLayout
 
         if(toMatch == null) return components;
 
-        Collection<de.bauersoft.data.entities.Component> matching = components.stream()
+        Collection<de.bauersoft.data.entities.component.Component> matching = components.stream()
                 .filter(component -> component.getRecipes().stream()
                         .allMatch(recipe -> recipe.getPatterns().stream()
                                 .anyMatch(pattern -> pattern.equals(toMatch))))
@@ -182,7 +181,7 @@ public class ClusterLayout extends VerticalLayout
         return matching;
     }
 
-    public static List<Pattern> getMatchingPatternsForComponent(de.bauersoft.data.entities.Component component)
+    public static List<Pattern> getMatchingPatternsForComponent(de.bauersoft.data.entities.component.Component component)
     {
         Objects.requireNonNull(component, "component cannot be null");
 

@@ -1,10 +1,9 @@
 package de.bauersoft.data.repositories.griddata;
 
-import java.util.List;
-
 import com.vaadin.flow.data.provider.QuerySortOrder;
-
 import de.bauersoft.data.filters.SerializableFilter;
+
+import java.util.List;
 
 public interface GridDataRepository<T> {
 

@@ -1,20 +1,18 @@
 package de.bauersoft.data.providers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
-import org.springframework.stereotype.Service;
-
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.shared.Registration;
-
-import de.bauersoft.data.entities.Additive;
+import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.services.AdditiveService;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class AdditiveDataProvider implements ConfigurableFilterDataProvider<Additive, Void, List<SerializableFilter<Additive,?>>> {
@@ -38,7 +36,7 @@ public class AdditiveDataProvider implements ConfigurableFilterDataProvider<Addi
 	
 	@Override
 	public int size(Query<Additive, Void> query) {
-		return this.service.count(filter);
+		return (int) this.service.count(filter);
 	}
 
 	@Override

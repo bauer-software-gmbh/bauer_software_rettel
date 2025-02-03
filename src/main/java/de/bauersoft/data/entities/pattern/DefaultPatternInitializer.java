@@ -4,24 +4,28 @@ import de.bauersoft.data.repositories.pattern.PatternRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 @Configuration
 public class DefaultPatternInitializer
 {
-
     @Bean
-    public CommandLineRunner initializePatterns(PatternRepository patternRepository)
+    public CommandLineRunner initializeDefaultPattern(PatternRepository patternRepository)
     {
         return args ->
         {
-            for(DefaultPattern defPattern : DefaultPattern.values())
+            for(DefaultPattern defaultPattern : DefaultPattern.values())
             {
-                Pattern pattern = new Pattern();
-                pattern.setName(defPattern.getName());
-                pattern.setDescription(defPattern.getDescription());
-                pattern.setReligious(defPattern.getReligious());
+                if(patternRepository.existsByName(defaultPattern.getName()))
+                    continue;
 
-                patternRepository.insertOrUpdatePattern(pattern);
+                Pattern pattern = Pattern.builder()
+                        .name(defaultPattern.getName())
+                        .description(defaultPattern.getDescription())
+                        .religious(defaultPattern.getReligious())
+                        .build();
+
+                patternRepository.save(pattern);
             }
         };
     }

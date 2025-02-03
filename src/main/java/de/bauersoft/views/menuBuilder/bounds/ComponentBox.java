@@ -1,8 +1,8 @@
 package de.bauersoft.views.menuBuilder.bounds;
 
 import com.vaadin.flow.component.combobox.ComboBox;
-import de.bauersoft.data.entities.Component;
-import de.bauersoft.data.entities.Course;
+import de.bauersoft.data.entities.component.Component;
+import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
 
 import java.util.Collection;

@@ -1,10 +1,10 @@
 package de.bauersoft.data.filters;
 
-import java.lang.reflect.Field;
-
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
+
+import java.lang.reflect.Field;
 
 public class NumberFilter<T, V extends Comparable<V>> extends AbstractSerializableTwoValueFilter<T, V> {
 	private NumericOperations matchType;

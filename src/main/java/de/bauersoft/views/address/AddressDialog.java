@@ -1,7 +1,6 @@
 package de.bauersoft.views.address;
 
-import org.springframework.dao.DataIntegrityViolationException;
-
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -9,90 +8,144 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-
-import de.bauersoft.data.entities.Address;
+import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.data.entities.address.Address;
 import de.bauersoft.data.providers.AddressDataProvider;
 import de.bauersoft.services.AddressService;
 import de.bauersoft.views.DialogState;
+import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
+import org.springframework.dao.DataIntegrityViolationException;
 
-public class AddressDialog extends Dialog {
-	
-	public AddressDialog(AddressService service,AddressDataProvider dataProvider, Address item, DialogState state) {
-		Binder<Address> binder = new Binder<Address>(Address.class);
+public class AddressDialog extends Dialog
+{
+
+    private final AddressService addressService;
+    private final AddressDataProvider addressDataProvider;
+    private Address item;
+    private DialogState state;
+
+    public AddressDialog(AddressService addressService, AddressDataProvider addressDataProvider, Address item, DialogState state)
+    {
+        this.addressService = addressService;
+        this.addressDataProvider = addressDataProvider;
+        this.item = item;
+        this.state = state;
+
 		this.setHeaderTitle(state.toString());
-		FormLayout inputLayout = new FormLayout();
-		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
-		
-		TextField streetTextField = new TextField();
-		streetTextField.setMaxLength(64);
-		streetTextField.setRequired(true);
-		streetTextField.setMinWidth("20em");
-	
-		TextField houseNumberTextField = new TextField();
-		houseNumberTextField.setMaxLength(64);
-		houseNumberTextField.setRequired(true);
-		houseNumberTextField.setMinWidth("20em");
-	
-		TextField postalCodeTextField = new TextField();
-		postalCodeTextField.setMaxLength(64);
-		postalCodeTextField.setRequired(true);
-		postalCodeTextField.setMinWidth("20em");
-	
-		TextField cityTextField = new TextField();
-		cityTextField.setMaxLength(64);
-		cityTextField.setRequired(true);
-		cityTextField.setMinWidth("20em");
-	
-		inputLayout.setColspan(inputLayout.addFormItem(streetTextField, "street"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(houseNumberTextField, "house Number"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(postalCodeTextField, "postal code"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(cityTextField, "city"), 1);
-		
-		binder.bind(streetTextField, "street");
-		binder.bind(houseNumberTextField, "houseNumber");
-		binder.bind(postalCodeTextField, "postalCode");
-		binder.bind(cityTextField, "city");
-		binder.setBean(item);
-		Button saveButton = new Button("save");
-		saveButton.setMinWidth("150px");
-		saveButton.setMaxWidth("180px");
-		saveButton.addClickListener(event -> {
-			if (binder.isValid()) {
-				try {
-					service.update(binder.getBean());
-					if(dataProvider !=null) dataProvider.refreshAll();
-					Notification.show("Data updated");
-					this.close();
-				} catch (DataIntegrityViolationException error) {
-					Notification.show("Duplicate entry", 5000, Position.MIDDLE)
-							.addThemeVariants(NotificationVariant.LUMO_ERROR);
-				}
-			}
-		});
-		Button cancelButton = new Button("cancel");
-		cancelButton.setMinWidth("150px");
-		cancelButton.setMaxWidth("180px");
-		cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-		cancelButton.addClickListener(e -> {
-			binder.removeBean();
-			this.close();
-		});
+
+        Binder<Address> binder = new Binder<Address>(Address.class);
+
+        FormLayout inputLayout = new FormLayout();
 		inputLayout.setWidth("50vw");
 		inputLayout.setMaxWidth("50em");
 		inputLayout.setHeight("50vh");
 		inputLayout.setMaxHeight("20em");
-		Span spacer = new Span();
-		spacer.setWidthFull();
-		this.add(inputLayout);
-		this.getFooter().add(new HorizontalLayout(spacer, saveButton, cancelButton));
-		this.setCloseOnEsc(false);
-		this.setCloseOnOutsideClick(false);
-		this.setModal(true);
-		this.open();
-	}
+
+        inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
+
+        TextField streetTextField = new TextField();
+        streetTextField.setMaxLength(64);
+        streetTextField.setRequired(true);
+        streetTextField.setMinWidth("20em");
+
+        TextField houseNumberTextField = new TextField();
+        houseNumberTextField.setMaxLength(64);
+        houseNumberTextField.setRequired(true);
+        houseNumberTextField.setMinWidth("20em");
+
+        TextField postalCodeTextField = new TextField();
+        postalCodeTextField.setMaxLength(64);
+        postalCodeTextField.setRequired(true);
+        postalCodeTextField.setMinWidth("20em");
+
+        TextField cityTextField = new TextField();
+        cityTextField.setMaxLength(64);
+        cityTextField.setRequired(true);
+        cityTextField.setMinWidth("20em");
+
+        inputLayout.setColspan(inputLayout.addFormItem(streetTextField, "street"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(houseNumberTextField, "house Number"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(postalCodeTextField, "postal code"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(cityTextField, "city"), 1);
+
+        binder.forField(streetTextField).asRequired((value, context) ->
+		{
+			return (value != null && !value.isBlank())
+					? ValidationResult.ok()
+					: ValidationResult.error("street is required");
+		}).bind(Address::getStreet, Address::setStreet);
+
+        binder.forField(houseNumberTextField).asRequired((value, context) ->
+		{
+			return (value != null && !value.isBlank())
+					? ValidationResult.ok()
+					: ValidationResult.error("house number is required");
+		}).bind(Address::getNumber, Address::setNumber);
+
+        binder.forField(postalCodeTextField).asRequired((value, context) ->
+		{
+			return (value != null && !value.isBlank())
+					? ValidationResult.ok()
+					: ValidationResult.error("postal code is required");
+		}).bind(Address::getPostal, Address::setPostal);
+
+        binder.forField(cityTextField).asRequired((value, context) ->
+		{
+			return (value != null && !value.isBlank())
+					? ValidationResult.ok()
+					: ValidationResult.error("city is required");
+		}).bind(Address::getCity, Address::setCity);
+
+        binder.setBean(item);
+
+        Button saveButton = new Button("save");
+        saveButton.addClickShortcut(Key.ENTER);
+        saveButton.setMinWidth("150px");
+        saveButton.setMaxWidth("180px");
+        saveButton.addClickListener(event ->
+        {
+			binder.validate();
+            if(binder.isValid())
+            {
+                try
+                {
+                    addressService.update(binder.getBean());
+					addressDataProvider.refreshAll();
+                    Notification.show("Data updated");
+                    this.close();
+
+                }catch(DataIntegrityViolationException error)
+                {
+                    Notification.show("Duplicate entry", 5000, Position.MIDDLE)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                }
+            }
+        });
+
+        Button cancelButton = new Button("cancel");
+        cancelButton.addClickShortcut(Key.ESCAPE);
+        cancelButton.setMinWidth("150px");
+        cancelButton.setMaxWidth("180px");
+        cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        cancelButton.addClickListener(e ->
+        {
+            binder.removeBean();
+            this.close();
+        });
+
+        Span spacer = new Span();
+        spacer.setWidthFull();
+
+        this.add(inputLayout);
+        this.getFooter().add(new HorizontalLayout(spacer, saveButton, cancelButton));
+        this.setCloseOnEsc(false);
+        this.setCloseOnOutsideClick(false);
+        this.setModal(true);
+        this.open();
+    }
 }
