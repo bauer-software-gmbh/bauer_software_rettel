@@ -6,8 +6,10 @@
     flex-direction: column;
     justify-content: center;
 	background-image: url('/images/retti_bildschirm.png');
-	background-size: cover;
+    background-size: contain; /* Behält das Seitenverhältnis bei und skaliert das Bild so, dass es in den Container passt */
     background-position: center;
+    background-repeat: no-repeat; /* Verhindert Wiederholung */
+    background-color: white; /* Falls das Bild nicht die ganze Fläche füllt */
 }
 .login-form{
 	background-color: transparent;
