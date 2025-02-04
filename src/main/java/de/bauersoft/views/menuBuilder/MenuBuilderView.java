@@ -29,7 +29,7 @@ import jakarta.annotation.security.RolesAllowed;
 import java.util.stream.Collectors;
 
 
-@PageTitle("Menue Builder")
+@PageTitle("Menü-Baukasten")
 @Route(value = "menubuilder", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 public class MenuBuilderView extends Div

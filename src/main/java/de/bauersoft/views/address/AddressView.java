@@ -18,7 +18,7 @@ import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
-@PageTitle("address")
+@PageTitle("Adressen")
 @Route(value = "address", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 public class AddressView extends Div

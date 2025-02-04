@@ -1,33 +1,25 @@
 package de.bauersoft.views.institution;
 
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.MultiSortPriority;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
-import de.bauersoft.data.entities.address.Address;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.providers.AddressDataProvider;
 import de.bauersoft.data.providers.InstitutionDataProvider;
-import de.bauersoft.data.repositories.address.AddressRepository;
-import de.bauersoft.data.repositories.field.FieldRepository;
-import de.bauersoft.data.repositories.institutionfields.InstitutionFieldsRepository;
-import de.bauersoft.data.repositories.user.UserRepository;
 import de.bauersoft.services.*;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-@PageTitle("institution")
+@PageTitle("Institution")
 @Route(value = "institution", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @CssImport(value = "./themes/rettels/components/auto-filter-grid.css", themeFor = "vaadin-grid")

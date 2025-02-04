@@ -18,12 +18,12 @@ import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
-@PageTitle("Course")
+@PageTitle("Gänge")
 @Route(value = "course", layout = MainLayout.class)
 @RolesAllowed(value = { "ADMIN", "ACCOUNTENT" })
 public class CourseView extends Div
 {
-	AutoFilterGrid<Course> grid = new AutoFilterGrid<Course>(Course.class, false, true);
+	AutoFilterGrid<Course> grid = new AutoFilterGrid<>(Course.class, false, true);
 
 	public CourseView(CourseService service,
 					  CourseDataProvider dataProvider,

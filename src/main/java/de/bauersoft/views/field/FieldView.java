@@ -17,7 +17,7 @@ import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
-@PageTitle("field")
+@PageTitle("Einrichtungsart")
 @Route(value = "field", layout = MainLayout.class)
 @RolesAllowed(value = {"ADMIN", "ACCOUNTENT"})
 public class FieldView extends Div

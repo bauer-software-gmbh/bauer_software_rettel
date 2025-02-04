@@ -23,13 +23,13 @@ import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
-@PageTitle("Component")
+@PageTitle("Komponenten")
 @Route(value = "component", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @Uses(Icon.class)
 public class ComponentView extends Div
 {
-    AutoFilterGrid<Component> grid = new AutoFilterGrid<Component>(Component.class, false, true);
+    AutoFilterGrid<Component> grid = new AutoFilterGrid<>(Component.class, false, true);
 
     public ComponentView(ComponentService componentService, ComponentDataProvider dataProvider,
 						 RecipeRepository recipeRepository, CourseRepository courseRepository,

@@ -21,6 +21,8 @@ import de.bauersoft.data.providers.UserDataProvider;
 import de.bauersoft.security.AuthenticatedUser;
 import de.bauersoft.services.UserService;
 import de.bauersoft.views.DialogState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -30,6 +32,7 @@ public class UserDialog extends Dialog
 {
 
     public static final Pattern passwortRegex;
+    private static final Logger logger = LoggerFactory.getLogger(UserDialog.class);
 
     static
     {
@@ -42,6 +45,7 @@ public class UserDialog extends Dialog
     private DialogState state;
     private PasswordEncoder encoder;
     private AuthenticatedUser authenticatedUser;
+    private boolean isChangingPassword = false;
 
     public UserDialog(UserService userService,
                       UserDataProvider dataProvider,
@@ -83,7 +87,7 @@ public class UserDialog extends Dialog
         emailField.setRequired(true);
         emailField.setMinWidth("20em");
 
-        MultiSelectComboBox<Role> roleMultiSelectComboBox = new MultiSelectComboBox<Role>();
+        MultiSelectComboBox<Role> roleMultiSelectComboBox = new MultiSelectComboBox<>();
         roleMultiSelectComboBox.setItems(Role.values());
         roleMultiSelectComboBox.setSizeFull();
 
@@ -119,6 +123,7 @@ public class UserDialog extends Dialog
 
         changePasswordButtonItem.addClickListener(event ->
         {
+            isChangingPassword = true;
             passwordFieldItem.setVisible(true);
             confirmPasswordFieldItem.setVisible(true);
             changePasswordButtonItem.setVisible(false);
@@ -154,15 +159,23 @@ public class UserDialog extends Dialog
 
         binder.forField(passwordField).asRequired((value, context) ->
         {
+            if(!isChangingPassword)
+                return ValidationResult.ok();
             return (passwortRegex.matcher(value).matches())
                     ? ValidationResult.ok()
                     : ValidationResult.error("Das Passwort muss mindestens acht Zeichen lang sein, mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl und ein Sonderzeichen enthalten.");
 
         }).bind((user) -> null,
-                (user, value) -> user.setPassword(encoder.encode(value)));
+                (user, value) -> {
+                    if(isChangingPassword) {
+                        user.setPassword(encoder.encode(value));
+                    }
+                });
 
         binder.forField(confirmPasswordField).asRequired((value, context) ->
         {
+            if(!isChangingPassword)
+                return ValidationResult.ok();
             if(!confirmPasswordField.getValue().equals(passwordField.getValue()))
                 return ValidationResult.error("Die Passwörter stimmen nicht überein!");
 
@@ -170,7 +183,11 @@ public class UserDialog extends Dialog
                     ? ValidationResult.ok()
                     : ValidationResult.error("Das Passwort muss mindestens acht Zeichen lang sein, mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl und ein Sonderzeichen enthalten.");
         }).bind((user) -> null,
-                (user, value) -> user.setPassword(encoder.encode(value)));
+                (user, value) -> {
+            if(isChangingPassword) {
+                user.setPassword(encoder.encode(value));
+            }
+        });
 
         binder.setBean(item);
 
@@ -180,11 +197,13 @@ public class UserDialog extends Dialog
         saveButton.setMaxWidth("180px");
         saveButton.addClickListener(e ->
         {
+            logger.info("Save button clicked!");
             binder.validate();
             if(binder.isValid())
             {
                 try
                 {
+                    logger.info("Form is valid, saving...");
                     userService.update(binder.getBean());
                     dataProvider.refreshAll();
                     Notification.show("Data updated");
@@ -192,9 +211,12 @@ public class UserDialog extends Dialog
 
                 }catch(DataIntegrityViolationException error)
                 {
+                    logger.error("Duplicate entry error!");
                     Notification.show("Duplicate entry", 5000, Notification.Position.MIDDLE)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
+            } else {
+                logger.error("Form invalidation failed!");
             }
         });
 

@@ -144,7 +144,7 @@ public class MainLayout extends AppLayout {
 				|| accessChecker.hasAccess(MenuBuilderView.class) || accessChecker.hasAccess(OffersView.class)) {
 			SideNavItem backend = new SideNavItem("Backend");
 
-			if(accessChecker.hasAccess(MenueView.class))
+			if(accessChecker.hasAccess(MenuBuilderView.class))
 			{
 				SideNavItem sideNavItem = new SideNavItem("Menü-Baukasten", MenuBuilderView.class, LineAwesomeIcon.BACON_SOLID.create());
 				sideNavItem.getElement().setAttribute("title", "Funktionales interaktives Menü Baukasten Entwicklungssystem 1.0");
@@ -200,8 +200,7 @@ public class MainLayout extends AppLayout {
 		return nav;
 	}
 	private Footer createFooter() {
-		Footer layout = new Footer();
-		return layout;
+        return new Footer();
 	}
 	@Override
 	protected void afterNavigation() {

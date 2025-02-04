@@ -1,6 +1,5 @@
 package de.bauersoft.views.additive;
 
-import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -14,7 +13,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
 import de.bauersoft.data.entities.additive.Additive;
-import de.bauersoft.data.entities.ingredient.Ingredient;
 import de.bauersoft.data.providers.AdditiveDataProvider;
 import de.bauersoft.services.AdditiveService;
 import de.bauersoft.services.IngredientService;
@@ -22,10 +20,7 @@ import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-@PageTitle("Additive")
+@PageTitle("Zusatzstoffe")
 @Route(value = "additive", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @Uses(Icon.class)

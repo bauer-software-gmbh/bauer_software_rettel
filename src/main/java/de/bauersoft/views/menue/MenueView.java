@@ -14,19 +14,15 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import de.bauersoft.data.entities.field.DefaultField;
 import de.bauersoft.data.entities.field.Field;
-import de.bauersoft.security.AuthenticatedUser;
 import de.bauersoft.services.FieldService;
 import de.bauersoft.views.MainLayout;
-import de.bauersoft.views.field.FieldView;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@PageTitle("menue")
+@PageTitle("Speiseplan")
 @Route(value = "menue", layout = MainLayout.class)
 @AnonymousAllowed
 public class MenueView extends Div

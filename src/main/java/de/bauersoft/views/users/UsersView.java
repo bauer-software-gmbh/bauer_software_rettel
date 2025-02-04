@@ -32,7 +32,7 @@ import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@PageTitle("user")
+@PageTitle("Benutzer")
 @Route(value = "user", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @Uses(Icon.class)
@@ -103,7 +103,7 @@ public class UsersView extends Div
         emailField.setMaxLength(128);
         emailField.setRequired(true);
         emailField.setMinWidth("20em");
-        MultiSelectComboBox<Role> roleMultiSelectComboBox = new MultiSelectComboBox<Role>();
+        MultiSelectComboBox<Role> roleMultiSelectComboBox = new MultiSelectComboBox<>();
         roleMultiSelectComboBox.setItems(Role.values());
         roleMultiSelectComboBox.setSizeFull();
         PasswordField passwordField = new PasswordField();

@@ -19,12 +19,12 @@ import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
-@PageTitle("pattern")
+@PageTitle("Ernährungsformen")
 @Route(value = "pattern", layout = MainLayout.class)
 @RolesAllowed(value = {"ADMIN", "ACCOUNTENT"})
 public class PatternView extends Div
 {
-    AutoFilterGrid<Pattern> grid = new AutoFilterGrid<Pattern>(Pattern.class, false, true);
+    AutoFilterGrid<Pattern> grid = new AutoFilterGrid<>(Pattern.class, false, true);
 
     public PatternView(PatternService service,
 					   PatternDataProvider dataProvider,

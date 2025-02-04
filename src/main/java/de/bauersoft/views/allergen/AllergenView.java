@@ -1,6 +1,5 @@
 package de.bauersoft.views.allergen;
 
-import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -14,9 +13,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
 import de.bauersoft.data.entities.allergen.Allergen;
-import de.bauersoft.data.entities.ingredient.Ingredient;
-import de.bauersoft.data.entities.order.Order;
-import de.bauersoft.data.entities.order.OrderAllergen;
 import de.bauersoft.data.providers.AllergenDataProvider;
 import de.bauersoft.services.AllergenService;
 import de.bauersoft.services.IngredientService;
@@ -25,10 +21,7 @@ import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-@PageTitle("Allergen")
+@PageTitle("Allergene")
 @Route(value = "allergen", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @Uses(Icon.class)
@@ -54,15 +47,11 @@ public class AllergenView extends Div
 		grid.addColumn("description");
 
 		grid.addItemDoubleClickListener(event ->
-		{
-			new AllergenDialog(service,dataProvider, event.getItem(), DialogState.EDIT);
-		});
+                new AllergenDialog(service,dataProvider, event.getItem(), DialogState.EDIT));
 
 		GridContextMenu<Allergen> contextMenu = grid.addContextMenu();
 		contextMenu.addItem("new", event ->
-		{
-			new AllergenDialog(service, dataProvider, new Allergen(), DialogState.NEW);
-		});
+			new AllergenDialog(service, dataProvider, new Allergen(), DialogState.NEW));
 
 		GridMenuItem<Allergen> deleteItem = contextMenu.addItem("delete", event ->
 		{
@@ -117,9 +106,7 @@ public class AllergenView extends Div
 		});
 
 		contextMenu.addGridContextMenuOpenedListener(event ->
-		{
-			deleteItem.setVisible(event.getItem().isPresent());
-		});
+			deleteItem.setVisible(event.getItem().isPresent()));
 
 		this.add(grid);
 	}

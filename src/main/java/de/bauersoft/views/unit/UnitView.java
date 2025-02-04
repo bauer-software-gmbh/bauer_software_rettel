@@ -1,6 +1,5 @@
 package de.bauersoft.views.unit;
 
-import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
@@ -11,7 +10,6 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
-import de.bauersoft.data.entities.ingredient.Ingredient;
 import de.bauersoft.data.entities.unit.Unit;
 import de.bauersoft.data.providers.UnitDataProvider;
 import de.bauersoft.services.IngredientService;
@@ -20,12 +18,7 @@ import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
-@PageTitle("unit")
+@PageTitle("Einheiten")
 @Route(value = "unit", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 public class UnitView extends Div {

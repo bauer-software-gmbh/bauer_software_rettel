@@ -1,6 +1,5 @@
 package de.bauersoft.views.incredient;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
@@ -23,11 +22,10 @@ import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 
 
-@PageTitle("ingredient")
+@PageTitle("Zutaten")
 @Route(value = "incredient", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 public class IngredientView extends Div

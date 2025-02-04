@@ -55,6 +55,6 @@ public class Start
 
             userService.createUser("Milan", "Krall", "krall@bauer-soft.de", "1234", Role.values());
         };
-    }*/
-
+    }
+*/
 }

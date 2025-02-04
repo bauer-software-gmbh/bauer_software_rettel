@@ -18,7 +18,6 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
 import de.bauersoft.data.entities.field.DefaultField;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.flesh.DefaultFlesh;
@@ -38,6 +37,7 @@ import de.bauersoft.tools.DatePickerLocaleGerman;
 import de.bauersoft.views.MainLayout;
 import com.vaadin.flow.component.html.Div;
 import de.bauersoft.views.menue.CreateMenuPdf;
+import jakarta.annotation.security.RolesAllowed;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -45,9 +45,9 @@ import java.time.temporal.ChronoUnit;
 import java.time.DayOfWeek;
 import java.util.*;
 
-@PageTitle("offers")
+@PageTitle("Menü Planung")
 @Route(value = "offers", layout = MainLayout.class)
-@AnonymousAllowed
+@RolesAllowed("ADMIN")
 public class OffersView extends Div
 {
     private final OffersDataProvider dataProvider;

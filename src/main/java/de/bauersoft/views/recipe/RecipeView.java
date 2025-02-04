@@ -1,6 +1,5 @@
 package de.bauersoft.views.recipe;
 
-
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
@@ -11,22 +10,16 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
-import de.bauersoft.data.entities.formulation.Formulation;
 import de.bauersoft.data.entities.recipe.Recipe;
 import de.bauersoft.data.providers.RecipeDataProvider;
-import de.bauersoft.data.repositories.formulation.FormulationRepository;
-import de.bauersoft.data.repositories.ingredient.IngredientRepository;
-import de.bauersoft.data.repositories.pattern.PatternRepository;
 import de.bauersoft.services.*;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-@PageTitle("Recipe")
+@PageTitle("Rezepte")
 @Route(value = "recipe", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 public class RecipeView extends Div
