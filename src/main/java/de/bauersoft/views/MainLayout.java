@@ -82,9 +82,7 @@ public class MainLayout extends AppLayout {
 			div.getElement().getStyle().set("align-items", "center");
 			div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
 			userName.add(div);
-			userName.getSubMenu().addItem("Sign out", e -> {
-				authenticatedUser.logout();
-			});
+			userName.getSubMenu().addItem("Sign out", e -> authenticatedUser.logout());
 			layout.add(userMenu);
 		} else {
 			Avatar avatar = new Avatar(" ");
@@ -144,16 +142,16 @@ public class MainLayout extends AppLayout {
 				|| accessChecker.hasAccess(MenuBuilderView.class) || accessChecker.hasAccess(OffersView.class)) {
 			SideNavItem backend = new SideNavItem("Backend");
 
+			if(accessChecker.hasAccess(OffersView.class))
+			{
+				backend.addItem(new SideNavItem("Menü Planung", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
+			}
+
 			if(accessChecker.hasAccess(MenuBuilderView.class))
 			{
 				SideNavItem sideNavItem = new SideNavItem("Menü-Baukasten", MenuBuilderView.class, LineAwesomeIcon.BACON_SOLID.create());
 				sideNavItem.getElement().setAttribute("title", "Funktionales interaktives Menü Baukasten Entwicklungssystem 1.0");
 				backend.addItem(sideNavItem);
-			}
-
-			if(accessChecker.hasAccess(OffersView.class))
-			{
-				backend.addItem(new SideNavItem("Menü Planung", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
 			}
 
 			if (accessChecker.hasAccess(ComponentView.class)) {
@@ -174,7 +172,7 @@ public class MainLayout extends AppLayout {
 				SideNavItem parameters = new SideNavItem("Parameter");
 				if (accessChecker.hasAccess(CourseView.class)) {
 					parameters.addItem(
-							new SideNavItem("Gänge", CourseView.class, LineAwesomeIcon.STREAM_SOLID.create()));
+							new SideNavItem("Menükomponenten", CourseView.class, LineAwesomeIcon.STREAM_SOLID.create()));
 				}
 				if (accessChecker.hasAccess(PatternView.class)) {
 					parameters.addItem(new SideNavItem("Ernährungsformen", PatternView.class, LineAwesomeIcon.CARROT_SOLID.create()));

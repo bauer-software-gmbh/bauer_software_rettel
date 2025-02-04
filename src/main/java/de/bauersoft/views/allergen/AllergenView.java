@@ -43,17 +43,17 @@ public class AllergenView extends Div
 
 		grid.setItems(dataProvider);
 
-		grid.addColumn("name");
-		grid.addColumn("description");
+		grid.addColumn("name").setHeader("Name");
+		grid.addColumn("description").setHeader("Beschreibung");
 
 		grid.addItemDoubleClickListener(event ->
                 new AllergenDialog(service,dataProvider, event.getItem(), DialogState.EDIT));
 
 		GridContextMenu<Allergen> contextMenu = grid.addContextMenu();
-		contextMenu.addItem("new", event ->
+		contextMenu.addItem("Neues Allergen", event ->
 			new AllergenDialog(service, dataProvider, new Allergen(), DialogState.NEW));
 
-		GridMenuItem<Allergen> deleteItem = contextMenu.addItem("delete", event ->
+		GridMenuItem<Allergen> deleteItem = contextMenu.addItem("Löschen", event ->
 		{
 			event.getItem().ifPresent(item ->
 			{
@@ -68,7 +68,7 @@ public class AllergenView extends Div
 					div.getStyle().set("white-space", "normal");
 					div.getStyle().set("word-wrap", "break-word");
 
-					div.add(new Text("Das Allergen \"" + item.getName() + "\" kann nicht gelöscht werden da es noch in einigen Zutaten verwendet wird."));
+					div.add(new Text("Das Allergen \"" + item.getName() + "\" kann nicht gelöscht werden, da es noch in einigen Zutaten verwendet wird."));
 
 					Notification notification = new Notification(div);
 					notification.setDuration(5000);
@@ -87,7 +87,7 @@ public class AllergenView extends Div
 					div.getStyle().set("white-space", "normal");
 					div.getStyle().set("word-wrap", "break-word");
 
-					div.add(new Text("Das Allergen \"" + item.getName() + "\" kann nicht gelöscht werden da es noch in einigen Bestellungen verwendet wird."));
+					div.add(new Text("Das Allergen \"" + item.getName() + "\" kann nicht gelöscht werden, da es noch in einigen Bestellungen verwendet wird."));
 
 					Notification notification = new Notification(div);
 					notification.setDuration(5000);

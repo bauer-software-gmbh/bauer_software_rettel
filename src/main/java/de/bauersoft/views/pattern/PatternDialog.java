@@ -28,7 +28,7 @@ public class PatternDialog extends Dialog
     {
         this.setHeaderTitle(state.toString());
 
-        Binder<Pattern> binder = new Binder<Pattern>(Pattern.class);
+        Binder<Pattern> binder = new Binder<>(Pattern.class);
 
         FormLayout inputLayout = new FormLayout();
 		inputLayout.setWidth("50vw");
@@ -50,15 +50,15 @@ public class PatternDialog extends Dialog
 
         Checkbox religiousCheckbox = new Checkbox();
 
-        inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
-        inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "description"), 1);
-        inputLayout.setColspan(inputLayout.addFormItem(religiousCheckbox, "religious"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(religiousCheckbox, "Religion"), 1);
 
         binder.forField(nameTextField).asRequired((value, context) ->
         {
             return (value != null && !value.isBlank())
                     ? ValidationResult.ok()
-                    : ValidationResult.error("Name is required");
+                    : ValidationResult.error("Name ist erforderlich");
 
         }).bind(Pattern::getName, Pattern::setName);
         binder.bind(descriptionTextArea, "description");
@@ -66,7 +66,7 @@ public class PatternDialog extends Dialog
 
         binder.setBean(item);
 
-        Button saveButton = new Button("save");
+        Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
         saveButton.setMinWidth("150px");
         saveButton.setMaxWidth("180px");
@@ -79,18 +79,18 @@ public class PatternDialog extends Dialog
 				{
 					service.update(binder.getBean());
 					dataProvider.refreshAll();
-					Notification.show("Data updated");
+					Notification.show("Daten wurden aktualisiert");
 					this.close();
 
 				}catch(DataIntegrityViolationException error)
 				{
-					Notification.show("Duplicate entry", 5000, Notification.Position.MIDDLE)
+					Notification.show("Doppelter Eintrag", 5000, Notification.Position.MIDDLE)
 							.addThemeVariants(NotificationVariant.LUMO_ERROR);
 				}
             }
         });
 
-        Button cancelButton = new Button("cancel");
+        Button cancelButton = new Button("Abbrechen");
 		cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.setMinWidth("150px");
         cancelButton.setMaxWidth("200px");

@@ -49,8 +49,8 @@ public class RecipeView extends Div
 
         grid.setDataProvider(recipeDataProvider);
 
-        grid.addColumn("name");
-        grid.addColumn("description");
+        grid.addColumn("name").setHeader("Name");
+        grid.addColumn("description").setHeader("Beschreibung");
 
         grid.addColumn(item ->
         {
@@ -63,12 +63,12 @@ public class RecipeView extends Div
         });
 
         GridContextMenu<Recipe> contextMenu = grid.addContextMenu();
-        contextMenu.addItem("new recipe", event ->
+        contextMenu.addItem("Neues Rezept", event ->
         {
 			new RecipeDialog(recipeService, ingredientService, formulationService, patternService, recipeDataProvider, new Recipe(), DialogState.EDIT);
         });
 
-        GridMenuItem<Recipe> deleteItem = contextMenu.addItem("delete", event ->
+        GridMenuItem<Recipe> deleteItem = contextMenu.addItem("Löschen", event ->
         {
             event.getItem().ifPresent(item ->
             {
@@ -79,7 +79,7 @@ public class RecipeView extends Div
                     div.getStyle().set("white-space", "normal");
                     div.getStyle().set("word-wrap", "break-word");
 
-                    div.add(new Text("Das Rezept \"" + item.getName() + "\" kann nicht gelöscht werden da es noch von einigen Komponenten verwendet wird."));
+                    div.add(new Text("Das Rezept \"" + item.getName() + "\" kann nicht gelöscht werden, da es noch von einigen Komponenten verwendet wird."));
 
                     Notification notification = new Notification(div);
                     notification.setDuration(5000);

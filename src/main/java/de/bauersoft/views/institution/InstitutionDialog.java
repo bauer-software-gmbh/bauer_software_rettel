@@ -103,9 +103,9 @@ public class InstitutionDialog extends Dialog
 		this.dialogState = dialogState;
 
 		instMultiplierMap = new LinkedHashMap<>();
-		deletedFieldIds = new HashSet<Long>();
+		deletedFieldIds = new HashSet<>();
 
-		selected = new AtomicReference<Field>();
+		selected = new AtomicReference<>();
 
 		this.setHeaderTitle(dialogState.toString());
 
@@ -142,7 +142,7 @@ public class InstitutionDialog extends Dialog
 		addressComboBox.setItems(addressService.getRepository().findAll());
 		addressComboBox.setWidthFull();
 
-		userMultiSelectComboBox = new MultiSelectComboBox<User>();
+		userMultiSelectComboBox = new MultiSelectComboBox<>();
 		userMultiSelectComboBox.setItemLabelGenerator(user ->
 				{
 					return user.getName() + " " + user.getSurname() + " [" + user.getEmail() + "]";
@@ -157,17 +157,17 @@ public class InstitutionDialog extends Dialog
 		fieldComponent.getStyle().setMarginTop("5px");
 		fieldComponent.setHeight("50vh");
 
-		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "description"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(customerIdTextField, "customer id"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(addressComboBox, "address"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(userMultiSelectComboBox, "user"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(customerIdTextField, "Produktiv ID"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(addressComboBox, "Adresse"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(userMultiSelectComboBox, "Benutzer"), 1);
 
 		binder.forField(nameTextField).asRequired((value, context) ->
 		{
 			return (value != null && !value.isBlank())
 					? ValidationResult.ok()
-					: ValidationResult.error("Name is required");
+					: ValidationResult.error("Name ist erforderlich");
 		}).bind("name");
 
 		binder.bind(descriptionTextArea, "description");
@@ -260,7 +260,7 @@ public class InstitutionDialog extends Dialog
 
 
 
-		Button saveButton = new Button("save");
+		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
 		saveButton.setMinWidth("150px");
 		saveButton.setMaxWidth("180px");
@@ -302,18 +302,18 @@ public class InstitutionDialog extends Dialog
 
 
 					institutionDataProvider.refreshAll();
-					Notification.show("Data updated");
+					Notification.show("Daten wurden aktualisiert");
 					this.close();
 
 				}catch(DataIntegrityViolationException error)
 				{
-					Notification.show("Duplicate entry", 5000, Position.MIDDLE)
+					Notification.show("Doppelter Eintrag", 5000, Position.MIDDLE)
 							.addThemeVariants(NotificationVariant.LUMO_ERROR);
 				}
 			}
 		});
 
-		Button cancelButton = new Button("cancel");
+		Button cancelButton = new Button("Abbrechen");
 		cancelButton.addClickShortcut(Key.ESCAPE);
 		cancelButton.setMinWidth("150px");
 		cancelButton.setMaxWidth("180px");
@@ -365,7 +365,7 @@ public class InstitutionDialog extends Dialog
 		instMultiplierMap.computeIfAbsent(field, t ->
 		{
 
-			Set<InstitutionMultiplier> instMultiplierByField = (item.getId() == null) ? new HashSet<InstitutionMultiplier>() :
+			Set<InstitutionMultiplier> instMultiplierByField = (item.getId() == null) ? new HashSet<>() :
 					institutionMultiplierRepository
 							.findAllByInstitutionId(item.getId())
 							.stream()

@@ -63,7 +63,7 @@ public class FieldDialog extends Dialog
 
 		this.setHeaderTitle(state.toString());
 
-        Binder<Field> binder = new Binder<Field>(Field.class);
+        Binder<Field> binder = new Binder<>(Field.class);
 
         FormLayout inputLayout = new FormLayout();
 		inputLayout.setWidth("50vw");
@@ -78,13 +78,13 @@ public class FieldDialog extends Dialog
         nameTextField.setRequired(true);
         nameTextField.setMinWidth("20em");
 
-        inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
 
         binder.forField(nameTextField).asRequired((value, context) ->
 		{
 			return (value != null && !value.isBlank())
 					? ValidationResult.ok()
-					: ValidationResult.error("Name is required");
+					: ValidationResult.error("Name ist erforderlich");
 		}).bind("name");
 
         binder.setBean(item);
@@ -97,7 +97,7 @@ public class FieldDialog extends Dialog
         initFieldMultiplier();
         multipliersMap.values().forEach(textField -> multipliersInputLayout.add(textField));
 
-        Button saveButton = new Button("save");
+        Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
         saveButton.setMinWidth("150px");
         saveButton.setMaxWidth("180px");
@@ -116,18 +116,18 @@ public class FieldDialog extends Dialog
                     fieldMultiplierRepository.saveAll(multipliersMap.keySet());
 
                     fieldDataProvider.refreshAll();
-					Notification.show("Data updated");
+					Notification.show("Daten wurden aktualisiert");
 					this.close();
 
 				}catch(DataIntegrityViolationException error)
 				{
-					Notification.show("Duplicate entry", 5000, Notification.Position.MIDDLE)
+					Notification.show("Doppelter Eintrag", 5000, Notification.Position.MIDDLE)
 							.addThemeVariants(NotificationVariant.LUMO_ERROR);
 				}
             }
         });
 
-        Button cancelButton = new Button("cancel");
+        Button cancelButton = new Button("Abbrechen");
 		cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.setMinWidth("150px");
         cancelButton.setMaxWidth("200px");

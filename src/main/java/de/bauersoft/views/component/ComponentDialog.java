@@ -35,7 +35,7 @@ public class ComponentDialog extends Dialog
 	{
 
 		//TODO Recipes sollte Pflichtfeld sein
-		Binder<Component> binder = new Binder<Component>(Component.class);
+		Binder<Component> binder = new Binder<>(Component.class);
 
 		this.setHeaderTitle(state.toString());
 
@@ -52,29 +52,29 @@ public class ComponentDialog extends Dialog
 		descriptionTextArea.setSizeFull();
 		descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 
-		ComboBox<Course> courseComboBox = new ComboBox<Course>();
+		ComboBox<Course> courseComboBox = new ComboBox<>();
 		courseComboBox.setItemLabelGenerator(course -> course.getName());
 		courseComboBox.setItems(courseRepository.findAll());
 		courseComboBox.setMinWidth("20em");
 		courseComboBox.setRequired(true);
 
-		MultiSelectComboBox<Recipe> recipeMultiSelectComboBox = new MultiSelectComboBox<Recipe>();
+		MultiSelectComboBox<Recipe> recipeMultiSelectComboBox = new MultiSelectComboBox<>();
 		recipeMultiSelectComboBox.setWidthFull();
 
 		recipeMultiSelectComboBox.setItems(recipeRepository.findAll());
 		recipeMultiSelectComboBox.setItemLabelGenerator(recipe -> recipe.getName());
 
 
-		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "description"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(courseComboBox, "course"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(recipeMultiSelectComboBox, "recipe"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(courseComboBox, "Gang"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(recipeMultiSelectComboBox, "Rezept"), 1);
 
 		binder.forField(nameTextField).asRequired((value, context) ->
 		{
 			return (value != null && !value.isBlank())
 					? ValidationResult.ok()
-					: ValidationResult.error("Name is required");
+					: ValidationResult.error("Name it erforderlich");
 
 		}).bind(Component::getName, Component::setName);
 
@@ -84,7 +84,7 @@ public class ComponentDialog extends Dialog
 		{
 			return (value != null)
 					? ValidationResult.ok()
-					: ValidationResult.error("Course is required");
+					: ValidationResult.error("Gang ist erforderlich");
 
 		}).bind(Component::getCourse, Component::setCourse);
 
@@ -93,7 +93,7 @@ public class ComponentDialog extends Dialog
 
 		binder.setBean(item);
 
-		Button saveButton = new Button("save");
+		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
 		saveButton.setMinWidth("150px");
 		saveButton.setMaxWidth("180px");
@@ -107,18 +107,18 @@ public class ComponentDialog extends Dialog
 					service.update(binder.getBean());
 					provider.refreshAll();
 
-					Notification.show("Data updated");
+					Notification.show("Daten wurden aktualisiert");
 					this.close();
 
 				}catch(DataIntegrityViolationException error)
 				{
-					Notification.show("Duplicate entry", 5000, Notification.Position.MIDDLE)
+					Notification.show("Doppelter Eintrag", 5000, Notification.Position.MIDDLE)
 							.addThemeVariants(NotificationVariant.LUMO_ERROR);
 				}
 			}
 		});
 
-		Button cancelButton = new Button("cancel");
+		Button cancelButton = new Button("Abbrechen");
 		cancelButton.addClickShortcut(Key.ESCAPE);
 		cancelButton.setMinWidth("150px");
 		cancelButton.setMaxWidth("180px");

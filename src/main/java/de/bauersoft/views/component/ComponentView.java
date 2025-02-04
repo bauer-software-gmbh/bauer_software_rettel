@@ -44,14 +44,14 @@ public class ComponentView extends Div
 
 		grid.setDataProvider(dataProvider);
 
-        grid.addColumn("name");
-        grid.addColumn("description");
+        grid.addColumn("name").setHeader("Name");
+        grid.addColumn("description").setHeader("Beschreibung");
 
         grid.addColumn(item ->
 		{
 			return item.getCourse() != null ? item.getCourse().getName() : "";
 
-		}).setHeader("Course");
+		}).setHeader("Gang");
 
         grid.addItemDoubleClickListener(event ->
 		{
@@ -59,12 +59,12 @@ public class ComponentView extends Div
 		});
 
         GridContextMenu<Component> contextMenu = grid.addContextMenu();
-        contextMenu.addItem("new component", event ->
+        contextMenu.addItem("Neue Komponente", event ->
 		{
 			new ComponentDialog(componentService, dataProvider, recipeRepository, courseRepository, componentRepository, new Component(), DialogState.NEW);
 		});
 
-		GridMenuItem<Component> deleteItem = contextMenu.addItem("delete", event ->
+		GridMenuItem<Component> deleteItem = contextMenu.addItem("Löschen", event ->
 		{
 			event.getItem().ifPresent(item ->
 			{
@@ -75,7 +75,7 @@ public class ComponentView extends Div
 					div.getStyle().set("white-space", "normal");
 					div.getStyle().set("word-wrap", "break-word");
 
-					div.add(new Text("Die Komponente \"" + item.getName() + "\" kann nicht gelöscht werden da sie noch von einigen Menü-Varianten verwendet wird."));
+					div.add(new Text("Die Komponente \"" + item.getName() + "\" kann nicht gelöscht werden, da sie noch von einigen Menü-Varianten verwendet wird."));
 
 					Notification notification = new Notification(div);
 					notification.setDuration(5000);

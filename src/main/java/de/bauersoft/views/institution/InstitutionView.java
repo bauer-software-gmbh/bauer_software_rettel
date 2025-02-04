@@ -19,13 +19,13 @@ import jakarta.annotation.security.RolesAllowed;
 
 import java.util.stream.Collectors;
 
-@PageTitle("Institution")
+@PageTitle("Institutionen")
 @Route(value = "institution", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @CssImport(value = "./themes/rettels/components/auto-filter-grid.css", themeFor = "vaadin-grid")
 public class InstitutionView extends Div
 {
-    private AutoFilterGrid<Institution> grid = new AutoFilterGrid<Institution>(Institution.class, false, true);
+    private AutoFilterGrid<Institution> grid = new AutoFilterGrid<>(Institution.class, false, true);
 
 	private InstitutionService institutionService;
 	private InstitutionFieldsService institutionFieldsService;
@@ -61,10 +61,10 @@ public class InstitutionView extends Div
 		grid.setDataProvider(institutionDataProvider);
 
         grid.addColumn("name")
-				.setResizable(true);
+				.setResizable(true).setHeader("Name");
 
         grid.addColumn("description")
-						.setResizable(true);
+						.setResizable(true).setHeader("Beschreibung");
 
         grid.addColumn(item -> item.getAddress() != null
                                 ? item.getAddress().getStreet() + " " + item.getAddress().getNumber() + ", "
@@ -102,7 +102,7 @@ public class InstitutionView extends Div
 					.stream()
 					.map(user -> user.getName() + " " + user.getSurname())
 					.collect(Collectors.joining(", "));
-		}).setHeader("User");
+		}).setHeader("Benutzer");
 
         grid.setMultiSort(true, MultiSortPriority.APPEND);
         grid.addItemDoubleClickListener(event ->
@@ -111,12 +111,12 @@ public class InstitutionView extends Div
 		});
 
         GridContextMenu<Institution> contextMenu = grid.addContextMenu();
-        contextMenu.addItem("new institution", event ->
+        contextMenu.addItem("Neue Institution", event ->
 		{
 			new InstitutionDialog(institutionService, institutionFieldsService, addressService, fieldService, userService, institutionMultiplierService, courseService, fieldMultiplierService, institutionDataProvider, addressDataProvider, new Institution(), DialogState.NEW);
 		});
 
-        GridMenuItem<Institution> deleteItem = contextMenu.addItem("delete", event ->
+        GridMenuItem<Institution> deleteItem = contextMenu.addItem("Löschen", event ->
 		{
 			event.getItem().ifPresent(item ->
 			{

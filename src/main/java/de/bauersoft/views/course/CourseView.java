@@ -18,7 +18,7 @@ import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
-@PageTitle("Gänge")
+@PageTitle("Menükomponenten")
 @Route(value = "course", layout = MainLayout.class)
 @RolesAllowed(value = { "ADMIN", "ACCOUNTENT" })
 public class CourseView extends Div
@@ -37,7 +37,7 @@ public class CourseView extends Div
 		grid.setWidthFull();
 		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-		grid.addColumn("name");
+		grid.addColumn("name").setHeader("Name");
 
 		grid.addItemDoubleClickListener(event ->
 		{
@@ -45,12 +45,12 @@ public class CourseView extends Div
 		});
 
 		GridContextMenu<Course> contextMenu = grid.addContextMenu();
-		contextMenu.addItem("new", event ->
+		contextMenu.addItem("Neue Menükomponente", event ->
 		{
 			new CourseDialog(service,dataProvider, new Course(), DialogState.NEW);
 		});
 
-		GridMenuItem<Course> deleteItem = contextMenu.addItem("delete", event ->
+		GridMenuItem<Course> deleteItem = contextMenu.addItem("Löschen", event ->
 		{
 			event.getItem().ifPresent(item ->
 			{
@@ -61,7 +61,7 @@ public class CourseView extends Div
 					div.getStyle().set("white-space", "normal");
 					div.getStyle().set("word-wrap", "break-word");
 
-					div.add(new Text("Der Course \"" + item.getName() + "\" kann nicht gelöscht werden da er noch in einigen Components verwendet wird."));
+					div.add(new Text("Die Menükomponente \"" + item.getName() + "\" kann nicht gelöscht werden, da er noch mit einigen Komponenten verknüpft ist."));
 
 					Notification notification = new Notification(div);
 					notification.setDuration(5000);

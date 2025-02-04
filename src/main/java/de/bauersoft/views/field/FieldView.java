@@ -23,7 +23,7 @@ import jakarta.annotation.security.RolesAllowed;
 public class FieldView extends Div
 {
 
-    AutoFilterGrid<Field> grid = new AutoFilterGrid<Field>(Field.class, false, true);
+    AutoFilterGrid<Field> grid = new AutoFilterGrid<>(Field.class, false, true);
 
     public FieldView(FieldService service, FieldDataProvider dataProvider,
 					 OrderService orderService,
@@ -47,12 +47,12 @@ public class FieldView extends Div
 		});
 
         GridContextMenu<Field> contextMenu = grid.addContextMenu();
-        contextMenu.addItem("new", event ->
+        contextMenu.addItem("Neue Einrichtung", event ->
 		{
 			new FieldDialog(service, dataProvider, fieldMultiplierService, courseService, new Field(), DialogState.NEW);
 		});
 
-		GridMenuItem<Field> deleteItem = contextMenu.addItem("delete", event ->
+		GridMenuItem<Field> deleteItem = contextMenu.addItem("Löschen", event ->
 		{
 			event.getItem().ifPresent(item ->
 			{
@@ -64,7 +64,7 @@ public class FieldView extends Div
 					div.getStyle().set("white-space", "normal");
 					div.getStyle().set("word-wrap", "break-word");
 
-					div.add(new Text("Das Field \"" + item.getName() + "\" kann nicht gelöscht werden da es noch von einigen Bestellungen verwendet wird."));
+					div.add(new Text("Die Einrichtung \"" + item.getName() + "\" kann nicht gelöscht werden, da sie noch von einigen Bestellungen verwendet wird."));
 
 					Notification notification = new Notification(div);
 					notification.setDuration(5000);
@@ -82,7 +82,7 @@ public class FieldView extends Div
 					div.getStyle().set("white-space", "normal");
 					div.getStyle().set("word-wrap", "break-word");
 
-					div.add(new Text("Das Field \"" + item.getName() + "\" kann nicht gelöscht werden da es noch von einigen Institutionen verwendet wird."));
+					div.add(new Text("Die Einrichtung \"" + item.getName() + "\" kann nicht gelöscht werden, da sie noch von einigen Institutionen verwendet wird."));
 
 					Notification notification = new Notification(div);
 					notification.setDuration(5000);

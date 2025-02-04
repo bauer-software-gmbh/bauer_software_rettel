@@ -101,12 +101,12 @@ public class UserDialog extends Dialog
         confirmPasswordField.setRequired(true);
         confirmPasswordField.setMinWidth("20em");
 
-        Button changePasswordButton = new Button("change Password");
+        Button changePasswordButton = new Button("Password ändern");
 
-        inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
-        inputLayout.setColspan(inputLayout.addFormItem(surnameTextField, "surname"), 1);
-        inputLayout.setColspan(inputLayout.addFormItem(emailField, "email"), 1);
-        inputLayout.setColspan(inputLayout.addFormItem(roleMultiSelectComboBox, "role"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Vorname"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(surnameTextField, "Nachname"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(emailField, "E-Mail"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(roleMultiSelectComboBox, "Rolle"), 1);
 
         FormLayout.FormItem passwordFieldItem = inputLayout.addFormItem(passwordField, "Passwort");
         inputLayout.setColspan(passwordFieldItem, 1);
@@ -138,21 +138,21 @@ public class UserDialog extends Dialog
         {
             return (value != null && !value.isBlank())
                     ? ValidationResult.ok()
-                    : ValidationResult.error("Name is required");
+                    : ValidationResult.error("Vorname ist erforderlich");
         }).bind("name");
 
         binder.forField(surnameTextField).asRequired((value, context) ->
         {
             return (value != null && !value.isBlank())
                     ? ValidationResult.ok()
-                    : ValidationResult.error("Surname is required");
+                    : ValidationResult.error("Nachname ist erforderlich");
         }).bind("surname");
 
         binder.forField(emailField).asRequired((value, context) ->
         {
             return (value != null && !value.isBlank())
                     ? ValidationResult.ok()
-                    : ValidationResult.error("Email is required");
+                    : ValidationResult.error("E-Mail ist erforderlich");
         }).bind("email");
 
         binder.bind(roleMultiSelectComboBox, "roles");
@@ -191,7 +191,7 @@ public class UserDialog extends Dialog
 
         binder.setBean(item);
 
-        Button saveButton = new Button("save");
+        Button saveButton = new Button("Speichern");
         saveButton.addClickShortcut(Key.ENTER);
         saveButton.setMinWidth("150px");
         saveButton.setMaxWidth("180px");
@@ -206,13 +206,13 @@ public class UserDialog extends Dialog
                     logger.info("Form is valid, saving...");
                     userService.update(binder.getBean());
                     dataProvider.refreshAll();
-                    Notification.show("Data updated");
+                    Notification.show("Daten wurden aktualisiert");
                     this.close();
 
                 }catch(DataIntegrityViolationException error)
                 {
                     logger.error("Duplicate entry error!");
-                    Notification.show("Duplicate entry", 5000, Notification.Position.MIDDLE)
+                    Notification.show("Doppelter Eintrag", 5000, Notification.Position.MIDDLE)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
             } else {
@@ -220,7 +220,7 @@ public class UserDialog extends Dialog
             }
         });
 
-        Button cancelButton = new Button("cancel");
+        Button cancelButton = new Button("Abbrechen");
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.setMinWidth("150px");
         cancelButton.setMaxWidth("200px");

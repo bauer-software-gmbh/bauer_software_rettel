@@ -42,11 +42,11 @@ public class IngredientView extends Div
         grid.setWidthFull();
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-        grid.addColumn("name").setResizable(true);
-        grid.addColumn("description").setResizable(true);
+        grid.addColumn("name").setResizable(true).setHeader("Name");
+        grid.addColumn("description").setResizable(true).setHeader("Beschreibung");
 
         //grid.addColumn(item -> item.getUnit() == null ? "" : item.getUnit().getName()).setKey("unit.name").setHeader("unit").setResizable(true);
-        grid.addColumn("unit.name").setHeader("Unit").setResizable(true);
+        grid.addColumn("unit.name").setHeader("Einheit").setResizable(true);
 
         grid.addComponentColumn(item ->
         {
@@ -57,7 +57,7 @@ public class IngredientView extends Div
             icon.setTooltipText(item.getAllergens().stream().map(Allergen::getName).collect(Collectors.joining(",")));
 
             return icon;
-        }).setKey("allergens.name").setHeader("Allergens");
+        }).setKey("allergens.name").setHeader("Allergene");
 
         grid.addComponentColumn(item ->
         {
@@ -68,7 +68,7 @@ public class IngredientView extends Div
             icon.setTooltipText(item.getAdditives().stream().map(Additive::getName).collect(Collectors.joining(",")));
 
             return icon;
-        }).setKey("additives.name").setHeader("Additives").setResizable(true);
+        }).setKey("additives.name").setHeader("Zusatzstoffe").setResizable(true);
 
         grid.addItemDoubleClickListener(event ->
         {
@@ -76,12 +76,12 @@ public class IngredientView extends Div
         });
 
         GridContextMenu<Ingredient> contextMenu = grid.addContextMenu();
-        contextMenu.addItem("new ingredient", event ->
+        contextMenu.addItem("Neue Zutat", event ->
         {
             new IngredientDialog(service, unitRepository, allergenRepository, additiveRepository, dataProvider, new Ingredient(), DialogState.NEW);
         });
 
-        GridMenuItem<Ingredient> deleteItem = contextMenu.addItem("delete", event ->
+        GridMenuItem<Ingredient> deleteItem = contextMenu.addItem("Löschen", event ->
         {
             event.getItem().ifPresent(item ->
             {

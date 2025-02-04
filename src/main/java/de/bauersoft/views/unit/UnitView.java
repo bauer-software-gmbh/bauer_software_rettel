@@ -34,8 +34,8 @@ public class UnitView extends Div {
 		grid.setHeightFull();
 		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-		grid.addColumn("name");
-		grid.addColumn("shorthand");
+		grid.addColumn("name").setHeader("Name");
+		grid.addColumn("shorthand").setHeader("Abkürzung");
 		grid.addColumn(unit -> (unit.getParentUnit() == null) ? "" : unit.getParentUnit().getName()).setHeader("Parent");
 		grid.addColumn(unit -> (unit.getParentFactor() == 0.0f) ? "" : unit.getParentFactor()).setHeader("Faktor");
 
@@ -47,12 +47,12 @@ public class UnitView extends Div {
 		});
 
 		GridContextMenu<Unit> contextMenu = grid.addContextMenu();
-		contextMenu.addItem("new", event ->
+		contextMenu.addItem("Neue Einheit", event ->
 		{
 			new UnitDialog(unitService, dataProvider, new Unit(), DialogState.NEW);
 		});
 
-		GridMenuItem<Unit> deleteItem = contextMenu.addItem("delete", event ->
+		GridMenuItem<Unit> deleteItem = contextMenu.addItem("Löschen", event ->
 		{
 			event.getItem().ifPresent(item ->
 			{
@@ -64,7 +64,7 @@ public class UnitView extends Div {
 					div.getStyle().set("white-space", "normal");
 					div.getStyle().set("word-wrap", "break-word");
 
-					div.add(new Text("Die Unit " + item.getName() + "(" + item.getShorthand() + ")" + " kann nicht gelöscht werden da sie von einigen Zutaten verwendet wird."));
+					div.add(new Text("Die Einheit " + item.getName() + "(" + item.getShorthand() + ")" + " kann nicht gelöscht werden, da sie von einigen Zutaten verwendet wird."));
 
 					Notification notification = new Notification(div);
 					notification.setDuration(5000);

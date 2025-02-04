@@ -39,7 +39,7 @@ public class PatternView extends Div
 
 		grid.setDataProvider(dataProvider);
 
-        grid.addColumn("name");
+        grid.addColumn("name").setHeader("Name");
 
         grid.addItemDoubleClickListener(event ->
 		{
@@ -47,12 +47,12 @@ public class PatternView extends Div
 		});
 
         GridContextMenu<Pattern> contextMenu = grid.addContextMenu();
-        contextMenu.addItem("new", event ->
+        contextMenu.addItem("Neue Ernährungsform", event ->
 		{
 			new PatternDialog(service, dataProvider, new Pattern(), DialogState.NEW);
 		});
 
-        GridMenuItem<Pattern> deleteItem = contextMenu.addItem("delete", event ->
+        GridMenuItem<Pattern> deleteItem = contextMenu.addItem("Löschen", event ->
 		{
 			event.getItem().ifPresent(item ->
 			{
@@ -66,7 +66,7 @@ public class PatternView extends Div
 					div.getStyle().set("white-space", "normal");
 					div.getStyle().set("word-wrap", "break-word");
 
-					div.add(new Text("Das Pattern \"" + item.getName() + "\" kann nicht gelöscht werden da es noch in einigen Menü-Varianten verwendet wird."));
+					div.add(new Text("Die Ernährungsform \"" + item.getName() + "\" kann nicht gelöscht werden, da es noch in einigen Menü-Varianten verwendet wird."));
 
 					Notification notification = new Notification(div);
 					notification.setDuration(5000);
@@ -85,7 +85,7 @@ public class PatternView extends Div
 					div.getStyle().set("white-space", "normal");
 					div.getStyle().set("word-wrap", "break-word");
 
-					div.add(new Text("Das Pattern \"" + item.getName() + "\" kann nicht gelöscht werden da es noch in einigen Rezepten verwendet wird."));
+					div.add(new Text("Die Ernährungsform \"" + item.getName() + "\" kann nicht gelöscht werden, da es noch in einigen Rezepten verwendet wird."));
 
 					Notification notification = new Notification(div);
 					notification.setDuration(5000);

@@ -18,7 +18,6 @@ import de.bauersoft.data.entities.address.Address;
 import de.bauersoft.data.providers.AddressDataProvider;
 import de.bauersoft.services.AddressService;
 import de.bauersoft.views.DialogState;
-import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.springframework.dao.DataIntegrityViolationException;
 
 public class AddressDialog extends Dialog
@@ -68,42 +67,42 @@ public class AddressDialog extends Dialog
         cityTextField.setRequired(true);
         cityTextField.setMinWidth("20em");
 
-        inputLayout.setColspan(inputLayout.addFormItem(streetTextField, "street"), 1);
-        inputLayout.setColspan(inputLayout.addFormItem(houseNumberTextField, "house Number"), 1);
-        inputLayout.setColspan(inputLayout.addFormItem(postalCodeTextField, "postal code"), 1);
-        inputLayout.setColspan(inputLayout.addFormItem(cityTextField, "city"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(streetTextField, "Straße"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(houseNumberTextField, "Hausnummer"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(postalCodeTextField, "PLZ"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(cityTextField, "Ort"), 1);
 
         binder.forField(streetTextField).asRequired((value, context) ->
 		{
 			return (value != null && !value.isBlank())
 					? ValidationResult.ok()
-					: ValidationResult.error("street is required");
+					: ValidationResult.error("Straße ist erforderlich");
 		}).bind(Address::getStreet, Address::setStreet);
 
         binder.forField(houseNumberTextField).asRequired((value, context) ->
 		{
 			return (value != null && !value.isBlank())
 					? ValidationResult.ok()
-					: ValidationResult.error("house number is required");
+					: ValidationResult.error("Hausnummer ist erforderlich");
 		}).bind(Address::getNumber, Address::setNumber);
 
         binder.forField(postalCodeTextField).asRequired((value, context) ->
 		{
 			return (value != null && !value.isBlank())
 					? ValidationResult.ok()
-					: ValidationResult.error("postal code is required");
+					: ValidationResult.error("PLZ ist erforderlich");
 		}).bind(Address::getPostal, Address::setPostal);
 
         binder.forField(cityTextField).asRequired((value, context) ->
 		{
 			return (value != null && !value.isBlank())
 					? ValidationResult.ok()
-					: ValidationResult.error("city is required");
+					: ValidationResult.error("Ort ist erforderlich");
 		}).bind(Address::getCity, Address::setCity);
 
         binder.setBean(item);
 
-        Button saveButton = new Button("save");
+        Button saveButton = new Button("Speichern");
         saveButton.addClickShortcut(Key.ENTER);
         saveButton.setMinWidth("150px");
         saveButton.setMaxWidth("180px");
@@ -116,18 +115,18 @@ public class AddressDialog extends Dialog
                 {
                     addressService.update(binder.getBean());
 					addressDataProvider.refreshAll();
-                    Notification.show("Data updated");
+                    Notification.show("Daten wurden aktualisiert");
                     this.close();
 
                 }catch(DataIntegrityViolationException error)
                 {
-                    Notification.show("Duplicate entry", 5000, Position.MIDDLE)
+                    Notification.show("Doppelter Eintrag", 5000, Position.MIDDLE)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
             }
         });
 
-        Button cancelButton = new Button("cancel");
+        Button cancelButton = new Button("Abbrechen");
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.setMinWidth("150px");
         cancelButton.setMaxWidth("180px");

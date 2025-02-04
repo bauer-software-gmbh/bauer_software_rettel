@@ -44,9 +44,15 @@ public class Institution extends AbstractEntity
     @OneToMany(mappedBy = "institution", fetch = FetchType.EAGER)
     private Set<InstitutionMultiplier> institutionMultipliers = new HashSet<>();
 
+
+
     @Override
     public String toString()
     {
+        Institution.builder()
+                .customerId("dcdcdc")
+                .build();
+
         return "Institution{" +
                 "users=" + users +
                 ", address=" + address +

@@ -61,32 +61,32 @@ public class IngredientDialog extends Dialog
         descriptionTextArea.setSizeFull();
         descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 
-        ComboBox<Unit> unitComboBox = new ComboBox<Unit>();
+        ComboBox<Unit> unitComboBox = new ComboBox<>();
         unitComboBox.setItemLabelGenerator(unit -> unit.getName());
         unitComboBox.setItems(unitRepository.findAll());
         unitComboBox.setRequired(true);
 
-        MultiSelectComboBox<Allergen> allergenMultiSelectComboBox = new MultiSelectComboBox<Allergen>();
+        MultiSelectComboBox<Allergen> allergenMultiSelectComboBox = new MultiSelectComboBox<>();
         allergenMultiSelectComboBox.setItemLabelGenerator(allergen -> allergen.getName());
         allergenMultiSelectComboBox.setItems(allergenRepository.findAll());
         allergenMultiSelectComboBox.setWidthFull();
 
-        MultiSelectComboBox<Additive> additiveMultiSelectComboBox = new MultiSelectComboBox<Additive>();
+        MultiSelectComboBox<Additive> additiveMultiSelectComboBox = new MultiSelectComboBox<>();
         additiveMultiSelectComboBox.setItemLabelGenerator(allergen -> allergen.getName());
         additiveMultiSelectComboBox.setItems(additiveRepository.findAll());
         additiveMultiSelectComboBox.setWidthFull();
 
-        inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
-        inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "description"), 1);
-        inputLayout.setColspan(inputLayout.addFormItem(unitComboBox, "unit"), 1);
-        inputLayout.setColspan(inputLayout.addFormItem(allergenMultiSelectComboBox, "allergen"), 1);
-        inputLayout.setColspan(inputLayout.addFormItem(additiveMultiSelectComboBox, "additive"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(unitComboBox, "Einheit"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(allergenMultiSelectComboBox, "Allergene"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(additiveMultiSelectComboBox, "Zusatzstoffe"), 1);
 
 		binder.forField(nameTextField).asRequired((value, context) ->
         {
             return (value != null && !value.isBlank())
                     ? ValidationResult.ok()
-                    : ValidationResult.error("Name is required");
+                    : ValidationResult.error("Name ist erforderlich");
 
         }).bind(Ingredient::getName, Ingredient::setName);
 
@@ -96,14 +96,14 @@ public class IngredientDialog extends Dialog
         {
             return (value != null)
                     ? ValidationResult.ok()
-                    : ValidationResult.error("Unit is required");
+                    : ValidationResult.error("Einheit ist erforderlich");
         }).bind(Ingredient::getUnit, Ingredient::setUnit);
 
         binder.bind(allergenMultiSelectComboBox, "allergens");
         binder.bind(additiveMultiSelectComboBox, "additives");
         binder.setBean(item);
 
-        Button saveButton = new Button("save");
+        Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
         saveButton.setMinWidth("150px");
         saveButton.setMaxWidth("180px");
@@ -116,19 +116,19 @@ public class IngredientDialog extends Dialog
                 {
                     service.update(binder.getBean());
                     dataProvider.refreshAll();
-                    Notification.show("Data updated");
+                    Notification.show("Daten wurden aktualisiert");
                     this.close();
 
                 }catch(DataIntegrityViolationException error)
                 {
-                    Notification.show("Duplicate entry", 5000, Position.MIDDLE)
+                    Notification.show("Doppelter Eintrag", 5000, Position.MIDDLE)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
 					error.printStackTrace();
                 }
             }
         });
 
-        Button cancelButton = new Button("cancel");
+        Button cancelButton = new Button("Abbrechen");
 		cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.setMinWidth("150px");
         cancelButton.setMaxWidth("180px");

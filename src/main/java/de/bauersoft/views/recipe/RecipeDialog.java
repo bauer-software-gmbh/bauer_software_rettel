@@ -64,7 +64,7 @@ public class RecipeDialog extends Dialog
 
 		this.setHeaderTitle(state.toString());
 
-		Binder<Recipe> binder = new Binder<Recipe>(Recipe.class);
+		Binder<Recipe> binder = new Binder<>(Recipe.class);
 
 		FormLayout inputLayout = new FormLayout();
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
@@ -80,20 +80,20 @@ public class RecipeDialog extends Dialog
 		descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 		descriptionTextArea.setWidthFull();
 
-		MultiSelectComboBox<Pattern> patternMultiSelectComboBox = new MultiSelectComboBox<Pattern>();
+		MultiSelectComboBox<Pattern> patternMultiSelectComboBox = new MultiSelectComboBox<>();
 		patternMultiSelectComboBox.setItemLabelGenerator(pattern -> pattern.getName());
 		patternMultiSelectComboBox.setItems(patternRepository.findAll());
 		patternMultiSelectComboBox.setWidthFull();
 
-		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "description"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(patternMultiSelectComboBox, "patterns"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(patternMultiSelectComboBox, "Ernährungsart"), 1);
 
 		binder.forField(nameTextField).asRequired((value, context) ->
 		{
 			return (value != null && !value.isBlank())
 					? ValidationResult.ok()
-					: ValidationResult.error("Name is required");
+					: ValidationResult.error("Name ist erforderlich");
 
 		}).bind("name");
 
@@ -108,7 +108,7 @@ public class RecipeDialog extends Dialog
 
 		binder.setBean(item);
 
-		Button saveButton = new Button("save");
+		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
 
 		saveButton.setMinWidth("150px");
@@ -136,18 +136,18 @@ public class RecipeDialog extends Dialog
 
 					recipeDataProvider.refreshAll();
 
-					Notification.show("Data updated");
+					Notification.show("Daten wurden aktualisiert");
 					this.close();
 
 				}catch(DataIntegrityViolationException error)
 				{
-					Notification.show("Duplicate entry", 5000, Notification.Position.MIDDLE)
+					Notification.show("Doppelter Eintrag", 5000, Notification.Position.MIDDLE)
 							.addThemeVariants(NotificationVariant.LUMO_ERROR);
 				}
 			}
 		});
 
-		Button cancelButton = new Button("cancel");
+		Button cancelButton = new Button("Abbrechen");
 		cancelButton.addClickShortcut(Key.ESCAPE);
 
 		cancelButton.setMinWidth("150px");

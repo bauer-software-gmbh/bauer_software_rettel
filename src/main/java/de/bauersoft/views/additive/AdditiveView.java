@@ -38,8 +38,8 @@ public class AdditiveView extends Div
 		grid.setWidthFull();
 		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-		grid.addColumn("name");
-		grid.addColumn("description");
+		grid.addColumn("name").setHeader("Name");
+		grid.addColumn("description").setHeader("Beschreibung");
 
 		grid.setItems(dataProvider);
 
@@ -49,12 +49,12 @@ public class AdditiveView extends Div
 		});
 		
 		GridContextMenu<Additive> contextMenu = grid.addContextMenu();
-		contextMenu.addItem("new", event ->
+		contextMenu.addItem("Neuer Zusatzstoff", event ->
 		{
 			new AdditiveDialog(service, dataProvider, new Additive(), DialogState.NEW);
 		});
 
-		GridMenuItem<Additive> deleteItem = contextMenu.addItem("delete", event ->
+		GridMenuItem<Additive> deleteItem = contextMenu.addItem("Löschen", event ->
 		{
 			event.getItem().ifPresent(item ->
 			{
@@ -66,7 +66,7 @@ public class AdditiveView extends Div
 					div.getStyle().set("white-space", "normal");
 					div.getStyle().set("word-wrap", "break-word");
 
-					div.add(new Text("Das Additive \"" + item.getName() + "\" kann nicht gelöscht werden da es noch in einigen Zutaten verwendet wird."));
+					div.add(new Text("Der Zusatzstoff \"" + item.getName() + "\" kann nicht gelöscht werden, da er noch bei einigen Zutaten hinterlegt ist."));
 
 					Notification notification = new Notification(div);
 					notification.setDuration(5000);

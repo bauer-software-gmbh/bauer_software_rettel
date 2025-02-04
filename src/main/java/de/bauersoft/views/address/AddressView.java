@@ -23,7 +23,7 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed("ADMIN")
 public class AddressView extends Div
 {
-    AutoFilterGrid<Address> grid = new AutoFilterGrid<Address>(Address.class, false, true);
+    AutoFilterGrid<Address> grid = new AutoFilterGrid<>(Address.class, false, true);
 
 	private AddressService addressService;
 	private AddressDataProvider addressDataProvider;
@@ -43,10 +43,10 @@ public class AddressView extends Div
 
 		grid.setDataProvider(addressDataProvider);
 
-        grid.addColumn("street");
-        grid.addColumn("number");
-        grid.addColumn("postal");
-        grid.addColumn("city");
+        grid.addColumn("street").setHeader("Straße");
+        grid.addColumn("number").setHeader("Hausnummer");
+        grid.addColumn("postal").setHeader("PLZ");
+        grid.addColumn("city").setHeader("Ort");
 
         grid.addItemDoubleClickListener(event ->
 		{
@@ -55,12 +55,12 @@ public class AddressView extends Div
 		});
 
         GridContextMenu<Address> contextMenu = grid.addContextMenu();
-        contextMenu.addItem("new address", event ->
+        contextMenu.addItem("Neue Adresse", event ->
 		{
 			new AddressDialog(addressService, addressDataProvider, new Address(), DialogState.NEW);
 		});
 
-        GridMenuItem<Address> deleteItem = contextMenu.addItem("delete", event ->
+        GridMenuItem<Address> deleteItem = contextMenu.addItem("Löschen", event ->
 		{
 			event.getItem().ifPresent(item ->
 			{
@@ -72,7 +72,7 @@ public class AddressView extends Div
 					div.getStyle().set("word-wrap", "break-word");
 
 					String address = item.getStreet() + " " + item.getNumber() + ", " + item.getPostal() + " " + item.getCity();
-					div.add(new Text("Die Adresse \"" + address + "\" kann nicht gelöscht werden da es noch von einigen Institutionen verwendet wird."));
+					div.add(new Text("Die Adresse \"" + address + "\" kann nicht gelöscht werden, da sie noch von anderen Institutionen verwendet wird."));
 
 					Notification notification = new Notification(div);
 					notification.setDuration(5000);
