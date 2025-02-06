@@ -402,8 +402,17 @@ public class OffersView extends Div
         Div thinTarget = new Div();
         thinTarget.setClassName("thin-drop-target");
         thinTarget.getElement().setAttribute("date", dropZone.getElement().getAttribute("date"));
+        thinTarget.setVisible(true);
 
         LocalDate localDate = LocalDate.parse(dropZone.getElement().getAttribute("date"));
+
+        // Prüfen, ob bereits ein Menü für diesen Tag existiert
+        Optional<Offer> optionalOffer = this.offerService.getByLocalDateAndField(localDate, fieldComboBox.getValue());
+        if(optionalOffer.isPresent() && !optionalOffer.get().getMenus().isEmpty())
+        {
+            thinTarget.setVisible(false);
+        }
+
         if(localDate.isBefore(LocalDate.now()))
         {
             thinTarget.setVisible(false);
@@ -451,10 +460,15 @@ public class OffersView extends Div
                 offer.getMenus().add(copy.getItem());
                 offerService.update(offer); // Speichern
 
+
                 if(dropPosition != -1)
                 {
                     Div wrapper = createWrapper(offer, copy);
                     dropZone.addComponentAtIndex(dropPosition, wrapper);
+
+                    // Verhindert, dass weitere Menüs hinzugefügt werden können
+                    thinTarget.setVisible(false);
+
                     updateDropTargets(dropZone);
                 }
             }
@@ -486,6 +500,7 @@ public class OffersView extends Div
                 // Menü aus Offer entfernen
                 offerService.removeMenuFromOffer(offer.getId(), item.getItem().getId());
                 System.out.println(offer.getId() + " : " + item.getItem().getId());
+                dataProvider.refreshAll();
             }
         });
 
