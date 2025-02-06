@@ -7,7 +7,7 @@ public enum DefaultField
 {
     GRUNDSCHULE("Grundschule"),
     SCHULE("Schule"),
-    KINDERTAGESSTÄTTE("Kindertagesstätte"),
+    KINDERTAGESSTAETTE("Kindertagesstätte"),
     KINDERGARTEN("Kindergarten");
 
     private String name;

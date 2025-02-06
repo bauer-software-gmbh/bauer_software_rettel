@@ -26,8 +26,6 @@ import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.entities.offer.Offer;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
 import de.bauersoft.data.entities.variant.Variant;
-import de.bauersoft.data.repositories.flesh.FleshRepository;
-import de.bauersoft.data.repositories.menu.MenuRepository;
 import de.bauersoft.data.providers.OffersDataProvider;
 import de.bauersoft.services.FieldService;
 import de.bauersoft.services.MenuService;
@@ -38,6 +36,7 @@ import de.bauersoft.views.MainLayout;
 import com.vaadin.flow.component.html.Div;
 import de.bauersoft.views.menue.CreateMenuPdf;
 import jakarta.annotation.security.RolesAllowed;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +45,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.DayOfWeek;
 import java.util.*;
+import java.util.stream.Stream;
 
 @PageTitle("Menü Planung")
 @Route(value = "offers", layout = MainLayout.class)
@@ -53,31 +53,21 @@ import java.util.*;
 public class OffersView extends Div
 {
     private final OffersDataProvider dataProvider;
-    private final MenuService menuService;
     private final OfferService offerService;
-    private final MenuRepository menuRepository;
-    private final FleshRepository fleshRepository;
     private LocalDate vonDate, bisDate;
     private final DatePicker filterDate;
-    private Button deleteButton, generatePDF;
+    private Button generatePDF;
     private ComboBox<Field> fieldComboBox;
-    private Logger logger = LoggerFactory.getLogger(OffersView.class);
+    private final Logger logger = LoggerFactory.getLogger(OffersView.class);
 
-    public OffersView(MenuService menuService, FieldService fieldService, OfferService offerService, MenuRepository menuRepository, FleshRepository fleshRepository)
+    public OffersView(MenuService menuService, FieldService fieldService, OfferService offerService)
     {
         this.offerService = offerService;
-        this.fleshRepository = fleshRepository;
         this.dataProvider = new OffersDataProvider(offerService, menuService);
-        this.menuService = menuService;
-        this.menuRepository = menuRepository;
-        this.deleteButton = new Button();
         this.generatePDF = new Button("Generate PDF"); // Initialisiere den Button
         generatePDF.setVisible(true); // Standardmäßig unsichtbar
         generatePDF.addClickListener(event ->
-        {
-            createMenuPdf();
-
-        }); // Button-Click-Listener hinzufügen
+                createMenuPdf()); // Button-Click-Listener hinzufügen
 
         setClassName("content");
         VerticalLayout pageVerticalLayout = new VerticalLayout();
@@ -98,10 +88,7 @@ public class OffersView extends Div
             Field selectedField = event.getValue();
             if(selectedField != null)
             {
-                //String fieldName = selectedField.getName().toLowerCase();
-                //boolean shouldShowButton = fieldName.matches("^(kit|kind|gri|gru).*");
-                boolean shouldShowButton = List.of(DefaultField.GRUNDSCHULE, DefaultField.KINDERTAGESSTÄTTE, DefaultField.KINDERGARTEN)
-                                .stream().anyMatch(defaultField -> defaultField.equalsDefault(selectedField));
+                boolean shouldShowButton = Stream.of(DefaultField.GRUNDSCHULE, DefaultField.KINDERTAGESSTAETTE, DefaultField.KINDERGARTEN).anyMatch(defaultField -> defaultField.equalsDefault(selectedField));
 
                 generatePDF.setVisible(shouldShowButton);
                 // Setze die Field-ID und aktualisiere die Daten
@@ -113,7 +100,7 @@ public class OffersView extends Div
                 generatePDF.setVisible(false); // Verstecke den Button, wenn nichts ausgewählt ist
             }
         });
-        fieldComboBox.setValue(fieldService.findAll().get(0)); // Setze Standardwert
+        fieldComboBox.setValue(fieldService.findAll().getFirst()); // Setze Standardwert
 
 
         ComboBox<WeekSelector> weekCombobox = getWeekSelectorComboBox();
@@ -134,19 +121,8 @@ public class OffersView extends Div
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-        // Grid-Setup
-//        Grid<Week> grid = new Grid<>(Week.class, false);
-//        grid.addColumn(Week::getKw).setHeader("KW");
-//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.MONDAY).getDate(), formatter))).setHeader("Montag");
-//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.TUESDAY).getDate(), formatter))).setHeader("Dienstag");
-//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.WEDNESDAY).getDate(), formatter))).setHeader("Mittwoch");
-//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.THURSDAY).getDate(), formatter))).setHeader("Donnerstag");
-//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.FRIDAY).getDate(), formatter))).setHeader("Freitag");
-//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.SATURDAY).getDate(), formatter))).setHeader("Samstag");
-//        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item.getDayFor(DayOfWeek.SUNDAY).getDate(), formatter))).setHeader("Sonntag");
-
         Grid<LocalDate> grid = new Grid<>(LocalDate.class, false);
-        grid.addColumn(localDate -> Week.getKw(localDate)).setHeader("KW");
+        grid.addColumn(Week::getKw).setHeader("KW");
         grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.MONDAY, item), formatter))).setHeader("Montag");
         grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.TUESDAY, item), formatter))).setHeader("Dienstag");
         grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.WEDNESDAY, item), formatter))).setHeader("Mittwoch");
@@ -356,8 +332,6 @@ public class OffersView extends Div
             return offerService.update(newOffer); // Speichern und zurückgeben
         });
 
-        this.deleteButton.setEnabled(offer.getLocalDate().isAfter(LocalDate.now()));
-
         offer.getMenus().forEach(menu ->
         {
             MenuDiv menuDiv = new MenuDiv(menu);
@@ -486,14 +460,13 @@ public class OffersView extends Div
     {
         Div wrapper = new Div();
         wrapper.setClassName("item-wrapper");
+        boolean isDeletable = offer.getLocalDate().isEqual(LocalDate.now()) || offer.getLocalDate().isAfter(LocalDate.now());
 
-        this.deleteButton = new Button(VaadinIcon.TRASH.create());
+        Button deleteButton = new Button(VaadinIcon.TRASH.create());
 
-        this.deleteButton.setEnabled(!offer.getLocalDate().isBefore(LocalDate.now()));
+        deleteButton.setEnabled(isDeletable);
 
-        logger.info("Offer Date: {} | Today: {}", offer.getLocalDate(), LocalDate.now());
-
-        this.deleteButton.addClickListener(event ->
+        deleteButton.addClickListener(event ->
         {
             Div parent = (Div) wrapper.getParent().orElse(null);
             if(parent != null)
@@ -503,7 +476,7 @@ public class OffersView extends Div
 
                 // Menü aus Offer entfernen
                 offerService.removeMenuFromOffer(offer.getId(), item.getItem().getId());
-                System.out.println(offer.getId() + " : " + item.getItem().getId());
+                logger.info("Menü entfernt: {} : {}", offer.getId(), item.getItem().getId());
                 dataProvider.refreshAll();
             }
         });
@@ -517,7 +490,7 @@ public class OffersView extends Div
         return wrapper;
     }
 
-
+    @Getter
     private static class MenuDiv extends Div
     {
         private final Menu item;
@@ -531,21 +504,22 @@ public class OffersView extends Div
                     .set("white-space", "nowrap")
                     .set("overflow", "hidden")
                     .set("text-overflow", "ellipsis")
-                    .set("max-width", "120px") // oder eine andere Breite setzen
+                    .set("max-width", "80px") // oder eine andere Breite setzen
                     .set("display", "inline-block");
             this.add(name);
         }
-
-        public Menu getItem()
-        {
-            return this.item;
-        }
-
     }
 
     private record WeekSelector(int amount, ChronoUnit unit, String name)
     {
 
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        logger.warn("deleteButton.setEnabled({}) aufgerufen! Stacktrace:", enabled);
+        Thread.dumpStack();
     }
 
 }

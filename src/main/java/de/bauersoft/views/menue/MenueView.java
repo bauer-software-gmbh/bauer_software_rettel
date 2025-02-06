@@ -53,7 +53,7 @@ public class MenueView extends Div
                 .filter(field ->
                 {
                     return DefaultField.KINDERGARTEN.equalsDefault(field)
-                            || DefaultField.KINDERTAGESSTÄTTE.equalsDefault(field)
+                            || DefaultField.KINDERTAGESSTAETTE.equalsDefault(field)
                             || DefaultField.GRUNDSCHULE.equalsDefault(field);
 
                 }).collect(Collectors.toList());
