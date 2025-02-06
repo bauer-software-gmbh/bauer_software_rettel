@@ -91,7 +91,7 @@ public class OffersView extends Div
         fieldComboBox = new ComboBox<>("Einrichtungsart:");
         fieldComboBox.setItemLabelGenerator(Field::getName); // Anzeige in der ComboBox
         fieldComboBox.setItems(fieldService.findAll());
-        fieldComboBox.setValue(fieldService.findAll().get(0)); // Setze Standardwert
+
 
         fieldComboBox.addValueChangeListener(event ->
         {
@@ -113,6 +113,7 @@ public class OffersView extends Div
                 generatePDF.setVisible(false); // Verstecke den Button, wenn nichts ausgewählt ist
             }
         });
+        fieldComboBox.setValue(fieldService.findAll().get(0)); // Setze Standardwert
 
 
         ComboBox<WeekSelector> weekCombobox = getWeekSelectorComboBox();
@@ -289,7 +290,6 @@ public class OffersView extends Div
         {
             if (this.filterDate.getValue() == null)
             {
-                logger.warn("⚠️ FilterDate ist null! Setze auf aktuelles Datum.");
                 return; // Falls kein Datum gesetzt ist, keine Änderung
             }
 
