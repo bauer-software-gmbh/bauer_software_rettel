@@ -40,15 +40,16 @@ public class CreateMenuPdf
             //File resource = new File(CreateMenuPdf.class.getClassLoader().getResource(resourceFileName).getFile(), "UTF-8");
 
             pdfTemplate.getParentFile().mkdirs();
-            try(InputStream inputStream = CreateMenuPdf.class.getClassLoader().getResourceAsStream(resourceFileName))
-            {
+            try (InputStream inputStream = CreateMenuPdf.class.getClassLoader().getResourceAsStream(resourceFileName)) {
+                if (inputStream == null) {
+                    throw new IOException("Vorlagendatei " + resourceFileName + " nicht gefunden.");
+                }
                 Files.copy(inputStream, Path.of(pdfTemplatePath), StandardCopyOption.REPLACE_EXISTING);
-
-            }catch(Exception e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
                 return;
             }
+
         }
 
         if(!pdfTemplate.exists())
@@ -123,16 +124,19 @@ public class CreateMenuPdf
                     Object menu = entry.get("menu");
                     String menuText = (menu == null || menu.toString().isEmpty()) ? "kein Menu" : menu.toString();
                     // Zeilen umbrechen
-                    String[] menuWrT = WordUtils.wrap(menuText, 29).split("/r?/n");
+                    String[] menuWrT = WordUtils.wrap(menuText, 25).split("\r?\n");
                     // Text um 90 Grad gedreht anzeigen
-                    for(int j = 0; j < menuWrT.length; j++)
-                    {
-                        contentStream.beginText();
-                        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 8);
-                        contentStream.setTextMatrix(Matrix.getRotateInstance(Math.toRadians(90), baseX + 22 + (j * 12), baseY));
-                        contentStream.showText(menuWrT[j]);
-                        contentStream.endText();
+                    contentStream.beginText();
+                    contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 8);
+                    contentStream.setTextMatrix(Matrix.getRotateInstance(Math.toRadians(90), baseX + 22, baseY));
+
+                    for (String line : menuWrT) {
+                        contentStream.showText(line);
+                        contentStream.newLineAtOffset(0, -10); // Abstand zwischen den Zeilen
                     }
+
+                    contentStream.endText();
+
 
                     // Typ (type) - "×" in passendes Kästchen setzen
                     String type = entry.get("type").toString();
@@ -154,7 +158,7 @@ public class CreateMenuPdf
                         {
                             if(entryCounter == 2 || entryCounter == 7 || entryCounter == 12 || entryCounter == 17)
                             {
-                                drawCheckmark(contentStream, baseX + 115, baseY + 37);
+                                drawCheckmark(contentStream, baseX + 115, baseY + 38);
                             }else
                             {
                                 drawCheckmark(contentStream, baseX + 115, baseY + 38);
@@ -165,8 +169,8 @@ public class CreateMenuPdf
                     // Alternative (alternative)
                     Object alternative = entry.get("alternative");
                     String[] altWrt = (alternative == null || alternative.equals(""))
-                            ? WordUtils.wrap("siehe oben", 29).split("/r?/n")
-                            : WordUtils.wrap(alternative.toString(), 30).split("/r?/n");
+                            ? WordUtils.wrap("siehe oben", 29).split("\r?\n")
+                            : WordUtils.wrap(alternative.toString(), 30).split("\r?\n");
                     // Text um 90 Grad gedreht anzeigen
                     for(int j = 0; j < altWrt.length; j++)
                     {

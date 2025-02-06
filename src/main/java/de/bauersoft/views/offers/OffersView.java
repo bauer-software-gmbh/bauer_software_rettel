@@ -198,7 +198,7 @@ public class OffersView extends Div
         List<Map<String, Object>> menuList = new ArrayList<>();
         Field field = fieldComboBox.getValue();
 
-        System.out.println(new StringBuilder().repeat("-", 500).append("Oben: ").append(field.getName()));
+        System.out.println(new StringBuilder().repeat("-", 500).append("Oben: ").append(field != null ? field.getName() : "Kein Feld ausgewählt"));
 
         for(LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1))
         {
@@ -275,7 +275,11 @@ public class OffersView extends Div
 
         // PDF-Erstellung mit den gesammelten Daten
         System.out.println(new StringBuilder().repeat("-", 500).append("Unten: ").append(field.getName()));
-        CreateMenuPdf.generatePdf(menuList, field.getName());
+        if (field != null) {
+            CreateMenuPdf.generatePdf(menuList, field.getName());
+        } else {
+            System.err.println("Fehler: Kein Feld ausgewählt. PDF-Generierung abgebrochen.");
+        }
     }
 
 
