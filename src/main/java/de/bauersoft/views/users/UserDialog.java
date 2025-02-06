@@ -69,6 +69,7 @@ public class UserDialog extends Dialog
         inputLayout.setMaxWidth("50em");
         inputLayout.setHeight("50vh");
         inputLayout.setMaxHeight("18em");
+        inputLayout.getElement().setAttribute("autocomplete", "off");
 
         inputLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
@@ -101,6 +102,10 @@ public class UserDialog extends Dialog
         confirmPasswordField.setRequired(true);
         confirmPasswordField.setMinWidth("20em");
 
+        passwordField.getElement().setAttribute("autocomplete", "new-password");
+        confirmPasswordField.getElement().setAttribute("autocomplete", "new-password");
+
+
         Button changePasswordButton = new Button("Password ändern");
 
         inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Vorname"), 1);
@@ -111,7 +116,7 @@ public class UserDialog extends Dialog
         FormLayout.FormItem passwordFieldItem = inputLayout.addFormItem(passwordField, "Passwort");
         inputLayout.setColspan(passwordFieldItem, 1);
 
-        FormLayout.FormItem confirmPasswordFieldItem = inputLayout.addFormItem(confirmPasswordField, "Passwort");
+        FormLayout.FormItem confirmPasswordFieldItem = inputLayout.addFormItem(confirmPasswordField, "Passwort wdh.");
         inputLayout.setColspan(confirmPasswordFieldItem, 1);
 
         FormLayout.FormItem changePasswordButtonItem = inputLayout.addFormItem(changePasswordButton, "");
@@ -159,7 +164,7 @@ public class UserDialog extends Dialog
 
         binder.forField(passwordField).asRequired((value, context) ->
         {
-            if(!isChangingPassword)
+            if(!isChangingPassword && !DialogState.NEW.equals(state))
                 return ValidationResult.ok();
             return (passwortRegex.matcher(value).matches())
                     ? ValidationResult.ok()
@@ -167,7 +172,7 @@ public class UserDialog extends Dialog
 
         }).bind((user) -> null,
                 (user, value) -> {
-                    if(isChangingPassword) {
+                    if(isChangingPassword || DialogState.NEW.equals(state)) {
                         user.setPassword(encoder.encode(value));
                     }
                 });
@@ -184,7 +189,7 @@ public class UserDialog extends Dialog
                     : ValidationResult.error("Das Passwort muss mindestens acht Zeichen lang sein, mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl und ein Sonderzeichen enthalten.");
         }).bind((user) -> null,
                 (user, value) -> {
-            if(isChangingPassword) {
+            if(isChangingPassword || DialogState.NEW.equals(state)) {
                 user.setPassword(encoder.encode(value));
             }
         });
@@ -197,6 +202,8 @@ public class UserDialog extends Dialog
         saveButton.setMaxWidth("180px");
         saveButton.addClickListener(e ->
         {
+            logger.info("User Object before saving: {}", binder.getBean().toString());
+
             logger.info("Save button clicked!");
             binder.validate();
             if(binder.isValid())

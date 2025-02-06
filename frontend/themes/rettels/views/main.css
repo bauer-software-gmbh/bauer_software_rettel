@@ -1,7 +1,7 @@
 .main-view{
 	width: 100vw;
     height: 100vh;
-    background-image: url('/images/retti_bildschirm.png');
+    background-image: url('/images/retti_bildschirm.jpg');
     background-size: contain; /* Behält das Seitenverhältnis bei und skaliert das Bild so, dass es in den Container passt */
     background-position: center;
     background-repeat: no-repeat; /* Verhindert Wiederholung */

@@ -38,6 +38,8 @@ import de.bauersoft.views.MainLayout;
 import com.vaadin.flow.component.html.Div;
 import de.bauersoft.views.menue.CreateMenuPdf;
 import jakarta.annotation.security.RolesAllowed;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -59,6 +61,7 @@ public class OffersView extends Div
     private final DatePicker filterDate;
     private Button deleteButton, generatePDF;
     private ComboBox<Field> fieldComboBox;
+    private Logger logger = LoggerFactory.getLogger(OffersView.class);
 
     public OffersView(MenuService menuService, FieldService fieldService, OfferService offerService, MenuRepository menuRepository, FleshRepository fleshRepository)
     {
@@ -85,7 +88,7 @@ public class OffersView extends Div
         this.filterDate.setI18n(new DatePickerLocaleGerman());
 
         // Neue ComboBox für Field hinzufügen
-        fieldComboBox = new ComboBox<>("Field auswählen:");
+        fieldComboBox = new ComboBox<>("Einrichtungsart:");
         fieldComboBox.setItemLabelGenerator(Field::getName); // Anzeige in der ComboBox
         fieldComboBox.setItems(fieldService.findAll());
         fieldComboBox.setValue(fieldService.findAll().get(0)); // Setze Standardwert
@@ -116,10 +119,16 @@ public class OffersView extends Div
 
         this.filterDate.addValueChangeListener(event ->
         {
+            if (event.getValue() == null) return;
+
             this.vonDate = event.getValue().minusDays(event.getValue().getDayOfWeek().getValue() - 1);
             var value = weekCombobox.getValue();
             this.bisDate = this.vonDate.plus(value.amount(), value.unit());
+
+            logger.info("DatePicker changed: {} - {}", vonDate, bisDate);
+
             this.dataProvider.setDateRange(this.vonDate, this.bisDate);
+            this.dataProvider.refreshAll();
         });
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -271,18 +280,31 @@ public class OffersView extends Div
 
     private ComboBox<WeekSelector> getWeekSelectorComboBox()
     {
-
         ComboBox<WeekSelector> weekCombobox = getSelectorComboBox();
+
+        // Erstmaligen Wert setzen und sicherstellen, dass die Methode sich aktualisiert
+        weekCombobox.setValue(new WeekSelector(1, ChronoUnit.WEEKS, "2 Wochen")); // Standard-Wert setzen
+
         weekCombobox.addValueChangeListener(event ->
         {
+            if (this.filterDate.getValue() == null)
+            {
+                logger.warn("⚠️ FilterDate ist null! Setze auf aktuelles Datum.");
+                return; // Falls kein Datum gesetzt ist, keine Änderung
+            }
+
+            this.vonDate = this.filterDate.getValue();
+
             if(!DayOfWeek.MONDAY.equals(this.filterDate.getValue().getDayOfWeek()))
             {
                 this.vonDate = this.filterDate.getValue().minusDays(this.filterDate.getValue().getDayOfWeek().getValue() - 1);
             }
-            this.vonDate = this.filterDate.getValue();
+
             WeekSelector value = event.getValue();
             this.bisDate = this.vonDate.plus(value.amount(), value.unit());
+
             this.dataProvider.setDateRange(this.vonDate, this.bisDate);
+            this.dataProvider.refreshAll();
         });
         return weekCombobox;
     }
@@ -449,7 +471,9 @@ public class OffersView extends Div
 
         this.deleteButton = new Button(VaadinIcon.TRASH.create());
 
-        this.deleteButton.setEnabled(offer.getLocalDate().isAfter(LocalDate.now()));
+        this.deleteButton.setEnabled(!offer.getLocalDate().isBefore(LocalDate.now()));
+
+        logger.info("Offer Date: {} | Today: {}", offer.getLocalDate(), LocalDate.now());
 
         this.deleteButton.addClickListener(event ->
         {
@@ -483,7 +507,13 @@ public class OffersView extends Div
         {
             this.item = item;
             Span name = new Span(item.getName());
-            //name.getElement().setAttribute("title", item.getDescription()); // Tooltip mit Beschreibung
+            name.getElement().setAttribute("title", item.getName()); // Tooltip anzeigen
+            name.getElement().getStyle()
+                    .set("white-space", "nowrap")
+                    .set("overflow", "hidden")
+                    .set("text-overflow", "ellipsis")
+                    .set("max-width", "120px") // oder eine andere Breite setzen
+                    .set("display", "inline-block");
             this.add(name);
         }
 

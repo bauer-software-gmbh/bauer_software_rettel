@@ -56,16 +56,16 @@ public class UnitDialog extends Dialog
 		parentFactorNumberField.setMin(0);
 		parentFactorNumberField.setMax(Float.MAX_VALUE);
 
-		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(shorthandTextField, "shorthand"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(parentComboBox, "parent"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(parentFactorNumberField, "factor"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(shorthandTextField, "Abkürzung"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(parentComboBox, "Parent"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(parentFactorNumberField, "Faktor"), 1);
 
 		binder.forField(nameTextField).asRequired((value, context) ->
 		{
 			return (value != null && !value.isBlank())
 					? ValidationResult.ok()
-					: ValidationResult.error("Name is required");
+					: ValidationResult.error("Name ist erforderlich");
 
 		}).bind(Unit::getName, Unit::setName);
 
@@ -73,7 +73,7 @@ public class UnitDialog extends Dialog
 		{
 			return (value != null && !value.isBlank())
 					? ValidationResult.ok()
-					: ValidationResult.error("Shorthand is required");
+					: ValidationResult.error("Abkürzung ist erforderlich");
 
 		}).bind(Unit::getShorthand, Unit::setShorthand);
 
@@ -83,7 +83,7 @@ public class UnitDialog extends Dialog
 				.bind(Unit::getParentFactor, Unit::setParentFactor);
 		binder.setBean(item);
 
-		Button saveButton = new Button("save");
+		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
 		saveButton.setMinWidth("150px");
 		saveButton.setMaxWidth("180px");
@@ -96,18 +96,18 @@ public class UnitDialog extends Dialog
 				{
 					service.update(binder.getBean());
 					dataProvider.refreshAll();
-					Notification.show("Data updated");
+					Notification.show("Daten wurden aktualisiert");
 					this.close();
 
 				}catch(DataIntegrityViolationException error)
 				{
-					Notification.show("Duplicate entry", 5000, Notification.Position.MIDDLE)
+					Notification.show("Doppelter Eintrag", 5000, Notification.Position.MIDDLE)
 							.addThemeVariants(NotificationVariant.LUMO_ERROR);
 				}
 			}
 		});
 
-		Button cancelButton = new Button("cancel");
+		Button cancelButton = new Button("Abbrechen");
 		cancelButton.addClickShortcut(Key.ESCAPE);
 		cancelButton.setMinWidth("150px");
 		cancelButton.setMaxWidth("180px");

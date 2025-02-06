@@ -51,40 +51,6 @@ public class CreateMenuPdf
             }
         }
 
-//        // Extrahieren des kleinsten und größten Datums aus der Liste
-//        Optional<LocalDate> minDate = menuList.stream()
-//                .map(entry -> LocalDate.parse(entry.get("day").toString(), DateTimeFormatter.ofPattern("dd.MM.yyyy")))
-//                .min(Comparator.naturalOrder());
-//
-//        Optional<LocalDate> maxDate = menuList.stream()
-//                .map(entry -> LocalDate.parse(entry.get("day").toString(), DateTimeFormatter.ofPattern("dd.MM.yyyy")))
-//                .max(Comparator.naturalOrder());
-
-//        if(minDate.isPresent() && maxDate.isPresent())
-//        {
-//            // Formatieren der Daten
-//            String formattedMinDate = minDate.get().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-//            String formattedMaxDate = maxDate.get().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-//
-////            // Erstellen des Basis-Dateinamens
-////            String baseFileName = "C:/Users/KorayAyer/Downloads/Speiseplan_" + fieldName + "_" + formattedMinDate + "-" + formattedMaxDate + ".pdf";
-////
-////            //Überprüfen, ob die Datei existiert und ggf. Zähler hinzufügen
-////
-////            output = baseFileName;
-////            int counter = 1;
-////            File file = new File(output);
-////            while(file.exists())
-////            {
-////                output = baseFileName.replace(".pdf", "(" + counter + ").pdf");
-////                file = new File(output);
-////                counter++;
-////            }
-//        }else
-//        {
-//            System.err.println("Fehler beim Bestimmen des Datumsbereichs.");
-//        }
-
         if(!pdfTemplate.exists())
         {
             System.err.println("Die Quelldatei wurde nicht gefunden.");

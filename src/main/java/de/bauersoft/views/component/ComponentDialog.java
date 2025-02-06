@@ -67,7 +67,7 @@ public class ComponentDialog extends Dialog
 
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(courseComboBox, "Gang"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(courseComboBox, "Menükomponente"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(recipeMultiSelectComboBox, "Rezept"), 1);
 
 		binder.forField(nameTextField).asRequired((value, context) ->

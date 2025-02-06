@@ -19,6 +19,8 @@ import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static org.atmosphere.annotation.AnnotationUtil.logger;
+
 @Service
 public class OffersDataProvider implements DataProvider<LocalDate, Void> {
 
@@ -74,6 +76,7 @@ public class OffersDataProvider implements DataProvider<LocalDate, Void> {
     }
 
     public void setDateRange(LocalDate startDate, LocalDate endDate) {
+        logger.info("setDateRange aufgerufen mit: {} - {}", startDate, endDate);
         Objects.requireNonNull(startDate);
         Objects.requireNonNull(endDate);
         this.startDate = startDate;
