@@ -1,14 +1,17 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.institution.InstitutionMultiplier;
 import de.bauersoft.data.entities.institution.InstitutionMultiplierKey;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import de.bauersoft.data.repositories.institution.InstitutionMultiplierRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -84,9 +87,9 @@ public class InstitutionMultiplierService implements ServiceBase<InstitutionMult
         return null;
     }
 
-    public void updateInstitutionMultipliers()
+    public void deleteAllByInstitution(Institution Institution)
     {
-
+        repository.deleteAllByInstitutionId(Institution.getId());
     }
 }
 

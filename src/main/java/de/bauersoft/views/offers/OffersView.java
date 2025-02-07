@@ -197,7 +197,7 @@ public class OffersView extends Div
                 continue;
             }
 
-            Optional<Offer> offer = offerService.findByLocalDateAndFieldId(date, field.getId());
+            Optional<Offer> offer = offerService.findByLocalDateAndField(date, field);
             if(offer.isPresent())
             {
                 Offer currentOffer = offer.get();

@@ -14,6 +14,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,5 +88,10 @@ public class OrderAllergenService implements ServiceBase<OrderAllergen, OrderAll
     public GridDataRepository<OrderAllergen> getCustomRepository()
     {
         return customRepository;
+    }
+
+    public void updateAll(Collection<OrderAllergen> orderAllergens)
+    {
+        repository.saveAll(orderAllergens);
     }
 }

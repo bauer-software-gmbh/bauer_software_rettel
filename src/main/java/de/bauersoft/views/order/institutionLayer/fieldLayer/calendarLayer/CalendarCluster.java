@@ -1,0 +1,157 @@
+package de.bauersoft.views.order.institutionLayer.fieldLayer.calendarLayer;
+
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.bauersoft.data.entities.institution.InstitutionField;
+import de.bauersoft.data.entities.menu.Menu;
+import de.bauersoft.data.entities.offer.Offer;
+import de.bauersoft.data.entities.order.Order;
+import de.bauersoft.views.order.OrderManager;
+import de.bauersoft.views.order.institutionLayer.fieldLayer.FieldTabSheet;
+import de.bauersoft.views.order.institutionLayer.fieldLayer.calendarLayer.allergenLayer.AllergenComponent;
+import de.bauersoft.views.order.institutionLayer.fieldLayer.calendarLayer.variantLayer.VariantBoxComponent;
+import lombok.Getter;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Stream;
+
+@Getter
+public class CalendarCluster extends VerticalLayout
+{
+    private final OrderManager orderManager;
+    private final FieldTabSheet fieldTabSheet;
+    private final InstitutionField institutionField;
+
+    private final Paragraph paragraph;
+
+    private DatePicker.DatePickerI18n datePickerI18n;
+    private DatePicker datePicker;
+
+    private final Map<LocalDate, VariantBoxComponent> variantBoxComponentMap;
+    private final Map<LocalDate, AllergenComponent> allergenComponentMap;
+    private final Set<Order> orders;
+
+    public CalendarCluster(OrderManager orderManager, FieldTabSheet fieldTabSheet, InstitutionField institutionField)
+    {
+        Objects.requireNonNull(orderManager, "OrderManager cannot be null!");
+        Objects.requireNonNull(fieldTabSheet, "FieldTabSheet cannot be null!");
+        Objects.requireNonNull(institutionField, "InstitutionField cannot be null!");
+
+        this.orderManager = orderManager;
+        this.fieldTabSheet = fieldTabSheet;
+        this.institutionField = institutionField;
+
+        variantBoxComponentMap = new HashMap<>();
+        allergenComponentMap = new HashMap<>();
+        orders = new HashSet<>();
+
+        paragraph = new Paragraph();
+
+        initializeCalendar();
+
+        this.add(datePicker);
+
+        datePicker.addValueChangeListener(event ->
+        {
+            VariantBoxComponent variantBoxComponent = variantBoxComponentMap.get(event.getOldValue());
+            if(variantBoxComponent != null)
+                this.remove(variantBoxComponent);
+
+            AllergenComponent allergenComponent = allergenComponentMap.get(event.getOldValue());
+            if(allergenComponent != null)
+                this.remove(allergenComponent);
+
+            Optional<Offer> offerOptional = orderManager.getOfferService().findByLocalDateAndField(event.getValue(), institutionField.getField());
+            Optional<Order> orderOptional = orderManager.getOrderService().findByLocalDateAndInstitutionAndField(event.getValue(), institutionField.getInstitution(), institutionField.getField());
+            if(offerOptional.isEmpty())
+            {
+                String text = "Für den " + DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN).format(event.getValue()) + " ist kein Angebot vorhanden.";
+                if(orderOptional.isPresent())
+                    text = "Für den " + DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN).format(event.getValue()) + " ist kein Angebot vorhanden. Es wurde jedoch bereits eine Bestellung aufgegeben. Bitte kontaktieren Sie Rettel, dies ist ein Fehler!";
+
+                paragraph.setText(text);
+
+                this.add(paragraph);
+                return;
+            }
+
+            Optional<Menu> menuOptional = offerOptional.get().getMenus().stream().findFirst();
+            if(menuOptional.isEmpty())
+            {
+                String text = "Für den " + DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN).format(event.getValue()) + " ist kein Menü vorhanden.";
+                paragraph.setText(text);
+
+                this.add(paragraph);
+                return;
+            }
+
+            this.remove(paragraph);
+
+            Order order = orderOptional.orElseGet(() ->
+            {
+                Order newOrder = new Order();
+                newOrder.setLocalDate(event.getValue());
+                newOrder.setInstitution(institutionField.getInstitution());
+                newOrder.setField(institutionField.getField());
+
+                return newOrder;
+            });
+
+            orders.add(order);
+
+            variantBoxComponent = variantBoxComponentMap.get(event.getValue());
+            if(variantBoxComponent == null)
+            {
+                variantBoxComponent = new VariantBoxComponent(orderManager, institutionField, this, menuOptional.get(), order);
+                variantBoxComponentMap.put(event.getValue(), variantBoxComponent);
+            }
+
+            allergenComponent = allergenComponentMap.get(event.getValue());
+            if(allergenComponent == null)
+            {
+                allergenComponent = new AllergenComponent(orderManager, institutionField, this, order);
+                allergenComponentMap.put(event.getValue(), allergenComponent);
+            }
+
+            this.add(variantBoxComponent, allergenComponent);
+        });
+
+        datePicker.setValue(LocalDate.now());
+
+        this.setWidthFull();
+        this.setHeightFull();
+    }
+
+    private void initializeCalendar()
+    {
+        datePickerI18n = new DatePicker.DatePickerI18n();
+        datePickerI18n.setWeekdays(Arrays.asList("Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"))
+                .setWeekdaysShort(Arrays.asList("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"))
+                .setMonthNames(Arrays.asList("Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"))
+                .setToday("Heute")
+                .setCancel("Abbrechen")
+                .setFirstDayOfWeek(0);
+
+        datePicker = new DatePicker();
+
+        datePicker.setI18n(datePickerI18n);
+    }
+
+    public boolean validate()
+    {
+        return Stream.concat(
+                variantBoxComponentMap.values().stream().map(VariantBoxComponent::validate),
+                allergenComponentMap.values().stream().map(AllergenComponent::validate)
+        ).allMatch(Boolean::booleanValue);
+    }
+
+    public void save()
+    {
+        orderManager.getOrderService().updateAll(orders);
+        variantBoxComponentMap.values().forEach(VariantBoxComponent::save);
+        allergenComponentMap.values().forEach(AllergenComponent::save);
+    }
+}

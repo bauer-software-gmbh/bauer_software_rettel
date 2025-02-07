@@ -85,4 +85,9 @@ public class InstitutionService implements ServiceBase<Institution, Long>
     {
         return customRepository;
     }
+
+    public List<Institution> findAllByUsersId(Long userId)
+    {
+        return repository.findAllByUsersId(userId);
+    }
 }

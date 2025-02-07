@@ -128,6 +128,7 @@ public class InstitutionView extends Div
 		{
 			event.getItem().ifPresent(item ->
 			{
+				institutionMultiplierService.getRepository().deleteAllByInstitution(item);
 				institutionFieldsService.getRepository().deleteAllByInstitutionId(item.getId());
 				institutionService.delete(item.getId());
 				institutionDataProvider.refreshAll();

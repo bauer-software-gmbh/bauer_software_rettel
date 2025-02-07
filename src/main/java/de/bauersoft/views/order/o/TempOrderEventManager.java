@@ -1,4 +1,4 @@
-package de.bauersoft.views.order;
+package de.bauersoft.views.order.o;
 
 import de.bauersoft.tools.listener.order.OrderAllergenChangeEvent;
 import de.bauersoft.tools.listener.order.OrderDataChangeEvent;

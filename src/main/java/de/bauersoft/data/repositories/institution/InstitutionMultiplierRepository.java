@@ -1,5 +1,6 @@
 package de.bauersoft.data.repositories.institution;
 
+import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.institution.InstitutionMultiplier;
 import de.bauersoft.data.entities.institution.InstitutionMultiplierKey;
 import jakarta.transaction.Transactional;
@@ -31,4 +32,12 @@ public interface InstitutionMultiplierRepository extends JpaRepository<Instituti
             AND im.id.fieldId = :fieldId
     """)
     void deleteByInstitutionIdAndFieldId(Long institutionId, Long fieldId);
+
+    @Transactional
+    @Modifying
+    void deleteAllByInstitution(Institution institution);
+
+    @Transactional
+    @Modifying
+    void deleteAllByInstitutionId(Long institutionId);
 }

@@ -14,8 +14,6 @@ import java.util.Optional;
 
 public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecificationExecutor<Offer>
 {
-    Optional<Offer> findByLocalDateAndFieldId(LocalDate date, Long id);
-
     Optional<Offer> findByLocalDateAndField(LocalDate date, Field value);
 
     @Modifying

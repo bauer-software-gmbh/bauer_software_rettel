@@ -1,6 +1,8 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import de.bauersoft.data.entities.field.Field;
+import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
@@ -13,6 +15,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,5 +90,15 @@ public class OrderService implements ServiceBase<Order, Long>
     public GridDataRepository<Order> getCustomRepository()
     {
         return customRepository;
+    }
+
+    public Optional<Order> findByLocalDateAndInstitutionAndField(LocalDate localDate, Institution institution, Field field)
+    {
+        return repository.findByLocalDateAndInstitutionAndField(localDate, institution, field);
+    }
+
+    public void updateAll(Collection<Order> orders)
+    {
+        repository.saveAll(orders);
     }
 }

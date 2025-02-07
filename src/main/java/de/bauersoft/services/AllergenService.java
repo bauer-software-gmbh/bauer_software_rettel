@@ -85,4 +85,9 @@ public class AllergenService implements ServiceBase<Allergen, Long>
     {
         return customRepository;
     }
+
+    public List<Allergen> findAll()
+    {
+        return repository.findAll();
+    }
 }

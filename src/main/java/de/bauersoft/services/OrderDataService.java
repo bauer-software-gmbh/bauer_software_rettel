@@ -98,4 +98,9 @@ public class OrderDataService implements ServiceBase<OrderData, OrderDataKey>
     {
         return ids.stream().anyMatch(this::existsByVariantId);
     }
+
+    public void updateAll(Collection<OrderData> orderData)
+    {
+        repository.saveAll(orderData);
+    }
 }

@@ -1,16 +1,6 @@
 package de.bauersoft.test;
 
-import de.bauersoft.data.entities.offer.Offer;
-import de.bauersoft.data.entities.order.OrderAllergen;
-import de.bauersoft.data.entities.role.Role;
-import de.bauersoft.data.repositories.field.FieldRepository;
-import de.bauersoft.services.*;
-import de.bauersoft.services.offer.OfferService;
-import de.bauersoft.views.order.TempOrderEventManager;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 
 @Configuration
 public class Start

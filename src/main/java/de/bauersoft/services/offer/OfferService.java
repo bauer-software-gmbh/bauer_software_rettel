@@ -106,9 +106,9 @@ public class OfferService implements ServiceBase<Offer, Long>
         return null;
     }
 
-    public Optional<Offer> findByLocalDateAndFieldId(LocalDate date, Long id)
+    public Optional<Offer> findByLocalDateAndField(LocalDate date, Field field)
     {
-        return repository.findByLocalDateAndFieldId(date, id);
+        return repository.findByLocalDateAndField(date, field);
     }
 
     public boolean existsByMenusId(Long menuId)
