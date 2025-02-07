@@ -1,13 +1,17 @@
 package de.bauersoft.views.order.institutionLayer.fieldLayer.calendarLayer;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.bauersoft.data.entities.institution.InstitutionField;
 import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.entities.offer.Offer;
 import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.views.order.OrderManager;
+import de.bauersoft.views.order.institutionLayer.fieldLayer.FieldTab;
 import de.bauersoft.views.order.institutionLayer.fieldLayer.FieldTabSheet;
 import de.bauersoft.views.order.institutionLayer.fieldLayer.calendarLayer.allergenLayer.AllergenComponent;
 import de.bauersoft.views.order.institutionLayer.fieldLayer.calendarLayer.variantLayer.VariantBoxComponent;
@@ -16,13 +20,12 @@ import lombok.Getter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Stream;
 
 @Getter
 public class CalendarCluster extends VerticalLayout
 {
     private final OrderManager orderManager;
-    private final FieldTabSheet fieldTabSheet;
+    private final FieldTab fieldTab;
     private final InstitutionField institutionField;
 
     private final Paragraph paragraph;
@@ -34,15 +37,15 @@ public class CalendarCluster extends VerticalLayout
     private final Map<LocalDate, AllergenComponent> allergenComponentMap;
     private final Set<Order> orders;
 
-    public CalendarCluster(OrderManager orderManager, FieldTabSheet fieldTabSheet, InstitutionField institutionField)
+    private final Button saveButton;
+
+    public CalendarCluster(OrderManager orderManager, FieldTab fieldTab)
     {
         Objects.requireNonNull(orderManager, "OrderManager cannot be null!");
-        Objects.requireNonNull(fieldTabSheet, "FieldTabSheet cannot be null!");
-        Objects.requireNonNull(institutionField, "InstitutionField cannot be null!");
 
         this.orderManager = orderManager;
-        this.fieldTabSheet = fieldTabSheet;
-        this.institutionField = institutionField;
+        this.fieldTab = fieldTab;
+        this.institutionField = fieldTab.getInstitutionField();
 
         variantBoxComponentMap = new HashMap<>();
         allergenComponentMap = new HashMap<>();
@@ -51,6 +54,54 @@ public class CalendarCluster extends VerticalLayout
         paragraph = new Paragraph();
 
         initializeCalendar();
+
+        saveButton = new Button("Bestellung abschicken!");
+        saveButton.getStyle().set("position", "fixed");
+        saveButton.getStyle().set("bottom", "20px");
+        saveButton.getStyle().set("right", "20px");
+        saveButton.addClickListener(event ->
+        {
+            if(!this.validate()) return;
+
+            try
+            {
+                this.save();
+
+                Notification notification = new Notification();
+                notification.setText("Die Bestellung wurde erfolgreich gespeichert!");
+                notification.setPosition(Notification.Position.MIDDLE);
+                notification.setDuration(5000);
+                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+
+                notification.open();
+
+            }catch(Exception e)
+            {
+                Notification.show("Es ist ein Fehler aufgetreten!", 5000, Notification.Position.MIDDLE)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+
+                e.printStackTrace();
+            }
+        });
+
+        this.add(saveButton);
+
+        this.setWidthFull();
+        this.setHeightFull();
+    }
+
+    private void initializeCalendar()
+    {
+        datePickerI18n = new DatePicker.DatePickerI18n();
+        datePickerI18n.setWeekdays(Arrays.asList("Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"))
+                .setWeekdaysShort(Arrays.asList("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"))
+                .setMonthNames(Arrays.asList("Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"))
+                .setToday("Heute")
+                .setCancel("Abbrechen")
+                .setFirstDayOfWeek(0);
+
+        datePicker = new DatePicker();
+        datePicker.setI18n(datePickerI18n);
 
         this.add(datePicker);
 
@@ -120,32 +171,24 @@ public class CalendarCluster extends VerticalLayout
         });
 
         datePicker.setValue(LocalDate.now());
-
-        this.setWidthFull();
-        this.setHeightFull();
-    }
-
-    private void initializeCalendar()
-    {
-        datePickerI18n = new DatePicker.DatePickerI18n();
-        datePickerI18n.setWeekdays(Arrays.asList("Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"))
-                .setWeekdaysShort(Arrays.asList("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"))
-                .setMonthNames(Arrays.asList("Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"))
-                .setToday("Heute")
-                .setCancel("Abbrechen")
-                .setFirstDayOfWeek(0);
-
-        datePicker = new DatePicker();
-
-        datePicker.setI18n(datePickerI18n);
     }
 
     public boolean validate()
     {
-        return Stream.concat(
-                variantBoxComponentMap.values().stream().map(VariantBoxComponent::validate),
-                allergenComponentMap.values().stream().map(AllergenComponent::validate)
-        ).allMatch(Boolean::booleanValue);
+        boolean allValid = true;
+        for(VariantBoxComponent variantBoxComponent : variantBoxComponentMap.values())
+        {
+            if(!variantBoxComponent.validate())
+                allValid = false;
+        }
+
+        for(AllergenComponent allergenComponent : allergenComponentMap.values())
+        {
+            if(!allergenComponent.validate())
+                allValid = false;
+        }
+
+        return allValid;
     }
 
     public void save()

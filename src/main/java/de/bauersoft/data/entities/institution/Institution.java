@@ -6,6 +6,7 @@ import de.bauersoft.data.entities.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,6 +25,9 @@ public class Institution extends AbstractEntity
     private String description;
 
     private String customerId;
+
+    private LocalTime orderStart = LocalTime.of(0, 0);
+    private LocalTime orderEnd = LocalTime.of(23, 59);
 
     @Column(nullable = false, columnDefinition = "TINYINT(1) default 0")
     private boolean localMultiplier;

@@ -6,7 +6,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import de.bauersoft.data.entities.allergen.Allergen;
 import de.bauersoft.data.entities.institution.InstitutionField;
@@ -20,7 +19,6 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Getter
@@ -81,9 +79,8 @@ public class AllergenComponent extends VerticalLayout
             addAllergenRow(orderAllergen);
         }
 
-        this.getStyle()
-                .set("padding", "0px");
         this.setWidthFull();
+        this.getStyle().setPadding("0px");
     }
 
     private void addAllergenRow(OrderAllergen orderAllergen)
@@ -115,7 +112,14 @@ public class AllergenComponent extends VerticalLayout
 
     public boolean validate()
     {
-        return allergenRows.stream().allMatch(AllergenRow::validate);
+        boolean allValid = true;
+        for(AllergenRow allergenRow : allergenRows)
+        {
+            if(!allergenRow.validate())
+                allValid = false;
+        }
+
+        return allValid;
     }
 
     public void save()

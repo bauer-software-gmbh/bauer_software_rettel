@@ -14,14 +14,10 @@ import de.bauersoft.data.entities.variant.Variant;
 import de.bauersoft.views.order.OrderManager;
 import de.bauersoft.views.order.institutionLayer.fieldLayer.calendarLayer.CalendarCluster;
 import lombok.Getter;
-import org.hibernate.metamodel.mapping.Bindable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Getter
 public class VariantBoxComponent extends HorizontalLayout
@@ -92,7 +88,14 @@ public class VariantBoxComponent extends HorizontalLayout
 
     public boolean validate()
     {
-        return variantBoxMap.values().stream().allMatch(VariantBox::validate);
+        boolean allValid = true;
+        for(VariantBox variantBox : variantBoxMap.values())
+        {
+            if(!variantBox.validate())
+                allValid = false;
+        }
+
+        return allValid;
     }
 
     public void save()
@@ -165,7 +168,7 @@ public class VariantBoxComponent extends HorizontalLayout
 
             amountField = new NumberField();
             amountField.setAllowedCharPattern("[0-9]");
-            amountField.setMax(0);
+            amountField.setMin(0);
             amountField.setMax(Integer.MAX_VALUE);
             amountField.setValue(Integer.valueOf(orderData.getAmount()).doubleValue());
             amountField.setWidthFull();

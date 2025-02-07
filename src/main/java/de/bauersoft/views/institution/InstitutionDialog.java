@@ -19,8 +19,10 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.dom.Style;
 import de.bauersoft.components.Multiplier;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
@@ -38,6 +40,7 @@ import de.bauersoft.views.DialogState;
 import de.bauersoft.views.address.AddressComboBox;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -69,6 +72,9 @@ public class InstitutionDialog extends Dialog
 	private TextField nameTextField;
 	private TextArea descriptionTextArea;
 	private TextField customerIdTextField;
+	private HorizontalLayout datePickerLayout;
+	private TimePicker orderStartTimePicker;
+	private TimePicker orderEndTimePicker;
 	private AddressComboBox addressComboBox;
 	private MultiSelectComboBox<User> userMultiSelectComboBox;
 	private FieldComponent fieldComponent;
@@ -133,6 +139,22 @@ public class InstitutionDialog extends Dialog
 		customerIdTextField.setWidthFull();
 		customerIdTextField.setMaxLength(255);
 
+		datePickerLayout = new HorizontalLayout();
+
+		Span orderStartSpan = new Span("Von ");
+		orderStartSpan.getStyle().setAlignSelf(Style.AlignSelf.CENTER);
+
+		orderStartTimePicker = new TimePicker();
+		orderStartTimePicker.setValue(LocalTime.of(0, 0));
+
+		Span orderEndSpan = new Span(" bis ");
+		orderEndSpan.getStyle().setAlignSelf(Style.AlignSelf.CENTER);
+
+		orderEndTimePicker = new TimePicker();
+		orderEndTimePicker.setValue(LocalTime.of(8, 0));
+
+		datePickerLayout.add(orderStartSpan, orderStartTimePicker, orderEndSpan, orderEndTimePicker);
+
 		addressComboBox = new AddressComboBox(addressService, addressDataProvider);
 		addressComboBox.setRequired(true);
 		addressComboBox.setItemLabelGenerator(address ->
@@ -160,6 +182,7 @@ public class InstitutionDialog extends Dialog
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "description"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(customerIdTextField, "customer id"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(datePickerLayout, "Bestellung"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(addressComboBox, "address"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(userMultiSelectComboBox, "user"), 1);
 
@@ -172,6 +195,23 @@ public class InstitutionDialog extends Dialog
 
 		binder.bind(descriptionTextArea, "description");
 		binder.bind(customerIdTextField, "customerId");
+
+		binder.forField(orderStartTimePicker).withValidator((value, context) ->
+		{
+			return (value.isBefore(orderEndTimePicker.getValue())) ?
+					ValidationResult.ok() :
+					ValidationResult.error("Startzeit muss vor Endzeit liegen!");
+
+		}).bind("orderStart");
+
+		binder.forField(orderEndTimePicker).withValidator((value, context) ->
+		{
+			return (value.isAfter(orderStartTimePicker.getValue())) ?
+					ValidationResult.ok() :
+					ValidationResult.error("Endzeit muss nach Startzeit liegen!");
+
+		}).bind("orderEnd");
+
 		binder.bind(addressComboBox, "address");
 		binder.bind(userMultiSelectComboBox, "users");
 		binder.setBean(item);
