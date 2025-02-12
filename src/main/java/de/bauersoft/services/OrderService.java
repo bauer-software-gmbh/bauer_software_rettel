@@ -101,4 +101,9 @@ public class OrderService implements ServiceBase<Order, Long>
     {
         repository.saveAll(orders);
     }
+
+    public boolean existsByInstitution(Institution institution)
+    {
+        return repository.existsByInstitution(institution);
+    }
 }

@@ -13,5 +13,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 {
     boolean existsByFieldId(Long id);
 
+    boolean existsByInstitution(Institution institution);
+
     Optional<Order> findByLocalDateAndInstitutionAndField(LocalDate localDate, Institution institution, Field field);
 }

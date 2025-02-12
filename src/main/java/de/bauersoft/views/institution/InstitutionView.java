@@ -1,5 +1,6 @@
 package de.bauersoft.views.institution;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.MultiSortPriority;
@@ -7,6 +8,8 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -43,11 +46,12 @@ public class InstitutionView extends Div
 	private InstitutionMultiplierService institutionMultiplierService;
 	private CourseService courseService;
 	private FieldMultiplierService fieldMultiplierService;
+	private OrderService orderService;
 
 	private InstitutionDataProvider institutionDataProvider;
 	private AddressDataProvider addressDataProvider;
 
-	public InstitutionView(InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, AddressService addressService, FieldService fieldService, UserService userService, InstitutionMultiplierService institutionMultiplierService, CourseService courseService, FieldMultiplierService fieldMultiplierService, InstitutionDataProvider institutionDataProvider, AddressDataProvider addressDataProvider)
+	public InstitutionView(InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, AddressService addressService, FieldService fieldService, UserService userService, InstitutionMultiplierService institutionMultiplierService, CourseService courseService, FieldMultiplierService fieldMultiplierService, OrderService orderService, InstitutionDataProvider institutionDataProvider, AddressDataProvider addressDataProvider)
 	{
 		this.institutionService = institutionService;
 		this.institutionFieldsService = institutionFieldsService;
@@ -57,6 +61,7 @@ public class InstitutionView extends Div
         this.institutionMultiplierService = institutionMultiplierService;
         this.courseService = courseService;
         this.fieldMultiplierService = fieldMultiplierService;
+        this.orderService = orderService;
         this.institutionDataProvider = institutionDataProvider;
         this.addressDataProvider = addressDataProvider;
 
@@ -128,7 +133,24 @@ public class InstitutionView extends Div
 		{
 			event.getItem().ifPresent(item ->
 			{
-				institutionMultiplierService.getRepository().deleteAllByInstitution(item);
+				if(orderService.existsByInstitution(item))
+				{
+					Div div = new Div();
+					div.setMaxWidth("33vw");
+					div.getStyle().set("white-space", "normal");
+					div.getStyle().set("word-wrap", "break-word");
+
+					div.add(new Text("Die Institution " + item.getName() + " kann nicht gelöscht werden da sie von einigen Bestellungen verwendet wird."));
+
+					Notification notification = new Notification(div);
+					notification.setDuration(5000);
+					notification.setPosition(Notification.Position.MIDDLE);
+					notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+					notification.open();
+					return;
+				}
+
+				institutionMultiplierService.getRepository().deleteAllByInstitutionId(item.getId());
 				institutionFieldsService.getRepository().deleteAllByInstitutionId(item.getId());
 				institutionService.delete(item.getId());
 				institutionDataProvider.refreshAll();

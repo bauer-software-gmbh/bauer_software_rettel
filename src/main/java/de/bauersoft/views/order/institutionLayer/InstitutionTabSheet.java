@@ -3,6 +3,7 @@ package de.bauersoft.views.order.institutionLayer;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
+import com.vaadin.flow.component.tabs.TabSheetVariant;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.views.order.OrderManager;
 import de.bauersoft.views.order.institutionLayer.fieldLayer.FieldTabSheet;

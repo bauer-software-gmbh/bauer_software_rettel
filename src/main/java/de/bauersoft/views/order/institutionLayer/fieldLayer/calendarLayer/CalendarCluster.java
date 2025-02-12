@@ -1,11 +1,17 @@
 package de.bauersoft.views.order.institutionLayer.fieldLayer.calendarLayer;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.dom.Style;
 import de.bauersoft.data.entities.institution.InstitutionField;
 import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.entities.offer.Offer;
@@ -22,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Getter
+@CssImport(value = "./themes/rettels/views/order.css")
 public class CalendarCluster extends VerticalLayout
 {
     private final OrderManager orderManager;
@@ -30,8 +37,13 @@ public class CalendarCluster extends VerticalLayout
 
     private final Paragraph paragraph;
 
+    private HorizontalLayout calendarLayout;
+
     private DatePicker.DatePickerI18n datePickerI18n;
     private DatePicker datePicker;
+
+    private TimePicker orderStart;
+    private TimePicker orderEnd;
 
     private final Map<LocalDate, VariantBoxComponent> variantBoxComponentMap;
     private final Map<LocalDate, AllergenComponent> allergenComponentMap;
@@ -55,6 +67,23 @@ public class CalendarCluster extends VerticalLayout
 
         initializeCalendar();
 
+        orderStart = new TimePicker("Bestellzeitraum von", institutionField.getInstitution().getOrderStart());
+        orderStart.setReadOnly(true);
+        orderStart.getStyle()
+                .setMaxWidth("10em")
+                .set("tabindex", "-1");
+        orderStart.getElement()
+                .setAttribute("tabindex", "-1");
+
+        orderEnd = new TimePicker("bis", institutionField.getInstitution().getOrderEnd());
+        orderEnd.setReadOnly(true);
+        orderEnd.getStyle()
+                .setMaxWidth("10em");
+        orderEnd.getElement()
+                .setAttribute("tabindex", "-1");
+
+        calendarLayout.add(orderStart, orderEnd);
+
         saveButton = new Button("Bestellung abschicken!");
         saveButton.getStyle().set("position", "fixed");
         saveButton.getStyle().set("bottom", "20px");
@@ -66,6 +95,11 @@ public class CalendarCluster extends VerticalLayout
             try
             {
                 this.save();
+
+                fieldTab.getTab()
+                        .getStyle()
+                        .setColor("green")
+                        .setFontWeight(Style.FontWeight.BOLD);
 
                 Notification notification = new Notification();
                 notification.setText("Die Bestellung wurde erfolgreich gespeichert!");
@@ -100,10 +134,12 @@ public class CalendarCluster extends VerticalLayout
                 .setCancel("Abbrechen")
                 .setFirstDayOfWeek(0);
 
-        datePicker = new DatePicker();
+        datePicker = new DatePicker("Bestelldatum");
         datePicker.setI18n(datePickerI18n);
 
-        this.add(datePicker);
+        calendarLayout = new HorizontalLayout(datePicker);
+
+        this.add(calendarLayout);
 
         datePicker.addValueChangeListener(event ->
         {

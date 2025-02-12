@@ -13,6 +13,7 @@ import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.providers.FieldDataProvider;
 import de.bauersoft.services.*;
+import de.bauersoft.services.offer.OfferService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
@@ -30,7 +31,7 @@ public class FieldView extends Div
 					 InstitutionService institutionService,
 					 InstitutionFieldsService institutionFieldsService,
 					 FieldMultiplierService fieldMultiplierService,
-					 CourseService courseService)
+					 CourseService courseService, OfferService offerService)
     {
         setClassName("content");
 
@@ -93,8 +94,27 @@ public class FieldView extends Div
 					cancel = true;
 				}
 
+				if(offerService.existsByField(item))
+				{
+					Div div = new Div();
+					div.setMaxWidth("33vw");
+					div.getStyle().set("white-space", "normal");
+					div.getStyle().set("word-wrap", "break-word");
+
+					div.add(new Text("Das Field \"" + item.getName() + "\" kann nicht gelöscht werden da es noch von einigen Angeboten verwendet wird."));
+
+					Notification notification = new Notification(div);
+					notification.setDuration(5000);
+					notification.setPosition(Notification.Position.MIDDLE);
+					notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+					notification.open();
+
+					cancel = true;
+				}
+
 				if(cancel) return;
 
+				fieldMultiplierService.deleteAllByFieldId(item.getId());
 				service.delete(item.getId());
 				dataProvider.refreshAll();
 			});

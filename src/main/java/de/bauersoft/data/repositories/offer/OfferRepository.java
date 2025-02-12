@@ -22,4 +22,6 @@ public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecific
     void deleteByIdAndMenusId(@Param("offerId") Long offerId, @Param("menuId") Long menuId);
 
     boolean existsByMenusId(Long menuId);
+
+    boolean existsByField(Field field);
 }

@@ -86,4 +86,9 @@ public class FieldMultiplierService implements ServiceBase<FieldMultiplier, Fiel
         return null;
     }
 
+    public void deleteAllByFieldId(Long fieldId)
+    {
+        repository.deleteAllByFieldId(fieldId);
+    }
+
 }

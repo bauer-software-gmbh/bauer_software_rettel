@@ -35,9 +35,10 @@ public interface InstitutionMultiplierRepository extends JpaRepository<Instituti
 
     @Transactional
     @Modifying
-    void deleteAllByInstitution(Institution institution);
-
-    @Transactional
-    @Modifying
+    @Query("""
+            DELETE FROM InstitutionMultiplier im
+            WHERE im.id.institutionId = :institutionId
+    """)
     void deleteAllByInstitutionId(Long institutionId);
+
 }

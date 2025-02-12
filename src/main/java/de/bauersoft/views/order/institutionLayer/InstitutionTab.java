@@ -4,6 +4,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.tabs.Tab;
 import de.bauersoft.data.entities.institution.Institution;
+import de.bauersoft.data.entities.role.Role;
 import de.bauersoft.views.order.OrderManager;
 import de.bauersoft.views.order.institutionLayer.fieldLayer.FieldTabSheet;
 import lombok.Getter;
@@ -22,7 +23,7 @@ public class InstitutionTab extends Div
 
     public final Tab tab;
 
-    private final Timer scheduler;
+    private Timer scheduler;
 
     public FieldTabSheet fieldTabSheet;
     public OrderRestrictionScreen orderRestrictionScreen;
@@ -39,27 +40,30 @@ public class InstitutionTab extends Div
         fieldTabSheet = new FieldTabSheet(orderManager, this);
         this.add(fieldTabSheet);
 
-        LocalDateTime orderEndDateTime = LocalDateTime.of(LocalDate.now(), institution.getOrderEnd());
-        Date orderEndDate = Date.from(orderEndDateTime.atZone(ZoneId.systemDefault()).toInstant());
+       if(!orderManager.getUser().getRoles().contains(Role.ADMIN))
+       {
+           LocalDateTime orderEndDateTime = LocalDateTime.of(LocalDate.now(), institution.getOrderEnd());
+           Date orderEndDate = Date.from(orderEndDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        UI currentUI = UI.getCurrent();
+           UI currentUI = UI.getCurrent();
 
-        scheduler = new Timer();
-        scheduler.schedule(new TimerTask()
-        {
-            @Override
-            public void run()
-            {
-                currentUI.access(() ->
-                {
-                    orderRestrictionScreen = new OrderRestrictionScreen(orderManager, institution);
-                    if(fieldTabSheet != null)
-                        InstitutionTab.this.remove(fieldTabSheet);
+           scheduler = new Timer();
+           scheduler.schedule(new TimerTask()
+           {
+               @Override
+               public void run()
+               {
+                   currentUI.access(() ->
+                   {
+                       orderRestrictionScreen = new OrderRestrictionScreen(orderManager, institution);
+                       if(fieldTabSheet != null)
+                           InstitutionTab.this.remove(fieldTabSheet);
 
-                    InstitutionTab.this.add(orderRestrictionScreen);
-                });
-            }
-        }, orderEndDate);
+                       InstitutionTab.this.add(orderRestrictionScreen);
+                   });
+               }
+           }, orderEndDate);
+       }
 
         this.setWidthFull();
         this.setHeightFull();

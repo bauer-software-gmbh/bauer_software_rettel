@@ -115,4 +115,9 @@ public class OfferService implements ServiceBase<Offer, Long>
     {
         return repository.existsByMenusId(menuId);
     }
+
+    public boolean existsByField(Field field)
+    {
+        return repository.existsByField(field);
+    }
 }

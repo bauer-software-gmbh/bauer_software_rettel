@@ -87,9 +87,9 @@ public class InstitutionMultiplierService implements ServiceBase<InstitutionMult
         return null;
     }
 
-    public void deleteAllByInstitution(Institution Institution)
+    public void deleteAllByInstitutionId(Long InstitutionId)
     {
-        repository.deleteAllByInstitutionId(Institution.getId());
+        repository.deleteAllByInstitutionId(InstitutionId);
     }
 }
 
