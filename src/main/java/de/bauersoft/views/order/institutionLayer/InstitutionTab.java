@@ -40,7 +40,8 @@ public class InstitutionTab extends Div
         fieldTabSheet = new FieldTabSheet(orderManager, this);
         this.add(fieldTabSheet);
 
-       if(!orderManager.getUser().getRoles().contains(Role.ADMIN))
+       if(!orderManager.getUser().getRoles().contains(Role.ADMIN) &&
+               !orderManager.getUser().getRoles().contains(Role.ORDER_TIME_BYPASS))
        {
            LocalDateTime orderEndDateTime = LocalDateTime.of(LocalDate.now(), institution.getOrderEnd());
            Date orderEndDate = Date.from(orderEndDateTime.atZone(ZoneId.systemDefault()).toInstant());

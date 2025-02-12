@@ -26,6 +26,7 @@ import de.bauersoft.data.entities.flesh.Flesh;
 import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.entities.offer.Offer;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
+import de.bauersoft.data.entities.role.Role;
 import de.bauersoft.data.entities.variant.Variant;
 import de.bauersoft.data.repositories.flesh.FleshRepository;
 import de.bauersoft.data.repositories.menu.MenuRepository;
@@ -38,6 +39,7 @@ import de.bauersoft.tools.DatePickerLocaleGerman;
 import de.bauersoft.views.MainLayout;
 import com.vaadin.flow.component.html.Div;
 import de.bauersoft.views.menue.CreateMenuPdf;
+import jakarta.annotation.security.RolesAllowed;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -47,7 +49,7 @@ import java.util.*;
 
 @PageTitle("offers")
 @Route(value = "offers", layout = MainLayout.class)
-@AnonymousAllowed
+@RolesAllowed("ADMIN")
 public class OffersView extends Div
 {
     private final OffersDataProvider dataProvider;

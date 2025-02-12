@@ -4,6 +4,7 @@ public enum Role
 {
     USER,
     ORDERER,
+    ORDER_TIME_BYPASS,
     STAFF,
     CHEF,
     ACCOUNTENT,

@@ -21,7 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 @PageTitle("Bestellübersicht")
 @Route(value = "order", layout = MainLayout.class)
-@RolesAllowed(value = {"ADMIN", "ACCOUNTENT"})
+@RolesAllowed(value = {"ADMIN", "ORDERER"})
 public class OrderView extends Div
 {
 
