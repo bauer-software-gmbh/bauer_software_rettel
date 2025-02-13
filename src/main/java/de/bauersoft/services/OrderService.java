@@ -1,6 +1,9 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import de.bauersoft.data.entities.additive.Additive;
+import de.bauersoft.data.entities.field.Field;
+import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
@@ -13,6 +16,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,9 +46,45 @@ public class OrderService implements ServiceBase<Order, Long>
     }
 
     @Override
-    public void delete(Long id)
+    public List<Order> updateAll(Collection<Order> entities)
+    {
+        return repository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(Order entity)
+    {
+        repository.delete(entity);
+    }
+
+    @Override
+    public void deleteById(Long id)
     {
         repository.deleteById(id);
+    }
+
+    @Override
+    public void deleteAll(Collection<Order> entities)
+    {
+        repository.deleteAll(entities);
+    }
+
+    @Override
+    public void deleteAll()
+    {
+        repository.deleteAll();
+    }
+
+    @Override
+    public void deleteAllById(Collection<Long> ids)
+    {
+        repository.deleteAllById(ids);
+    }
+
+    @Override
+    public List<Order> findAll()
+    {
+        return repository.findAll();
     }
 
     @Override
@@ -86,5 +127,15 @@ public class OrderService implements ServiceBase<Order, Long>
     public GridDataRepository<Order> getCustomRepository()
     {
         return customRepository;
+    }
+
+    public Optional<Order> findByLocalDateAndInstitutionAndField(LocalDate localDate, Institution institution, Field field)
+    {
+        return repository.findByLocalDateAndInstitutionAndField(localDate, institution, field);
+    }
+
+    public boolean existsByInstitution(Institution institution)
+    {
+        return repository.existsByInstitution(institution);
     }
 }

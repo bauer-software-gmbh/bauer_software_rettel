@@ -1,9 +1,11 @@
 package de.bauersoft.data.entities.institution;
 
 import de.bauersoft.data.entities.course.Course;
-import de.bauersoft.data.entities.field.Field;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "institution_multiplier")
@@ -11,30 +13,24 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class InstitutionMultiplier
 {
     @EmbeddedId
     private InstitutionMultiplierKey id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("institutionId")
-    @JoinColumn(name = "institution_id")
-    private Institution institution;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("fieldId")
-    @JoinColumn(name = "field_id")
-    private Field field;
+    @MapsId("institutionFieldId")
+    @JoinColumn(name = "institution_field_id", referencedColumnName = "id")
+    private InstitutionField institutionField;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("courseId")
-    @JoinColumn(name = "course_id")
+    @JoinColumn(name = "course_id", referencedColumnName = "id")
     private Course course;
 
-    @Column(nullable = false, columnDefinition = "DOUBLE default 1.0")
+    @Column(name = "multiplier", columnDefinition = "double default 1.0")
     private double multiplier;
 
-    @Column(nullable = false, columnDefinition = "TINYINT(1) default 0")
     private boolean isLocal;
+
 }

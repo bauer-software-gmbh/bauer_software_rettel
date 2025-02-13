@@ -1,6 +1,7 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.ingredient.Ingredient;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,9 +41,45 @@ public class IngredientService implements ServiceBase<Ingredient, Long>
     }
 
     @Override
-    public void delete(Long id)
+    public List<Ingredient> updateAll(Collection<Ingredient> entities)
+    {
+        return repository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(Ingredient entity)
+    {
+        repository.delete(entity);
+    }
+
+    @Override
+    public void deleteById(Long id)
     {
         repository.deleteById(id);
+    }
+
+    @Override
+    public void deleteAll(Collection<Ingredient> entities)
+    {
+        repository.deleteAll(entities);
+    }
+
+    @Override
+    public void deleteAll()
+    {
+        repository.deleteAll();
+    }
+
+    @Override
+    public void deleteAllById(Collection<Long> ids)
+    {
+        repository.deleteAllById(ids);
+    }
+
+    @Override
+    public List<Ingredient> findAll()
+    {
+        return repository.findAll();
     }
 
     @Override

@@ -117,6 +117,8 @@ public class MenuBuilderDialog extends Dialog
 
         Button saveButton = new Button("Speichern");
         saveButton.addClickShortcut(Key.ENTER);
+        saveButton.setMinWidth("150px");
+        saveButton.setMaxWidth("180px");
         saveButton.addClickListener(event ->
         {
             binder.validate();
@@ -147,7 +149,8 @@ public class MenuBuilderDialog extends Dialog
 
         Button cancelButton = new Button("Abbruch");
         cancelButton.addClickShortcut(Key.ESCAPE);
-
+        cancelButton.setMinWidth("150px");
+        cancelButton.setMaxWidth("180px");
         cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         cancelButton.addClickListener(event ->
         {
@@ -162,7 +165,7 @@ public class MenuBuilderDialog extends Dialog
 //        this.setWidth("50vw");
 //        this.setMaxWidth("50vw");
 
-        this.getFooter().add(new HorizontalLayout(cancelButton, saveButton));
+        this.getFooter().add(new HorizontalLayout(saveButton, cancelButton));
         this.setCloseOnEsc(false);
         this.setCloseOnOutsideClick(false);
         this.setModal(true);

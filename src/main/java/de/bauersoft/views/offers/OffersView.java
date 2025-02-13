@@ -25,6 +25,7 @@ import de.bauersoft.data.entities.flesh.Flesh;
 import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.entities.offer.Offer;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
+import de.bauersoft.data.entities.role.Role;
 import de.bauersoft.data.entities.variant.Variant;
 import de.bauersoft.data.providers.OffersDataProvider;
 import de.bauersoft.services.FieldService;
@@ -183,7 +184,7 @@ public class OffersView extends Div
                 continue;
             }
 
-            Optional<Offer> offer = offerService.findByLocalDateAndFieldId(date, field.getId());
+            Optional<Offer> offer = offerService.findByLocalDateAndField(date, field);
             if(offer.isPresent())
             {
                 Offer currentOffer = offer.get();

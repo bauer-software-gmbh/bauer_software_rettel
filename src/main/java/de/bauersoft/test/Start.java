@@ -1,16 +1,10 @@
 package de.bauersoft.test;
 
-import de.bauersoft.data.entities.offer.Offer;
-import de.bauersoft.data.entities.order.OrderAllergen;
 import de.bauersoft.data.entities.role.Role;
-import de.bauersoft.data.repositories.field.FieldRepository;
-import de.bauersoft.services.*;
-import de.bauersoft.services.offer.OfferService;
-import de.bauersoft.views.order.TempOrderEventManager;
+import de.bauersoft.services.UserService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 
 @Configuration
 public class Start
@@ -44,7 +38,7 @@ public class Start
 //            }
         };
     }
-
+*/
     @Bean
     public CommandLineRunner autoStart(UserService userService)
     {
@@ -56,5 +50,4 @@ public class Start
             userService.createUser("Milan", "Krall", "krall@bauer-soft.de", "1234", Role.values());
         };
     }
-*/
 }

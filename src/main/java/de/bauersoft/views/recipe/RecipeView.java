@@ -90,7 +90,7 @@ public class RecipeView extends Div
                 }
 
                 formulationService.getRepository().deleteAllByRecipeId(item.getId());
-                recipeService.delete(item.getId());
+                recipeService.deleteById(item.getId());
 
                 recipeDataProvider.refreshAll();
             });

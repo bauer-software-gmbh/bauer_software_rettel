@@ -10,6 +10,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -26,7 +27,7 @@ public class Order extends AbstractEntity
 {
 
     @Column(nullable = false)
-    private LocalDate orderDate;
+    private LocalDate localDate;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
@@ -39,16 +40,16 @@ public class Order extends AbstractEntity
     private Field field;
 
     @OneToMany(mappedBy = "_order", fetch = FetchType.EAGER)
-    private Set<OrderData> orderData;
+    private Set<OrderData> orderData = new HashSet<>();
 
     @OneToMany(mappedBy = "_order", fetch = FetchType.EAGER)
-    private Set<OrderAllergen> orderAllergens;
+    private Set<OrderAllergen> orderAllergens = new HashSet<>();
 
     @Override
     public String toString()
     {
         return "Order{" +
-                "orderDate=" + orderDate +
+                "orderDate=" + localDate +
                 ", institution=" + institution +
                 ", field=" + field +
                 ", orderData=" + orderData +

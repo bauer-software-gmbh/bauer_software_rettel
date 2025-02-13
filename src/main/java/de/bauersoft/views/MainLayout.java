@@ -30,6 +30,7 @@ import de.bauersoft.views.institution.InstitutionView;
 import de.bauersoft.views.menuBuilder.MenuBuilderView;
 import de.bauersoft.views.menue.MenueView;
 import de.bauersoft.views.offers.OffersView;
+import de.bauersoft.views.order.OrderView;
 import de.bauersoft.views.pattern.PatternView;
 import de.bauersoft.views.recipe.RecipeView;
 import de.bauersoft.views.unit.UnitView;
@@ -113,6 +114,11 @@ public class MainLayout extends AppLayout {
 
 		if (accessChecker.hasAccess(MenueView.class)) {
 			nav.addItem(new SideNavItem("Speiseplan", MenueView.class, LineAwesomeIcon.UTENSILS_SOLID.create()));
+		}
+
+		if(accessChecker.hasAccess(OrderView.class))
+		{
+			nav.addItem(new SideNavItem("Bestellungen", OrderView.class, LineAwesomeIcon.CLIPBOARD_SOLID.create()));
 		}
 //		if (accessChecker.hasAccess(DashboardView.class)) {
 //			nav.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.CHART_AREA_SOLID.create()));

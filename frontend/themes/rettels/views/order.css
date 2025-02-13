@@ -1,0 +1,8 @@
+.tabsheet-green vaadin-tab.permanent-selected {
+    color: green;
+}
+
+.custom-tabsheet vaadin-tab[selected]::before,
+.custom-tabsheet vaadin-tab[selected]::after {
+    background-color: darkred;
+}

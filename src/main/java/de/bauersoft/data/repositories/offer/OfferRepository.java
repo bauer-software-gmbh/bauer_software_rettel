@@ -14,8 +14,6 @@ import java.util.Optional;
 
 public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecificationExecutor<Offer>
 {
-    Optional<Offer> findByLocalDateAndFieldId(LocalDate date, Long id);
-
     Optional<Offer> findByLocalDateAndField(LocalDate date, Field value);
 
     @Modifying
@@ -24,4 +22,6 @@ public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecific
     void deleteByIdAndMenusId(@Param("offerId") Long offerId, @Param("menuId") Long menuId);
 
     boolean existsByMenusId(Long menuId);
+
+    boolean existsByField(Field field);
 }

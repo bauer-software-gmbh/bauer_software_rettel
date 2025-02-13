@@ -6,13 +6,13 @@ import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import de.bauersoft.data.repositories.variant.VariantGridDataRepository;
 import de.bauersoft.data.repositories.variant.VariantRepository;
-import org.aspectj.weaver.ast.Var;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,9 +41,45 @@ public class VariantService implements ServiceBase<Variant, Long>
     }
 
     @Override
-    public void delete(Long id)
+    public List<Variant> updateAll(Collection<Variant> entities)
+    {
+        return repository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(Variant entity)
+    {
+        repository.delete(entity);
+    }
+
+    @Override
+    public void deleteById(Long id)
     {
         repository.deleteById(id);
+    }
+
+    @Override
+    public void deleteAll(Collection<Variant> entities)
+    {
+        repository.deleteAll(entities);
+    }
+
+    @Override
+    public void deleteAll()
+    {
+        repository.deleteAll();
+    }
+
+    @Override
+    public void deleteAllById(Collection<Long> ids)
+    {
+        repository.deleteAllById(ids);
+    }
+
+    @Override
+    public List<Variant> findAll()
+    {
+        return repository.findAll();
     }
 
     @Override

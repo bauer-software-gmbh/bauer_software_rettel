@@ -4,8 +4,12 @@ import de.bauersoft.data.entities.AbstractEntity;
 import de.bauersoft.data.entities.address.Address;
 import de.bauersoft.data.entities.user.User;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,7 +19,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Institution extends AbstractEntity
 {
     @Column(nullable = false, unique = true)
@@ -24,6 +27,12 @@ public class Institution extends AbstractEntity
     private String description;
 
     private String customerId;
+
+    @Column(nullable = false, columnDefinition = "TIME default '00:00:00'")
+    private LocalTime orderStart = LocalTime.of(0, 0);
+
+    @Column(nullable = false, columnDefinition = "TIME default '23:59:00'")
+    private LocalTime orderEnd = LocalTime.of(23, 59);
 
     @Column(nullable = false, columnDefinition = "TINYINT(1) default 0")
     private boolean localMultiplier;
@@ -41,33 +50,4 @@ public class Institution extends AbstractEntity
     @OneToMany(mappedBy = "institution", fetch = FetchType.EAGER)
     private Set<InstitutionField> institutionFields = new HashSet<>();
 
-    @OneToMany(mappedBy = "institution", fetch = FetchType.EAGER)
-    private Set<InstitutionMultiplier> institutionMultipliers = new HashSet<>();
-
-
-
-    @Override
-    public String toString()
-    {
-        Institution.builder()
-                .customerId("dcdcdc")
-                .build();
-
-        return "Institution{" +
-                "users=" + users +
-                ", address=" + address +
-                ", description='" + description + '\'' +
-                ", name='" + name + '\'' +
-                '}';
-    }
-
-    public boolean useLocalMultiplier()
-    {
-        return localMultiplier;
-    }
-
-    public void setUseLocalMultiplier(boolean localMultiplier)
-    {
-        this.localMultiplier = localMultiplier;
-    }
 }

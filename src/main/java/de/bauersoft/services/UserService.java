@@ -1,6 +1,7 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.role.Role;
 import de.bauersoft.data.entities.user.User;
 import de.bauersoft.data.filters.SerializableFilter;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -45,9 +47,45 @@ public class UserService implements ServiceBase<User, Long>
     }
 
     @Override
-    public void delete(Long id)
+    public List<User> updateAll(Collection<User> entities)
+    {
+        return repository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(User entity)
+    {
+        repository.delete(entity);
+    }
+
+    @Override
+    public void deleteById(Long id)
     {
         repository.deleteById(id);
+    }
+
+    @Override
+    public void deleteAll(Collection<User> entities)
+    {
+        repository.deleteAll(entities);
+    }
+
+    @Override
+    public void deleteAll()
+    {
+        repository.deleteAll();
+    }
+
+    @Override
+    public void deleteAllById(Collection<Long> ids)
+    {
+        repository.deleteAllById(ids);
+    }
+
+    @Override
+    public List<User> findAll()
+    {
+        return repository.findAll();
     }
 
     @Override

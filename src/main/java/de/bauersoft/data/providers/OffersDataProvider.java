@@ -118,7 +118,7 @@ public class OffersDataProvider implements DataProvider<LocalDate, Void> {
         this.menuService.update(menuToDelete);
 
         if (offer.getMenus().isEmpty()) {
-            offerService.delete(offerId);
+            offerService.deleteById(offerId);
         }
 
         refreshAll();

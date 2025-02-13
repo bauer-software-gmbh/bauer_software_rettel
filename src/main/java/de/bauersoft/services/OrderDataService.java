@@ -1,6 +1,7 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.order.OrderData;
 import de.bauersoft.data.entities.order.OrderDataKey;
 import de.bauersoft.data.filters.SerializableFilter;
@@ -42,9 +43,45 @@ public class OrderDataService implements ServiceBase<OrderData, OrderDataKey>
     }
 
     @Override
-    public void delete(OrderDataKey orderDataKey)
+    public List<OrderData> updateAll(Collection<OrderData> entities)
+    {
+        return repository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(OrderData entity)
+    {
+        repository.delete(entity);
+    }
+
+    @Override
+    public void deleteById(OrderDataKey orderDataKey)
     {
         repository.deleteById(orderDataKey);
+    }
+
+    @Override
+    public void deleteAll(Collection<OrderData> entities)
+    {
+        repository.deleteAll(entities);
+    }
+
+    @Override
+    public void deleteAll()
+    {
+        repository.deleteAll();
+    }
+
+    @Override
+    public void deleteAllById(Collection<OrderDataKey> orderDataKeys)
+    {
+        repository.deleteAllById(orderDataKeys);
+    }
+
+    @Override
+    public List<OrderData> findAll()
+    {
+        return repository.findAll();
     }
 
     @Override

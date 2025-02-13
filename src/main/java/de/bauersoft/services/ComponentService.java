@@ -1,6 +1,7 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.component.Component;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,9 +41,45 @@ public class ComponentService implements ServiceBase<Component, Long>
     }
 
     @Override
-    public void delete(Long id)
+    public List<Component> updateAll(Collection<Component> entities)
+    {
+        return repository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(Component entity)
+    {
+        repository.delete(entity);
+    }
+
+    @Override
+    public void deleteById(Long id)
     {
         repository.deleteById(id);
+    }
+
+    @Override
+    public void deleteAll(Collection<Component> entities)
+    {
+        repository.deleteAll(entities);
+    }
+
+    @Override
+    public void deleteAll()
+    {
+        repository.deleteAll();
+    }
+
+    @Override
+    public void deleteAllById(Collection<Long> ids)
+    {
+        repository.deleteAllById(ids);
+    }
+
+    @Override
+    public List<Component> findAll()
+    {
+        return repository.findAll();
     }
 
     @Override
