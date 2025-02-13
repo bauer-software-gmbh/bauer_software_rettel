@@ -81,7 +81,7 @@ public class AdditiveView extends Div
 					return;
 				}
 
-				service.delete(item.getId());
+				service.deleteById(item.getId());
 				dataProvider.refreshAll();
 			});
 		});

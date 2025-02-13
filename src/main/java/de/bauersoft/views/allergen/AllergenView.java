@@ -111,7 +111,7 @@ public class AllergenView extends Div
 
 				if(cancel) return;
 
-				service.delete(item.getId());
+				service.deleteById(item.getId());
 				dataProvider.refreshAll();
 			});
 		});

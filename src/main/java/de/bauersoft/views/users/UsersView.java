@@ -77,7 +77,7 @@ public class UsersView extends Div
 
         contextMenu.addItem("delete", event -> event.getItem().ifPresent(item ->
         {
-            userService.delete(item.getId());
+            userService.deleteById(item.getId());
             userDataProvider.refreshAll();
         }));
 

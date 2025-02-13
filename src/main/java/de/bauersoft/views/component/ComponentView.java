@@ -85,7 +85,7 @@ public class ComponentView extends Div
 					return;
 				}
 
-				componentService.delete(item.getId());
+				componentService.deleteById(item.getId());
 				dataProvider.refreshAll();
 			});
 		});

@@ -1,6 +1,7 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,9 +42,45 @@ public class FieldService implements ServiceBase<Field, Long>
     }
 
     @Override
-    public void delete(Long id)
+    public List<Field> updateAll(Collection<Field> entities)
+    {
+        return repository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(Field entity)
+    {
+        repository.delete(entity);
+    }
+
+    @Override
+    public void deleteById(Long id)
     {
         repository.deleteById(id);
+    }
+
+    @Override
+    public void deleteAll(Collection<Field> entities)
+    {
+        repository.deleteAll(entities);
+    }
+
+    @Override
+    public void deleteAll()
+    {
+        repository.deleteAll();
+    }
+
+    @Override
+    public void deleteAllById(Collection<Long> ids)
+    {
+        repository.deleteAllById(ids);
+    }
+
+    @Override
+    public List<Field> findAll()
+    {
+        return repository.findAll();
     }
 
     @Override
@@ -85,10 +123,5 @@ public class FieldService implements ServiceBase<Field, Long>
     public GridDataRepository<Field> getCustomRepository()
     {
         return customRepository;
-    }
-
-    public List<Field> findAll()
-    {
-        return repository.findAll();
     }
 }

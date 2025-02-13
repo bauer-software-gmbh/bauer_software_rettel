@@ -1,23 +1,27 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.institution.InstitutionField;
-import de.bauersoft.data.entities.institution.InstitutionFieldKey;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
+import de.bauersoft.data.repositories.institution.InstitutionRepository;
 import de.bauersoft.data.repositories.institutionfields.InstitutionFieldsGridDataRepository;
 import de.bauersoft.data.repositories.institutionfields.InstitutionFieldsRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class InstitutionFieldsService implements ServiceBase<InstitutionField, InstitutionFieldKey>
+public class InstitutionFieldsService implements ServiceBase<InstitutionField, Long>
 {
     private final InstitutionFieldsRepository repository;
     private final InstitutionFieldsGridDataRepository customRepository;
@@ -29,9 +33,9 @@ public class InstitutionFieldsService implements ServiceBase<InstitutionField, I
     }
 
     @Override
-    public Optional<InstitutionField> get(InstitutionFieldKey institutionFieldsKey)
+    public Optional<InstitutionField> get(Long id)
     {
-        return repository.findById(institutionFieldsKey);
+        return repository.findById(id);
     }
 
     @Override
@@ -41,9 +45,45 @@ public class InstitutionFieldsService implements ServiceBase<InstitutionField, I
     }
 
     @Override
-    public void delete(InstitutionFieldKey institutionFieldsKey)
+    public List<InstitutionField> updateAll(Collection<InstitutionField> entities)
     {
-        repository.deleteById(institutionFieldsKey);
+        return repository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(InstitutionField entity)
+    {
+        repository.delete(entity);
+    }
+
+    @Override
+    public void deleteById(Long id)
+    {
+        repository.deleteById(id);
+    }
+
+    @Override
+    public void deleteAll(Collection<InstitutionField> entities)
+    {
+        repository.deleteAll(entities);
+    }
+
+    @Override
+    public void deleteAll()
+    {
+        repository.deleteAll();
+    }
+
+    @Override
+    public void deleteAllById(Collection<Long> ids)
+    {
+        repository.deleteAllById(ids);
+    }
+
+    @Override
+    public List<InstitutionField> findAll()
+    {
+        return repository.findAll();
     }
 
     @Override
@@ -86,26 +126,5 @@ public class InstitutionFieldsService implements ServiceBase<InstitutionField, I
     public GridDataRepository<InstitutionField> getCustomRepository()
     {
         return customRepository;
-    }
-
-    public void updateInstitutionFields(List<InstitutionField> oldInstitutionFields, List<InstitutionField> newInstitutionFields)
-    {
-        if(oldInstitutionFields == null)
-            oldInstitutionFields = new ArrayList<>();
-
-        if(newInstitutionFields == null)
-            newInstitutionFields = new ArrayList<>();
-
-        List<InstitutionField> remove = new ArrayList<>();
-        List<InstitutionField> update = new ArrayList<>(newInstitutionFields);
-
-        for(InstitutionField oldInstitutionField : oldInstitutionFields)
-        {
-            if(!newInstitutionFields.contains(oldInstitutionField))
-                remove.add(oldInstitutionField);
-        }
-
-        repository.deleteAll(remove);
-        repository.saveAll(update);
     }
 }

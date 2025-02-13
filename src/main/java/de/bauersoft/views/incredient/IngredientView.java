@@ -87,7 +87,7 @@ public class IngredientView extends Div
         {
             event.getItem().ifPresent(item ->
             {
-                service.delete(item.getId());
+                service.deleteById(item.getId());
                 dataProvider.refreshAll();
             });
         });

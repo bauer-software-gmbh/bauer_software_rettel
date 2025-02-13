@@ -40,6 +40,7 @@ public class CourseDialog extends Dialog
 		nameTextField.setMaxLength(50);
 		nameTextField.setRequired(true);
 		nameTextField.setMinWidth("20em");
+		nameTextField.setAutofocus(true);
 
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
 

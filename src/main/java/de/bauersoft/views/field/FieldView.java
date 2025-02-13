@@ -76,23 +76,24 @@ public class FieldView extends Div
 					cancel = true;
 				}
 
-				if(institutionFieldsService.getRepository().existsByFieldId(item.getId()))
-				{
-					Div div = new Div();
-					div.setMaxWidth("33vw");
-					div.getStyle().set("white-space", "normal");
-					div.getStyle().set("word-wrap", "break-word");
-
-					div.add(new Text("Das Field \"" + item.getName() + "\" kann nicht gelöscht werden da es noch von einigen Institutionen verwendet wird."));
-
-					Notification notification = new Notification(div);
-					notification.setDuration(5000);
-					notification.setPosition(Notification.Position.MIDDLE);
-					notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
-					notification.open();
-
-					cancel = true;
-				}
+				//TODO institutionFields
+//				if(institutionFieldsService.getRepository().existsByFieldId(item.getId()))
+//				{
+//					Div div = new Div();
+//					div.setMaxWidth("33vw");
+//					div.getStyle().set("white-space", "normal");
+//					div.getStyle().set("word-wrap", "break-word");
+//
+//					div.add(new Text("Das Field \"" + item.getName() + "\" kann nicht gelöscht werden da es noch von einigen Institutionen verwendet wird."));
+//
+//					Notification notification = new Notification(div);
+//					notification.setDuration(5000);
+//					notification.setPosition(Notification.Position.MIDDLE);
+//					notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+//					notification.open();
+//
+//					cancel = true;
+//				}
 
 				if(offerService.existsByField(item))
 				{
@@ -115,7 +116,7 @@ public class FieldView extends Div
 				if(cancel) return;
 
 				fieldMultiplierService.deleteAllByFieldId(item.getId());
-				service.delete(item.getId());
+				service.deleteById(item.getId());
 				dataProvider.refreshAll();
 			});
 		});
