@@ -6,7 +6,7 @@ import de.bauersoft.data.entities.component.Component;
 import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.ingredient.Ingredient;
-import de.bauersoft.data.entities.institution.Institution;
+import de.bauersoft.data.entities.institution.*;
 import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.entities.offer.Offer;
 import de.bauersoft.data.entities.order.*;
@@ -20,6 +20,7 @@ import de.bauersoft.services.offer.OfferService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -27,6 +28,119 @@ import java.util.*;
 @Configuration
 public class AutoInitializer
 {
+
+    @Bean
+    @Order(2)
+    public CommandLineRunner testInits(InstitutionService institutionService,
+                                       InstitutionFieldsService institutionFieldsService,
+                                       InstitutionAllergenService institutionAllergenService,
+                                       InstitutionMultiplierService institutionMultiplierService,
+                                       InstitutionPatternService institutionPatternService,
+                                       FieldService fieldService,
+                                       CourseService courseService,
+                                       AllergenService allergenService,
+                                       PatternService patternService)
+    {
+        return args ->
+        {
+            for(int i = courseService.findAll().size(); i < 5; i++)
+            {
+                Course course = new Course();
+                course.setName(UUID.randomUUID().toString());
+
+                courseService.update(course);
+            }
+
+            for(int i = allergenService.findAll().size(); i < 5; i++)
+            {
+                Allergen allergen = new Allergen();
+                allergen.setName(UUID.randomUUID().toString());
+
+                allergenService.update(allergen);
+            }
+
+            for(int i = institutionService.findAll().size(); i < 2; i++)
+            {
+                Institution institution = new Institution();
+                institution.setName(UUID.randomUUID().toString());
+
+                for(Field field : fieldService.findAll())
+                {
+                    InstitutionField institutionField = new InstitutionField();
+                    institutionField.setInstitution(institution);
+                    institutionField.setField(field);
+                    institutionField.setChildCount(20);
+
+                    institution.getInstitutionFields().add(institutionField);
+                }
+
+                institutionService.update(institution);
+
+                institutionFieldsService.updateAll(institution.getInstitutionFields());
+            }
+
+            for(InstitutionField institutionField : institutionFieldsService.findAll())
+            {
+                for(Course course : courseService.findAll())
+                {
+                    InstitutionMultiplierKey key = new InstitutionMultiplierKey();
+                    key.setInstitutionFieldId(institutionField.getId());
+                    key.setCourseId(course.getId());
+
+                    InstitutionMultiplier institutionMultiplier = new InstitutionMultiplier();
+                    institutionMultiplier.setId(key);
+                    institutionMultiplier.setInstitutionField(institutionField);
+                    institutionMultiplier.setCourse(course);
+                    institutionMultiplier.setMultiplier(1);
+
+                    institutionField.getInstitutionMultipliers().add(institutionMultiplier);
+                }
+
+                institutionMultiplierService.updateAll(institutionField.getInstitutionMultipliers());
+            }
+
+            for(InstitutionField institutionField : institutionFieldsService.findAll())
+            {
+                for(Pattern pattern : patternService.findAll())
+                {
+                    InstitutionPatternKey key = new InstitutionPatternKey();
+                    key.setInstitutionFieldId(institutionField.getId());
+                    key.setPatternId(pattern.getId());
+
+                    InstitutionPattern institutionPattern = new InstitutionPattern();
+                    institutionPattern.setId(key);
+                    institutionPattern.setInstitutionField(institutionField);
+                    institutionPattern.setPattern(pattern);
+                    institutionPattern.setAmount(20);
+
+                    institutionField.getInstitutionPatterns().add(institutionPattern);
+                }
+
+                institutionPatternService.updateAll(institutionField.getInstitutionPatterns());
+            }
+
+            for(InstitutionField institutionField : institutionFieldsService.findAll())
+            {
+                for(Allergen allergen : allergenService.findAll())
+                {
+                    InstitutionAllergenKey key = new InstitutionAllergenKey();
+                    key.setInstitutionFieldId(institutionField.getId());
+                    key.setAllergenId(allergen.getId());
+
+                    InstitutionAllergen institutionAllergen = new InstitutionAllergen();
+                    institutionAllergen.setId(key);
+                    institutionAllergen.setInstitutionField(institutionField);
+                    institutionAllergen.setAllergen(allergen);
+
+                    institutionField.getInstitutionAllergens().add(institutionAllergen);
+                }
+
+                institutionAllergenService.updateAll(institutionField.getInstitutionAllergens());
+            }
+
+        };
+    }
+
 /*
     @Bean
     @org.springframework.core.annotation.Order(2)

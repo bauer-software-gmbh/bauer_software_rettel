@@ -116,7 +116,7 @@ public class MenuBuilderView extends Div
                 System.out.println(message);
 
                 variantService.deleteAllByMenuId(item.getId());
-                menuService.delete(item.getId());
+                menuService.deleteById(item.getId());
 
                 menuDataProvider.refreshAll();
             });

@@ -16,6 +16,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,9 +45,45 @@ public class OfferService implements ServiceBase<Offer, Long>
     }
 
     @Override
-    public void delete(Long id)
+    public List<Offer> updateAll(Collection<Offer> entities)
+    {
+        return repository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(Offer entity)
+    {
+        repository.delete(entity);
+    }
+
+    @Override
+    public void deleteById(Long id)
     {
         repository.deleteById(id);
+    }
+
+    @Override
+    public void deleteAll(Collection<Offer> entities)
+    {
+        repository.deleteAll(entities);
+    }
+
+    @Override
+    public void deleteAllById(Collection<Long> ids)
+    {
+        repository.deleteAllById(ids);
+    }
+
+    @Override
+    public void deleteAll()
+    {
+        repository.deleteAll();
+    }
+
+    @Override
+    public List<Offer> findAll()
+    {
+        return repository.findAll();
     }
 
     @Override

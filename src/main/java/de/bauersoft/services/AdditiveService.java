@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,9 +40,45 @@ public class AdditiveService implements ServiceBase<Additive, Long>
     }
 
     @Override
-    public void delete(Long id)
+    public List<Additive> updateAll(Collection<Additive> entities)
+    {
+        return repository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(Additive entity)
+    {
+        repository.delete(entity);
+    }
+
+    @Override
+    public void deleteById(Long id)
     {
         repository.deleteById(id);
+    }
+
+    @Override
+    public void deleteAll(Collection<Additive> entities)
+    {
+        repository.deleteAll(entities);
+    }
+
+    @Override
+    public void deleteAll()
+    {
+        repository.deleteAll();
+    }
+
+    @Override
+    public void deleteAllById(Collection<Long> ids)
+    {
+        repository.deleteAllById(ids);
+    }
+
+    @Override
+    public List<Additive> findAll()
+    {
+        return repository.findAll();
     }
 
     @Override

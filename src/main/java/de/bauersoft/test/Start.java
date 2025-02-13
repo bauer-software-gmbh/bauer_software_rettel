@@ -1,5 +1,9 @@
 package de.bauersoft.test;
 
+import de.bauersoft.data.entities.role.Role;
+import de.bauersoft.services.UserService;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -34,7 +38,7 @@ public class Start
 //            }
         };
     }
-
+*/
     @Bean
     public CommandLineRunner autoStart(UserService userService)
     {
@@ -45,6 +49,6 @@ public class Start
 
             userService.createUser("Milan", "Krall", "krall@bauer-soft.de", "1234", Role.values());
         };
-    }*/
+    }
 
 }

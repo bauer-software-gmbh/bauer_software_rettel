@@ -124,6 +124,9 @@ public class AllergenComponent extends VerticalLayout
 
     public void save()
     {
+        if(order.getId() != null)
+            orderManager.getOrderAllergenService().deleteAllByOrderId(order.getId());
+
         allergenRows.forEach(AllergenRow::save);
     }
 
@@ -182,7 +185,7 @@ public class AllergenComponent extends VerticalLayout
 
             amountField = new NumberField();
             amountField.setAllowedCharPattern("[0-9]");
-            amountField.setMaxWidth("3vw");
+            amountField.setMaxWidth("3em");
             amountField.setMin(0);
             amountField.setMax(Integer.MAX_VALUE);
 
@@ -207,6 +210,7 @@ public class AllergenComponent extends VerticalLayout
             orderAllergen.getId().setOrderId(order.getId());
             orderAllergen.getId().setAllergenId(allergenComboBox.getValue().getId());
             orderAllergen.setAllergen(allergenComboBox.getValue());
+
             orderAllergen.setAmount(amountField.getValue().intValue());
 
             orderManager.getOrderAllergenService().update(orderAllergen);

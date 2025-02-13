@@ -83,7 +83,7 @@ public class AddressView extends Div
 					return;
 				}
 
-				addressService.delete(item.getId());
+				addressService.deleteById(item.getId());
 				addressDataProvider.refreshAll();
 			});
 		});

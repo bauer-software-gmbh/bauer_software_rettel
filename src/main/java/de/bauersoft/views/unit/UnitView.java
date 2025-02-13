@@ -81,7 +81,7 @@ public class UnitView extends Div {
 					return;
 				}
 
-				unitService.delete(item.getId());
+				unitService.deleteById(item.getId());
 				dataProvider.refreshAll();
 			});
 		});

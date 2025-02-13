@@ -10,8 +10,6 @@ import de.bauersoft.data.repositories.order.OrderAllergenRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -43,9 +41,45 @@ public class OrderAllergenService implements ServiceBase<OrderAllergen, OrderAll
     }
 
     @Override
-    public void delete(OrderAllergenKey orderAllergenKey)
+    public List<OrderAllergen> updateAll(Collection<OrderAllergen> entities)
+    {
+        return repository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(OrderAllergen entity)
+    {
+        repository.delete(entity);
+    }
+
+    @Override
+    public void deleteById(OrderAllergenKey orderAllergenKey)
     {
         repository.deleteById(orderAllergenKey);
+    }
+
+    @Override
+    public void deleteAll(Collection<OrderAllergen> entities)
+    {
+        repository.deleteAll(entities);
+    }
+
+    @Override
+    public void deleteAll()
+    {
+        repository.deleteAll();
+    }
+
+    @Override
+    public void deleteAllById(Collection<OrderAllergenKey> orderAllergenKeys)
+    {
+        repository.deleteAllById(orderAllergenKeys);
+    }
+
+    @Override
+    public List<OrderAllergen> findAll()
+    {
+        return repository.findAll();
     }
 
     @Override
@@ -90,8 +124,9 @@ public class OrderAllergenService implements ServiceBase<OrderAllergen, OrderAll
         return customRepository;
     }
 
-    public void updateAll(Collection<OrderAllergen> orderAllergens)
+
+    public void deleteAllByOrderId(Long orderId)
     {
-        repository.saveAll(orderAllergens);
+        repository.deleteAllByOrderId(orderId);
     }
 }

@@ -1,6 +1,7 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.field.FieldMultiplier;
 import de.bauersoft.data.entities.field.FieldMultiplierKey;
 import de.bauersoft.data.filters.SerializableFilter;
@@ -13,6 +14,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,9 +41,45 @@ public class FieldMultiplierService implements ServiceBase<FieldMultiplier, Fiel
     }
 
     @Override
-    public void delete(FieldMultiplierKey fieldMultiplierKey)
+    public List<FieldMultiplier> updateAll(Collection<FieldMultiplier> entities)
+    {
+        return repository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(FieldMultiplier entity)
+    {
+        repository.delete(entity);
+    }
+
+    @Override
+    public void deleteById(FieldMultiplierKey fieldMultiplierKey)
     {
         repository.deleteById(fieldMultiplierKey);
+    }
+
+    @Override
+    public void deleteAll(Collection<FieldMultiplier> entities)
+    {
+        repository.deleteAll(entities);
+    }
+
+    @Override
+    public void deleteAll()
+    {
+        repository.deleteAll();
+    }
+
+    @Override
+    public void deleteAllById(Collection<FieldMultiplierKey> fieldMultiplierKeys)
+    {
+        repository.deleteAllById(fieldMultiplierKeys);
+    }
+
+    @Override
+    public List<FieldMultiplier> findAll()
+    {
+        return repository.findAll();
     }
 
     @Override

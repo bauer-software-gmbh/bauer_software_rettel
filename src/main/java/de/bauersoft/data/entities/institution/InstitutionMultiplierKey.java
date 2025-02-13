@@ -2,9 +2,11 @@ package de.bauersoft.data.entities.institution;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
@@ -12,14 +14,10 @@ import java.util.Objects;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
-public class InstitutionMultiplierKey implements Serializable
+public class InstitutionMultiplierKey
 {
     @Column(nullable = false)
-    private Long institutionId;
-
-    @Column(nullable = false)
-    private Long fieldId;
+    private Long institutionFieldId;
 
     @Column(nullable = false)
     private Long courseId;
@@ -32,22 +30,12 @@ public class InstitutionMultiplierKey implements Serializable
             return false;
         }
         InstitutionMultiplierKey that = (InstitutionMultiplierKey) o;
-        return Objects.equals(institutionId, that.institutionId) && Objects.equals(fieldId, that.fieldId) && Objects.equals(courseId, that.courseId);
+        return Objects.equals(institutionFieldId, that.institutionFieldId) && Objects.equals(courseId, that.courseId);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(institutionId, fieldId, courseId);
-    }
-
-    @Override
-    public String toString()
-    {
-        return "InstitutionMultiplierKey{" +
-                "institutionId=" + institutionId +
-                ", fieldId=" + fieldId +
-                ", courseId=" + courseId +
-                '}';
+        return Objects.hash(institutionFieldId, courseId);
     }
 }
