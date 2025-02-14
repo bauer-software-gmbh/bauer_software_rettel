@@ -91,7 +91,7 @@ public class AutoInitializer
                     institutionMultiplier.setId(key);
                     institutionMultiplier.setInstitutionField(institutionField);
                     institutionMultiplier.setCourse(course);
-                    institutionMultiplier.setMultiplier(1);
+                    institutionMultiplier.setMultiplier(1d);
 
                     institutionField.getInstitutionMultipliers().add(institutionMultiplier);
                 }

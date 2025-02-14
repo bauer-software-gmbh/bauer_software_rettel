@@ -28,7 +28,7 @@ public class InstitutionMultiplier
     @JoinColumn(name = "course_id", referencedColumnName = "id")
     private Course course;
 
-    @Column(name = "multiplier", columnDefinition = "double default 1.0")
+    @Column(nullable = false, columnDefinition = "double default 1.0")
     private double multiplier;
 
     private boolean isLocal;

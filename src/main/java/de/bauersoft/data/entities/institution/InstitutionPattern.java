@@ -1,6 +1,7 @@
 package de.bauersoft.data.entities.institution;
 
 import de.bauersoft.data.entities.pattern.Pattern;
+import de.bauersoft.views.institution.container.ContainerBase;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,4 +31,5 @@ public class InstitutionPattern
 
     @Column(nullable = false, columnDefinition = "integer default 0")
     private int amount;
+
 }

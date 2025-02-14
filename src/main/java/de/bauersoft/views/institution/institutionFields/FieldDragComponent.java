@@ -7,17 +7,24 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.SvgIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.Style;
 import de.bauersoft.data.entities.field.Field;
-import de.bauersoft.data.entities.institution.Institution;
-import de.bauersoft.data.entities.institution.InstitutionField;
+import de.bauersoft.data.entities.institution.*;
+import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.services.InstitutionAllergenService;
 import de.bauersoft.services.InstitutionFieldsService;
+import de.bauersoft.services.InstitutionMultiplierService;
+import de.bauersoft.services.InstitutionPatternService;
 import de.bauersoft.views.institution.InstitutionDialog;
-import de.bauersoft.views.institution.institutionFields.dialogLayer.InstitutionFieldDialog;
+import de.bauersoft.views.institution.container.StackContainer;
+import de.bauersoft.views.institution.institutionFields.components.InstitutionFieldContainer;
+import de.bauersoft.views.institution.institutionFields.components.allergen.AllergenContainer;
+import de.bauersoft.views.institution.institutionFields.components.multiplier.MultiplierContainer;
+import de.bauersoft.views.institution.institutionFields.components.pattern.PatternContainer;
 import lombok.Getter;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -30,7 +37,7 @@ public class FieldDragComponent extends FlexLayout
     private final InstitutionDialog institutionDialog;
     private final Institution institution;
 
-    private final Map<Field, InstitutionFieldDialog> institutionFieldDialogMap;
+    private final Map<Field, InstitutionFieldContainer> institutionFieldContanerMap;
 
     private final List<InstitutionField> gridItems;
     private final Grid<InstitutionField> institutionFieldsGrid;
@@ -38,13 +45,12 @@ public class FieldDragComponent extends FlexLayout
     private final List<Field> fieldPool;
     private final VirtualList<Field> fieldVirtualList;
 
-
     public FieldDragComponent(InstitutionDialog institutionDialog)
     {
         this.institutionDialog = institutionDialog;
-        this.institution = institutionDialog.getInstitution();
+        this.institution = institutionDialog.getItem();
 
-        institutionFieldDialogMap = new HashMap<>();
+        institutionFieldContanerMap = new HashMap<>();
 
         gridItems = new ArrayList<>();
         gridItems.addAll(institution.getInstitutionFields());
@@ -80,20 +86,39 @@ public class FieldDragComponent extends FlexLayout
 
         institutionFieldsGrid.addItemDoubleClickListener(event ->
         {
+            if(event.getItem() == null) return;
 
-            InstitutionFieldDialog institutionFieldDialog = institutionFieldDialogMap.get(event.getItem().getField());
-            if(institutionFieldDialog == null)
-            {
-                institutionFieldDialog = new InstitutionFieldDialog(institutionDialog, this, event.getItem());
-                institutionFieldDialogMap.put(event.getItem().getField(), institutionFieldDialog);
-            }
+            InstitutionFieldContainer institutionFieldContainer = institutionFieldContanerMap
+                    .computeIfAbsent(event.getItem().getField(), field ->
+                    {
+                        Notification.show("defaults loaded");
+                        InstitutionFieldContainer container = new InstitutionFieldContainer(event.getItem());
 
+                        for(InstitutionPattern institutionPattern : event.getItem().getInstitutionPatterns())
+                        {
+                            container.getPatternContainers()
+                                    .put(institutionPattern.getPattern(), new PatternContainer(institutionPattern.getPattern(), institutionPattern.getAmount()));
+                        }
+
+                        for(InstitutionMultiplier institutionMultiplier : event.getItem().getInstitutionMultipliers())
+                        {
+                            container.getMultiplierContainers()
+                                    .put(institutionMultiplier.getCourse(), new MultiplierContainer(institutionMultiplier.getCourse(), institutionMultiplier.getMultiplier()));
+                        }
+
+                        for(InstitutionAllergen institutionAllergen : event.getItem().getInstitutionAllergens())
+                        {
+                            container.getAllergenContainers()
+                                    .put(institutionAllergen.getAllergen(), new AllergenContainer(institutionAllergen.getAllergen(), institutionAllergen.getAmount(), false));
+                        }
+
+                        return container;
+                    });
+
+
+
+            InstitutionFieldDialog institutionFieldDialog = new InstitutionFieldDialog(institutionDialog, this, institutionFieldContainer);
             institutionFieldDialog.open();
-
-            for(Map.Entry<Field, InstitutionFieldDialog> entry : institutionFieldDialogMap.entrySet())
-            {
-                System.out.println(entry.getKey().getName());
-            }
         });
 
         DropTarget.create(institutionFieldsGrid).addDropListener(event ->
@@ -153,16 +178,17 @@ public class FieldDragComponent extends FlexLayout
         this.fieldPool.removeAll(gridItems.stream().map(InstitutionField::getField).toList());
     }
 
-    public void updateInstitutionFields(List<InstitutionField> oldInstitutionFields, List<InstitutionField> newInstitutionFields)
+    public void updateInstitutionFields(List<InstitutionField> oldInstitutionFields)
     {
         InstitutionFieldsService institutionFieldsService = institutionDialog.getInstitutionFieldsService();
+        InstitutionPatternService institutionPatternService = institutionDialog.getInstitutionPatternService();
+        InstitutionMultiplierService institutionMultiplierService = institutionDialog.getInstitutionMultiplierService();
         InstitutionAllergenService institutionAllergenService = institutionDialog.getInstitutionAllergenService();
 
         if(oldInstitutionFields == null)
             oldInstitutionFields = new ArrayList<>();
 
-        if(newInstitutionFields == null)
-            newInstitutionFields = new ArrayList<>();
+        List<InstitutionField> newInstitutionFields = new ArrayList<>(gridItems);
 
         List<InstitutionField> remove = new ArrayList<>();
         List<InstitutionField> update = new ArrayList<>(newInstitutionFields);
@@ -173,10 +199,26 @@ public class FieldDragComponent extends FlexLayout
                 remove.add(oldInstitutionField);
         }
 
+        institutionPatternService.deleteAll(remove.stream().map(InstitutionField::getInstitutionPatterns).flatMap(Collection::stream).toList());
+        institutionMultiplierService.deleteAll(remove.stream().map(InstitutionField::getInstitutionMultipliers).flatMap(Collection::stream).toList());
         institutionAllergenService.deleteAll(remove.stream().map(InstitutionField::getInstitutionAllergens).flatMap(Collection::stream).toList());
         institutionFieldsService.deleteAll(remove);
 
         institutionFieldsService.updateAll(update);
+
+        institutionAllergenService.deleteAll(update.stream().map(InstitutionField::getInstitutionAllergens).flatMap(Collection::stream).toList());
+        for(InstitutionField institutionField : update)
+        {
+            InstitutionFieldContainer container = institutionFieldContanerMap.get(institutionField.getField());
+            if(container == null) continue;
+
+            institutionField.setInstitutionPatterns(container.getInstitutionPatterns());
+            institutionField.setInstitutionMultipliers(container.getInstitutionMultipliers());
+            institutionField.setInstitutionAllergens(container.getInstitutionAllergens());
+        }
+
+        institutionPatternService.updateAll(update.stream().map(InstitutionField::getInstitutionPatterns).flatMap(Collection::stream).toList());
+        institutionMultiplierService.updateAll(update.stream().map(InstitutionField::getInstitutionMultipliers).flatMap(Collection::stream).toList());
         institutionAllergenService.updateAll(update.stream().map(InstitutionField::getInstitutionAllergens).flatMap(Collection::stream).toList());
     }
 }

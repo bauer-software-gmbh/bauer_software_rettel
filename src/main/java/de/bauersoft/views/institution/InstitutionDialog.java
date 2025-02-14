@@ -17,6 +17,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.dom.Style;
 import de.bauersoft.data.entities.field.Field;
@@ -35,10 +36,8 @@ import de.bauersoft.views.institution.institutionFields.FieldDragComponent;
 import lombok.Getter;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Getter
 public class InstitutionDialog extends Dialog
@@ -56,11 +55,13 @@ public class InstitutionDialog extends Dialog
 	private FieldMultiplierRepository fieldMultiplierRepository;
 	private AllergenService allergenService;
 	private InstitutionAllergenService institutionAllergenService;
+	private PatternService patternService;
+	private InstitutionPatternService institutionPatternService;
 
 	private InstitutionDataProvider institutionDataProvider;
 	private AddressDataProvider addressDataProvider;
 
-	private Institution institution;
+	private Institution item;
 
 	private DialogState dialogState;
 
@@ -86,7 +87,7 @@ public class InstitutionDialog extends Dialog
 //	private final Checkbox multipliersCheckBox;
 //	private final ComboBox<Field> fieldsComboBox;
 
-	public InstitutionDialog(InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, AddressService addressService, FieldService fieldService, UserService userService, InstitutionMultiplierService institutionMultiplierService, CourseService courseService, FieldMultiplierService fieldMultiplierService, AllergenService allergenService, InstitutionAllergenService institutionAllergenService, InstitutionDataProvider institutionDataProvider, AddressDataProvider addressDataProvider, Institution item, DialogState dialogState)
+	public InstitutionDialog(InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, AddressService addressService, FieldService fieldService, UserService userService, InstitutionMultiplierService institutionMultiplierService, CourseService courseService, FieldMultiplierService fieldMultiplierService, AllergenService allergenService, InstitutionAllergenService institutionAllergenService, PatternService patternService, InstitutionPatternService institutionPatternService, InstitutionDataProvider institutionDataProvider, AddressDataProvider addressDataProvider, Institution item, DialogState dialogState)
 	{
 		this.institutionService = institutionService;
 		this.institutionFieldsService = institutionFieldsService;
@@ -101,9 +102,11 @@ public class InstitutionDialog extends Dialog
 		this.fieldMultiplierRepository = fieldMultiplierService.getRepository();
         this.allergenService = allergenService;
         this.institutionAllergenService = institutionAllergenService;
+        this.patternService = patternService;
+        this.institutionPatternService = institutionPatternService;
         this.institutionDataProvider = institutionDataProvider;
         this.addressDataProvider = addressDataProvider;
-        this.institution = item;
+        this.item = item;
 		this.dialogState = dialogState;
 
 		instMultiplierMap = new LinkedHashMap<>();
@@ -140,13 +143,11 @@ public class InstitutionDialog extends Dialog
 		orderStartSpan.getStyle().setAlignSelf(Style.AlignSelf.CENTER);
 
 		orderStartTimePicker = new TimePicker();
-		orderStartTimePicker.setValue(LocalTime.of(0, 0));
 
 		Span orderEndSpan = new Span(" bis ");
 		orderEndSpan.getStyle().setAlignSelf(Style.AlignSelf.CENTER);
 
 		orderEndTimePicker = new TimePicker();
-		orderEndTimePicker.setValue(LocalTime.of(8, 0));
 
 		datePickerLayout.add(orderStartSpan, orderStartTimePicker, orderEndSpan, orderEndTimePicker);
 
@@ -167,16 +168,8 @@ public class InstitutionDialog extends Dialog
 		userMultiSelectComboBox.setItems(userService.getRepository().findAll());
 		userMultiSelectComboBox.setWidthFull();
 
-//		fieldComponent = new FieldComponent();
-//		fieldComponent.setInstitutionFields(institutionFieldsService.getRepository().findAllByInstitutionId(item.getId()));
-//		fieldComponent.setFields(fieldService.getRepository().findAll());
-//		fieldComponent.updateView();
-//		fieldComponent.getStyle().setMarginTop("5px");
-//		fieldComponent.setHeight("50vh");
-
 		FieldDragComponent fieldDragComponent = new FieldDragComponent(this);
 		fieldDragComponent.setFieldPool(fieldService.getRepository().findAll());
-
 		fieldDragComponent.updateView();
 
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
@@ -191,32 +184,32 @@ public class InstitutionDialog extends Dialog
 			return (value != null && !value.isBlank())
 					? ValidationResult.ok()
 					: ValidationResult.error("Name ist erforderlich");
-		}).bind("name");
 
-		binder.bind(descriptionTextArea, "description");
-		binder.bind(customerIdTextField, "customerId");
+		}).bind(Institution::getName, Institution::setName);
+
+		binder.bind(descriptionTextArea, Institution::getDescription, Institution::setDescription);
+		binder.bind(customerIdTextField, Institution::getCustomerId, Institution::setCustomerId);
 
 		binder.forField(orderStartTimePicker).withValidator((value, context) ->
 		{
-			return (value.isBefore(orderEndTimePicker.getValue())) ?
+			return (value != null && value.isBefore(orderEndTimePicker.getValue())) ?
 					ValidationResult.ok() :
 					ValidationResult.error("Startzeit muss vor Endzeit liegen!");
 
-		}).bind("orderStart");
+		}).bind(Institution::getOrderStart, Institution::setOrderStart);
 
 		binder.forField(orderEndTimePicker).withValidator((value, context) ->
 		{
-			return (value.isAfter(orderStartTimePicker.getValue())) ?
+			return (value != null && value.isAfter(orderStartTimePicker.getValue())) ?
 					ValidationResult.ok() :
 					ValidationResult.error("Endzeit muss nach Startzeit liegen!");
 
-		}).bind("orderEnd");
+		}).bind(Institution::getOrderEnd, Institution::setOrderEnd);
 
-		binder.bind(addressComboBox, "address");
-		binder.bind(userMultiSelectComboBox, "users");
-		binder.setBean(item);
+		binder.bind(addressComboBox, Institution::getAddress, Institution::setAddress);
+		binder.bind(userMultiSelectComboBox, Institution::getUsers, Institution::setUsers);
 
-
+		binder.readBean(item);
 
 		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
@@ -224,50 +217,26 @@ public class InstitutionDialog extends Dialog
 		saveButton.setMaxWidth("180px");
 		saveButton.addClickListener(event ->
 		{
-			binder.validate();
-
-			if(instMultiplierMap.values()
-					.stream()
-					.flatMap(map -> map.values().stream())
-					.anyMatch(numberField -> numberField.isInvalid()))
-				return;
-
-
-//			if(binder.isValid() && fieldComponent.isValid())
-			if(binder.isValid())
+			try
 			{
-				try
-				{
-					Institution institution = binder.getBean();
-					institutionService.update(institution);
+				binder.writeBean(item);
 
-					institutionMultiplierRepository.saveAll
-					(
-						instMultiplierMap.values()
-								.stream()
-								.flatMap(map -> map.keySet().stream())
-								.filter(institutionMultiplier -> !deletedFieldIds.contains(institutionMultiplier.getInstitutionField().getField().getId()))
-								.collect(Collectors.toSet())
-					);
+				institutionService.update(item);
 
-//					deletedFieldIds.forEach(id ->
-//					{
-//						institutionMultiplierRepository.deleteByInstitutionIdAndFieldId(institution.getId(), id);
-//					});
+				fieldDragComponent.updateInstitutionFields(item.getInstitutionFields().stream().toList());
 
-					//fieldComponent.accept(institution);
-					//institutionFieldsService.updateInstitutionFields(institution.getInstitutionFields().stream().toList(), fieldComponent.getInstitutionFieldsMap().keySet().stream().toList());
+				institutionDataProvider.refreshAll();
 
+				Notification.show("Daten wurden aktualisiert");
+				this.close();
 
-					institutionDataProvider.refreshAll();
-					Notification.show("Daten wurden aktualisiert");
-					this.close();
+			}catch(DataIntegrityViolationException error)
+			{
+				Notification.show("Doppelter Eintrag", 5000, Position.MIDDLE)
+						.addThemeVariants(NotificationVariant.LUMO_ERROR);
 
-				}catch(DataIntegrityViolationException error)
-				{
-					Notification.show("Doppelter Eintrag", 5000, Position.MIDDLE)
-							.addThemeVariants(NotificationVariant.LUMO_ERROR);
-				}
+			}catch(ValidationException err)
+			{
 			}
 		});
 
@@ -278,15 +247,11 @@ public class InstitutionDialog extends Dialog
 		cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		cancelButton.addClickListener(event ->
 		{
-			binder.removeBean();
 			this.close();
 		});
 
-		Span spacer = new Span();
-		spacer.setWidthFull();
-
 		this.add(inputLayout, fieldDragComponent);
-		this.getFooter().add(new HorizontalLayout(spacer, saveButton, cancelButton));
+		this.getFooter().add(saveButton, cancelButton);
 		this.setCloseOnEsc(false);
 		this.setCloseOnOutsideClick(false);
 		this.setModal(true);

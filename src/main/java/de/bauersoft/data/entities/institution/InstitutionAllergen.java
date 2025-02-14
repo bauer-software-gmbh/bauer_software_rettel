@@ -28,6 +28,6 @@ public class InstitutionAllergen
     @JoinColumn(name = "allergen_id", referencedColumnName = "id")
     private Allergen allergen;
 
-    @Column(columnDefinition = "integer default 0")
+    @Column(nullable = false, columnDefinition = "integer default 0")
     private int amount;
 }
