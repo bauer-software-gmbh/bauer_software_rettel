@@ -203,6 +203,7 @@ public class MainLayout extends AppLayout {
 		}
 		return nav;
 	}
+
 	private Footer createFooter() {
         return new Footer();
 	}
@@ -211,6 +212,7 @@ public class MainLayout extends AppLayout {
 		super.afterNavigation();
 		viewTitle.setText(getCurrentPageTitle());
 	}
+
 	private String getCurrentPageTitle() {
 		PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
 		return title == null ? "" : title.value();
