@@ -32,7 +32,7 @@ import java.util.*;
         value = "./themes/rettels/views/kitchen.css"
 )
 // @CssImport("./themes/rettels/views/kitchen.css")
-@PageTitle("kitchen")
+@PageTitle("Küchenübersicht")
 @Route(value = "kitchen", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 public class KitchenView extends Div {

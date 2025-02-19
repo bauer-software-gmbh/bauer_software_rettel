@@ -20,8 +20,5 @@ public class WelcomeView extends VerticalLayout {
         
 
         setSizeFull();
-
-    
     }
-   
 }

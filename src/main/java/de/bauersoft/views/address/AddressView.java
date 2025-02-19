@@ -51,7 +51,6 @@ public class AddressView extends Div
         grid.addItemDoubleClickListener(event ->
 		{
 			new AddressDialog(addressService, addressDataProvider, event.getItem(), DialogState.EDIT);
-
 		});
 
         GridContextMenu<Address> contextMenu = grid.addContextMenu();

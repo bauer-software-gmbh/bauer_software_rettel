@@ -146,7 +146,6 @@ public class InstitutionView extends Div
 					notification.open();
 					return;
 				}
-
 //				institutionMultiplierService.getRepository().deleteAllByInstitutionId(item.getId());
 //				institutionFieldsService.getRepository().deleteAllByInstitutionId(item.getId());
 				institutionService.deleteById(item.getId());

@@ -23,7 +23,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 public class PatternDialog extends Dialog
 {
-
     public PatternDialog(PatternService service, PatternDataProvider dataProvider, Pattern item, DialogState state)
     {
         this.setHeaderTitle(state.toString());

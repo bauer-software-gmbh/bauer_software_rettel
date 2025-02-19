@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 @AnonymousAllowed
 public class MenueView extends Div
 {
-
     private final FieldService fieldService;
 
     private ComboBox<Field> fieldsComboBox;

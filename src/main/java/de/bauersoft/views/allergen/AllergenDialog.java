@@ -104,5 +104,6 @@ public class AllergenDialog extends Dialog
         this.setCloseOnOutsideClick(false);
         this.setModal(true);
         this.open();
+
     }
 }

@@ -74,5 +74,6 @@ public class UsersView extends Div
         });
 
         this.add(grid);
+
     }
 }

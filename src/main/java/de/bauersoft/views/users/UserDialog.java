@@ -30,7 +30,6 @@ import java.util.regex.Pattern;
 
 public class UserDialog extends Dialog
 {
-
     public static final Pattern passwortRegex;
     private static final Logger logger = LoggerFactory.getLogger(UserDialog.class);
 

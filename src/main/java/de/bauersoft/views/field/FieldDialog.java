@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 
 public class FieldDialog extends Dialog
 {
-
     private FieldService fieldService;
     private FieldDataProvider fieldDataProvider;
     private FieldMultiplierService fieldMultiplierService;

@@ -132,6 +132,7 @@ public class UnitDialog extends Dialog
 		this.setCloseOnEsc(false);
 		this.setCloseOnOutsideClick(false);
 		this.setModal(true);
-		this.open();	
+		this.open();
+
 	}
 }

@@ -23,7 +23,6 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed(value = {"ADMIN", "ACCOUNTENT"})
 public class FieldView extends Div
 {
-
     AutoFilterGrid<Field> grid = new AutoFilterGrid<>(Field.class, false, true);
 
     public FieldView(FieldService service, FieldDataProvider dataProvider,

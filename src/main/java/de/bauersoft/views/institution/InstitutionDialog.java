@@ -216,8 +216,6 @@ public class InstitutionDialog extends Dialog
 		binder.bind(userMultiSelectComboBox, "users");
 		binder.setBean(item);
 
-
-
 		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
 		saveButton.setMinWidth("150px");

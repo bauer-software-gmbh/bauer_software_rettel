@@ -522,6 +522,5 @@ public class OffersView extends Div
         logger.warn("deleteButton.setEnabled({}) aufgerufen! Stacktrace:", enabled);
         Thread.dumpStack();
     }
-
 }
 

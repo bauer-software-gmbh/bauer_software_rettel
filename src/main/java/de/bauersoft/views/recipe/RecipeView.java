@@ -103,6 +103,4 @@ public class RecipeView extends Div
 
         this.add(grid);
     }
-
-
 }

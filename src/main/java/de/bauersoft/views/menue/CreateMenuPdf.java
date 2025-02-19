@@ -49,7 +49,6 @@ public class CreateMenuPdf
                 e.printStackTrace();
                 return;
             }
-
         }
 
         if(!pdfTemplate.exists())

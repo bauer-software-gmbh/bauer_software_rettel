@@ -97,5 +97,6 @@ public class CourseDialog extends Dialog
 		this.setCloseOnOutsideClick(false);
 		this.setModal(true);
 		this.open();
+
 	}
 }

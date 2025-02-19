@@ -33,7 +33,6 @@ public class ComponentDialog extends Dialog
 			CourseRepository courseRepository, ComponentRepository componentRepository, Component item,
 			DialogState state)
 	{
-
 		//TODO Recipes sollte Pflichtfeld sein
 		Binder<Component> binder = new Binder<>(Component.class);
 

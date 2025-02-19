@@ -50,7 +50,6 @@ public class ComponentView extends Div
         grid.addColumn(item ->
 		{
 			return item.getCourse() != null ? item.getCourse().getName() : "";
-
 		}).setHeader("Gang");
 
         grid.addItemDoubleClickListener(event ->

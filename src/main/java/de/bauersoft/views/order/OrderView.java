@@ -24,7 +24,6 @@ import java.util.concurrent.ScheduledExecutorService;
 @RolesAllowed(value = {"ADMIN", "ORDERER"})
 public class OrderView extends Div
 {
-
     private final OrderManager orderManager;
 
     private final AuthenticatedUser authenticatedUser;
