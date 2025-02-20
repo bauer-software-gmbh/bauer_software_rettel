@@ -18,6 +18,7 @@ import de.bauersoft.data.repositories.component.ComponentRepository;
 import de.bauersoft.data.repositories.course.CourseRepository;
 import de.bauersoft.data.repositories.recipe.RecipeRepository;
 import de.bauersoft.services.ComponentService;
+import de.bauersoft.services.UnitService;
 import de.bauersoft.services.VariantService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
@@ -33,7 +34,7 @@ public class ComponentView extends Div
 
     public ComponentView(ComponentService componentService, ComponentDataProvider dataProvider,
 						 RecipeRepository recipeRepository, CourseRepository courseRepository,
-						 ComponentRepository componentRepository,
+						 ComponentRepository componentRepository, UnitService unitService,
 						 VariantService variantService)
     {
         setClassName("content");
@@ -54,13 +55,13 @@ public class ComponentView extends Div
 
         grid.addItemDoubleClickListener(event ->
 		{
-			new ComponentDialog(componentService, dataProvider, recipeRepository, courseRepository, componentRepository, event.getItem(), DialogState.EDIT);
+			new ComponentDialog(componentService, dataProvider, recipeRepository, courseRepository, componentRepository, event.getItem(), unitService, DialogState.EDIT);
 		});
 
         GridContextMenu<Component> contextMenu = grid.addContextMenu();
         contextMenu.addItem("Neue Komponente", event ->
 		{
-			new ComponentDialog(componentService, dataProvider, recipeRepository, courseRepository, componentRepository, new Component(), DialogState.NEW);
+			new ComponentDialog(componentService, dataProvider, recipeRepository, courseRepository, componentRepository, new Component(), unitService, DialogState.NEW);
 		});
 
 		GridMenuItem<Component> deleteItem = contextMenu.addItem("Löschen", event ->

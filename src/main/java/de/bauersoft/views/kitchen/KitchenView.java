@@ -24,12 +24,14 @@ import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.data.entities.order.OrderData;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
 import de.bauersoft.data.entities.pattern.Pattern;
+import de.bauersoft.data.entities.unit.Unit;
 import de.bauersoft.data.model.KitchenDTO;
 import de.bauersoft.services.*;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @CssImport(
         themeFor = "vaadin-grid",
@@ -50,9 +52,12 @@ public class KitchenView extends Div {
     private final Map<Long, Boolean> rowStatusMapPattern = new HashMap<>();
     private final Map<Long, Integer> lastKnownSollWertMapPattern = new HashMap<>();
 
+    private final Map<Course, Double> multipliers = new HashMap<>();
 
     public KitchenView(OrderService orderService, CourseService courseService,
-                      InstitutionFieldsService institutionFieldsService, InstitutionMultiplierService institutionMultiplierService,  PatternService patternService) {
+                       InstitutionFieldsService institutionFieldsService,
+                       InstitutionMultiplierService institutionMultiplierService,
+                       PatternService patternService) {
         this.institutionFieldsService = institutionFieldsService;
 
         this.kitchenDTO = new KitchenDTO(orderService, institutionFieldsService);
@@ -65,7 +70,17 @@ public class KitchenView extends Div {
         TabSheet tabSheet = new TabSheet();
         tabSheet.setSizeFull();
 
-        //  Erzeuge ein Tab für jeden Course
+        // Map mit Multiplikatoren für alle InstitutionFields
+
+        // 🔥 Hole alle InstitutionFields und lade die Multiplikatoren
+        List<InstitutionField> institutionFields = institutionFieldsService.findAll();
+        for (InstitutionField institutionField : institutionFields) {
+            for (InstitutionMultiplier im : institutionField.getInstitutionMultipliers()) {
+                multipliers.put(im.getCourse(), im.getMultiplier());
+            }
+        }
+
+        // Erzeuge ein Tab für jeden Course
         for (Course course : courseService.findAll()) {
             Grid<Order> grid = createGrid(course);
             grids.add(grid);
@@ -74,8 +89,7 @@ public class KitchenView extends Div {
 
         // Erstelle ein zusätzliches Tab für "Vegetarisch"
         for (Pattern pattern : patternService.findAll()) {
-            if(!DefaultPattern.DEFAULT.equalsDefault(pattern))
-            {
+            if (!DefaultPattern.DEFAULT.equalsDefault(pattern)) {
                 Grid<Order> vegetarischGrid = createPatternGrid(pattern);
                 tabSheet.add(pattern.getName(), vegetarischGrid);
                 grids.add(vegetarischGrid);
@@ -133,10 +147,14 @@ public class KitchenView extends Div {
                 return "Keine Komponente gefunden";
             }
 
+            long institutionId = order.getInstitution().getId();
+            long fieldId = order.getField().getId();
+
             Optional<OrderData> orderData = order.getOrderData()
                     .stream()
                     .filter(item -> DefaultPattern.DEFAULT.equalsDefault(item.getVariant().getPattern()))
                     .findFirst();
+
 
             if(orderData.isEmpty()) return "Keine Komponente gefunden";
 
@@ -158,9 +176,43 @@ public class KitchenView extends Div {
             long institutionId = order.getInstitution().getId();
             long fieldId = order.getField().getId();
 
-            // Solange keine Multiplayer hinterlegt sind!!!!
-            // return (int) (orderChildCount * multiplier);
-            return kitchenDTO.getChildCount(institutionId, fieldId).orElse(-4);
+            // 1️⃣ Hole das InstitutionField für die Institution und das Feld
+            Optional<InstitutionField> institutionFieldOpt =
+                    institutionFieldsService.findByInstitutionAndField(order.getInstitution(), order.getField());
+
+            if (institutionFieldOpt.isEmpty()) {
+                Notification.show("❌ Fehler: InstitutionField nicht gefunden!");
+                return 0;
+            }
+
+            InstitutionField institutionField = institutionFieldOpt.get();
+
+            // 2️⃣ Berechne Bestellmenge-Soll für PatternId = 1
+            return institutionField.getInstitutionPatterns()
+                    .stream()
+                    .filter(institutionPattern -> institutionPattern.getPattern().getId() == 1) // 🎯 Fixe PatternId = 1
+                    .mapToInt(institutionPattern -> {
+
+                        // 3️⃣ 🔥 Versuche, den passenden Course zu holen (über OrderData → Variant → Component)
+                        Optional<Course> foundCourse = order.getOrderData().stream()
+                                .filter(od -> od.getVariant().getPattern().getId() == 1) // 🎯 Fixe PatternId = 1
+                                .flatMap(od -> od.getVariant().getComponents().stream())
+                                .map(Component::getCourse)
+                                .findFirst();
+
+                        // 4️⃣ 🔥 Finde den passenden Multiplier für diesen Course
+                        double multiplier = foundCourse.flatMap(c ->
+                                institutionField.getInstitutionMultipliers()
+                                        .stream()
+                                        .filter(im -> im.getCourse().equals(c)) // Finde den passenden Course
+                                        .findFirst()
+                                        .map(InstitutionMultiplier::getMultiplier)
+                        ).orElse(1.0); // Falls kein Multiplier existiert, Standardwert 1.0 verwenden
+
+                        // 5️⃣ 🔥 Berechne die finale Bestellmenge-Soll
+                        return (int) (institutionPattern.getAmount() * multiplier);
+                    })
+                    .sum();
         }).setHeader("Bestellmenge-Soll");
 
         grid.addColumn(order -> {
@@ -193,8 +245,31 @@ public class KitchenView extends Div {
         }).setHeader("Bestellmenge-Ist");
 
         grid.addColumn(order -> {
-            return 0;
+            if (order.getInstitution() == null) {
+                return "Keine Einheit";
+            }
+
+            Optional<OrderData> orderData = order.getOrderData()
+                    .stream()
+                    .filter(item -> DefaultPattern.DEFAULT.equalsDefault(item.getVariant().getPattern()))
+                    .findFirst();
+
+            if (orderData.isEmpty()) return "Keine Einheit";
+
+            Optional<Component> component = orderData.get().getVariant().getComponents()
+                    .stream()
+                    .filter(c -> course.equals(c.getCourse()))
+                    .findFirst();
+
+            if (component.isEmpty()) return "Keine Einheit";
+
+            // 🔥 Hole die Einheit von der Komponente
+            Unit unit = component.get().getUnit();
+            if (unit == null) return "Keine Einheit";
+
+            return unit.getName() + " (" + unit.getShorthand() + ")"; // Z. B. "Kilogramm (kg)"
         }).setHeader("Grammatur");
+
 
         grid.addColumn(new ComponentRenderer<>(order -> {
             if (order.getInstitution() == null) {
@@ -285,16 +360,46 @@ public class KitchenView extends Div {
                 return 0;
             }
 
-            Optional<InstitutionField> institutionFieldOptional = institutionFieldsService.findByInstitutionAndField(order.getInstitution(), order.getField());
+            long institutionId = order.getInstitution().getId();
+            long fieldId = order.getField().getId();
+
+            // 1️⃣ Hole das InstitutionField für die Institution und das Feld
+            Optional<InstitutionField> institutionFieldOptional =
+                    institutionFieldsService.findByInstitutionAndField(order.getInstitution(), order.getField());
+
             if (institutionFieldOptional.isEmpty()) {
-                Notification.show("Es ist ein Fehler aufgetreten! KitchenView#createPatternGrid.institutionFieldOptional");
+                Notification.show("❌ Fehler: InstitutionField nicht gefunden!");
+                return 0;
             }
 
-            return institutionFieldOptional.map(field -> field.getInstitutionPatterns()
+            InstitutionField institutionField = institutionFieldOptional.get();
+
+            // 2️⃣ Berechne Bestellmenge-Soll für das spezifische Pattern
+            return institutionField.getInstitutionPatterns()
                     .stream()
                     .filter(institutionPattern -> institutionPattern.getPattern().equals(pattern))
-                    .map(InstitutionPattern::getAmount)
-                    .reduce(0, Integer::sum)).orElse(0);
+                    .mapToInt(institutionPattern -> {
+
+                        // 3️⃣ 🔥 Versuche, den passenden Course zu holen (über OrderData → Variant → Component)
+                        Optional<Course> courseOptional = order.getOrderData().stream()
+                                .filter(od -> od.getVariant().getPattern().equals(pattern))
+                                .flatMap(od -> od.getVariant().getComponents().stream())
+                                .map(Component::getCourse)
+                                .findFirst();
+
+                        // 4️⃣ 🔥 Finde den passenden Multiplier für diesen Course
+                        double multiplier = courseOptional.flatMap(course ->
+                                institutionField.getInstitutionMultipliers()
+                                        .stream()
+                                        .filter(im -> im.getCourse().equals(course)) // Finde den passenden Course
+                                        .findFirst()
+                                        .map(InstitutionMultiplier::getMultiplier)
+                        ).orElse(1.0); // Falls kein Multiplier existiert, Standardwert 1.0 verwenden
+
+                        // 5️⃣ 🔥 Berechne die finale Bestellmenge-Soll
+                        return (int) (institutionPattern.getAmount() * multiplier);
+                    })
+                    .sum();
         }).setHeader("Bestellmenge-Soll");
 
         patternGrid.addColumn(order -> {
