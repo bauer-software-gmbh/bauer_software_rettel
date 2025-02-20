@@ -27,6 +27,7 @@ import de.bauersoft.views.course.CourseView;
 import de.bauersoft.views.field.FieldView;
 import de.bauersoft.views.incredient.IngredientView;
 import de.bauersoft.views.institution.InstitutionView;
+import de.bauersoft.views.kitchen.KitchenView;
 import de.bauersoft.views.menuBuilder.MenuBuilderView;
 import de.bauersoft.views.menue.MenueView;
 import de.bauersoft.views.offers.OffersView;
@@ -199,13 +200,20 @@ public class MainLayout extends AppLayout {
 
 			nav.addItem(backend);
 
-//			nav.addItem(new SideNavItem("offer", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
+//			if (accessChecker.hasAccess(OffersView.class)) {
+//				nav.addItem(new SideNavItem("offer", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
+//			}
+
+			if (accessChecker.hasAccess(KitchenView.class)) {
+				nav.addItem(new SideNavItem("Küche", KitchenView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
+			}
+
 		}
 		return nav;
 	}
 
 	private Footer createFooter() {
-        return new Footer();
+		return new Footer();
 	}
 	@Override
 	protected void afterNavigation() {

@@ -89,9 +89,9 @@ public class OffersView extends Div
             Field selectedField = event.getValue();
             if(selectedField != null)
             {
-                boolean shouldShowButton = Stream.of(DefaultField.GRUNDSCHULE, DefaultField.KINDERTAGESSTAETTE, DefaultField.KINDERGARTEN).anyMatch(defaultField -> defaultField.equalsDefault(selectedField));
-
-                generatePDF.setVisible(shouldShowButton);
+//                boolean shouldShowButton = Stream.of(DefaultField.GRUNDSCHULE, DefaultField.KINDERTAGESSTAETTE, DefaultField.KINDERGARTEN).anyMatch(defaultField -> defaultField.equalsDefault(selectedField));
+//
+//                generatePDF.setVisible(shouldShowButton);
                 // Setze die Field-ID und aktualisiere die Daten
                 dataProvider.setFieldId(selectedField.getId());
                 // Benachrichtige das Grid, dass es sich aktualisieren soll

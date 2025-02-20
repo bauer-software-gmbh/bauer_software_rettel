@@ -4,6 +4,7 @@ import de.bauersoft.data.entities.component.Component;
 import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.institution.InstitutionField;
 import de.bauersoft.data.entities.institution.InstitutionMultiplier;
+import de.bauersoft.data.entities.institution.InstitutionPattern;
 import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.data.entities.order.OrderData;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
@@ -24,6 +25,7 @@ public class KitchenDTO {
 
     private List<Order> localDateOrders;
     private final Map<Long, InstitutionField> institutionFieldsMap = new HashMap<>();
+    private final Map<Long, InstitutionPattern> institutionPatternsMap = new HashMap<>();
     private final Map<Long, Map<Course, InstitutionMultiplier>> multipliersMap = new HashMap<>();
     private final Map<Long, Map<Course, Component>> componentMap = new HashMap<>();
 
@@ -55,9 +57,38 @@ public class KitchenDTO {
         return Optional.ofNullable(institutionFieldsMap.get(institutionId * 10000 + fieldId));
     }
 
+    public Optional<InstitutionPattern> getInstitutionPattern(long institutionFieldId) {
+        return institutionPatternsMap.values().stream()
+                .filter(ip -> ip.getInstitutionField().getId() == institutionFieldId)
+                .findFirst();
+    }
+
+    public Optional<Integer> getPatternAmount(long institutionFieldId, long patternId) {
+        return institutionPatternsMap.values().stream()
+                .filter(ip -> ip.getInstitutionField().getId() == institutionFieldId && ip.getPattern().getId() == patternId)
+                .map(InstitutionPattern::getAmount)
+                .reduce(Integer::sum); // Summiert alle gefundenen Amount-Werte
+    }
+
+    public Optional<Integer> getTotalPatternAmount(long institutionFieldId) {
+        return institutionPatternsMap.values().stream()
+                .filter(ip -> ip.getInstitutionField().getId() == institutionFieldId) // Passende InstitutionFieldId suchen
+                .map(InstitutionPattern::getAmount) // Amount-Wert holen
+                .reduce(Integer::sum); // Summiere alle Amount-Werte
+    }
+
     public Optional<Integer> getChildCount(long institutionId, long fieldId) {
         return Optional.ofNullable(institutionFieldsMap.get(institutionId * 10000 + fieldId))
                 .map(InstitutionField::getChildCount);
+    }
+
+    public Optional<Integer> getOrderAmountForPattern(long institutionId, long fieldId, long patternId) {
+        return localDateOrders.stream()
+                .filter(order -> order.getInstitution().getId() == institutionId && order.getField().getId() == fieldId)
+                .flatMap(order -> order.getOrderData().stream()) // Extrahiere OrderData
+                .filter(orderData -> orderData.getVariant().getPattern().getId() == patternId) // Passendes Pattern filtern
+                .map(OrderData::getAmount) // Bestellmenge extrahieren
+                .reduce(Integer::sum); // Summiere alle Bestellmengen
     }
 
     public Optional<Integer> getOrderAmount(long institutionId, long fieldId)
@@ -74,8 +105,15 @@ public class KitchenDTO {
         LocalDate today = LocalDate.now();
         System.out.println("🔄 [KitchenDTO] Update gestartet für " + today);
 
+        // 🔥 Zeigt ALLE Orders aus der Datenbank an, unabhängig vom Datum
+        List<Order> allOrders = orderService.findAll();
+        System.out.println("📌 Alle Orders in der DB: " + allOrders.size());
+        for (Order order : allOrders) {
+            System.out.println("📌 Order-ID: " + order.getId() + " | Datum: " + order.getLocalDate());
+        }
+
         this.localDateOrders = orderService.getOrdersForLocalDate(today);
-        System.out.println("🔍 Anzahl geladener Orders: " + localDateOrders.size());
+        System.out.println("🔍 Anzahl geladener Orders für " + today + ": " + localDateOrders.size());
 
         institutionFieldsMap.clear();
         multipliersMap.clear();
@@ -87,13 +125,7 @@ public class KitchenDTO {
             long key = institutionId * 10000 + fieldId;
 
             System.out.println("✅ InstitutionField gespeichert: " + institutionField.getInstitution().getName());
-
             institutionFieldsMap.put(key, institutionField);
-
-            /*Set<InstitutionMultiplier> multipliers = institutionField.getInstitution().getInstitutionMultipliers();
-            multipliersMap.put(key,
-                    multipliers.stream().collect(Collectors.toMap(InstitutionMultiplier::getCourse, m -> m))
-            );*/
 
             Optional<Order> order = orderService.findAllByOrderDateAndInstitutionIdAndFieldId(today, institutionId, fieldId);
             order.flatMap(o -> o.getOrderData().stream()

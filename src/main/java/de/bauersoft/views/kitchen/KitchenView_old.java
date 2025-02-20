@@ -15,7 +15,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
-import de.bauersoft.data.entities.component.Component;
 import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.institution.InstitutionField;
 import de.bauersoft.data.entities.institution.InstitutionMultiplier;
@@ -31,28 +30,25 @@ import jakarta.annotation.security.RolesAllowed;
 
 import java.util.*;
 
-@CssImport(
-        themeFor = "vaadin-grid",
-        value = "./themes/rettels/views/kitchen.css")
-@PageTitle("kitchen")
-@Route(value = "kitchen", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
-public class KitchenView extends Div {
+//@CssImport(
+//        themeFor = "vaadin-grid",
+//        value = "./themes/rettels/views/kitchen.css"
+//)
+//// @CssImport("./themes/rettels/views/kitchen.css")
+//@PageTitle("Küchenübersicht")
+//@Route(value = "kitchen", layout = MainLayout.class)
+//@RolesAllowed("ADMIN")
+public class KitchenView_old extends Div {
     private final InstitutionFieldsService institutionFieldsService;
     private KitchenDTO kitchenDTO;
     private Registration pollRegistration;
     private final List<Grid<Order>> grids = new ArrayList<>(); // Liste für alle Grids
-    private final Map<Long, Boolean> rowStatusMapGrid = new HashMap<>();
-    private final Map<Long, Integer> lastKnownSollWertMapGrid = new HashMap<>();
+    private final Map<Long, Boolean> rowStatusMap = new HashMap<>();
+    private final Map<Long, Integer> lastKnownSollWertMap = new HashMap<>();
 
-    private final Map<Long, Boolean> confirmationStatusPattern = new HashMap<>(); // 🔥 Separate Map für createPatternGrid
-
-    private final Map<Long, Boolean> rowStatusMapPattern = new HashMap<>();
-    private final Map<Long, Integer> lastKnownSollWertMapPattern = new HashMap<>();
-
-
-    public KitchenView(OrderService orderService, CourseService courseService,
-                      InstitutionFieldsService institutionFieldsService, InstitutionMultiplierService institutionMultiplierService,  PatternService patternService) {
+    public KitchenView_old(OrderService orderService, CourseService courseService,
+                           InstitutionService institutionService,
+                           InstitutionMultiplierService institutionMultiplierService, PatternService patternService, InstitutionFieldsService institutionFieldsService) {
         this.institutionFieldsService = institutionFieldsService;
 
         this.kitchenDTO = new KitchenDTO(orderService, institutionFieldsService);
@@ -71,7 +67,6 @@ public class KitchenView extends Div {
             grids.add(grid);
             tabSheet.add(course.getName(), grid);
         }
-
         // Erstelle ein zusätzliches Tab für "Vegetarisch"
         for (Pattern pattern : patternService.findAll()) {
             if(!DefaultPattern.DEFAULT.equalsDefault(pattern))
@@ -84,10 +79,154 @@ public class KitchenView extends Div {
 
         System.out.println("🔄 [KitchenView] Anzahl registrierter Grids: " + grids.size());
 
+        // evtl für update
+        // this.getElement().executeJs("");
+
         pageVerticalLayout.add(tabSheet);
 
+        // Aktiviert Polling alle 10 Sekunden
         enablePolling();
     }
+
+    private Grid<Order> createPatternGrid(Pattern pattern) {
+        Grid<Order> grid = new Grid<>(Order.class, false);
+
+        // Filtere die Bestellungen basierend auf dem Pattern
+        List<Order> filteredOrders = new ArrayList<>(kitchenDTO.getLocalDateOrders()
+                .stream()
+                .filter(order -> order.getOrderData().stream()
+                        .anyMatch(orderData -> orderData.getVariant().getPattern().equals(pattern))
+                )
+                .toList());
+
+        System.out.println("🔍 [Grid] Geladene Orders für Pattern " + pattern.getName() + ": " + filteredOrders.size());
+
+        // Falls keine Orders existieren, füge eine Dummy-Zeile hinzu
+        if (filteredOrders.isEmpty()) {
+            System.out.println("⚠️ Keine Orders gefunden. Erstelle Dummy-Zeilen für Pattern " + pattern.getName());
+
+            Order dummyOrder = new Order(); // Dummy-Order erstellen
+            filteredOrders.add(dummyOrder);
+        }
+
+        // Grid mit gefilterten Daten füllen
+        grid.setItems(filteredOrders);
+
+        // Spalten dynamisch aus `Order` füllen
+        grid.addColumn(order -> {
+            if (order.getInstitution() == null) {
+                return "Unbekannte Institution - Unbekanntes Feld";
+            }
+            long institutionId = order.getInstitution().getId();
+            long fieldId = order.getField().getId();
+
+            return kitchenDTO.getInstitutionField(institutionId, fieldId)
+                    .map(instField -> instField.getInstitution().getName() + " - " + instField.getField().getName())
+                    .orElse("Unbekannte Institution - Unbekanntes Feld");
+        }).setHeader("Institution - Field");
+
+        grid.addColumn(order -> {
+            if (order.getInstitution() == null) {
+                return 0;
+            }
+
+            Optional<InstitutionField> institutionFieldOptional = institutionFieldsService.findByInstitutionAndField(order.getInstitution(), order.getField());
+            if(institutionFieldOptional.isEmpty())
+            {
+                Notification.show("Es ist ein Fehler aufgetreten! KitchenView#createPatternGrid.institutionFieldOptional");
+            }
+
+            int soll = institutionFieldOptional.get().getInstitutionPatterns()
+                    .stream()
+                    .filter(institutionPattern -> institutionPattern.getPattern().equals(pattern))
+                    .map(InstitutionPattern::getAmount)
+                    .reduce(0, Integer::sum);
+
+            return soll;
+        }).setHeader("Bestellmenge-Soll");
+
+        grid.addColumn(order -> {
+            if (order.getInstitution() == null) {
+                return 0;
+            }
+
+            long institutionId = order.getInstitution().getId();
+            long fieldId = order.getField().getId();
+            long rowKey = institutionId * 1000 + fieldId; // Eindeutiger Schlüssel für jede Zeile
+
+            // 🔍 Berechne "Bestellmenge-Ist" nur für die aktuelle Institution und das aktuelle Feld
+            int neuerSollWert = filteredOrders.stream()
+                    .filter(o -> o.getInstitution().getId() == institutionId && o.getField().getId() == fieldId) // Nur passende Orders
+                    .flatMap(o -> o.getOrderData().stream()) // Alle OrderData extrahieren
+                    .filter(orderData -> orderData.getVariant().getPattern().equals(pattern)) // Nur passendes Pattern
+                    .mapToInt(OrderData::getAmount) // Integer-Stream für Summierung
+                    .sum(); // Summiere Werte für diese Institution/Feld
+
+            int vorherigerSollWert = lastKnownSollWertMap.getOrDefault(rowKey, -1); // -1 als Default für "noch nicht gesetzt"
+
+            // Falls der Wert noch nie gespeichert wurde, initialisiere ihn
+            if (!lastKnownSollWertMap.containsKey(rowKey)) {
+                lastKnownSollWertMap.put(rowKey, neuerSollWert);
+                rowStatusMap.put(rowKey, false); // Button bleibt deaktiviert
+            }
+
+            // Falls sich der Wert geändert hat, Button aktivieren
+            if (vorherigerSollWert != -1 && neuerSollWert != vorherigerSollWert) {
+                rowStatusMap.put(rowKey, true); // Aktivieren nur, wenn sich etwas geändert hat
+                lastKnownSollWertMap.put(rowKey, neuerSollWert); // Aktualisiere den gespeicherten Wert
+                System.out.println("🔄 Änderung erkannt! Zeile für " + rowKey + " ist jetzt MODIFIED");
+            }
+
+            return neuerSollWert;
+        }).setHeader("Bestellmenge-Ist");
+
+
+        grid.addColumn(new ComponentRenderer<>(order -> {
+            if (order.getInstitution() == null) {
+                return new Button("N/A");
+            }
+
+            long institutionId = order.getInstitution().getId();
+            long fieldId = order.getField().getId();
+            long rowKey = institutionId * 1000 + fieldId; // Eindeutiger Schlüssel für jede Zeile
+
+            HorizontalLayout layout = new HorizontalLayout();
+            Button confirmButton = new Button("Bestätigen");
+
+            confirmButton.setEnabled(rowStatusMap.getOrDefault(rowKey, false)); // Aktiv, falls geändert
+
+            Span checkMark = new Span("✔"); // Grünes Häkchen
+            checkMark.getElement().getStyle().set("color", "green");
+            checkMark.setVisible(false);
+
+            confirmButton.addClickListener(event -> {
+                rowStatusMap.put(rowKey, false); // Status zurücksetzen
+                lastKnownSollWertMap.put(rowKey, kitchenDTO.getOrderAmount(institutionId, fieldId).orElse(0)); // Aktualisiert den gespeicherten Wert
+                grid.getDataProvider().refreshItem(order); // Grid-Update auslösen
+                confirmButton.setEnabled(false);
+                checkMark.setVisible(true); // Häkchen anzeigen
+            });
+
+            layout.add(confirmButton, checkMark);
+            return layout;
+
+        })).setHeader("Bestätigen");
+
+        // Zeilen-Markierung setzen (rot, falls geändert)
+        grid.setClassNameGenerator(order -> {
+            long institutionId = order.getInstitution() != null ? order.getInstitution().getId() : 0;
+            long fieldId = order.getField() != null ? order.getField().getId() : 0;
+            long rowKey = institutionId * 1000 + fieldId;
+
+            boolean isModified = rowStatusMap.getOrDefault(rowKey, false);
+            System.out.println("🔍 [setClassNameGenerator] Zeile für " + rowKey + ": " + (isModified ? "MODIFIED" : "NORMAL"));
+
+            return isModified ? "warn" : "";
+        });
+
+        return grid;
+    }
+
 
     private Grid<Order> createGrid(Course course) {
         Grid<Order> grid = new Grid<>(Order.class, false);
@@ -102,6 +241,7 @@ public class KitchenView extends Div {
                         )
                 )
                 .toList()); // Hier konvertieren wir es in eine ArrayList
+
         System.out.println("🔍 [Grid] Geladene Orders für " + course.getName() + ": " + filteredOrders.size());
 
         // Falls keine Orders existieren, füge eine Dummy-Zeile hinzu
@@ -129,28 +269,6 @@ public class KitchenView extends Div {
         }).setHeader("Institution - Field");
 
         grid.addColumn(order -> {
-            if (order.getOrderData() == null || order.getOrderData().isEmpty()) {
-                return "Keine Komponente gefunden";
-            }
-
-            Optional<OrderData> orderData = order.getOrderData()
-                    .stream()
-                    .filter(item -> DefaultPattern.DEFAULT.equalsDefault(item.getVariant().getPattern()))
-                    .findFirst();
-
-            if(orderData.isEmpty()) return "Keine Komponente gefunden";
-
-            Optional<Component> component = orderData.get().getVariant().getComponents()
-                    .stream()
-                    .filter(c -> course.equals(c.getCourse()))
-                    .findFirst();
-
-            if(component.isEmpty()) return "Keine Komponente gefunden";
-
-            return component.get().getName();
-        }).setHeader("Name");
-
-        grid.addColumn(order -> {
             if (order.getInstitution() == null) {
                 return 0;
             }
@@ -172,29 +290,25 @@ public class KitchenView extends Div {
             long fieldId = order.getField().getId();
             long rowKey = institutionId * 1000 + fieldId; // Eindeutiger Schlüssel für jede Zeile
 
-            int neuerIstWert = kitchenDTO.getOrderAmount(institutionId, fieldId).orElse(0);
-            int vorherigerSollWert = lastKnownSollWertMapGrid .getOrDefault(rowKey, -1); // -1 als Default für "noch nicht gesetzt"
+            int neuerSollWert = kitchenDTO.getOrderAmount(institutionId, fieldId).orElse(0);
+            int vorherigerSollWert = lastKnownSollWertMap.getOrDefault(rowKey, -1); // -1 als Default für "noch nicht gesetzt"
 
-            // Falls der Wert noch nie gespeichert wurde, initialisiere ihn
-            if (!lastKnownSollWertMapGrid .containsKey(rowKey)) {
-                lastKnownSollWertMapGrid .put(rowKey, neuerIstWert);
-                rowStatusMapGrid.put(rowKey, false); // Button bleibt deaktiviert
+            // 🔥 Falls der Wert noch nie gespeichert wurde, initialisiere ihn
+            if (!lastKnownSollWertMap.containsKey(rowKey)) {
+                lastKnownSollWertMap.put(rowKey, neuerSollWert);
+                rowStatusMap.put(rowKey, false); // 🔥 Button bleibt deaktiviert
             }
 
-            // Falls sich der Wert geändert hat, Button aktivieren
-            if (vorherigerSollWert != -1 && neuerIstWert != vorherigerSollWert) {
-                rowStatusMapGrid.put(rowKey, true); // Aktivieren nur, wenn sich etwas geändert hat
-                lastKnownSollWertMapGrid .put(rowKey, neuerIstWert); // Aktualisiere den gespeicherten Wert
+            // 🔥 Falls sich der Wert geändert hat, Button aktivieren
+            if (vorherigerSollWert != -1 && neuerSollWert != vorherigerSollWert) {
+                rowStatusMap.put(rowKey, true); // 🔥 Aktivieren nur, wenn sich etwas geändert hat
+                lastKnownSollWertMap.put(rowKey, neuerSollWert); // 🔥 Aktualisiere den gespeicherten Wert
                 System.out.println("🔄 Änderung erkannt! Zeile für " + rowKey + " ist jetzt MODIFIED");
-                order.setConfirmed(false);
             }
 
-                return neuerIstWert;
+                return neuerSollWert;
         }).setHeader("Bestellmenge-Ist");
 
-        grid.addColumn(order -> {
-            return 0;
-        }).setHeader("Grammatur");
 
         grid.addColumn(new ComponentRenderer<>(order -> {
             if (order.getInstitution() == null) {
@@ -208,20 +322,18 @@ public class KitchenView extends Div {
             HorizontalLayout layout = new HorizontalLayout();
             Button confirmButton = new Button("Bestätigen");
 
-            confirmButton.setEnabled(rowStatusMapGrid.getOrDefault(rowKey, false)); // Aktiv, falls geändert
+            confirmButton.setEnabled(rowStatusMap.getOrDefault(rowKey, false)); // Aktiv, falls geändert
 
             Span checkMark = new Span("✔"); // Grünes Häkchen
             checkMark.getElement().getStyle().set("color", "green");
-            checkMark.getElement().getStyle().set("font-size", "20px");
-            checkMark.setVisible(order.isConfirmed()); // Direkt aus `Order` lesen
+            checkMark.setVisible(false);
 
             confirmButton.addClickListener(event -> {
-                rowStatusMapGrid.put(rowKey, false); // Status zurücksetzen
-                lastKnownSollWertMapGrid.put(rowKey, kitchenDTO.getOrderAmount(institutionId, fieldId).orElse(0)); // Aktualisiert den gespeicherten Wert
-
+                rowStatusMap.put(rowKey, false); // Status zurücksetzen
+                lastKnownSollWertMap.put(rowKey, kitchenDTO.getOrderAmount(institutionId, fieldId).orElse(0)); // Aktualisiert den gespeicherten Wert
+                grid.getDataProvider().refreshItem(order); // Grid-Update auslösen
                 confirmButton.setEnabled(false);
-                order.setConfirmed(true); // 🔥 Bestätigungsstatus direkt in `Order` setzen
-                grid.getDataProvider().refreshItem(order);
+                checkMark.setVisible(true); // Häkchen anzeigen
             });
 
             layout.add(confirmButton, checkMark);
@@ -229,153 +341,21 @@ public class KitchenView extends Div {
 
         })).setHeader("Bestätigen");
 
+        // Zeilen-Markierung setzen (rot, falls geändert)
         grid.setClassNameGenerator(order -> {
             long institutionId = order.getInstitution() != null ? order.getInstitution().getId() : 0;
             long fieldId = order.getField() != null ? order.getField().getId() : 0;
             long rowKey = institutionId * 1000 + fieldId;
 
-            boolean isModified = rowStatusMapGrid.getOrDefault(rowKey, false);
+            //return rowStatusMap.getOrDefault(rowKey, false) ? "row-modified" : "";
 
+            boolean isModified = rowStatusMap.getOrDefault(rowKey, false);
             System.out.println("🔍 [setClassNameGenerator] Zeile für " + rowKey + ": " + (isModified ? "MODIFIED" : "NORMAL"));
 
-            return isModified ? "modified-row" : null;
+            return isModified ? "warn" : "";
         });
 
         return grid;
-    }
-
-    private Grid<Order> createPatternGrid(Pattern pattern) {
-        Grid<Order> patternGrid = new Grid<>(Order.class, false);
-
-        // Filtere die Bestellungen basierend auf dem Pattern
-        List<Order> filteredOrders = new ArrayList<>(kitchenDTO.getLocalDateOrders()
-                .stream()
-                .filter(order -> order.getOrderData().stream()
-                        .anyMatch(orderData -> orderData.getVariant().getPattern().equals(pattern))
-                )
-                .toList());
-
-        System.out.println("🔍 [Grid] Geladene Orders für Pattern " + pattern.getName() + ": " + filteredOrders.size());
-
-        // Falls keine Orders existieren, füge eine Dummy-Zeile hinzu
-        if (filteredOrders.isEmpty()) {
-            System.out.println("⚠️ Keine Orders gefunden. Erstelle Dummy-Zeilen für Pattern " + pattern.getName());
-            Order dummyOrder = new Order(); // Dummy-Order erstellen
-            filteredOrders.add(dummyOrder);
-        }
-
-        // Grid mit gefilterten Daten füllen
-        patternGrid.setItems(filteredOrders);
-
-        // Spalten dynamisch aus `Order` füllen
-        patternGrid.addColumn(order -> {
-            if (order.getInstitution() == null) {
-                return "Unbekannte Institution - Unbekanntes Feld";
-            }
-            long institutionId = order.getInstitution().getId();
-            long fieldId = order.getField().getId();
-
-            return kitchenDTO.getInstitutionField(institutionId, fieldId)
-                    .map(instField -> instField.getInstitution().getName() + " - " + instField.getField().getName())
-                    .orElse("Unbekannte Institution - Unbekanntes Feld");
-        }).setHeader("Institution - Field");
-
-        patternGrid.addColumn(order -> {
-            if (order.getInstitution() == null) {
-                return 0;
-            }
-
-            Optional<InstitutionField> institutionFieldOptional = institutionFieldsService.findByInstitutionAndField(order.getInstitution(), order.getField());
-            if (institutionFieldOptional.isEmpty()) {
-                Notification.show("Es ist ein Fehler aufgetreten! KitchenView#createPatternGrid.institutionFieldOptional");
-            }
-
-            return institutionFieldOptional.map(field -> field.getInstitutionPatterns()
-                    .stream()
-                    .filter(institutionPattern -> institutionPattern.getPattern().equals(pattern))
-                    .map(InstitutionPattern::getAmount)
-                    .reduce(0, Integer::sum)).orElse(0);
-        }).setHeader("Bestellmenge-Soll");
-
-        patternGrid.addColumn(order -> {
-            if (order.getInstitution() == null) {
-                return 0;
-            }
-
-            long institutionId = order.getInstitution().getId();
-            long fieldId = order.getField().getId();
-            long rowKey = (institutionId * 1000 + fieldId) * 10 + 1; // Eindeutiger Schlüssel für Pattern-Grid
-
-            // 🔍 Berechne "Bestellmenge-Ist" nur für die aktuelle Institution und das aktuelle Feld basierend auf Pattern
-            int neuerIstWert = kitchenDTO.getOrderAmountForPattern(institutionId, fieldId, pattern.getId()).orElse(0);
-            int vorherigerSollWert = lastKnownSollWertMapPattern.getOrDefault(rowKey, neuerIstWert);
-
-            // Falls der Wert noch nie gespeichert wurde, initialisiere ihn
-            if (!lastKnownSollWertMapPattern.containsKey(rowKey)) {
-                lastKnownSollWertMapPattern.put(rowKey, neuerIstWert);
-                rowStatusMapPattern.put(rowKey, false); // Button bleibt deaktiviert
-            }
-
-            // Falls sich der Wert geändert hat, Button aktivieren
-            if (vorherigerSollWert != -1 && neuerIstWert != vorherigerSollWert) {
-                rowStatusMapPattern.put(rowKey, true); // Aktivieren, weil sich etwas geändert hat
-                lastKnownSollWertMapPattern.put(rowKey, neuerIstWert); // Aktualisiere den gespeicherten Wert
-                confirmationStatusPattern.put(rowKey, false); // ✅ Checkmark für Pattern-Grid zurücksetzen
-                System.out.println("🔄 Änderung erkannt! Zeile für " + rowKey + " ist jetzt MODIFIED");
-            }
-
-            return neuerIstWert;
-        }).setHeader("Bestellmenge-Ist");
-
-
-        patternGrid.addColumn(new ComponentRenderer<>(order -> {
-            if (order.getInstitution() == null) {
-                return new Button("N/A");
-            }
-
-            long institutionId = order.getInstitution().getId();
-            long fieldId = order.getField().getId();
-            long rowKey = (institutionId * 1000 + fieldId) * 10 + 1; // Eindeutiger Schlüssel für Pattern
-
-            HorizontalLayout layout = new HorizontalLayout();
-            Button confirmButton = new Button("Bestätigen");
-
-            confirmButton.setEnabled(rowStatusMapPattern.getOrDefault(rowKey, false)); // Aktiv, falls geändert
-
-            Span checkMark = new Span("✔"); // Grünes Häkchen
-            checkMark.getElement().getStyle().set("color", "green");
-            checkMark.getElement().getStyle().set("font-size", "20px");
-            checkMark.setVisible(confirmationStatusPattern.getOrDefault(rowKey, false)); // 🔥 Separate Map für Pattern-Grid verwenden!
-
-            confirmButton.addClickListener(event -> {
-                rowStatusMapPattern.put(rowKey, false); // Status zurücksetzen
-                lastKnownSollWertMapPattern.put(rowKey, kitchenDTO.getOrderAmountForPattern(institutionId, fieldId, pattern.getId()).orElse(0)); // Aktualisiert den gespeicherten Wert
-
-                confirmButton.setEnabled(false);
-                confirmationStatusPattern.put(rowKey, true); // 🔥 Separater Bestätigungsstatus für Pattern-Grid
-                patternGrid.getDataProvider().refreshItem(order);
-            });
-
-            layout.add(confirmButton, checkMark);
-            return layout;
-
-        })).setHeader("Bestätigen");
-
-
-
-        patternGrid.setClassNameGenerator(order -> {
-            long institutionId = order.getInstitution() != null ? order.getInstitution().getId() : 0;
-            long fieldId = order.getField() != null ? order.getField().getId() : 0;
-            long rowKey = (institutionId * 1000 + fieldId) * 10 + 1;
-
-            boolean isModified = rowStatusMapPattern.getOrDefault(rowKey, false);
-
-            System.out.println("🔍 [setClassNameGenerator] Zeile für " + rowKey + ": " + (isModified ? "MODIFIED" : "NORMAL"));
-
-            return isModified ? "modified-row" : null;
-        });
-
-        return patternGrid;
     }
 
     private void enablePolling() {
@@ -387,13 +367,8 @@ public class KitchenView extends Div {
 
             grids.forEach(grid -> {
                 System.out.println("🔄 [Polling] Aktualisiere Grid für " + grid);
-                grid.getDataProvider().refreshAll();
+                grid.getDataProvider().refreshAll(); // UI.getCurrent().getPage().reload(); // UI neu laden (alternativ nur Grid aktualisieren)
             });
-
-            // 💡 Stelle sicher, dass auch das Pattern-Grid aktualisiert wird
-            grids.stream()
-                    .filter(grid -> grid.getId().orElse("").contains("pattern")) // Falls ID gesetzt ist
-                    .forEach(grid -> grid.getDataProvider().refreshAll());
         });
     }
 
