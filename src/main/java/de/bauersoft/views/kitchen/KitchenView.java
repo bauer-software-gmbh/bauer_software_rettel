@@ -254,6 +254,7 @@ public class KitchenView extends Div {
                     .filter(item -> DefaultPattern.DEFAULT.equalsDefault(item.getVariant().getPattern()))
                     .findFirst();
 
+
             if (orderData.isEmpty()) return "Keine Einheit";
 
             Optional<Component> component = orderData.get().getVariant().getComponents()
