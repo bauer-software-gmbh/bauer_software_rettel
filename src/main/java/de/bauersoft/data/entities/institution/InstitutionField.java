@@ -33,12 +33,24 @@ public class InstitutionField extends AbstractEntity
     @Column(name = "child_count", columnDefinition = "integer default 0")
     private int childCount;
 
-    @OneToMany(mappedBy = "institutionField", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "institutionField", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.MERGE})
     private Set<InstitutionMultiplier> institutionMultipliers = new HashSet<>();
 
-    @OneToMany(mappedBy = "institutionField", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "institutionField", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.MERGE})
     private Set<InstitutionAllergen> institutionAllergens = new HashSet<>();
 
-    @OneToMany(mappedBy = "institutionField", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "institutionField", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.MERGE})
     private Set<InstitutionPattern> institutionPatterns = new HashSet<>();
+
+    @Override
+    public String toString()
+    {
+        return "InstitutionField{" +
+                "field=" + field +
+                ", childCount=" + childCount +
+                ", institutionMultipliers=" + institutionMultipliers +
+                ", institutionAllergens=" + institutionAllergens +
+                ", institutionPatterns=" + institutionPatterns +
+                '}';
+    }
 }

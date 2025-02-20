@@ -17,4 +17,14 @@ public interface InstitutionAllergenRepository extends JpaRepository<Institution
             WHERE ia.id.institutionFieldId = :institutionFieldId
     """)
     void deleteAllByInstitutionFieldId(Long institutionFieldId);
+
+
+    @Transactional
+    @Modifying
+    @Query("""
+            DELETE FROM InstitutionAllergen ia
+            WHERE ia.id.institutionFieldId = :institutionFieldId
+            AND ia.id.allergenId = :allergenId
+            """)
+    void deleteById(Long institutionFieldId, Long allergenId);
 }

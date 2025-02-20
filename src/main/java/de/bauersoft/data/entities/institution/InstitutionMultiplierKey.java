@@ -38,4 +38,13 @@ public class InstitutionMultiplierKey
     {
         return Objects.hash(institutionFieldId, courseId);
     }
+
+    @Override
+    public String toString()
+    {
+        return "InstitutionMultiplierKey{" +
+                "institutionFieldId=" + institutionFieldId +
+                ", courseId=" + courseId +
+                '}';
+    }
 }

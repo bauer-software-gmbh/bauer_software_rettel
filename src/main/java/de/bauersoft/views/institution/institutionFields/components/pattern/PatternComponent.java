@@ -10,9 +10,7 @@ import de.bauersoft.data.entities.institution.InstitutionPattern;
 import de.bauersoft.data.entities.institution.InstitutionPatternKey;
 import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.views.institution.InstitutionDialog;
-import de.bauersoft.views.institution.container.StackContainer;
 import de.bauersoft.views.institution.institutionFields.InstitutionFieldDialog;
-import de.bauersoft.views.institution.institutionFields.components.InstitutionFieldContainer;
 import lombok.Getter;
 
 import java.util.HashMap;
@@ -26,28 +24,34 @@ public class PatternComponent extends HorizontalLayout
     private final InstitutionFieldDialog institutionFieldDialog;
     private final InstitutionField institutionField;
 
-    private final InstitutionFieldContainer institutionFieldContainer;
+    private final PatternMapContainer patternListContainer;
 
-    private final Map<Pattern, PatternBox> patternBoxes;
+    private final Map<Pattern, PatternBox> patternBoxMap;
 
-    public PatternComponent(InstitutionDialog institutionDialog, InstitutionFieldDialog institutionFieldDialog, InstitutionFieldContainer institutionFieldContainer)
+    public PatternComponent(InstitutionDialog institutionDialog, InstitutionFieldDialog institutionFieldDialog, PatternMapContainer patternListContainer)
     {
         this.institutionDialog = institutionDialog;
         this.institutionFieldDialog = institutionFieldDialog;
         this.institutionField = institutionFieldDialog.getInstitutionField();
-        this.institutionFieldContainer = institutionFieldContainer;
+        this.patternListContainer = patternListContainer;
 
-        patternBoxes = new HashMap<>();
+        patternBoxMap = new HashMap<>();
 
         for(Pattern pattern : institutionDialog.getPatternService().findAll())
         {
-            PatternContainer patternContainer = institutionFieldContainer
-                    .getPatternContainers()
-                    .getOrDefault(pattern, new PatternContainer(pattern, 0));
+            PatternContainer container = (PatternContainer) patternListContainer.addIfAbsent(pattern, () ->
+            {
+                InstitutionPattern institutionPattern = new InstitutionPattern();
+                institutionPattern.setId(new InstitutionPatternKey(null, pattern.getId()));
+                institutionPattern.setInstitutionField(institutionField);
+                institutionPattern.setPattern(pattern);
 
-            PatternBox patternBox = new PatternBox(patternContainer);
+                return institutionPattern;
+            });
 
-            patternBoxes.put(pattern, patternBox);
+            PatternBox patternBox = new PatternBox(container);
+
+            patternBoxMap.put(pattern, patternBox);
             this.add(patternBox);
         }
 
@@ -58,11 +62,6 @@ public class PatternComponent extends HorizontalLayout
                 .set("padding", "var(--lumo-space-s)")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
                 .set("border-radius", "var(--lumo-border-radius-s)");
-    }
-
-    public void saveToContainer()
-    {
-        patternBoxes.values().forEach(PatternBox::saveToContainer);
     }
 
     public class PatternBox extends Div
@@ -80,7 +79,7 @@ public class PatternComponent extends HorizontalLayout
         {
             this.patternContainer = patternContainer;
 
-            pattern = patternContainer.getPattern();
+            pattern = patternContainer.getEntity().getPattern();
 
             nameDiv = new Div();
             nameDiv.getElement().setAttribute("tabindex", "-1");
@@ -110,7 +109,12 @@ public class PatternComponent extends HorizontalLayout
             amountField.setMin(0);
             amountField.setMax(Integer.MAX_VALUE);
 
-            amountField.setValue(Objects.requireNonNullElse(patternContainer.getAmount(), 0).doubleValue());
+            amountField.setValue(Objects.requireNonNullElse(patternContainer.getEntity().getAmount(), 0).doubleValue());
+
+            amountField.addValueChangeListener(event ->
+            {
+                patternContainer.setTempAmount(Objects.requireNonNullElse(event.getValue(), 0).intValue());
+            });
 
             amountBinder = new Binder<>();
             amountBinder.forField(amountField)
@@ -123,12 +127,6 @@ public class PatternComponent extends HorizontalLayout
                     .set("border", "1px solid var(--lumo-contrast-20pct)")
                     .set("border-radius", "var(--lumo-border-radius-m)")
                     .set("padding", "var(--lumo-space-s)");
-        }
-
-        public void saveToContainer()
-        {
-            patternContainer.setAmount(Objects.requireNonNullElse(amountField.getValue(), 0).intValue());
-            institutionFieldContainer.getPatternContainers().put(pattern, patternContainer);
         }
     }
 

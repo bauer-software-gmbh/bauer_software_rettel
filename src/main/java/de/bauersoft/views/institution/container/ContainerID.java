@@ -1,8 +1,7 @@
 package de.bauersoft.views.institution.container;
 
-public interface ContainerBase<ID, M>
+public interface ContainerID<ID>
 {
     ID getId();
-
-    M getMapper();
+    void setId(ID id);
 }

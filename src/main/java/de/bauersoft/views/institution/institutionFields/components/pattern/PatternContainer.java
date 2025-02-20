@@ -1,17 +1,40 @@
 package de.bauersoft.views.institution.institutionFields.components.pattern;
 
-import de.bauersoft.data.entities.pattern.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import de.bauersoft.data.entities.institution.InstitutionPattern;
+import de.bauersoft.data.entities.institution.InstitutionPatternKey;
+import de.bauersoft.views.institution.container2.Container;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class PatternContainer
+import java.util.Objects;
+
+public class PatternContainer extends Container<InstitutionPattern, InstitutionPatternKey>
 {
-    private Pattern pattern;
-    private int amount;
+    private int tempAmount;
+
+    public PatternContainer(InstitutionPattern entity)
+    {
+        super(entity);
+        loadTemporaries();
+    }
+
+    public int getTempAmount()
+    {
+        return tempAmount;
+    }
+
+    public void setTempAmount(int tempAmount)
+    {
+        this.tempAmount = tempAmount;
+    }
+
+    @Override
+    public void loadTemporaries()
+    {
+        tempAmount = Objects.requireNonNullElse(getEntity().getAmount(), 0);
+    }
+
+    @Override
+    public void acceptTemporaries()
+    {
+        getEntity().setAmount(tempAmount);
+    }
 }

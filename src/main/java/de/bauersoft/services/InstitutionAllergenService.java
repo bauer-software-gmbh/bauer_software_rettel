@@ -9,9 +9,11 @@ import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import de.bauersoft.data.repositories.institutionAllergen.InstitutionAllergenGridDataRepository;
 import de.bauersoft.data.repositories.institutionAllergen.InstitutionAllergenRepository;
 import de.bauersoft.views.institution.InstitutionView;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -57,7 +59,7 @@ public class InstitutionAllergenService implements ServiceBase<InstitutionAllerg
     @Override
     public void deleteById(InstitutionAllergenKey institutionAllergenKey)
     {
-        repository.deleteById(institutionAllergenKey);
+        repository.deleteById(institutionAllergenKey.getInstitutionFieldId(), institutionAllergenKey.getAllergenId());
     }
 
     @Override

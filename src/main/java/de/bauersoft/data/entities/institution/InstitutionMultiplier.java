@@ -1,6 +1,7 @@
 package de.bauersoft.data.entities.institution;
 
 import de.bauersoft.data.entities.course.Course;
+import de.bauersoft.views.institution.container.ContainerID;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class InstitutionMultiplier
+public class InstitutionMultiplier implements ContainerID<InstitutionMultiplierKey>
 {
     @EmbeddedId
     private InstitutionMultiplierKey id;
@@ -33,4 +34,14 @@ public class InstitutionMultiplier
 
     private boolean isLocal;
 
+    @Override
+    public String toString()
+    {
+        return "InstitutionMultiplier{" +
+                "id=" + id +
+                ", course=" + course +
+                ", multiplier=" + multiplier +
+                ", isLocal=" + isLocal +
+                '}';
+    }
 }

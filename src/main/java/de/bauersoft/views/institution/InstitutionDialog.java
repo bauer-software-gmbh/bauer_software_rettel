@@ -22,6 +22,7 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.dom.Style;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
+import de.bauersoft.data.entities.institution.InstitutionAllergenKey;
 import de.bauersoft.data.entities.institution.InstitutionMultiplier;
 import de.bauersoft.data.entities.user.User;
 import de.bauersoft.data.providers.AddressDataProvider;
@@ -30,6 +31,8 @@ import de.bauersoft.data.repositories.course.CourseRepository;
 import de.bauersoft.data.repositories.field.FieldMultiplierRepository;
 import de.bauersoft.data.repositories.institutionMultiplier.InstitutionMultiplierRepository;
 import de.bauersoft.services.*;
+import de.bauersoft.test.Mapper;
+import de.bauersoft.test.TestClass;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.address.AddressComboBox;
 import de.bauersoft.views.institution.institutionFields.FieldDragComponent;
@@ -210,6 +213,17 @@ public class InstitutionDialog extends Dialog
 		binder.bind(userMultiSelectComboBox, Institution::getUsers, Institution::setUsers);
 
 		binder.readBean(item);
+
+		Button debug = new Button();
+		debug.setWidthFull();
+
+		debug.addClickListener(event ->
+		{
+			institutionAllergenService.deleteById(new InstitutionAllergenKey(31l, 3l));
+			institutionAllergenService.getRepository().deleteById(31l, 3l);
+		});
+
+		this.add(debug);
 
 		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);

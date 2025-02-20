@@ -38,4 +38,13 @@ public class InstitutionPatternKey
     {
         return Objects.hash(institutionFieldId, patternId);
     }
+
+    @Override
+    public String toString()
+    {
+        return "InstitutionPatternKey{" +
+                "institutionFieldId=" + institutionFieldId +
+                ", patternId=" + patternId +
+                '}';
+    }
 }
