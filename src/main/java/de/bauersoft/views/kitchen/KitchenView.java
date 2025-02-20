@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @CssImport(
         themeFor = "vaadin-grid",
         value = "./themes/rettels/views/kitchen.css")
-@PageTitle("kitchen")
+@PageTitle("Küche")
 @Route(value = "kitchen", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 public class KitchenView extends Div {
@@ -246,6 +246,46 @@ public class KitchenView extends Div {
 
         grid.addColumn(order -> {
             if (order.getInstitution() == null) {
+                return 0;
+            }
+
+            long institutionId = order.getInstitution().getId();
+            long fieldId = order.getField().getId();
+
+            // Direkt die aktuellen Werte berechnen
+            int sollWert = institutionFieldsService.findByInstitutionAndField(order.getInstitution(), order.getField())
+                    .map(institutionField -> institutionField.getInstitutionPatterns().stream()
+                            .filter(pattern -> pattern.getPattern().getId() == 1)
+                            .mapToInt(pattern -> {
+                                Optional<Course> foundCourse = order.getOrderData().stream()
+                                        .filter(od -> od.getVariant().getPattern().getId() == 1)
+                                        .flatMap(od -> od.getVariant().getComponents().stream())
+                                        .map(Component::getCourse)
+                                        .findFirst();
+
+                                double multiplier = foundCourse.flatMap(c ->
+                                        institutionField.getInstitutionMultipliers()
+                                                .stream()
+                                                .filter(im -> im.getCourse().equals(c))
+                                                .findFirst()
+                                                .map(InstitutionMultiplier::getMultiplier)
+                                ).orElse(1.0);
+
+                                return (int) (pattern.getAmount() * multiplier);
+                            })
+                            .sum()
+                    ).orElse(0);
+
+            int istWert = kitchenDTO.getOrderAmount(institutionId, fieldId).orElse(0);
+
+            return sollWert - istWert;
+
+        }).setHeader("Differenz");
+
+
+
+        grid.addColumn(order -> {
+            if (order.getInstitution() == null) {
                 return "Keine Einheit";
             }
 
@@ -432,6 +472,45 @@ public class KitchenView extends Div {
 
             return neuerIstWert;
         }).setHeader("Bestellmenge-Ist");
+
+        patternGrid.addColumn(order -> {
+            if (order.getInstitution() == null) {
+                return 0;
+            }
+
+            long institutionId = order.getInstitution().getId();
+            long fieldId = order.getField().getId();
+
+            // Direkt die aktuellen Werte berechnen
+            int sollWert = institutionFieldsService.findByInstitutionAndField(order.getInstitution(), order.getField())
+                    .map(institutionField -> institutionField.getInstitutionPatterns().stream()
+                            .filter(institutionPattern -> institutionPattern.getPattern().equals(pattern))
+                            .mapToInt(institutionPattern -> {
+                                Optional<Course> courseOptional = order.getOrderData().stream()
+                                        .filter(od -> od.getVariant().getPattern().equals(pattern))
+                                        .flatMap(od -> od.getVariant().getComponents().stream())
+                                        .map(Component::getCourse)
+                                        .findFirst();
+
+                                double multiplier = courseOptional.flatMap(course ->
+                                        institutionField.getInstitutionMultipliers()
+                                                .stream()
+                                                .filter(im -> im.getCourse().equals(course))
+                                                .findFirst()
+                                                .map(InstitutionMultiplier::getMultiplier)
+                                ).orElse(1.0);
+
+                                return (int) (institutionPattern.getAmount() * multiplier);
+                            })
+                            .sum()
+                    ).orElse(0);
+
+            int istWert = kitchenDTO.getOrderAmountForPattern(institutionId, fieldId, pattern.getId()).orElse(0);
+
+            return sollWert - istWert;
+
+        }).setHeader("Differenz");
+
 
 
         patternGrid.addColumn(new ComponentRenderer<>(order -> {
