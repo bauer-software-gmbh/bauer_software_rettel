@@ -1,4 +1,4 @@
-package de.bauersoft.views.institution.container;
+package de.bauersoft.components.container;
 
 public interface ContainerID<ID>
 {

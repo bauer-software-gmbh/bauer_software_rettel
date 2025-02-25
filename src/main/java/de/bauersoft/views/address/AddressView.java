@@ -23,11 +23,11 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed("ADMIN")
 public class AddressView extends Div
 {
-    AutoFilterGrid<Address> grid = new AutoFilterGrid<>(Address.class, false, true);
+	private final AddressService addressService;
+	private final AddressDataProvider addressDataProvider;
+	private final InstitutionService institutionService;
 
-	private AddressService addressService;
-	private AddressDataProvider addressDataProvider;
-	private InstitutionService institutionService;
+    AutoFilterGrid<Address> grid = new AutoFilterGrid<>(Address.class, false, true);
 
 	public AddressView(AddressService addressService, AddressDataProvider addressDataProvider, InstitutionService institutionService)
 	{

@@ -9,6 +9,7 @@ import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -20,33 +21,26 @@ import java.util.Set;
 @Builder
 public class User extends AbstractEntity
 {
-    @Column(length = 50, nullable = false)
+    @Column(nullable = false, length = 64)
     private String name;
 
-    @Column(length = 50, nullable = false)
+    @Column(nullable = false, length = 64)
     private String surname;
 
-    @Column(length = 128, nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 128)
     private String email;
 
     @JsonIgnore
     @Column(nullable = false, columnDefinition = "BINARY(60)")
     private String password;
 
-//    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
-//    @Enumerated(EnumType.STRING)
-//    @CollectionTable(name = "user_roles",
-//            joinColumns = @JoinColumn(name = "user_id"),
-//            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role"}))
-//    @OnDelete(action = OnDeleteAction.CASCADE)
-//    @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<Role> roles;
+    private Set<Role> roles = new HashSet<>();
 
-    @ManyToMany(mappedBy = "users", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
-    private Set<Institution> institutions;
+    @ManyToMany(mappedBy = "users", fetch = FetchType.EAGER)
+    private Set<Institution> institutions = new HashSet<>();
 
     @Override
     public String toString() {

@@ -29,26 +29,43 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 public class ComponentDialog extends Dialog
 {
-	public ComponentDialog(ComponentService service, ComponentDataProvider provider, RecipeRepository recipeRepository,
-			CourseRepository courseRepository, ComponentRepository componentRepository, Component item,
-			DialogState state)
-	{
+	private final ComponentService componentService;
+	private final ComponentDataProvider componentDataProvider;
+	private final RecipeRepository recipeRepository;
+	private final CourseRepository courseRepository;
+	private final ComponentRepository componentRepository;
+	private final Component item;
+	private final DialogState state;
 
-		//TODO Recipes sollte Pflichtfeld sein
-		Binder<Component> binder = new Binder<>(Component.class);
+	public ComponentDialog(ComponentService componentService, ComponentDataProvider componentDataProvider, RecipeRepository recipeRepository, CourseRepository courseRepository, ComponentRepository componentRepository, Component item, DialogState state)
+	{
+        this.componentService = componentService;
+        this.componentDataProvider = componentDataProvider;
+        this.recipeRepository = recipeRepository;
+        this.courseRepository = courseRepository;
+        this.componentRepository = componentRepository;
+        this.item = item;
+        this.state = state;
 
 		this.setHeaderTitle(state.toString());
 
+		Binder<Component> binder = new Binder<>(Component.class);
+
 		FormLayout inputLayout = new FormLayout();
+		inputLayout.setWidth("50vw");
+		inputLayout.setMaxWidth("50em");
+		inputLayout.setHeight("50vh");
+		inputLayout.setMaxHeight("20em");
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
 		TextField nameTextField = new TextField();
 		nameTextField.setMaxLength(64);
+		nameTextField.setAutofocus(true);
 		nameTextField.setRequired(true);
 		nameTextField.setMinWidth("20em");
 
 		TextArea descriptionTextArea = new TextArea();
-		descriptionTextArea.setMaxLength(512);
+		descriptionTextArea.setMaxLength(1024);
 		descriptionTextArea.setSizeFull();
 		descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 
@@ -104,8 +121,8 @@ public class ComponentDialog extends Dialog
 			{
 				try
 				{
-					service.update(binder.getBean());
-					provider.refreshAll();
+					componentService.update(binder.getBean());
+					componentDataProvider.refreshAll();
 
 					Notification.show("Daten wurden aktualisiert");
 					this.close();
@@ -126,19 +143,12 @@ public class ComponentDialog extends Dialog
 		cancelButton.addClickListener(e ->
 		{
 			binder.removeBean();
+			componentDataProvider.refreshAll();
 			this.close();
 		});
 
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
-		inputLayout.setHeight("50vh");
-		inputLayout.setMaxHeight("20em");
-
-		Span spacer = new Span();
-		spacer.setWidthFull();
-
 		this.add(inputLayout);
-		this.getFooter().add(new HorizontalLayout(spacer, saveButton, cancelButton));
+		this.getFooter().add(saveButton, cancelButton);
 		this.setCloseOnEsc(false);
 		this.setCloseOnOutsideClick(false);
 		this.setModal(true);

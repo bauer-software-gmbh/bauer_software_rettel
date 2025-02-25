@@ -1,7 +1,6 @@
-package de.bauersoft.views.institution.container2;
+package de.bauersoft.components.container;
 
 import de.bauersoft.services.ServiceBase;
-import de.bauersoft.views.institution.container.ContainerID;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,8 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
 
     public abstract Container<T, ID> createContainer(T entity);
 
+    public abstract Container<T, ID> createContainer(T entity, ContainerState state);
+
     public Container<T, ID> addIfAbsent(M mapper, Supplier<T> entitySupplier)
     {
         Objects.requireNonNull(mapper);
@@ -33,6 +34,19 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
             Objects.requireNonNull(entity);
 
             return createContainer(entity);
+        });
+    }
+
+    public Container<T, ID> addIfAbsent(M mapper, Supplier<T> entitySupplier, ContainerState state)
+    {
+        Objects.requireNonNull(mapper);
+        Objects.requireNonNull(entitySupplier);
+        return containers.computeIfAbsent(mapper, k ->
+        {
+            T entity = entitySupplier.get();
+            Objects.requireNonNull(entity);
+
+            return createContainer(entity, state);
         });
     }
 
@@ -49,24 +63,41 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
         });
     }
 
-    public void addContainer(M mapper, T entity)
+    public Container<T, ID> addContainer(M mapper, T entity)
     {
         Objects.requireNonNull(mapper);
         Objects.requireNonNull(entity);
-        containers.put(mapper, createContainer(entity));
+
+        Container<T, ID> container = createContainer(entity);
+        containers.put(mapper, container);
+
+        return container;
     }
 
-    public void addContainer(M mapper, Container<T, ID> container)
+    public Container<T, ID> addContainer(M mapper, T entity, ContainerState state)
+    {
+        Objects.requireNonNull(mapper);
+        Objects.requireNonNull(entity);
+
+        Container<T, ID> container = createContainer(entity, state);
+        containers.put(mapper, container);
+
+        return container;
+    }
+
+    public Container<T, ID> addContainer(M mapper, Container<T, ID> container)
     {
         Objects.requireNonNull(mapper);
         Objects.requireNonNull(container);
+
         containers.put(mapper, container);
+        return container;
     }
 
-    public void removeContainer(M mapper)
+    public Container<T, ID> removeContainer(M mapper)
     {
-        if(mapper == null) return;
-        containers.remove(mapper);
+        if(mapper == null) return null;
+        return containers.remove(mapper);
     }
 
     public Container<T, ID> getContainer(M mapper)
@@ -89,32 +120,44 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
         return mapper != null && containers.containsKey(mapper);
     }
 
-    public void loadTemporaries()
+    public MapContainer<T, ID, M> clear()
+    {
+        containers.clear();
+        return this;
+    }
+
+    public MapContainer<T, ID, M> loadTemporaries()
     {
         for(Container<T, ID> container : containers.values())
             container.loadTemporaries();
+
+        return this;
     }
 
-    public void acceptTemporaries()
+    public MapContainer<T, ID, M> acceptTemporaries()
     {
         for(Container<T, ID> container : containers.values())
             container.acceptTemporaries();
+
+        return this;
     }
 
     /**
      * In dieser Methode soll für jeden Container die passende ID gesetzt werden.
      */
-    public void evaluate(Consumer<Container<T, ID>> processor)
+    public MapContainer<T, ID, M> evaluate(Consumer<Container<T, ID>> processor)
     {
         Objects.requireNonNull(processor);
         for(Container<T, ID> container : containers.values())
             processor.accept(container);
+
+        return this;
     }
 
     /**
      * Führt verschiedene Operationen für jeden Container je nach ContainerState aus.
      */
-    public void run(ServiceBase<T, ID> service)
+    public MapContainer<T, ID, M> run(ServiceBase<T, ID> service)
     {
         Objects.requireNonNull(service);
         for(Map.Entry<M, Container<T, ID>> entry : containers.entrySet())
@@ -136,5 +179,7 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
                 }
             }
         }
+
+        return this;
     }
 }

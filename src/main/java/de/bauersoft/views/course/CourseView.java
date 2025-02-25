@@ -23,15 +23,21 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed(value = { "ADMIN", "ACCOUNTENT" })
 public class CourseView extends Div
 {
+	private final CourseService courseService;
+	private final CourseDataProvider courseDataProvider;
+	private final ComponentService componentService;
+
 	AutoFilterGrid<Course> grid = new AutoFilterGrid<>(Course.class, false, true);
 
-	public CourseView(CourseService service,
-					  CourseDataProvider dataProvider,
-					  ComponentService componentService)
+	public CourseView(CourseService courseService, CourseDataProvider courseDataProvider, ComponentService componentService)
 	{
-		setClassName("content");
+        this.courseService = courseService;
+        this.courseDataProvider = courseDataProvider;
+        this.componentService = componentService;
 
-		grid.setDataProvider(dataProvider);
+        setClassName("content");
+
+		grid.setDataProvider(courseDataProvider);
 
 		grid.setHeightFull();
 		grid.setWidthFull();
@@ -41,13 +47,13 @@ public class CourseView extends Div
 
 		grid.addItemDoubleClickListener(event ->
 		{
-			new CourseDialog(service,dataProvider, event.getItem(), DialogState.EDIT);
+			new CourseDialog(courseService, courseDataProvider, event.getItem(), DialogState.EDIT);
 		});
 
 		GridContextMenu<Course> contextMenu = grid.addContextMenu();
 		contextMenu.addItem("Neue Menükomponente", event ->
 		{
-			new CourseDialog(service,dataProvider, new Course(), DialogState.NEW);
+			new CourseDialog(courseService, courseDataProvider, new Course(), DialogState.NEW);
 		});
 
 		GridMenuItem<Course> deleteItem = contextMenu.addItem("Löschen", event ->
@@ -72,8 +78,8 @@ public class CourseView extends Div
 					return;
 				}
 
-				service.deleteById(item.getId());
-				dataProvider.refreshAll();
+				courseService.deleteById(item.getId());
+				courseDataProvider.refreshAll();
 			});
 		});
 

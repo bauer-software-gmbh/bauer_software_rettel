@@ -21,19 +21,17 @@ import java.util.Set;
 @Builder
 public class Recipe extends AbstractEntity
 {
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 64)
     private String name;
 
     @Column(length = 1024)
     private String description;
 
     @OneToMany(mappedBy = "recipe", fetch = FetchType.EAGER)
-    //TODO testen ob ich das brauche - Milan vvv
-//    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<Formulation> formulations = new HashSet<>(); //<- da lassen!
+    private Set<Formulation> formulations = new HashSet<>();
 
     @ManyToMany(mappedBy = "recipes", fetch = FetchType.EAGER)
-    private Set<Component> components;
+    private Set<Component> components = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -41,7 +39,7 @@ public class Recipe extends AbstractEntity
             joinColumns = @JoinColumn(name = "recipe_id"),
             inverseJoinColumns = @JoinColumn(name = "pattern_id")
     )
-    private Set<Pattern> patterns;
+    private Set<Pattern> patterns = new HashSet<>();
 
     @Override
     public String toString()

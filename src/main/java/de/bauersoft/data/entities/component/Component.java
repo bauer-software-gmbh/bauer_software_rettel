@@ -6,6 +6,7 @@ import de.bauersoft.data.entities.recipe.Recipe;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -17,21 +18,21 @@ import java.util.Set;
 @Builder
 public class Component extends AbstractEntity
 {
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 64)
     private String name;
 
     @Column(length = 1024)
     private String description;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "course_id", referencedColumnName = "id")
     private Course course;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "component_recipes",
             joinColumns = @JoinColumn(name = "component_id"),
             inverseJoinColumns = @JoinColumn(name = "recipe_id")
     )
-    private Set<Recipe> recipes;
+    private Set<Recipe> recipes = new HashSet<>();
 }

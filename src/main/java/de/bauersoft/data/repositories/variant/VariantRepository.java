@@ -22,6 +22,8 @@ public interface VariantRepository extends JpaRepository<Variant, Long>, JpaSpec
 
     Optional<Variant> findByMenuIdAndPatternId(Long menuId, Long patternId);
 
+
+
     @Transactional
     @Modifying
     @Query("DELETE FROM Variant v WHERE v.menu.id = :menuId")

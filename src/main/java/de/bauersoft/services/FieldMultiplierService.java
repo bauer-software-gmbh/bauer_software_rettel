@@ -1,17 +1,16 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.additive.Additive;
-import de.bauersoft.data.entities.field.FieldMultiplier;
-import de.bauersoft.data.entities.field.FieldMultiplierKey;
+import de.bauersoft.data.entities.course.Course;
+import de.bauersoft.data.entities.field.Field;
+import de.bauersoft.data.entities.fieldMultiplier.FieldMultiplier;
+import de.bauersoft.data.entities.fieldMultiplier.FieldMultiplierKey;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.field.FieldMultiplierRepository;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -129,4 +128,8 @@ public class FieldMultiplierService implements ServiceBase<FieldMultiplier, Fiel
         repository.deleteAllByFieldId(fieldId);
     }
 
+    public Optional<FieldMultiplier> findByFieldAndCourse(Field field, Course course)
+    {
+        return repository.findByFieldAndCourse(field, course);
+    }
 }

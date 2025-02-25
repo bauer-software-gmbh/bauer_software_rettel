@@ -1,7 +1,8 @@
-package de.bauersoft.data.entities.institution;
+package de.bauersoft.data.entities.institutionFieldPattern;
 
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.entities.pattern.Pattern;
-import de.bauersoft.views.institution.container.ContainerID;
+import de.bauersoft.components.container.ContainerID;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

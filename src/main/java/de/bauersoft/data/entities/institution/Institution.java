@@ -2,6 +2,7 @@ package de.bauersoft.data.entities.institution;
 
 import de.bauersoft.data.entities.AbstractEntity;
 import de.bauersoft.data.entities.address.Address;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.entities.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -28,14 +29,11 @@ public class Institution extends AbstractEntity
 
     private String customerId;
 
-    @Column(nullable = false, columnDefinition = "TIME default '00:00:00'")
-    private LocalTime orderStart = LocalTime.of(0, 0);
+    @Column(nullable = false, columnDefinition = "TIME default '00:00:05'")
+    private LocalTime orderStart = LocalTime.of(0, 5);
 
-    @Column(nullable = false, columnDefinition = "TIME default '23:59:00'")
-    private LocalTime orderEnd = LocalTime.of(23, 59);
-
-    @Column(nullable = false, columnDefinition = "TINYINT(1) default 0")
-    private boolean localMultiplier;
+    @Column(nullable = false, columnDefinition = "TIME default '08:00:00'")
+    private LocalTime orderEnd = LocalTime.of(8, 8);
 
     @ManyToOne(fetch = FetchType.EAGER, targetEntity = Address.class)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
@@ -47,7 +45,7 @@ public class Institution extends AbstractEntity
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> users = new HashSet<>();
 
-    @OneToMany(mappedBy = "institution", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "institution", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
     private Set<InstitutionField> institutionFields = new HashSet<>();
 
 }

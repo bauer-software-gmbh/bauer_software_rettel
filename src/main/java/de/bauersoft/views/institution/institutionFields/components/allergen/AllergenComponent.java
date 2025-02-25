@@ -8,19 +8,17 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import de.bauersoft.data.entities.allergen.Allergen;
-import de.bauersoft.data.entities.institution.InstitutionAllergen;
-import de.bauersoft.data.entities.institution.InstitutionAllergenKey;
-import de.bauersoft.data.entities.institution.InstitutionField;
+import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
+import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergenKey;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.views.institution.InstitutionDialog;
-import de.bauersoft.views.institution.container2.Container;
-import de.bauersoft.views.institution.container2.ContainerMapper;
-import de.bauersoft.views.institution.container2.ContainerState;
+import de.bauersoft.components.container.Container;
+import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.views.institution.institutionFields.InstitutionFieldDialog;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -51,7 +49,6 @@ public class AllergenComponent extends VerticalLayout
         allergenRows = new ArrayList<>();
 
         addButton = new Button("Allergen Hinzufügen", LineAwesomeIcon.PLUS_SOLID.create());
-
         addButton.addClickListener(event ->
         {
             AllergenRow allergenRow = new AllergenRow(null);
@@ -64,13 +61,14 @@ public class AllergenComponent extends VerticalLayout
 
         for(Container<InstitutionAllergen, InstitutionAllergenKey> container : allergenListContainer.getContainers())
         {
-            if(container.getState().equals(ContainerState.DELETE)) continue;
+            if(container.getState().equals(ContainerState.DELETE) || container.getState().equals(ContainerState.IGNORE)) continue;
             AllergenRow allergenRow = new AllergenRow((AllergenContainer) container);
 
             allergenRows.add(allergenRow);
             this.add(allergenRow);
         }
 
+        this.setWidthFull();
         this.getStyle()
                 .set("padding", "var(--lumo-space-s)")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
@@ -91,7 +89,7 @@ public class AllergenComponent extends VerticalLayout
 
     public class AllergenRow extends HorizontalLayout
     {
-        private AtomicReference<AllergenContainer> allergenContainer;
+        private AtomicReference<AllergenContainer> currentContainer;
 
         private ComboBox<Allergen> allergenComboBox;
         private NumberField amountField;
@@ -103,126 +101,88 @@ public class AllergenComponent extends VerticalLayout
 
         public AllergenRow(AllergenContainer allergenContainer)
         {
-            this.allergenContainer = new AtomicReference<>();
-            this.allergenContainer.set(allergenContainer);
+            this.currentContainer = new AtomicReference<>();
+            this.currentContainer.set(allergenContainer);
 
             initiateComponents();
 
             allergenComboBox.addValueChangeListener(event ->
             {
+                Allergen oldValue = event.getOldValue();
+                if(oldValue != null)
+                {
+                    allergenPool.add(oldValue);
+                    AllergenContainer oldContainer = this.currentContainer.get();
+
+                    if(oldContainer == null) return;
+                    oldContainer.setTempState(ContainerState.DELETE);
+                }
+
                 Allergen value = event.getValue();
                 if(value == null)
                 {
-                    allergenComboBox.setTooltipText(" ");
-                    this.allergenContainer.set(null);
+                    allergenComboBox.setTooltipText("");
 
-                }else
+                    AllergenContainer currentContainer = this.currentContainer.get();
+                    if(currentContainer == null) return;
+
+                    currentContainer.setTempState(ContainerState.DELETE);
+
+                }else //Not Null
                 {
                     allergenPool.remove(value);
                     allergenComboBox.setTooltipText(value.getName());
 
-                    this.allergenContainer.set((AllergenContainer) allergenListContainer.addIfAbsent(value, () ->
+                    AllergenContainer currentContainer = (AllergenContainer) allergenListContainer.addIfAbsent(value, () ->
                     {
                         InstitutionAllergen institutionAllergen = new InstitutionAllergen();
-                        institutionAllergen.setId(new InstitutionAllergenKey());
+                        institutionAllergen.setId(new InstitutionAllergenKey(null, value.getId()));
                         institutionAllergen.setInstitutionField(institutionField);
+                        institutionAllergen.setAllergen(value);
 
                         return institutionAllergen;
-                    }));
+                    });
 
-                    this.allergenContainer.get().setState(ContainerState.UPDATE);
-                    this.allergenContainer.get().setTempState(ContainerState.UPDATE);
-                    this.allergenContainer.get().setTempAllergen(value);
-                    this.allergenContainer.get().setTempAmount(Objects.requireNonNullElse(amountField.getValue(), 0).intValue());
+                    currentContainer.setTempState(ContainerState.UPDATE);
+                    this.currentContainer.set(currentContainer);
+
+                    amountField.setValue(Double.valueOf(currentContainer.getTempAmount()));
                 }
-
-                if(event.getOldValue() != null)
-                    allergenPool.add(event.getOldValue());
 
                 allergenDataProvider.refreshAll();
             });
 
-            if(this.allergenContainer.get() != null)
-                allergenComboBox.setValue(this.allergenContainer.get().getEntity().getAllergen());
-
             amountField.addValueChangeListener(event ->
             {
-                if(this.allergenContainer.get() != null)
-                    this.allergenContainer.get().setTempAmount(Objects.requireNonNullElse(event.getValue(), 0).intValue());
-            });
+                AllergenContainer currentContainer = this.currentContainer.get();
+                if(currentContainer == null) return;
 
-            if(this.allergenContainer.get() != null)
-                amountField.setValue(Objects.requireNonNullElse(this.allergenContainer.get().getEntity().getAmount(), 0).doubleValue());
+                currentContainer.setTempAmount(Objects.requireNonNullElse(event.getValue(), 0).intValue());
+            });
 
             removeButton.addClickListener(event ->
             {
-                if(allergenComboBox.getValue() != null)
+                Allergen value = allergenComboBox.getValue();
+                if(value != null)
                 {
-                    allergenPool.add(allergenComboBox.getValue());
+                    allergenPool.add(value);
                     allergenDataProvider.refreshAll();
                 }
 
                 AllergenComponent.this.remove(this);
-                this.allergenContainer.get().setTempState(ContainerState.DELETE);
-                this.allergenContainer.set(null);
-            });
-        }
 
-//        public AllergenRow(AllergenContainer allergenContainer)
-//        {
-//            this.allergenContainer = allergenContainer;
-//
-//           initiateComponents();
-//
-//            allergenComboBox.addValueChangeListener(event ->
-//            {
-//                Allergen value = event.getValue();
-//                if(value == null)
-//                {
-//                    allergenComboBox.setTooltipText("");
-//                }else
-//                {
-//                    allergenPool.remove(value);
-//                    allergenComboBox.setTooltipText(value.getName());
-//
-//                    allergenContainer = allergenListContainer.addIfAbsent(value, () ->
-//                    {
-//                        InstitutionAllergen institutionAllergen = new InstitutionAllergen();
-//
-//                        institutionAllergen.setId(new InstitutionAllergenKey());
-//
-//                        return institutionAllergen;
-//                    });
-//                }
-//
-//                if(event.getOldValue() != null)
-//                    allergenPool.add(event.getOldValue());
-//
-//                allergenDataProvider.refreshAll();
-//            });
-//            allergenComboBox.setValue(allergenContainer.getEntity().getAllergen());
-//
-//
-//
-//            amountField.addValueChangeListener(event ->
-//            {
-//                allergenContainer.setTempAmount(Objects.requireNonNullElse(event.getValue(), 0).intValue());
-//            });
-//            amountField.setValue(Objects.requireNonNullElse(allergenContainer.getEntity().getAmount(), 0).doubleValue());
-//
-//
-//
-//            removeButton.addClickListener(event ->
-//            {
-//                if(allergenComboBox.getValue() != null)
-//                {
-//                    allergenPool.add(allergenComboBox.getValue());
-//                    allergenDataProvider.refreshAll();
-//                }
-//
-//                AllergenComponent.this.remove(this);
-//            });
-//        }
+                AllergenContainer currentContainer = this.currentContainer.get();
+                if(currentContainer == null) return;
+
+                currentContainer.setTempState(ContainerState.DELETE);
+            });
+
+            AllergenContainer creationContainer = this.currentContainer.get();
+            if(creationContainer == null) return;
+
+            allergenComboBox.setValue(creationContainer.getEntity().getAllergen());
+            amountField.setValue(Objects.requireNonNullElse(creationContainer.getEntity().getAmount(), 0).doubleValue());
+        }
 
         private void initiateComponents()
         {
@@ -230,6 +190,7 @@ public class AllergenComponent extends VerticalLayout
             allergenComboBox.setClearButtonVisible(true);
             allergenComboBox.setItemLabelGenerator(Allergen::getName);
             allergenComboBox.setItems(allergenDataProvider);
+            allergenComboBox.setWidthFull();
 
             allergenBinder = new Binder<>();
             allergenBinder.forField(allergenComboBox)

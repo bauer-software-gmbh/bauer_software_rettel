@@ -25,10 +25,12 @@ public class OrderManager extends Div
     private final OrderService orderService;
     private final OrderDataService orderDataService;
     private final OrderAllergenService orderAllergenService;
+    private final InstitutionPatternService institutionPatternService;
+    private final InstitutionAllergenService institutionAllergenService;
 
     private final InstitutionTabSheet institutionTabSheet;
 
-    public OrderManager(AuthenticatedUser authenticatedUser, InstitutionService institutionService, FieldService fieldService, MenuService menuService, VariantService variantService, OfferService offerService, AllergenService allergenService, OrderService orderService, OrderDataService orderDataService, OrderAllergenService orderAllergenService)
+    public OrderManager(AuthenticatedUser authenticatedUser, InstitutionService institutionService, FieldService fieldService, MenuService menuService, VariantService variantService, OfferService offerService, AllergenService allergenService, OrderService orderService, OrderDataService orderDataService, OrderAllergenService orderAllergenService, InstitutionPatternService institutionPatternService, InstitutionAllergenService institutionAllergenService)
     {
         this.authenticatedUser = authenticatedUser;
         this.institutionService = institutionService;
@@ -41,6 +43,8 @@ public class OrderManager extends Div
         this.orderService = orderService;
         this.orderDataService = orderDataService;
         this.orderAllergenService = orderAllergenService;
+        this.institutionPatternService = institutionPatternService;
+        this.institutionAllergenService = institutionAllergenService;
 
         if(authenticatedUser.get().isEmpty())
             throw new IllegalArgumentException("AuthenticatedUser cannot be empty!");

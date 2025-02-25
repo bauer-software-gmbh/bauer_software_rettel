@@ -1,11 +1,11 @@
 package de.bauersoft.data.entities.address;
 
-import de.bauersoft.data.entities.AbstractEntity;
 import de.bauersoft.data.entities.AbstractGroupByEntity;
 import de.bauersoft.data.entities.institution.Institution;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -22,19 +22,19 @@ import java.util.Set;
 @Builder
 public class Address extends AbstractGroupByEntity<Address>
 {
-    @Column(nullable = false)
+    @Column(nullable = false, length = 64)
     private String street;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 8)
     private String number;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5)
     private String postal;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 64)
     private String city;
 
-    @OneToMany(mappedBy = "address", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    private Set<Institution> institutions;
+    @OneToMany(mappedBy = "address", fetch = FetchType.EAGER)
+    private Set<Institution> institutions = new HashSet<>();
 
 }

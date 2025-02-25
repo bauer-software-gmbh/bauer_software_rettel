@@ -1,4 +1,4 @@
-package de.bauersoft.data.entities.institution;
+package de.bauersoft.data.entities.institutionFieldMultiplier;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -14,13 +14,13 @@ import java.util.Objects;
 @NoArgsConstructor
 @Getter
 @Setter
-public class InstitutionPatternKey
+public class InstitutionMultiplierKey
 {
     @Column(nullable = false)
     private Long institutionFieldId;
 
     @Column(nullable = false)
-    private Long patternId;
+    private Long courseId;
 
     @Override
     public boolean equals(Object o)
@@ -29,22 +29,22 @@ public class InstitutionPatternKey
         {
             return false;
         }
-        InstitutionPatternKey that = (InstitutionPatternKey) o;
-        return Objects.equals(institutionFieldId, that.institutionFieldId) && Objects.equals(patternId, that.patternId);
+        InstitutionMultiplierKey that = (InstitutionMultiplierKey) o;
+        return Objects.equals(institutionFieldId, that.institutionFieldId) && Objects.equals(courseId, that.courseId);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(institutionFieldId, patternId);
+        return Objects.hash(institutionFieldId, courseId);
     }
 
     @Override
     public String toString()
     {
-        return "InstitutionPatternKey{" +
+        return "InstitutionMultiplierKey{" +
                 "institutionFieldId=" + institutionFieldId +
-                ", patternId=" + patternId +
+                ", courseId=" + courseId +
                 '}';
     }
 }

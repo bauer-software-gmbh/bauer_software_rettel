@@ -1,10 +1,11 @@
 package de.bauersoft.views.institution.institutionFields.components.pattern;
 
-import de.bauersoft.data.entities.institution.InstitutionPattern;
-import de.bauersoft.data.entities.institution.InstitutionPatternKey;
+import de.bauersoft.components.container.ContainerState;
+import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPattern;
+import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPatternKey;
 import de.bauersoft.data.entities.pattern.Pattern;
-import de.bauersoft.views.institution.container2.Container;
-import de.bauersoft.views.institution.container2.MapContainer;
+import de.bauersoft.components.container.Container;
+import de.bauersoft.components.container.MapContainer;
 
 public class PatternMapContainer extends MapContainer<InstitutionPattern, InstitutionPatternKey, Pattern>
 {
@@ -15,8 +16,14 @@ public class PatternMapContainer extends MapContainer<InstitutionPattern, Instit
     }
 
     @Override
-    public Container<InstitutionPattern, InstitutionPatternKey> createContainer(InstitutionPattern entity)
+    public PatternContainer createContainer(InstitutionPattern entity)
     {
         return new PatternContainer(entity);
+    }
+
+    @Override
+    public PatternContainer createContainer(InstitutionPattern entity, ContainerState state)
+    {
+        return new PatternContainer(entity, state);
     }
 }

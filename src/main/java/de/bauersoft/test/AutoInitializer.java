@@ -1,28 +1,16 @@
 package de.bauersoft.test;
 
-import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.allergen.Allergen;
-import de.bauersoft.data.entities.component.Component;
 import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.field.Field;
-import de.bauersoft.data.entities.ingredient.Ingredient;
-import de.bauersoft.data.entities.institution.*;
-import de.bauersoft.data.entities.menu.Menu;
-import de.bauersoft.data.entities.offer.Offer;
-import de.bauersoft.data.entities.order.*;
-import de.bauersoft.data.entities.pattern.Pattern;
-import de.bauersoft.data.entities.recipe.Recipe;
-import de.bauersoft.data.entities.unit.Unit;
-import de.bauersoft.data.entities.variant.Variant;
-import de.bauersoft.data.repositories.pattern.PatternRepository;
+import de.bauersoft.data.entities.institution.Institution;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.services.*;
-import de.bauersoft.services.offer.OfferService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Configuration
@@ -39,10 +27,20 @@ public class AutoInitializer
                                        FieldService fieldService,
                                        CourseService courseService,
                                        AllergenService allergenService,
-                                       PatternService patternService)
+                                       PatternService patternService,
+                                       UnitService unitService)
     {
         return args ->
         {
+//            for(long i = unitService.count(); i < 10000; i++)
+//            {
+//                Unit unit = new Unit();
+//                unit.setName(UUID.randomUUID().toString());
+//                unit.setShorthand(unit.getName() + " - S");
+//
+//                unitService.update(unit);
+//            }
+
             for(int i = courseService.findAll().size(); i < 5; i++)
             {
                 Course course = new Course();
@@ -69,7 +67,6 @@ public class AutoInitializer
                     InstitutionField institutionField = new InstitutionField();
                     institutionField.setInstitution(institution);
                     institutionField.setField(field);
-                    institutionField.setChildCount(20);
 
                     institution.getInstitutionFields().add(institutionField);
                 }
@@ -79,64 +76,64 @@ public class AutoInitializer
                 institutionFieldsService.updateAll(institution.getInstitutionFields());
             }
 
-            for(InstitutionField institutionField : institutionFieldsService.findAll())
-            {
-                for(Course course : courseService.findAll())
-                {
-                    InstitutionMultiplierKey key = new InstitutionMultiplierKey();
-                    key.setInstitutionFieldId(institutionField.getId());
-                    key.setCourseId(course.getId());
+//            for(InstitutionField institutionField : institutionFieldsService.findAll())
+//            {
+//                for(Course course : courseService.findAll())
+//                {
+//                    InstitutionMultiplierKey key = new InstitutionMultiplierKey();
+//                    key.setInstitutionFieldId(institutionField.getId());
+//                    key.setCourseId(course.getId());
+//
+//                    InstitutionMultiplier institutionMultiplier = new InstitutionMultiplier();
+//                    institutionMultiplier.setId(key);
+//                    institutionMultiplier.setInstitutionField(institutionField);
+//                    institutionMultiplier.setCourse(course);
+//                    institutionMultiplier.setMultiplier(1d);
+//
+//                    institutionField.getInstitutionMultipliers().add(institutionMultiplier);
+//                }
+//
+//                institutionMultiplierService.updateAll(institutionField.getInstitutionMultipliers());
+//            }
+//
+//            for(InstitutionField institutionField : institutionFieldsService.findAll())
+//            {
+//                for(Pattern pattern : patternService.findAll())
+//                {
+//                    InstitutionPatternKey key = new InstitutionPatternKey();
+//                    key.setInstitutionFieldId(institutionField.getId());
+//                    key.setPatternId(pattern.getId());
+//
+//                    InstitutionPattern institutionPattern = new InstitutionPattern();
+//                    institutionPattern.setId(key);
+//                    institutionPattern.setInstitutionField(institutionField);
+//                    institutionPattern.setPattern(pattern);
+//                    institutionPattern.setAmount(20);
+//
+//                    institutionField.getInstitutionPatterns().add(institutionPattern);
+//                }
+//
+//                institutionPatternService.updateAll(institutionField.getInstitutionPatterns());
+//            }
 
-                    InstitutionMultiplier institutionMultiplier = new InstitutionMultiplier();
-                    institutionMultiplier.setId(key);
-                    institutionMultiplier.setInstitutionField(institutionField);
-                    institutionMultiplier.setCourse(course);
-                    institutionMultiplier.setMultiplier(1d);
-
-                    institutionField.getInstitutionMultipliers().add(institutionMultiplier);
-                }
-
-                institutionMultiplierService.updateAll(institutionField.getInstitutionMultipliers());
-            }
-
-            for(InstitutionField institutionField : institutionFieldsService.findAll())
-            {
-                for(Pattern pattern : patternService.findAll())
-                {
-                    InstitutionPatternKey key = new InstitutionPatternKey();
-                    key.setInstitutionFieldId(institutionField.getId());
-                    key.setPatternId(pattern.getId());
-
-                    InstitutionPattern institutionPattern = new InstitutionPattern();
-                    institutionPattern.setId(key);
-                    institutionPattern.setInstitutionField(institutionField);
-                    institutionPattern.setPattern(pattern);
-                    institutionPattern.setAmount(20);
-
-                    institutionField.getInstitutionPatterns().add(institutionPattern);
-                }
-
-                institutionPatternService.updateAll(institutionField.getInstitutionPatterns());
-            }
-
-            for(InstitutionField institutionField : institutionFieldsService.findAll())
-            {
-                for(Allergen allergen : allergenService.findAll())
-                {
-                    InstitutionAllergenKey key = new InstitutionAllergenKey();
-                    key.setInstitutionFieldId(institutionField.getId());
-                    key.setAllergenId(allergen.getId());
-
-                    InstitutionAllergen institutionAllergen = new InstitutionAllergen();
-                    institutionAllergen.setId(key);
-                    institutionAllergen.setInstitutionField(institutionField);
-                    institutionAllergen.setAllergen(allergen);
-
-                    institutionField.getInstitutionAllergens().add(institutionAllergen);
-                }
-
-                institutionAllergenService.updateAll(institutionField.getInstitutionAllergens());
-            }
+//            for(InstitutionField institutionField : institutionFieldsService.findAll())
+//            {
+//                for(Allergen allergen : allergenService.findAll())
+//                {
+//                    InstitutionAllergenKey key = new InstitutionAllergenKey();
+//                    key.setInstitutionFieldId(institutionField.getId());
+//                    key.setAllergenId(allergen.getId());
+//
+//                    InstitutionAllergen institutionAllergen = new InstitutionAllergen();
+//                    institutionAllergen.setId(key);
+//                    institutionAllergen.setInstitutionField(institutionField);
+//                    institutionAllergen.setAllergen(allergen);
+//
+//                    institutionField.getInstitutionAllergens().add(institutionAllergen);
+//                }
+//
+//                institutionAllergenService.updateAll(institutionField.getInstitutionAllergens());
+//            }
 
         };
     }

@@ -8,7 +8,7 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import de.bauersoft.data.entities.allergen.Allergen;
-import de.bauersoft.data.entities.institution.InstitutionField;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.data.entities.order.OrderAllergen;
 import de.bauersoft.data.entities.order.OrderAllergenKey;
@@ -38,7 +38,6 @@ public class AllergenComponent extends VerticalLayout
 
     public AllergenComponent(OrderManager orderManager, InstitutionField institutionField, CalendarCluster calendarCluster, Order order)
     {
-
         Objects.requireNonNull(orderManager, "OrderManager cannot be null!");
         Objects.requireNonNull(institutionField, "InstitutionField cannot be null!");
         Objects.requireNonNull(calendarCluster, "CalendarCluster cannot be null!");
@@ -71,13 +70,30 @@ public class AllergenComponent extends VerticalLayout
 
         this.add(addButton);
 
+//        List<Allergen> existingAllergens = new ArrayList<>();
         for(OrderAllergen orderAllergen : order.getOrderAllergens())
         {
             allergensPool.remove(orderAllergen.getAllergen());
             allergenListDataProvider.refreshAll();
 
             addAllergenRow(orderAllergen);
+            //existingAllergens.add(orderAllergen.getAllergen());
         }
+
+//        for(InstitutionAllergen institutionAllergen : orderManager.getInstitutionAllergenService().findAllByInstitutionField(institutionField))
+//        {
+//            if(existingAllergens.contains(institutionAllergen.getAllergen()))
+//                continue;
+//
+//            OrderAllergen orderAllergen = new OrderAllergen();
+//            orderAllergen.setId(new OrderAllergenKey(null, institutionAllergen.getAllergen().getId()));
+//            orderAllergen.set_order(order);
+//            orderAllergen.setAllergen(institutionAllergen.getAllergen());
+//
+//            orderAllergen.setAmount(institutionAllergen.getAmount());
+//
+//            addAllergenRow(orderAllergen);
+//        }
 
         this.setWidthFull();
         this.getStyle().setPadding("0px");

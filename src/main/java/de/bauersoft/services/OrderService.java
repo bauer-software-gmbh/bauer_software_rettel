@@ -1,7 +1,6 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.order.Order;
@@ -12,8 +11,6 @@ import de.bauersoft.data.repositories.order.OrderRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

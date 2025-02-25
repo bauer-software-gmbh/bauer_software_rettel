@@ -1,7 +1,7 @@
 package de.bauersoft.views.order.institutionLayer.fieldLayer;
 
 import com.vaadin.flow.component.tabs.TabSheet;
-import de.bauersoft.data.entities.institution.InstitutionField;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.views.order.OrderManager;
 import de.bauersoft.views.order.institutionLayer.InstitutionTab;
 import lombok.Getter;

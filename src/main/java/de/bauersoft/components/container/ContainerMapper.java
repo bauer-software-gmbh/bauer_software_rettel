@@ -1,4 +1,4 @@
-package de.bauersoft.views.institution.container2;
+package de.bauersoft.components.container;
 
 import java.util.*;
 import java.util.stream.Collectors;

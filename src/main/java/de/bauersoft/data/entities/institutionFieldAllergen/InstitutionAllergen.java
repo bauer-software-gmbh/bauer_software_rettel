@@ -1,7 +1,8 @@
-package de.bauersoft.data.entities.institution;
+package de.bauersoft.data.entities.institutionFieldAllergen;
 
 import de.bauersoft.data.entities.allergen.Allergen;
-import de.bauersoft.views.institution.container.ContainerID;
+import de.bauersoft.components.container.ContainerID;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

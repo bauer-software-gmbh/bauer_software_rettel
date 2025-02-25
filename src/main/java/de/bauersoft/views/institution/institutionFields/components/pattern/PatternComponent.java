@@ -2,14 +2,16 @@ package de.bauersoft.views.institution.institutionFields.components.pattern;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.dom.Style;
-import de.bauersoft.data.entities.institution.InstitutionField;
-import de.bauersoft.data.entities.institution.InstitutionPattern;
-import de.bauersoft.data.entities.institution.InstitutionPatternKey;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
+import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPattern;
+import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPatternKey;
 import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.views.institution.InstitutionDialog;
+import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.views.institution.institutionFields.InstitutionFieldDialog;
 import lombok.Getter;
 
@@ -18,7 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Getter
-public class PatternComponent extends HorizontalLayout
+public class PatternComponent extends VerticalLayout
 {
     private final InstitutionDialog institutionDialog;
     private final InstitutionFieldDialog institutionFieldDialog;
@@ -27,6 +29,8 @@ public class PatternComponent extends HorizontalLayout
     private final PatternMapContainer patternListContainer;
 
     private final Map<Pattern, PatternBox> patternBoxMap;
+
+    private final HorizontalLayout horizontalLayout;
 
     public PatternComponent(InstitutionDialog institutionDialog, InstitutionFieldDialog institutionFieldDialog, PatternMapContainer patternListContainer)
     {
@@ -37,9 +41,12 @@ public class PatternComponent extends HorizontalLayout
 
         patternBoxMap = new HashMap<>();
 
+        horizontalLayout = new HorizontalLayout();
+        horizontalLayout.setWidthFull();
+
         for(Pattern pattern : institutionDialog.getPatternService().findAll())
         {
-            PatternContainer container = (PatternContainer) patternListContainer.addIfAbsent(pattern, () ->
+            PatternContainer patternContainer = (PatternContainer) patternListContainer.addIfAbsent(pattern, () ->
             {
                 InstitutionPattern institutionPattern = new InstitutionPattern();
                 institutionPattern.setId(new InstitutionPatternKey(null, pattern.getId()));
@@ -47,14 +54,16 @@ public class PatternComponent extends HorizontalLayout
                 institutionPattern.setPattern(pattern);
 
                 return institutionPattern;
-            });
+            }).setState(ContainerState.UPDATE);
 
-            PatternBox patternBox = new PatternBox(container);
+            PatternBox patternBox = new PatternBox(patternContainer);
 
             patternBoxMap.put(pattern, patternBox);
-            this.add(patternBox);
+            horizontalLayout.add(patternBox);
         }
 
+        this.add(horizontalLayout);
+        this.setWidthFull();
         this.getStyle()
                 .setFlexWrap(Style.FlexWrap.WRAP)
                 .setDisplay(Style.Display.FLEX)
@@ -62,6 +71,18 @@ public class PatternComponent extends HorizontalLayout
                 .set("padding", "var(--lumo-space-s)")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
                 .set("border-radius", "var(--lumo-border-radius-s)");
+    }
+
+    public boolean isValid()
+    {
+        boolean allValid = true;
+        for(PatternBox patternBox : patternBoxMap.values())
+        {
+            if(!patternBox.isValid())
+                allValid = false;
+        }
+
+        return allValid;
     }
 
     public class PatternBox extends Div
@@ -127,6 +148,13 @@ public class PatternComponent extends HorizontalLayout
                     .set("border", "1px solid var(--lumo-contrast-20pct)")
                     .set("border-radius", "var(--lumo-border-radius-m)")
                     .set("padding", "var(--lumo-space-s)");
+        }
+
+        public boolean isValid()
+        {
+            amountBinder.validate();
+
+            return amountBinder.isValid();
         }
     }
 

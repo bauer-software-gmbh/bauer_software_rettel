@@ -1,4 +1,4 @@
-package de.bauersoft.data.entities.institution;
+package de.bauersoft.data.entities.institutionFieldAllergen;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

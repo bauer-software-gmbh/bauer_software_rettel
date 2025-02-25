@@ -3,7 +3,6 @@ package de.bauersoft.data.entities.order;
 import de.bauersoft.data.entities.AbstractEntity;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
-import de.bauersoft.data.entities.menu.Menu;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
@@ -25,7 +24,6 @@ import java.util.Set;
 @Builder
 public class Order extends AbstractEntity
 {
-
     @Column(nullable = false)
     private LocalDate localDate;
 

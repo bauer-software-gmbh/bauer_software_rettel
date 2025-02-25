@@ -9,7 +9,6 @@ import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
@@ -44,11 +43,12 @@ public class InstitutionView extends Div
 	private InstitutionAllergenService institutionAllergenService;
 	private PatternService patternService;
 	private InstitutionPatternService institutionPatternService;
+	private InstitutionClosingTimeService institutionClosingTimeService;
 
 	private InstitutionDataProvider institutionDataProvider;
 	private AddressDataProvider addressDataProvider;
 
-	public InstitutionView(InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, AddressService addressService, FieldService fieldService, UserService userService, InstitutionMultiplierService institutionMultiplierService, CourseService courseService, FieldMultiplierService fieldMultiplierService, OrderService orderService, AllergenService allergenService, InstitutionAllergenService institutionAllergenService, PatternService patternService, InstitutionPatternService institutionPatternService, InstitutionDataProvider institutionDataProvider, AddressDataProvider addressDataProvider)
+	public InstitutionView(InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, AddressService addressService, FieldService fieldService, UserService userService, InstitutionMultiplierService institutionMultiplierService, CourseService courseService, FieldMultiplierService fieldMultiplierService, OrderService orderService, AllergenService allergenService, InstitutionAllergenService institutionAllergenService, PatternService patternService, InstitutionPatternService institutionPatternService, InstitutionClosingTimeService institutionClosingTimeService, InstitutionDataProvider institutionDataProvider, AddressDataProvider addressDataProvider)
 	{
 		this.institutionService = institutionService;
 		this.institutionFieldsService = institutionFieldsService;
@@ -63,6 +63,7 @@ public class InstitutionView extends Div
         this.institutionAllergenService = institutionAllergenService;
         this.patternService = patternService;
         this.institutionPatternService = institutionPatternService;
+        this.institutionClosingTimeService = institutionClosingTimeService;
         this.institutionDataProvider = institutionDataProvider;
         this.addressDataProvider = addressDataProvider;
 
@@ -121,13 +122,13 @@ public class InstitutionView extends Div
         grid.setMultiSort(true, MultiSortPriority.APPEND);
         grid.addItemDoubleClickListener(event ->
 		{
-			new InstitutionDialog(institutionService, institutionFieldsService, addressService, fieldService, userService, institutionMultiplierService, courseService, fieldMultiplierService, allergenService, institutionAllergenService, patternService, institutionPatternService, institutionDataProvider, addressDataProvider, event.getItem(), DialogState.EDIT);
+			new InstitutionDialog(institutionService, institutionFieldsService, addressService, fieldService, userService, institutionMultiplierService, courseService, fieldMultiplierService, allergenService, institutionAllergenService, patternService, institutionPatternService, institutionClosingTimeService, institutionDataProvider, addressDataProvider, event.getItem(), DialogState.EDIT);
 		});
 
         GridContextMenu<Institution> contextMenu = grid.addContextMenu();
         contextMenu.addItem("Neue Institution", event ->
 		{
-			new InstitutionDialog(institutionService, institutionFieldsService, addressService, fieldService, userService, institutionMultiplierService, courseService, fieldMultiplierService, allergenService, institutionAllergenService, patternService, institutionPatternService, institutionDataProvider, addressDataProvider, new Institution(), DialogState.NEW);
+			new InstitutionDialog(institutionService, institutionFieldsService, addressService, fieldService, userService, institutionMultiplierService, courseService, fieldMultiplierService, allergenService, institutionAllergenService, patternService, institutionPatternService, institutionClosingTimeService, institutionDataProvider, addressDataProvider, new Institution(), DialogState.NEW);
 		});
 
         GridMenuItem<Institution> deleteItem = contextMenu.addItem("Löschen", event ->

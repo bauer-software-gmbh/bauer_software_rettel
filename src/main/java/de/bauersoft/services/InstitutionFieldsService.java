@@ -1,21 +1,16 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.additive.Additive;
-import de.bauersoft.data.entities.institution.InstitutionField;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
-import de.bauersoft.data.repositories.institution.InstitutionRepository;
 import de.bauersoft.data.repositories.institutionfields.InstitutionFieldsGridDataRepository;
 import de.bauersoft.data.repositories.institutionfields.InstitutionFieldsRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;

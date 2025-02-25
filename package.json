@@ -17,6 +17,7 @@
     "@fullcalendar/scrollgrid": "6.1.9",
     "@fullcalendar/timegrid": "6.1.9",
     "@polymer/polymer": "3.5.1",
+    "@vaadin-component-factory/vcf-date-range-picker": "5.0.2",
     "@vaadin-component-factory/vcf-pdf-viewer": "3.1.0",
     "@vaadin/a11y-base": "24.3.13",
     "@vaadin/accordion": "24.3.13",
@@ -206,7 +207,8 @@
     "@fullcalendar/daygrid": "$@fullcalendar/daygrid",
     "moment-timezone": "$moment-timezone",
     "@fullcalendar/multimonth": "$@fullcalendar/multimonth",
-    "@fullcalendar/moment": "$@fullcalendar/moment"
+    "@fullcalendar/moment": "$@fullcalendar/moment",
+    "@vaadin-component-factory/vcf-date-range-picker": "$@vaadin-component-factory/vcf-date-range-picker"
   },
   "vaadin": {
     "dependencies": {
@@ -224,6 +226,7 @@
       "@fullcalendar/scrollgrid": "6.1.9",
       "@fullcalendar/timegrid": "6.1.9",
       "@polymer/polymer": "3.5.1",
+      "@vaadin-component-factory/vcf-date-range-picker": "5.0.2",
       "@vaadin-component-factory/vcf-pdf-viewer": "3.1.0",
       "@vaadin/a11y-base": "24.3.13",
       "@vaadin/accordion": "24.3.13",
@@ -321,6 +324,6 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "1220cc3292c8d3b4848cd3832237725fc0252638afd60f6f922cea64777c41fe"
+    "hash": "fded0389a35229c6103f20f46f8751072ad66a0c556cd86a63a518e5f8d3524b"
   }
 }

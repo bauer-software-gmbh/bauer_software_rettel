@@ -28,8 +28,8 @@ public class OrderData
     @OnDelete(action = OnDeleteAction.RESTRICT)
     private Variant variant;
 
-    @Column(nullable = false, columnDefinition = "integer default 1")
-    private int amount;
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private Integer amount = 0;
 
     @Override
     public String toString()

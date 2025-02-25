@@ -5,6 +5,7 @@ import de.bauersoft.data.entities.component.Component;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -17,10 +18,9 @@ import java.util.Set;
 public class Course extends AbstractEntity
 {
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 64)
     private String name;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
-    private Set<Component> components;
-
+    @OneToMany(mappedBy = "course", fetch = FetchType.EAGER)
+    private Set<Component> components = new HashSet<>();
 }

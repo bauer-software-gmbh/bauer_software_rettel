@@ -36,21 +36,21 @@ public class Ingredient extends AbstractEntity
     private Unit unit;
 
     @OneToMany(mappedBy = "ingredient", fetch = FetchType.EAGER)
-    private Set<Formulation> formulations = new HashSet<>(); //<- da lassen!
+    private Set<Formulation> formulations = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "allergenic",
             joinColumns = @JoinColumn(name = "ingredient_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "allergen_id", referencedColumnName = "id"))
-    private Set<Allergen> allergens;
+    private Set<Allergen> allergens = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "additives",
             joinColumns = @JoinColumn(name = "ingredient_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "additive_id", referencedColumnName = "id"))
-    private Set<Additive> additives;
+    private Set<Additive> additives = new HashSet<>();
 
     @Override
     public String toString()

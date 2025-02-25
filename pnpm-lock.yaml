@@ -50,6 +50,9 @@ importers:
       '@polymer/polymer':
         specifier: 3.5.1
         version: 3.5.1
+      '@vaadin-component-factory/vcf-date-range-picker':
+        specifier: 5.0.2
+        version: 5.0.2
       '@vaadin-component-factory/vcf-pdf-viewer':
         specifier: 3.1.0
         version: 3.1.0(rollup@2.79.2)
@@ -1131,6 +1134,18 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
+  '@polymer/iron-a11y-announcer@3.2.0':
+    resolution: {integrity: sha512-We+hyaFHcg7Ke8ovsoxUpYEXFIJLHxMCDaLehTB4dELS+C+K0zMnGSiqQvb/YzGS+nSYpAfkQIyg1msOCdHMtA==}
+
+  '@polymer/iron-a11y-keys-behavior@3.0.1':
+    resolution: {integrity: sha512-lnrjKq3ysbBPT/74l0Fj0U9H9C35Tpw2C/tpJ8a+5g8Y3YJs1WSZYnEl1yOkw6sEyaxOq/1DkzH0+60gGu5/PQ==}
+
+  '@polymer/iron-media-query@3.0.1':
+    resolution: {integrity: sha512-czUX1pm1zfmfcZtq5J57XFkcobBv08Y50exp0/3v8Bos5VL/jv2tU0RwiTfDBxUMhjicGbgwEBFQPY2V5DMzyw==}
+
+  '@polymer/iron-resizable-behavior@3.0.1':
+    resolution: {integrity: sha512-FyHxRxFspVoRaeZSWpT3y0C9awomb4tXXolIJcZ7RvXhMP632V5lez+ch5G5SwK0LpnAPkg35eB0LPMFv+YMMQ==}
+
   '@polymer/polymer@3.5.1':
     resolution: {integrity: sha512-JlAHuy+1qIC6hL1ojEUfIVD58fzTpJAoCxFwV5yr0mYTXV1H8bz5zy0+rC963Cgr9iNXQ4T9ncSjC2fkF9BQfw==}
 
@@ -1393,6 +1408,9 @@ packages:
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+
+  '@vaadin-component-factory/vcf-date-range-picker@5.0.2':
+    resolution: {integrity: sha512-ldMLFrctcxY1QzKD2Ekvd5cqMR1vr5JDAL5tbzBidmei4sZ3J47BsZEPeLCFV2wRUBB+EwFYdI2j1LHqV+Rj2w==}
 
   '@vaadin-component-factory/vcf-pdf-viewer@3.1.0':
     resolution: {integrity: sha512-BijB48vXe9AQc45+HkZLU/XQVcSVVbqLJknEs9rAmmpLsj40Cg6zF2fEPeiE/U5Ms7slRxTcudnXc2b/baMvyQ==}
@@ -1811,6 +1829,9 @@ packages:
 
   '@vaadin/upload@24.3.13':
     resolution: {integrity: sha512-nAAnROhjQc+4mmJKffCeSC7pwQ/aJE9aQnR8J8pcpMooYvhhRDXqGImVZaCLgqC9pU2cRqwXxhX42gk5pNnxDw==}
+
+  '@vaadin/vaadin-control-state-mixin@21.0.5':
+    resolution: {integrity: sha512-4wvlu+Pirckgl3rtt61nLJZ7sRfzcMPJ42oIE7boGe2gTuWumeSdnS66hsaUugXg+A37Gv6KzsJup1lfaU1Mug==}
 
   '@vaadin/vaadin-development-mode-detector@2.0.7':
     resolution: {integrity: sha512-9FhVhr0ynSR3X2ao+vaIEttcNU5XfzCbxtmYOV8uIRnUCtNgbvMOIcyGBvntsX9I5kvIP2dV3cFAOG9SILJzEA==}
@@ -4308,6 +4329,22 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
+  '@polymer/iron-a11y-announcer@3.2.0':
+    dependencies:
+      '@polymer/polymer': 3.5.1
+
+  '@polymer/iron-a11y-keys-behavior@3.0.1':
+    dependencies:
+      '@polymer/polymer': 3.5.1
+
+  '@polymer/iron-media-query@3.0.1':
+    dependencies:
+      '@polymer/polymer': 3.5.1
+
+  '@polymer/iron-resizable-behavior@3.0.1':
+    dependencies:
+      '@polymer/polymer': 3.5.1
+
   '@polymer/polymer@3.5.1':
     dependencies:
       '@webcomponents/shadycss': 1.11.2
@@ -4527,6 +4564,24 @@ snapshots:
       '@types/node': 22.13.1
 
   '@types/trusted-types@2.0.7': {}
+
+  '@vaadin-component-factory/vcf-date-range-picker@5.0.2':
+    dependencies:
+      '@polymer/iron-a11y-announcer': 3.2.0
+      '@polymer/iron-a11y-keys-behavior': 3.0.1
+      '@polymer/iron-media-query': 3.0.1
+      '@polymer/iron-resizable-behavior': 3.0.1
+      '@polymer/polymer': 3.5.1
+      '@vaadin/button': 24.3.13
+      '@vaadin/component-base': 24.3.13
+      '@vaadin/form-layout': 24.3.13
+      '@vaadin/overlay': 24.3.13
+      '@vaadin/polymer-legacy-adapter': 24.3.13
+      '@vaadin/text-field': 24.3.13
+      '@vaadin/vaadin-control-state-mixin': 21.0.5
+      '@vaadin/vaadin-lumo-styles': 24.3.13
+      '@vaadin/vaadin-material-styles': 24.3.13
+      '@vaadin/vaadin-themable-mixin': 24.3.13
 
   '@vaadin-component-factory/vcf-pdf-viewer@3.1.0(rollup@2.79.2)':
     dependencies:
@@ -5292,6 +5347,10 @@ snapshots:
       '@vaadin/vaadin-material-styles': 24.3.13
       '@vaadin/vaadin-themable-mixin': 24.3.13
       lit: 3.1.2
+
+  '@vaadin/vaadin-control-state-mixin@21.0.5':
+    dependencies:
+      '@polymer/polymer': 3.5.1
 
   '@vaadin/vaadin-development-mode-detector@2.0.7': {}
 

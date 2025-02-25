@@ -20,6 +20,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * The entry point of the Spring Boot application.
@@ -31,6 +32,7 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 @Theme(value = "rettels")
 @Push
+@EnableScheduling
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator
 {
 

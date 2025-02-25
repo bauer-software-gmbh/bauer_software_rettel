@@ -1,7 +1,8 @@
-package de.bauersoft.data.entities.institution;
+package de.bauersoft.data.entities.institutionFieldMultiplier;
 
 import de.bauersoft.data.entities.course.Course;
-import de.bauersoft.views.institution.container.ContainerID;
+import de.bauersoft.components.container.ContainerID;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,9 +31,7 @@ public class InstitutionMultiplier implements ContainerID<InstitutionMultiplierK
     private Course course;
 
     @Column(nullable = false, columnDefinition = "double default 1.0")
-    private double multiplier;
-
-    private boolean isLocal;
+    private double multiplier = 1;
 
     @Override
     public String toString()
@@ -41,7 +40,6 @@ public class InstitutionMultiplier implements ContainerID<InstitutionMultiplierK
                 "id=" + id +
                 ", course=" + course +
                 ", multiplier=" + multiplier +
-                ", isLocal=" + isLocal +
                 '}';
     }
 }

@@ -1,8 +1,7 @@
-package de.bauersoft.views.institution.container2;
+package de.bauersoft.components.container;
 
 import com.vaadin.flow.component.notification.Notification;
 import de.bauersoft.services.ServiceBase;
-import de.bauersoft.views.institution.container.ContainerID;
 
 import java.util.Objects;
 
@@ -15,8 +14,17 @@ public abstract class Container<T extends ContainerID<ID>, ID>
     public Container(T entity)
     {
         Objects.requireNonNull(entity);
+
         this.entity = entity;
         this.state = ContainerState.IGNORE;
+    }
+
+    public Container(T entity, ContainerState state)
+    {
+        Objects.requireNonNull(entity);
+
+        this.entity = entity;
+        this.state = state;
     }
 
     public T getEntity()
@@ -24,9 +32,12 @@ public abstract class Container<T extends ContainerID<ID>, ID>
         return entity;
     }
 
-    public void setEntity(T entity)
+    public Container<T, ID> setEntity(T entity)
     {
+        Objects.requireNonNull(entity);
+
         this.entity = entity;
+        return this;
     }
 
     public ContainerState getState()
@@ -34,43 +45,43 @@ public abstract class Container<T extends ContainerID<ID>, ID>
         return state;
     }
 
-    public void setState(ContainerState state)
+    public Container<T, ID> setState(ContainerState state)
     {
         Objects.requireNonNull(state);
         this.state = state;
+
+        return this;
     }
 
-    public void update(ServiceBase<T, ID> service)
+    public Container<T, ID> update(ServiceBase<T, ID> service)
     {
-        if(!hasID())
-            throw new IllegalStateException("The entity must have an ID.");
-
         service.update(entity);
+        return this;
     }
 
-    public void delete(ServiceBase<T, ID> service)
+    public Container<T, ID> delete(ServiceBase<T, ID> service)
     {
-        if(!hasID())
-            throw new IllegalStateException("The entity must have an ID.");
-
+        if(!validateId()) return this;
         service.deleteById(entity.getId());
+        return this;
     }
 
-    public void setID(ID id)
+    public Container<T, ID> setID(ID id)
     {
         entity.setId(id);
+        return this;
     }
 
-    public ID getID()
+    public ID getId()
     {
         return entity.getId();
     }
 
-    public boolean hasID()
+    public boolean validateId()
     {
         return entity.getId() != null;
     }
 
-    public abstract void loadTemporaries();
-    public abstract void acceptTemporaries();
+    public abstract Container<T, ID> loadTemporaries();
+    public abstract Container<T, ID> acceptTemporaries();
 }
