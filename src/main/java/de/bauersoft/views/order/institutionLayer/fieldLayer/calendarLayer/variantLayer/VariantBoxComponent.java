@@ -5,7 +5,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.dom.Style;
-import de.bauersoft.data.entities.institution.InstitutionField;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.data.entities.order.OrderData;
@@ -17,7 +17,6 @@ import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @Getter
 public class VariantBoxComponent extends HorizontalLayout
@@ -33,12 +32,6 @@ public class VariantBoxComponent extends HorizontalLayout
 
     public VariantBoxComponent(OrderManager orderManager, InstitutionField institutionField, CalendarCluster calendarCluster, Menu menu, Order order)
     {
-        Objects.requireNonNull(orderManager, "OrderManager cannot be null!");
-        Objects.requireNonNull(institutionField, "InstitutionField cannot be null!");
-        Objects.requireNonNull(calendarCluster, "CalendarCluster cannot be null!");
-        Objects.requireNonNull(menu, "Menu cannot be null!");
-        Objects.requireNonNull(order, "Order cannot be null!");
-
         this.orderManager = orderManager;
         this.institutionField = institutionField;
         this.calendarCluster = calendarCluster;
@@ -109,7 +102,6 @@ public class VariantBoxComponent extends HorizontalLayout
         private final OrderManager orderManager;
         private final VariantBoxComponent variantBoxLayout;
         private final InstitutionField institutionField;
-
         private final OrderData orderData;
 
         private final Div nameDiv;
@@ -124,6 +116,10 @@ public class VariantBoxComponent extends HorizontalLayout
             this.variantBoxLayout = variantBoxLayout;
             this.institutionField = institutionField;
             this.orderData = orderData;
+
+//            orderManager.getInstitutionPatternService()
+//                    .findByInstitutionFieldAndPattern(institutionField, orderData.getVariant().getPattern())
+//                    .ifPresent(institutionPattern -> forecastAmount = institutionPattern.getAmount());
 
             nameDiv = new Div();
             nameDiv.setText(orderData.getVariant().getPattern().getName());
@@ -155,7 +151,7 @@ public class VariantBoxComponent extends HorizontalLayout
                     .set("border-radius", "var(--lumo-border-radius-m)")
                     .set("padding", "var(--lumo-space-s)")
                     .set("background-color", "var(--lumo-base-color)")
-                    .set("height", "15em")
+                    .set("height", "10em")
                     .set("overflow", "auto")
                     .set("white-space", "pre-wrap")
                     .set("box-shadow", "var(--lumo-box-shadow-xs)")
@@ -167,11 +163,14 @@ public class VariantBoxComponent extends HorizontalLayout
                     .set("padding-right", "var(--lumo-space-m)");
 
             amountField = new NumberField();
+            amountField.setWidthFull();
             amountField.setAllowedCharPattern("[0-9]");
             amountField.setMin(0);
             amountField.setMax(Integer.MAX_VALUE);
-            amountField.setValue(Integer.valueOf(orderData.getAmount()).doubleValue());
-            amountField.setWidthFull();
+
+            amountField.setValue(orderData.getAmount().doubleValue());
+
+//            amountField.setValue(Double.valueOf(orderData.getAmount() == null ? forecastAmount : orderData.getAmount()));
 
             amountBinder = new Binder<>();
             amountBinder.forField(amountField)

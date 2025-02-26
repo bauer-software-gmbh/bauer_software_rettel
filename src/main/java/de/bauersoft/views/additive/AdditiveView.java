@@ -26,13 +26,19 @@ import jakarta.annotation.security.RolesAllowed;
 @Uses(Icon.class)
 public class AdditiveView extends Div
 {
+	private final AdditiveService additiveService;
+	private final AdditiveDataProvider additiveDataProvider;
+	private final IngredientService ingredientService;
+
 	private final AutoFilterGrid<Additive> grid = new AutoFilterGrid<>(Additive.class, false, true);
 
-	public AdditiveView(AdditiveService service,
-						AdditiveDataProvider dataProvider,
-						IngredientService ingredientService)
+	public AdditiveView(AdditiveService additiveService, AdditiveDataProvider additiveDataProvider, IngredientService ingredientService)
 	{
-		setClassName("content");
+        this.additiveService = additiveService;
+        this.additiveDataProvider = additiveDataProvider;
+        this.ingredientService = ingredientService;
+
+        setClassName("content");
 
 		grid.setHeightFull();
 		grid.setWidthFull();
@@ -41,17 +47,17 @@ public class AdditiveView extends Div
 		grid.addColumn("name").setHeader("Name");
 		grid.addColumn("description").setHeader("Beschreibung");
 
-		grid.setItems(dataProvider);
+		grid.setItems(additiveDataProvider);
 
 		grid.addItemDoubleClickListener(event ->
 		{
-			new AdditiveDialog(service,dataProvider, event.getItem(), DialogState.EDIT);
+			new AdditiveDialog(additiveService, additiveDataProvider, event.getItem(), DialogState.EDIT);
 		});
 		
 		GridContextMenu<Additive> contextMenu = grid.addContextMenu();
 		contextMenu.addItem("Neuer Zusatzstoff", event ->
 		{
-			new AdditiveDialog(service, dataProvider, new Additive(), DialogState.NEW);
+			new AdditiveDialog(additiveService, additiveDataProvider, new Additive(), DialogState.NEW);
 		});
 
 		GridMenuItem<Additive> deleteItem = contextMenu.addItem("Löschen", event ->
@@ -76,8 +82,8 @@ public class AdditiveView extends Div
 					return;
 				}
 
-				service.deleteById(item.getId());
-				dataProvider.refreshAll();
+				additiveService.deleteById(item.getId());
+				additiveDataProvider.refreshAll();
 			});
 		});
 

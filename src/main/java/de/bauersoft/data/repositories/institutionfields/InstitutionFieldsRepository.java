@@ -1,8 +1,6 @@
 package de.bauersoft.data.repositories.institutionfields;
 
-import de.bauersoft.data.entities.field.Field;
-import de.bauersoft.data.entities.institution.Institution;
-import de.bauersoft.data.entities.institution.InstitutionField;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 

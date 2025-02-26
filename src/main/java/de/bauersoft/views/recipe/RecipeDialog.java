@@ -66,15 +66,20 @@ public class RecipeDialog extends Dialog
 		Binder<Recipe> binder = new Binder<>(Recipe.class);
 
 		FormLayout inputLayout = new FormLayout();
+		inputLayout.setWidth("50vw");
+		inputLayout.setMaxWidth("50em");
+		inputLayout.setHeight("50vh");
+		inputLayout.setMaxHeight("16em");
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
 		TextField nameTextField = new TextField();
 		nameTextField.setMaxLength(64);
+		nameTextField.setAutofocus(true);
 		nameTextField.setRequired(true);
 		nameTextField.setMinWidth("20em");
 
 		TextArea descriptionTextArea = new TextArea();
-		descriptionTextArea.setMaxLength(512);
+		descriptionTextArea.setMaxLength(1024);
 		descriptionTextArea.setSizeFull();
 		descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 		descriptionTextArea.setWidthFull();
@@ -109,10 +114,8 @@ public class RecipeDialog extends Dialog
 
 		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
-
 		saveButton.setMinWidth("150px");
 		saveButton.setMaxWidth("180px");
-
 		saveButton.addClickListener(e ->
 		{
 			binder.validate();
@@ -125,13 +128,6 @@ public class RecipeDialog extends Dialog
 
 					formulationComponent.accept(recipe);
 					formulationService.updateFormulations(recipe.getFormulations().stream().toList(), formulationComponent.getFormulationsMap().keySet().stream().toList());
-
-//					formulationRepository.deleteAllByRecipeId(recipe.getId());
-//
-//					formulationComponent.accept(recipe);
-//					recipe.setFormulations(formulationComponent.getFormulationsMap().keySet());
-
-//					recipeService.update(recipe);
 
 					recipeDataProvider.refreshAll();
 
@@ -148,24 +144,18 @@ public class RecipeDialog extends Dialog
 
 		Button cancelButton = new Button("Abbrechen");
 		cancelButton.addClickShortcut(Key.ESCAPE);
-
 		cancelButton.setMinWidth("150px");
 		cancelButton.setMaxWidth("180px");
 		cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		cancelButton.addClickListener(e ->
 		{
 			binder.removeBean();
+			recipeDataProvider.refreshAll();
 			this.close();
 		});
 
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
-		inputLayout.setHeight("50vh");
-		inputLayout.setMaxHeight("16em");
-		Span spacer = new Span();
-		spacer.setWidthFull();
 		this.add(inputLayout, formulationComponent);
-		this.getFooter().add(new HorizontalLayout(spacer, saveButton, cancelButton));
+		this.getFooter().add(saveButton, cancelButton);
 		this.setCloseOnEsc(false);
 		this.setCloseOnOutsideClick(false);
 		this.setModal(true);

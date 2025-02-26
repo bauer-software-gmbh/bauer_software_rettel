@@ -1,7 +1,6 @@
 package de.bauersoft.views.order.institutionLayer;
 
 import com.vaadin.flow.component.HtmlComponent;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;

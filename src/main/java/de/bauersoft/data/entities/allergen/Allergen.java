@@ -6,6 +6,7 @@ import de.bauersoft.data.entities.order.OrderAllergen;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -17,15 +18,15 @@ import java.util.Set;
 @Builder
 public class Allergen extends AbstractEntity
 {
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 64)
     private String name;
 
     @Column(length = 1024)
     private String description;
 
     @ManyToMany(mappedBy = "allergens", fetch = FetchType.EAGER)
-    private Set<Ingredient> ingredients;
+    private Set<Ingredient> ingredients = new HashSet<>();
 
     @OneToMany(mappedBy = "allergen", fetch = FetchType.EAGER)
-    private Set<OrderAllergen> orderAllergens;
+    private Set<OrderAllergen> orderAllergens = new HashSet<>();
 }

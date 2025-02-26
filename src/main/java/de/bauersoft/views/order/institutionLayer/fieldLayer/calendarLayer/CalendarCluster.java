@@ -1,24 +1,21 @@
 package de.bauersoft.views.order.institutionLayer.fieldLayer.calendarLayer;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.dom.Style;
-import de.bauersoft.data.entities.institution.InstitutionField;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.entities.offer.Offer;
 import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.views.order.OrderManager;
 import de.bauersoft.views.order.institutionLayer.fieldLayer.FieldTab;
-import de.bauersoft.views.order.institutionLayer.fieldLayer.FieldTabSheet;
 import de.bauersoft.views.order.institutionLayer.fieldLayer.calendarLayer.allergenLayer.AllergenComponent;
 import de.bauersoft.views.order.institutionLayer.fieldLayer.calendarLayer.variantLayer.VariantBoxComponent;
 import lombok.Getter;
@@ -94,6 +91,7 @@ public class CalendarCluster extends VerticalLayout
 
             try
             {
+                orders.forEach(order -> order.setCustomerOrdered(true));
                 this.save();
 
                 fieldTab.getTab()
@@ -152,7 +150,7 @@ public class CalendarCluster extends VerticalLayout
                 this.remove(allergenComponent);
 
             Optional<Offer> offerOptional = orderManager.getOfferService().findByLocalDateAndField(event.getValue(), institutionField.getField());
-            Optional<Order> orderOptional = orderManager.getOrderService().findByLocalDateAndInstitutionAndField(event.getValue(), institutionField.getInstitution(), institutionField.getField());
+            Optional<Order> orderOptional = orderManager.getOrderService().findByOrderDateAndInstitutionAndField(event.getValue(), institutionField.getInstitution(), institutionField.getField());
             if(offerOptional.isEmpty())
             {
                 String text = "Für den " + DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN).format(event.getValue()) + " ist kein Angebot vorhanden.";
@@ -180,12 +178,17 @@ public class CalendarCluster extends VerticalLayout
             Order order = orderOptional.orElseGet(() ->
             {
                 Order newOrder = new Order();
-                newOrder.setLocalDate(event.getValue());
+                newOrder.setOrderDate(event.getValue());
                 newOrder.setInstitution(institutionField.getInstitution());
                 newOrder.setField(institutionField.getField());
 
                 return newOrder;
             });
+
+            fieldTab.getTab()
+                    .getStyle()
+                    .setColor((order.isCustomerOrdered()) ? "green" : "red")
+                    .setFontWeight(Style.FontWeight.BOLD);
 
             orders.add(order);
 

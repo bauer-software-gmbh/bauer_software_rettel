@@ -21,10 +21,19 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 public class CourseDialog extends Dialog
 {
+	private final CourseService courseService;
+	private final CourseDataProvider courseDataProvider;
+	private final Course item;
+	private final DialogState state;
 
-	public CourseDialog(CourseService service, CourseDataProvider dataProvider, Course item, DialogState state)
+	public CourseDialog(CourseService courseService, CourseDataProvider courseDataProvider, Course item, DialogState state)
 	{
-		this.setHeaderTitle(state.toString());
+        this.courseService = courseService;
+        this.courseDataProvider = courseDataProvider;
+        this.item = item;
+        this.state = state;
+
+        this.setHeaderTitle(state.toString());
 
 		Binder<Course> binder = new Binder<>(Course.class);
 
@@ -37,10 +46,10 @@ public class CourseDialog extends Dialog
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
 		TextField nameTextField = new TextField();
-		nameTextField.setMaxLength(50);
+		nameTextField.setMaxLength(64);
+		nameTextField.setAutofocus(true);
 		nameTextField.setRequired(true);
 		nameTextField.setMinWidth("20em");
-		nameTextField.setAutofocus(true);
 
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
 
@@ -51,6 +60,7 @@ public class CourseDialog extends Dialog
 					: ValidationResult.error("Name ist erforderlich");
 
 		}).bind(Course::getName, Course::setName);
+
 		binder.setBean(item);
 
 		Button saveButton = new Button("Speichern");
@@ -64,8 +74,9 @@ public class CourseDialog extends Dialog
 			{
 				try
 				{
-					service.update(binder.getBean());
-					dataProvider.refreshAll();
+					courseService.update(binder.getBean());
+					courseDataProvider.refreshAll();
+
 					Notification.show("Daten wurden aktualisiert");
 					this.close();
 
@@ -85,14 +96,13 @@ public class CourseDialog extends Dialog
 		cancelButton.addClickListener(e ->
 		{
 			binder.removeBean();
+			courseDataProvider.refreshAll();
 			this.close();
 		});
 
-		Span spacer = new Span();
-		spacer.setWidthFull();
 
 		this.add(inputLayout);
-		this.getFooter().add(new HorizontalLayout(spacer, saveButton, cancelButton));
+		this.getFooter().add(saveButton, cancelButton);
 		this.setCloseOnEsc(false);
 		this.setCloseOnOutsideClick(false);
 		this.setModal(true);

@@ -17,7 +17,7 @@ import java.util.Set;
 @Builder
 public class Pattern extends AbstractEntity
 {
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 64)
     private String name;
 
     @Column(length = 1024)

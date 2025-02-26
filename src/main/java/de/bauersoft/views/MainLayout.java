@@ -40,189 +40,217 @@ import de.bauersoft.views.welcome.WelcomeView;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.Optional;
+
 /**
  * The main view is a top-level placeholder for other views.
  */
 @CssImport("./themes/rettels/views/main.css")
-public class MainLayout extends AppLayout {
-	private H1 viewTitle;
-	private AuthenticatedUser authenticatedUser;
-	private AccessAnnotationChecker accessChecker;
-	public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
-		this.authenticatedUser = authenticatedUser;
-		this.accessChecker = accessChecker;
-		this.setClassName("main-view");
-		setPrimarySection(Section.DRAWER);
-		addDrawerContent();
-		addHeaderContent();
-		this.setDrawerOpened(false);
-	}
-	private void addHeaderContent() {
-		DrawerToggle toggle = new DrawerToggle();
-		toggle.setAriaLabel("Menu toggle");
-		viewTitle = new H1();
-		viewTitle.setSizeFull();
-		viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
-		Optional<User> maybeUser = authenticatedUser.get();
-		HorizontalLayout layout = new HorizontalLayout();
-		layout.getStyle().setAlignItems(AlignItems.CENTER);
-		layout.setWidthFull();
-		layout.add(viewTitle);
-		if (maybeUser.isPresent()) {
-			User user = maybeUser.get();
-			Avatar avatar = new Avatar(user.getName() + " " + user.getSurname());
-			avatar.setThemeName("xsmall");
-			avatar.getElement().setAttribute("tabindex", "-1");
-			MenuBar userMenu = new MenuBar();
-			userMenu.setThemeName("tertiary-inline contrast");
-			MenuItem userName = userMenu.addItem("");
-			Div div = new Div();
-			div.add(avatar);
-			div.add(user.getName());
-			div.add(new Icon("lumo", "dropdown"));
-			div.getElement().getStyle().set("display", "flex");
-			div.getElement().getStyle().set("align-items", "center");
-			div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
-			userName.add(div);
-			userName.getSubMenu().addItem("Sign out", e -> authenticatedUser.logout());
-			layout.add(userMenu);
-		} else {
-			Avatar avatar = new Avatar(" ");
-			avatar.setThemeName("xsmall");
-			avatar.getElement().setAttribute("tabindex", "-1");
-			Span login = new Span("login");
-			login.getStyle().setPadding("0 0 0 1rem");
-			Anchor anchor = new Anchor("login", avatar, login);
-			anchor.getStyle().setDisplay(Display.FLEX);
-			anchor.getStyle().setPadding("0 1rem 0 0");
-			layout.add(anchor);
-		}
-		addToNavbar(true, toggle, layout);
-	}
-	private void addDrawerContent() {
-		Image image = new Image("./icons/icon.png", "Rettels");
-		Span appName = new Span("Rettel's");
-		appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
-		Header header = new Header(image, appName);
-		Scroller scroller = new Scroller(createNavigation());
-		addToDrawer(header, scroller, createFooter());
-	}
-	private SideNav createNavigation() {
-		SideNav nav = new SideNav();
-		if (accessChecker.hasAccess(WelcomeView.class)) {
-			nav.addItem(new SideNavItem("Willkommen", WelcomeView.class, LineAwesomeIcon.HOME_SOLID.create()));
-		}
+public class MainLayout extends AppLayout
+{
+    private H1 viewTitle;
+    private AuthenticatedUser authenticatedUser;
+    private AccessAnnotationChecker accessChecker;
 
-		if (accessChecker.hasAccess(MenueView.class)) {
-			nav.addItem(new SideNavItem("Speiseplan", MenueView.class, LineAwesomeIcon.UTENSILS_SOLID.create()));
-		}
+    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker)
+    {
+        this.authenticatedUser = authenticatedUser;
+        this.accessChecker = accessChecker;
+        this.setClassName("main-view");
+        setPrimarySection(Section.DRAWER);
+        addDrawerContent();
+        addHeaderContent();
+        this.setDrawerOpened(false);
+    }
 
-		if(accessChecker.hasAccess(OrderView.class))
-		{
-			nav.addItem(new SideNavItem("Bestellungen", OrderView.class, LineAwesomeIcon.CLIPBOARD_SOLID.create()));
-		}
+    private void addHeaderContent()
+    {
+        DrawerToggle toggle = new DrawerToggle();
+        toggle.setAriaLabel("Menu toggle");
+        viewTitle = new H1();
+        viewTitle.setSizeFull();
+        viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+        Optional<User> maybeUser = authenticatedUser.get();
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.getStyle().setAlignItems(AlignItems.CENTER);
+        layout.setWidthFull();
+        layout.add(viewTitle);
+        if(maybeUser.isPresent())
+        {
+            User user = maybeUser.get();
+            Avatar avatar = new Avatar(user.getName() + " " + user.getSurname());
+            avatar.setThemeName("xsmall");
+            avatar.getElement().setAttribute("tabindex", "-1");
+            MenuBar userMenu = new MenuBar();
+            userMenu.setThemeName("tertiary-inline contrast");
+            MenuItem userName = userMenu.addItem("");
+            Div div = new Div();
+            div.add(avatar);
+            div.add(user.getName());
+            div.add(new Icon("lumo", "dropdown"));
+            div.getElement().getStyle().set("display", "flex");
+            div.getElement().getStyle().set("align-items", "center");
+            div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
+            userName.add(div);
+            userName.getSubMenu().addItem("Sign out", e -> authenticatedUser.logout());
+            layout.add(userMenu);
+        }else
+        {
+            Avatar avatar = new Avatar(" ");
+            avatar.setThemeName("xsmall");
+            avatar.getElement().setAttribute("tabindex", "-1");
+            Span login = new Span("login");
+            login.getStyle().setPadding("0 0 0 1rem");
+            Anchor anchor = new Anchor("login", avatar, login);
+            anchor.getStyle().setDisplay(Display.FLEX);
+            anchor.getStyle().setPadding("0 1rem 0 0");
+            layout.add(anchor);
+        }
+        addToNavbar(true, toggle, layout);
+    }
+
+    private void addDrawerContent()
+    {
+        Image image = new Image("./icons/icon.png", "Rettels");
+        Span appName = new Span("Rettel's");
+        appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
+        Header header = new Header(image, appName);
+        Scroller scroller = new Scroller(createNavigation());
+        addToDrawer(header, scroller, createFooter());
+    }
+
+    private SideNav createNavigation()
+    {
+        SideNav nav = new SideNav();
+        if(accessChecker.hasAccess(WelcomeView.class))
+        {
+            nav.addItem(new SideNavItem("Willkommen", WelcomeView.class, LineAwesomeIcon.HOME_SOLID.create()));
+        }
+
+        if(accessChecker.hasAccess(MenueView.class))
+        {
+            nav.addItem(new SideNavItem("Speiseplan", MenueView.class, LineAwesomeIcon.UTENSILS_SOLID.create()));
+        }
+
+        if(accessChecker.hasAccess(OrderView.class))
+        {
+            nav.addItem(new SideNavItem("Bestellungen", OrderView.class, LineAwesomeIcon.CLIPBOARD_SOLID.create()));
+        }
 //		if (accessChecker.hasAccess(DashboardView.class)) {
 //			nav.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.CHART_AREA_SOLID.create()));
 //		}
-		if (accessChecker.hasAccess(UsersView.class) || accessChecker.hasAccess(FieldView.class)
-				|| accessChecker.hasAccess(InstitutionView.class) || accessChecker.hasAccess(AddressView.class)) {
-			SideNavItem accounting = new SideNavItem("Accounting");
-			if (accessChecker.hasAccess(UsersView.class)) {
-				accounting.addItem(new SideNavItem("Benutzer", UsersView.class, LineAwesomeIcon.USERS_SOLID.create()));
-			}
-			if (accessChecker.hasAccess(InstitutionView.class)) {
-				accounting.addItem(
-						new SideNavItem("Institutionen", InstitutionView.class, LineAwesomeIcon.USERS_SOLID.create()));
-			}
-			if (accessChecker.hasAccess(AddressView.class)) {
-				accounting.addItem(new SideNavItem("Adressen", AddressView.class, LineAwesomeIcon.USERS_SOLID.create()));
-			}
-			if (accessChecker.hasAccess(FieldView.class)) {
-				accounting.addItem(new SideNavItem("Einrichtungsart", FieldView.class, LineAwesomeIcon.USERS_SOLID.create()));
-			}
-			nav.addItem(accounting);
-		}
-		if (accessChecker.hasAccess(ComponentView.class) || accessChecker.hasAccess(RecipeView.class)
-				|| accessChecker.hasAccess(IngredientView.class) || accessChecker.hasAccess(CourseView.class)
-				|| accessChecker.hasAccess(AllergenView.class) || accessChecker.hasAccess(AdditiveView.class)
-				|| accessChecker.hasAccess(UnitView.class) || accessChecker.hasAccess(PatternView.class)
-				|| accessChecker.hasAccess(MenuBuilderView.class) || accessChecker.hasAccess(OffersView.class)) {
-			SideNavItem backend = new SideNavItem("Backend");
+        if(accessChecker.hasAccess(UsersView.class) || accessChecker.hasAccess(FieldView.class)
+                || accessChecker.hasAccess(InstitutionView.class) || accessChecker.hasAccess(AddressView.class))
+        {
+            SideNavItem accounting = new SideNavItem("Accounting");
+            if(accessChecker.hasAccess(UsersView.class))
+            {
+                accounting.addItem(new SideNavItem("Benutzer", UsersView.class, LineAwesomeIcon.USERS_SOLID.create()));
+            }
+            if(accessChecker.hasAccess(InstitutionView.class))
+            {
+                accounting.addItem(
+                        new SideNavItem("Institutionen", InstitutionView.class, LineAwesomeIcon.USERS_SOLID.create()));
+            }
+            if(accessChecker.hasAccess(AddressView.class))
+            {
+                accounting.addItem(new SideNavItem("Adressen", AddressView.class, LineAwesomeIcon.USERS_SOLID.create()));
+            }
+            if(accessChecker.hasAccess(FieldView.class))
+            {
+                accounting.addItem(new SideNavItem("Einrichtungsart", FieldView.class, LineAwesomeIcon.USERS_SOLID.create()));
+            }
+            nav.addItem(accounting);
+        }
+        if(accessChecker.hasAccess(ComponentView.class) || accessChecker.hasAccess(RecipeView.class)
+                || accessChecker.hasAccess(IngredientView.class) || accessChecker.hasAccess(CourseView.class)
+                || accessChecker.hasAccess(AllergenView.class) || accessChecker.hasAccess(AdditiveView.class)
+                || accessChecker.hasAccess(UnitView.class) || accessChecker.hasAccess(PatternView.class)
+                || accessChecker.hasAccess(MenuBuilderView.class) || accessChecker.hasAccess(OffersView.class))
+        {
+            SideNavItem backend = new SideNavItem("Backend");
 
-			if(accessChecker.hasAccess(OffersView.class))
-			{
-				backend.addItem(new SideNavItem("Menü Planung", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
-			}
+            if(accessChecker.hasAccess(OffersView.class))
+            {
+                backend.addItem(new SideNavItem("Menü Planung", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
+            }
 
-			if(accessChecker.hasAccess(MenuBuilderView.class))
-			{
-				SideNavItem sideNavItem = new SideNavItem("Menü-Baukasten", MenuBuilderView.class, LineAwesomeIcon.BACON_SOLID.create());
-				sideNavItem.getElement().setAttribute("title", "Funktionales interaktives Menü Baukasten Entwicklungssystem 1.0");
-				backend.addItem(sideNavItem);
-			}
+            if(accessChecker.hasAccess(MenuBuilderView.class))
+            {
+                SideNavItem sideNavItem = new SideNavItem("Menü-Baukasten", MenuBuilderView.class, LineAwesomeIcon.BACON_SOLID.create());
+                sideNavItem.getElement().setAttribute("title", "Funktionales interaktives Menü Baukasten Entwicklungssystem 1.0");
+                backend.addItem(sideNavItem);
+            }
 
-			if (accessChecker.hasAccess(ComponentView.class)) {
-				backend.addItem(
-						new SideNavItem("Komponenten", ComponentView.class, LineAwesomeIcon.CARROT_SOLID.create()));
-			}
-			if (accessChecker.hasAccess(RecipeView.class)) {
-				backend.addItem(new SideNavItem("Rezepte", RecipeView.class, LineAwesomeIcon.EDIT.create()));
-			}
-			if (accessChecker.hasAccess(IngredientView.class)) {
-				backend.addItem(
-						new SideNavItem("Zutaten", IngredientView.class, LineAwesomeIcon.CARROT_SOLID.create()));
-			}
+            if(accessChecker.hasAccess(ComponentView.class))
+            {
+                backend.addItem(
+                        new SideNavItem("Komponenten", ComponentView.class, LineAwesomeIcon.CARROT_SOLID.create()));
+            }
+            if(accessChecker.hasAccess(RecipeView.class))
+            {
+                backend.addItem(new SideNavItem("Rezepte", RecipeView.class, LineAwesomeIcon.EDIT.create()));
+            }
+            if(accessChecker.hasAccess(IngredientView.class))
+            {
+                backend.addItem(
+                        new SideNavItem("Zutaten", IngredientView.class, LineAwesomeIcon.CARROT_SOLID.create()));
+            }
 
-			if (accessChecker.hasAccess(CourseView.class) || accessChecker.hasAccess(AllergenView.class)
-					|| accessChecker.hasAccess(AdditiveView.class) || accessChecker.hasAccess(UnitView.class)
-					|| accessChecker.hasAccess(PatternView.class)) {
-				SideNavItem parameters = new SideNavItem("Parameter");
-				if (accessChecker.hasAccess(CourseView.class)) {
-					parameters.addItem(
-							new SideNavItem("Menükomponenten", CourseView.class, LineAwesomeIcon.STREAM_SOLID.create()));
-				}
-				if (accessChecker.hasAccess(PatternView.class)) {
-					parameters.addItem(new SideNavItem("Ernährungsformen", PatternView.class, LineAwesomeIcon.CARROT_SOLID.create()));
-				}
-				if (accessChecker.hasAccess(AllergenView.class)) {
-					parameters.addItem(new SideNavItem("Allergene", AllergenView.class,
-							LineAwesomeIcon.CLOUD_MEATBALL_SOLID.create()));
-				}
-				if (accessChecker.hasAccess(AdditiveView.class)) {
-					parameters.addItem(new SideNavItem("Zusatzstoffe", AdditiveView.class,
-							LineAwesomeIcon.FOLDER_PLUS_SOLID.create()));
-				}
-				if (accessChecker.hasAccess(UnitView.class)) {
-					parameters.addItem(new SideNavItem("Einheiten", UnitView.class, LineAwesomeIcon.RULER_SOLID.create()));
-				}
-				backend.addItem(parameters);
-			}
+            if(accessChecker.hasAccess(CourseView.class) || accessChecker.hasAccess(AllergenView.class)
+                    || accessChecker.hasAccess(AdditiveView.class) || accessChecker.hasAccess(UnitView.class)
+                    || accessChecker.hasAccess(PatternView.class))
+            {
+                SideNavItem parameters = new SideNavItem("Parameter");
 
-			nav.addItem(backend);
+                if(accessChecker.hasAccess(CourseView.class))
+                {
+                    SideNavItem sideNavItem = new SideNavItem("Menükomponenten", CourseView.class, LineAwesomeIcon.STREAM_SOLID.create());
+                    sideNavItem.getElement().setAttribute("title", "Gänge");
+                    parameters.addItem(sideNavItem);
+                }
+                if(accessChecker.hasAccess(PatternView.class))
+                {
+                    parameters.addItem(new SideNavItem("Ernährungsformen", PatternView.class, LineAwesomeIcon.CARROT_SOLID.create()));
+                }
+                if(accessChecker.hasAccess(AllergenView.class))
+                {
+                    parameters.addItem(new SideNavItem("Allergene", AllergenView.class,
+                            LineAwesomeIcon.CLOUD_MEATBALL_SOLID.create()));
+                }
+                if(accessChecker.hasAccess(AdditiveView.class))
+                {
+                    parameters.addItem(new SideNavItem("Zusatzstoffe", AdditiveView.class,
+                            LineAwesomeIcon.FOLDER_PLUS_SOLID.create()));
+                }
+                if(accessChecker.hasAccess(UnitView.class))
+                {
+                    parameters.addItem(new SideNavItem("Einheiten", UnitView.class, LineAwesomeIcon.RULER_SOLID.create()));
+                }
+                backend.addItem(parameters);
+            }
 
-//			if (accessChecker.hasAccess(OffersView.class)) {
-//				nav.addItem(new SideNavItem("offer", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
-//			}
+            nav.addItem(backend);
 
-			if (accessChecker.hasAccess(KitchenView.class)) {
-				nav.addItem(new SideNavItem("Küche", KitchenView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
-			}
+//			nav.addItem(new SideNavItem("offer", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
+        }
+        return nav;
+    }
 
-		}
-		return nav;
-	}
+    private Footer createFooter()
+    {
+        return new Footer();
+    }
 
-	private Footer createFooter() {
-		return new Footer();
-	}
-	@Override
-	protected void afterNavigation() {
-		super.afterNavigation();
-		viewTitle.setText(getCurrentPageTitle());
-	}
+    @Override
+    protected void afterNavigation()
+    {
+        super.afterNavigation();
+        viewTitle.setText(getCurrentPageTitle());
+    }
 
-	private String getCurrentPageTitle() {
-		PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
-		return title == null ? "" : title.value();
-	}
+    private String getCurrentPageTitle()
+    {
+        PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
+        return title == null ? "" : title.value();
+    }
 }

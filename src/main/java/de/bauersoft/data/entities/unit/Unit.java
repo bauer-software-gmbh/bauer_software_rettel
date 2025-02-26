@@ -18,10 +18,10 @@ import java.util.Set;
 @Builder
 public class Unit extends AbstractEntity
 {
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 64)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true, length = 8)
     private String shorthand;
 
     @Column(nullable = false, columnDefinition = "float default 0.0")

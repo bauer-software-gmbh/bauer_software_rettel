@@ -1,4 +1,4 @@
-package de.bauersoft.data.entities.field;
+package de.bauersoft.data.entities.fieldMultiplier;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

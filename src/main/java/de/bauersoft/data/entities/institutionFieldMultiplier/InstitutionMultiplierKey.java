@@ -1,4 +1,4 @@
-package de.bauersoft.data.entities.institution;
+package de.bauersoft.data.entities.institutionFieldMultiplier;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -37,5 +37,14 @@ public class InstitutionMultiplierKey
     public int hashCode()
     {
         return Objects.hash(institutionFieldId, courseId);
+    }
+
+    @Override
+    public String toString()
+    {
+        return "InstitutionMultiplierKey{" +
+                "institutionFieldId=" + institutionFieldId +
+                ", courseId=" + courseId +
+                '}';
     }
 }

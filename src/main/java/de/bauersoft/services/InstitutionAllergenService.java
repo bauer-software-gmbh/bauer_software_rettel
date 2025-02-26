@@ -1,14 +1,13 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.additive.Additive;
-import de.bauersoft.data.entities.institution.InstitutionAllergen;
-import de.bauersoft.data.entities.institution.InstitutionAllergenKey;
+import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
+import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergenKey;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import de.bauersoft.data.repositories.institutionAllergen.InstitutionAllergenGridDataRepository;
 import de.bauersoft.data.repositories.institutionAllergen.InstitutionAllergenRepository;
-import de.bauersoft.views.institution.InstitutionView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -57,7 +56,7 @@ public class InstitutionAllergenService implements ServiceBase<InstitutionAllerg
     @Override
     public void deleteById(InstitutionAllergenKey institutionAllergenKey)
     {
-        repository.deleteById(institutionAllergenKey);
+        repository.deleteById(institutionAllergenKey.getInstitutionFieldId(), institutionAllergenKey.getAllergenId());
     }
 
     @Override
@@ -129,5 +128,10 @@ public class InstitutionAllergenService implements ServiceBase<InstitutionAllerg
     public void deleteAllByInstitutionFieldId(Long institutionFieldId)
     {
         repository.deleteAllByInstitutionFieldId(institutionFieldId);
+    }
+
+    public List<InstitutionAllergen> findAllByInstitutionField(InstitutionField institutionField)
+    {
+        return repository.findAllByInstitutionField(institutionField);
     }
 }

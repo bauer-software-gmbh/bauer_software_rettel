@@ -31,7 +31,7 @@ public class Order extends AbstractEntity
     private boolean hook = false;
 
     @Column(nullable = false)
-    private LocalDate localDate;
+    private LocalDate orderDate;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
@@ -43,6 +43,9 @@ public class Order extends AbstractEntity
     @OnDelete(action = OnDeleteAction.RESTRICT)
     private Field field;
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN default false")
+    private boolean customerOrdered = false;
+
     @OneToMany(mappedBy = "_order", fetch = FetchType.EAGER)
     private Set<OrderData> orderData = new HashSet<>();
 
@@ -53,7 +56,7 @@ public class Order extends AbstractEntity
     public String toString()
     {
         return "Order{" +
-                "orderDate=" + localDate +
+                "orderDate=" + orderDate +
                 ", institution=" + institution +
                 ", field=" + field +
                 ", orderData=" + orderData +

@@ -87,6 +87,11 @@
 			<version>6.2.1</version>
 		</dependency>
 		<dependency>
+			<groupId>com.vaadin.componentfactory</groupId>
+			<artifactId>vcf-date-range-picker</artifactId>
+			<version>5.0.2</version>
+		</dependency>
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>1.18.36</version>

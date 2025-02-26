@@ -1,4 +1,4 @@
-package de.bauersoft.data.entities.institution;
+package de.bauersoft.data.entities.institutionFieldAllergen;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -16,7 +16,6 @@ import java.util.Objects;
 @Setter
 public class InstitutionAllergenKey
 {
-
     @Column(nullable = false)
     private Long institutionFieldId;
 
@@ -38,5 +37,14 @@ public class InstitutionAllergenKey
     public int hashCode()
     {
         return Objects.hash(institutionFieldId, allergenId);
+    }
+
+    @Override
+    public String toString()
+    {
+        return "InstitutionAllergenKey{" +
+                "institutionFieldId=" + institutionFieldId +
+                ", allergenId=" + allergenId +
+                '}';
     }
 }

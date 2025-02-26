@@ -23,33 +23,46 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed(value = {"ADMIN", "ACCOUNTENT"})
 public class FieldView extends Div
 {
+	private final FieldService fieldService;
+	private final FieldDataProvider fieldDataProvider;
+	private final OrderService orderService;
+	private final InstitutionService institutionService;
+	private final InstitutionFieldsService institutionFieldsService;
+	private final FieldMultiplierService fieldMultiplierService;
+	private final CourseService courseService;
+	private final OfferService offerService;
+	
     AutoFilterGrid<Field> grid = new AutoFilterGrid<>(Field.class, false, true);
 
-    public FieldView(FieldService service, FieldDataProvider dataProvider,
-					 OrderService orderService,
-					 InstitutionService institutionService,
-					 InstitutionFieldsService institutionFieldsService,
-					 FieldMultiplierService fieldMultiplierService,
-					 CourseService courseService, OfferService offerService)
+    public FieldView(FieldService fieldService, FieldDataProvider fieldDataProvider, OrderService orderService, InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, FieldMultiplierService fieldMultiplierService, CourseService courseService, OfferService offerService)
     {
+        this.fieldService = fieldService;
+        this.fieldDataProvider = fieldDataProvider;
+        this.orderService = orderService;
+        this.institutionService = institutionService;
+        this.institutionFieldsService = institutionFieldsService;
+        this.fieldMultiplierService = fieldMultiplierService;
+        this.courseService = courseService;
+        this.offerService = offerService;
+		
         setClassName("content");
 
 		grid.setHeightFull();
 		grid.setWidthFull();
 		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-		grid.setDataProvider(dataProvider);
+		grid.setDataProvider(fieldDataProvider);
 
         grid.addColumn("name");
         grid.addItemDoubleClickListener(event ->
 		{
-			new FieldDialog(service, dataProvider, fieldMultiplierService, courseService, event.getItem(), DialogState.EDIT);
+			new FieldDialog(fieldService, fieldDataProvider, fieldMultiplierService, courseService, event.getItem(), DialogState.EDIT);
 		});
 
         GridContextMenu<Field> contextMenu = grid.addContextMenu();
         contextMenu.addItem("Neue Einrichtung", event ->
 		{
-			new FieldDialog(service, dataProvider, fieldMultiplierService, courseService, new Field(), DialogState.NEW);
+			new FieldDialog(fieldService, fieldDataProvider, fieldMultiplierService, courseService, new Field(), DialogState.NEW);
 		});
 
 		GridMenuItem<Field> deleteItem = contextMenu.addItem("Löschen", event ->
@@ -115,8 +128,8 @@ public class FieldView extends Div
 				if(cancel) return;
 
 				fieldMultiplierService.deleteAllByFieldId(item.getId());
-				service.deleteById(item.getId());
-				dataProvider.refreshAll();
+				fieldService.deleteById(item.getId());
+				fieldDataProvider.refreshAll();
 			});
 		});
 

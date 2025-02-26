@@ -1,6 +1,5 @@
 package de.bauersoft.views.institution.institutionFields;
 
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.Grid;
@@ -11,26 +10,39 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.Style;
+import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
-import de.bauersoft.data.entities.institution.InstitutionField;
-import de.bauersoft.services.InstitutionAllergenService;
-import de.bauersoft.services.InstitutionFieldsService;
+import de.bauersoft.data.entities.institutionClosingTime.InstitutionClosingTime;
+import de.bauersoft.data.entities.institutionField.*;
+import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
+import de.bauersoft.data.entities.institutionFieldMultiplier.InstitutionMultiplier;
+import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPattern;
+import de.bauersoft.services.*;
 import de.bauersoft.views.institution.InstitutionDialog;
-import de.bauersoft.views.institution.institutionFields.dialogLayer.InstitutionFieldDialog;
+import de.bauersoft.views.institution.institutionFields.components.allergen.AllergenMapContainer;
+import de.bauersoft.views.institution.institutionFields.components.closingTime.ClosingTimesContainer;
+import de.bauersoft.views.institution.institutionFields.components.closingTime.ClosingTimesMapContainer;
+import de.bauersoft.views.institution.institutionFields.components.multiplier.MultiplierMapContainer;
+import de.bauersoft.views.institution.institutionFields.components.pattern.PatternMapContainer;
 import lombok.Getter;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Getter
-@CssImport(value = "./themes/rettels/components/grid-vertical-centered.css")
 public class FieldDragComponent extends FlexLayout
 {
     private final InstitutionDialog institutionDialog;
     private final Institution institution;
 
-    private final Map<Field, InstitutionFieldDialog> institutionFieldDialogMap;
+    private final Map<Field, PatternMapContainer> patternMapContainerMap;
+    private final Map<Field, MultiplierMapContainer> multiplierMapContainerMap;
+    private final Map<Field, AllergenMapContainer> allergenMapContainerMap;
+    private final Map<Field, ClosingTimesMapContainer> closingTimesMapContainerMap;
 
     private final List<InstitutionField> gridItems;
     private final Grid<InstitutionField> institutionFieldsGrid;
@@ -38,13 +50,15 @@ public class FieldDragComponent extends FlexLayout
     private final List<Field> fieldPool;
     private final VirtualList<Field> fieldVirtualList;
 
-
     public FieldDragComponent(InstitutionDialog institutionDialog)
     {
         this.institutionDialog = institutionDialog;
-        this.institution = institutionDialog.getInstitution();
+        this.institution = institutionDialog.getItem();
 
-        institutionFieldDialogMap = new HashMap<>();
+        patternMapContainerMap = new HashMap<>();
+        multiplierMapContainerMap = new HashMap<>();
+        allergenMapContainerMap = new HashMap<>();
+        closingTimesMapContainerMap = new HashMap<>();
 
         gridItems = new ArrayList<>();
         gridItems.addAll(institution.getInstitutionFields());
@@ -80,20 +94,55 @@ public class FieldDragComponent extends FlexLayout
 
         institutionFieldsGrid.addItemDoubleClickListener(event ->
         {
+            if(event.getItem() == null) return;
 
-            InstitutionFieldDialog institutionFieldDialog = institutionFieldDialogMap.get(event.getItem().getField());
-            if(institutionFieldDialog == null)
+            PatternMapContainer patternMapContainer = patternMapContainerMap
+                    .computeIfAbsent(event.getItem().getField(), field ->
             {
-                institutionFieldDialog = new InstitutionFieldDialog(institutionDialog, this, event.getItem());
-                institutionFieldDialogMap.put(event.getItem().getField(), institutionFieldDialog);
-            }
+                PatternMapContainer container = new PatternMapContainer();
 
+                for(InstitutionPattern institutionPattern : event.getItem().getInstitutionPatterns())
+                    container.addContainer(institutionPattern.getPattern(), institutionPattern, ContainerState.SHOW);
+
+                return container;
+            });
+
+            MultiplierMapContainer multiplierListContainer = multiplierMapContainerMap
+                    .computeIfAbsent(event.getItem().getField(), field ->
+            {
+                MultiplierMapContainer container = new MultiplierMapContainer();
+
+                for(InstitutionMultiplier institutionMultiplier : event.getItem().getInstitutionMultipliers())
+                    container.addContainer(institutionMultiplier.getCourse(), institutionMultiplier, ContainerState.SHOW);
+
+                return container;
+            });
+
+            AllergenMapContainer allergenListContainer = allergenMapContainerMap.computeIfAbsent(event.getItem().getField(), field ->
+            {
+                AllergenMapContainer container = new AllergenMapContainer();
+
+                for(InstitutionAllergen institutionAllergen : event.getItem().getInstitutionAllergens())
+                    container.addContainer(institutionAllergen.getAllergen(), institutionAllergen, ContainerState.SHOW);
+
+                return container;
+            });
+
+            ClosingTimesMapContainer closingTimesMapContainer = closingTimesMapContainerMap.computeIfAbsent(event.getItem().getField(), field ->
+            {
+                ClosingTimesMapContainer container = new ClosingTimesMapContainer();
+
+                for(InstitutionClosingTime institutionClosingTimes : event.getItem().getInstitutionClosingTimes())
+                {
+                    int key = container.getNextKey();
+                    ((ClosingTimesContainer) container.addContainer(key, institutionClosingTimes, ContainerState.SHOW)).setKey(key);
+                }
+
+                return container;
+            });
+
+            InstitutionFieldDialog institutionFieldDialog = new InstitutionFieldDialog(institutionDialog, this, event.getItem(), patternMapContainer, multiplierListContainer, allergenListContainer, closingTimesMapContainer);
             institutionFieldDialog.open();
-
-            for(Map.Entry<Field, InstitutionFieldDialog> entry : institutionFieldDialogMap.entrySet())
-            {
-                System.out.println(entry.getKey().getName());
-            }
         });
 
         DropTarget.create(institutionFieldsGrid).addDropListener(event ->
@@ -136,8 +185,9 @@ public class FieldDragComponent extends FlexLayout
 
         this.add(institutionFieldsGrid, fieldVirtualList);
         this.setWidthFull();
-        this.setMaxHeight("25em");
-        this.setHeight("25em");
+        this.setMaxHeight("25rem");
+        this.setHeight("25rem");
+        this.setWidthFull();
     }
 
     public void updateView()
@@ -153,16 +203,18 @@ public class FieldDragComponent extends FlexLayout
         this.fieldPool.removeAll(gridItems.stream().map(InstitutionField::getField).toList());
     }
 
-    public void updateInstitutionFields(List<InstitutionField> oldInstitutionFields, List<InstitutionField> newInstitutionFields)
+    public void updateInstitutionFields(List<InstitutionField> oldInstitutionFields)
     {
         InstitutionFieldsService institutionFieldsService = institutionDialog.getInstitutionFieldsService();
+        InstitutionPatternService institutionPatternService = institutionDialog.getInstitutionPatternService();
+        InstitutionMultiplierService institutionMultiplierService = institutionDialog.getInstitutionMultiplierService();
         InstitutionAllergenService institutionAllergenService = institutionDialog.getInstitutionAllergenService();
+        InstitutionClosingTimeService institutionClosingTimeService = institutionDialog.getInstitutionClosingTimeService();
 
         if(oldInstitutionFields == null)
             oldInstitutionFields = new ArrayList<>();
 
-        if(newInstitutionFields == null)
-            newInstitutionFields = new ArrayList<>();
+        List<InstitutionField> newInstitutionFields = new ArrayList<>(gridItems);
 
         List<InstitutionField> remove = new ArrayList<>();
         List<InstitutionField> update = new ArrayList<>(newInstitutionFields);
@@ -173,10 +225,63 @@ public class FieldDragComponent extends FlexLayout
                 remove.add(oldInstitutionField);
         }
 
-        institutionAllergenService.deleteAll(remove.stream().map(InstitutionField::getInstitutionAllergens).flatMap(Collection::stream).toList());
         institutionFieldsService.deleteAll(remove);
 
         institutionFieldsService.updateAll(update);
-        institutionAllergenService.updateAll(update.stream().map(InstitutionField::getInstitutionAllergens).flatMap(Collection::stream).toList());
+
+        for(InstitutionField institutionField : update)
+        {
+            PatternMapContainer patternListContainer = patternMapContainerMap.get(institutionField.getField());
+            if(patternListContainer != null)
+            {
+                patternListContainer.evaluate(container ->
+                {
+                    container.getEntity().getId().setInstitutionFieldId(institutionField.getId());
+                });
+
+                patternListContainer.run(institutionPatternService);
+            }
+
+            MultiplierMapContainer multiplierListContainer = multiplierMapContainerMap.get(institutionField.getField());
+            if(multiplierListContainer != null)
+            {
+                multiplierListContainer.evaluate(container ->
+                {
+                    container.getEntity().getId().setInstitutionFieldId(institutionField.getId());
+                });
+
+                multiplierListContainer.run(institutionMultiplierService);
+            }
+
+            AllergenMapContainer allergenMapContainer = allergenMapContainerMap.get(institutionField.getField());
+            if(allergenMapContainer != null)
+            {
+                allergenMapContainer.evaluate(container ->
+                {
+                    container.getEntity().getId().setInstitutionFieldId(institutionField.getId());
+                });
+
+                allergenMapContainer.run(institutionAllergenService);
+            }
+
+            ClosingTimesMapContainer closingTimesMapContainer = closingTimesMapContainerMap.get(institutionField.getField());
+            if(closingTimesMapContainer != null)
+            {
+                closingTimesMapContainer.run(institutionClosingTimeService);
+            }
+        }
+
+    }
+
+    public void loadTemporaries()
+    {
+        for(PatternMapContainer patternListContainer : patternMapContainerMap.values())
+            patternListContainer.loadTemporaries();
+
+        for(MultiplierMapContainer multiplierListContainer : multiplierMapContainerMap.values())
+            multiplierListContainer.loadTemporaries();
+
+        for(AllergenMapContainer allergenListContainer : allergenMapContainerMap.values())
+            allergenListContainer.loadTemporaries();
     }
 }

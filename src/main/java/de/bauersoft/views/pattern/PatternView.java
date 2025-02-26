@@ -24,32 +24,39 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed(value = {"ADMIN", "ACCOUNTENT"})
 public class PatternView extends Div
 {
+	private final PatternService patternService;
+	private final PatternDataProvider patternDataProvider;
+	private final VariantService variantService;
+	private final RecipeService recipeService;
+
     AutoFilterGrid<Pattern> grid = new AutoFilterGrid<>(Pattern.class, false, true);
 
-    public PatternView(PatternService service,
-					   PatternDataProvider dataProvider,
-					   VariantService variantService,
-					   RecipeService recipeService)
+    public PatternView(PatternService patternService, PatternDataProvider patternDataProvider, VariantService variantService, RecipeService recipeService)
     {
+        this.patternService = patternService;
+        this.patternDataProvider = patternDataProvider;
+        this.variantService = variantService;
+        this.recipeService = recipeService;
+
         setClassName("content");
 
 		grid.setHeightFull();
 		grid.setWidthFull();
 		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-		grid.setDataProvider(dataProvider);
+		grid.setDataProvider(patternDataProvider);
 
         grid.addColumn("name").setHeader("Name");
 
         grid.addItemDoubleClickListener(event ->
 		{
-			new PatternDialog(service, dataProvider, event.getItem(), DialogState.EDIT);
+			new PatternDialog(patternService, patternDataProvider, event.getItem(), DialogState.EDIT);
 		});
 
         GridContextMenu<Pattern> contextMenu = grid.addContextMenu();
         contextMenu.addItem("Neue Ernährungsform", event ->
 		{
-			new PatternDialog(service, dataProvider, new Pattern(), DialogState.NEW);
+			new PatternDialog(patternService, patternDataProvider, new Pattern(), DialogState.NEW);
 		});
 
         GridMenuItem<Pattern> deleteItem = contextMenu.addItem("Löschen", event ->
@@ -98,8 +105,8 @@ public class PatternView extends Div
 
 				if(cancel) return;
 
-				service.deleteById(item.getId());
-				dataProvider.refreshAll();
+				patternService.deleteById(item.getId());
+				patternDataProvider.refreshAll();
 			});
 		});
 

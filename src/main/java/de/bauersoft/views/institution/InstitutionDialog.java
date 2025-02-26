@@ -12,22 +12,17 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.dom.Style;
-import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
-import de.bauersoft.data.entities.institution.InstitutionMultiplier;
 import de.bauersoft.data.entities.user.User;
 import de.bauersoft.data.providers.AddressDataProvider;
 import de.bauersoft.data.providers.InstitutionDataProvider;
-import de.bauersoft.data.repositories.course.CourseRepository;
-import de.bauersoft.data.repositories.field.FieldMultiplierRepository;
-import de.bauersoft.data.repositories.institutionMultiplier.InstitutionMultiplierRepository;
 import de.bauersoft.services.*;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.address.AddressComboBox;
@@ -35,10 +30,9 @@ import de.bauersoft.views.institution.institutionFields.FieldDragComponent;
 import lombok.Getter;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.time.Duration;
 import java.time.LocalTime;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Getter
 public class InstitutionDialog extends Dialog
@@ -49,18 +43,18 @@ public class InstitutionDialog extends Dialog
 	private FieldService fieldService;
 	private UserService userService;
 	private InstitutionMultiplierService institutionMultiplierService;
-	private InstitutionMultiplierRepository institutionMultiplierRepository;
 	private CourseService courseService;
-	private CourseRepository courseRepository;
 	private FieldMultiplierService fieldMultiplierService;
-	private FieldMultiplierRepository fieldMultiplierRepository;
 	private AllergenService allergenService;
 	private InstitutionAllergenService institutionAllergenService;
+	private PatternService patternService;
+	private InstitutionPatternService institutionPatternService;
+	private InstitutionClosingTimeService institutionClosingTimeService;
 
 	private InstitutionDataProvider institutionDataProvider;
 	private AddressDataProvider addressDataProvider;
 
-	private Institution institution;
+	private Institution item;
 
 	private DialogState dialogState;
 
@@ -73,20 +67,9 @@ public class InstitutionDialog extends Dialog
 	private TimePicker orderEndTimePicker;
 	private AddressComboBox addressComboBox;
 	private MultiSelectComboBox<User> userMultiSelectComboBox;
-	//private FieldComponent fieldComponent;
+	private FieldDragComponent fieldDragComponent;
 
-	private final LinkedHashMap<Field, LinkedHashMap<InstitutionMultiplier, NumberField>> instMultiplierMap;
-	private final Set<Long> deletedFieldIds;
-
-	private final AtomicReference<Field> selected;
-
-//	private final Consumer<Field> onSelectedFieldChange;
-//	private final HorizontalLayout multipliersControlLayout;
-//	private final FlexLayout multipliersInputLayout;
-//	private final Checkbox multipliersCheckBox;
-//	private final ComboBox<Field> fieldsComboBox;
-
-	public InstitutionDialog(InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, AddressService addressService, FieldService fieldService, UserService userService, InstitutionMultiplierService institutionMultiplierService, CourseService courseService, FieldMultiplierService fieldMultiplierService, AllergenService allergenService, InstitutionAllergenService institutionAllergenService, InstitutionDataProvider institutionDataProvider, AddressDataProvider addressDataProvider, Institution item, DialogState dialogState)
+	public InstitutionDialog(InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, AddressService addressService, FieldService fieldService, UserService userService, InstitutionMultiplierService institutionMultiplierService, CourseService courseService, FieldMultiplierService fieldMultiplierService, AllergenService allergenService, InstitutionAllergenService institutionAllergenService, PatternService patternService, InstitutionPatternService institutionPatternService, InstitutionClosingTimeService institutionClosingTimeService, InstitutionDataProvider institutionDataProvider, AddressDataProvider addressDataProvider, Institution item, DialogState dialogState)
 	{
 		this.institutionService = institutionService;
 		this.institutionFieldsService = institutionFieldsService;
@@ -94,59 +77,53 @@ public class InstitutionDialog extends Dialog
 		this.fieldService = fieldService;
 		this.userService = userService;
         this.institutionMultiplierService = institutionMultiplierService;
-		this.institutionMultiplierRepository = institutionMultiplierService.getRepository();
         this.courseService = courseService;
-		this.courseRepository = courseService.getRepository();
         this.fieldMultiplierService = fieldMultiplierService;
-		this.fieldMultiplierRepository = fieldMultiplierService.getRepository();
         this.allergenService = allergenService;
         this.institutionAllergenService = institutionAllergenService;
+        this.patternService = patternService;
+        this.institutionPatternService = institutionPatternService;
+        this.institutionClosingTimeService = institutionClosingTimeService;
         this.institutionDataProvider = institutionDataProvider;
         this.addressDataProvider = addressDataProvider;
-        this.institution = item;
+        this.item = item;
 		this.dialogState = dialogState;
-
-		instMultiplierMap = new LinkedHashMap<>();
-		deletedFieldIds = new HashSet<>();
-
-		selected = new AtomicReference<>();
 
 		this.setHeaderTitle(dialogState.toString());
 
 		Binder<Institution> binder = new Binder<>(Institution.class);
 
 		inputLayout = new FormLayout();
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
+		inputLayout.setWidthFull();
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
 		nameTextField = new TextField();
 		nameTextField.setMaxLength(64);
 		nameTextField.setRequired(true);
-		nameTextField.setMinWidth("20em");
+		nameTextField.setWidthFull();
 
 		descriptionTextArea = new TextArea();
-		descriptionTextArea.setMaxLength(512);
+		descriptionTextArea.setMaxLength(1024);
 		descriptionTextArea.setSizeFull();
-		descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
+		descriptionTextArea.setHeight("calc(3* var(--lumo-text-field-size))");
+		descriptionTextArea.setMaxHeight("calc(3* var(--lumo-text-field-size))");
 
 		customerIdTextField = new TextField();
 		customerIdTextField.setWidthFull();
 		customerIdTextField.setMaxLength(256);
 
 		datePickerLayout = new HorizontalLayout();
+		datePickerLayout.setWidthFull();
 
 		Span orderStartSpan = new Span("Von ");
 		orderStartSpan.getStyle().setAlignSelf(Style.AlignSelf.CENTER);
 
 		orderStartTimePicker = new TimePicker();
-		orderStartTimePicker.setValue(LocalTime.of(0, 0));
 
 		Span orderEndSpan = new Span(" bis ");
 		orderEndSpan.getStyle().setAlignSelf(Style.AlignSelf.CENTER);
 
 		orderEndTimePicker = new TimePicker();
-		orderEndTimePicker.setValue(LocalTime.of(8, 0));
 
 		datePickerLayout.add(orderStartSpan, orderStartTimePicker, orderEndSpan, orderEndTimePicker);
 
@@ -167,54 +144,62 @@ public class InstitutionDialog extends Dialog
 		userMultiSelectComboBox.setItems(userService.getRepository().findAll());
 		userMultiSelectComboBox.setWidthFull();
 
-//		fieldComponent = new FieldComponent();
-//		fieldComponent.setInstitutionFields(institutionFieldsService.getRepository().findAllByInstitutionId(item.getId()));
-//		fieldComponent.setFields(fieldService.getRepository().findAll());
-//		fieldComponent.updateView();
-//		fieldComponent.getStyle().setMarginTop("5px");
-//		fieldComponent.setHeight("50vh");
-
-		FieldDragComponent fieldDragComponent = new FieldDragComponent(this);
+		fieldDragComponent = new FieldDragComponent(this);
 		fieldDragComponent.setFieldPool(fieldService.getRepository().findAll());
-
 		fieldDragComponent.updateView();
 
-		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "name"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "description"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(customerIdTextField, "customer id"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(customerIdTextField, "Kunden Nr. "), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(datePickerLayout, "Bestellung"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(addressComboBox, "address"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(userMultiSelectComboBox, "user"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(addressComboBox, "Adresse"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(userMultiSelectComboBox, "Benutzer"), 1);
+
+
 
 		binder.forField(nameTextField).asRequired((value, context) ->
 		{
 			return (value != null && !value.isBlank())
 					? ValidationResult.ok()
 					: ValidationResult.error("Name ist erforderlich");
-		}).bind("name");
 
-		binder.bind(descriptionTextArea, "description");
-		binder.bind(customerIdTextField, "customerId");
+		}).bind(Institution::getName, Institution::setName);
+
+		binder.bind(descriptionTextArea, Institution::getDescription, Institution::setDescription);
+
+		binder.bind(customerIdTextField, institution ->
+		{
+			return Objects.requireNonNullElse(institution.getCustomerId(), "").trim();
+
+		}, (institution, s) ->
+		{
+			institution.setCustomerId(Objects.requireNonNullElse(s, "").trim());
+		});
 
 		binder.forField(orderStartTimePicker).withValidator((value, context) ->
 		{
-			return (value.isBefore(orderEndTimePicker.getValue())) ?
-					ValidationResult.ok() :
-					ValidationResult.error("Startzeit muss vor Endzeit liegen!");
+			if(value == null || value.isAfter(orderEndTimePicker.getValue()))
+				return ValidationResult.error("Startzeit muss vor Endzeit liegen!");
 
-		}).bind("orderStart");
+			if(value == null || value.isBefore(LocalTime.of(0, 5)))
+				return ValidationResult.error("Startzeit darf frühestens um 00:05 Uhr beginnen!");
+
+			return ValidationResult.ok();
+
+		}).bind(Institution::getOrderStart, Institution::setOrderStart);
 
 		binder.forField(orderEndTimePicker).withValidator((value, context) ->
 		{
-			return (value.isAfter(orderStartTimePicker.getValue())) ?
+			return (value != null && value.isAfter(orderStartTimePicker.getValue())) ?
 					ValidationResult.ok() :
 					ValidationResult.error("Endzeit muss nach Startzeit liegen!");
 
-		}).bind("orderEnd");
+		}).bind(Institution::getOrderEnd, Institution::setOrderEnd);
 
-		binder.bind(addressComboBox, "address");
-		binder.bind(userMultiSelectComboBox, "users");
-		binder.setBean(item);
+		binder.bind(addressComboBox, Institution::getAddress, Institution::setAddress);
+		binder.bind(userMultiSelectComboBox, Institution::getUsers, Institution::setUsers);
+
+		binder.readBean(item);
 
 		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
@@ -222,50 +207,26 @@ public class InstitutionDialog extends Dialog
 		saveButton.setMaxWidth("180px");
 		saveButton.addClickListener(event ->
 		{
-			binder.validate();
-
-			if(instMultiplierMap.values()
-					.stream()
-					.flatMap(map -> map.values().stream())
-					.anyMatch(numberField -> numberField.isInvalid()))
-				return;
-
-
-//			if(binder.isValid() && fieldComponent.isValid())
-			if(binder.isValid())
+			try
 			{
-				try
-				{
-					Institution institution = binder.getBean();
-					institutionService.update(institution);
+				binder.writeBean(item);
 
-					institutionMultiplierRepository.saveAll
-					(
-						instMultiplierMap.values()
-								.stream()
-								.flatMap(map -> map.keySet().stream())
-								.filter(institutionMultiplier -> !deletedFieldIds.contains(institutionMultiplier.getInstitutionField().getField().getId()))
-								.collect(Collectors.toSet())
-					);
+				institutionService.update(item);
 
-//					deletedFieldIds.forEach(id ->
-//					{
-//						institutionMultiplierRepository.deleteByInstitutionIdAndFieldId(institution.getId(), id);
-//					});
+				fieldDragComponent.updateInstitutionFields(item.getInstitutionFields().stream().toList());
 
-					//fieldComponent.accept(institution);
-					//institutionFieldsService.updateInstitutionFields(institution.getInstitutionFields().stream().toList(), fieldComponent.getInstitutionFieldsMap().keySet().stream().toList());
+				institutionDataProvider.refreshAll();
 
+				Notification.show("Daten wurden aktualisiert");
+				this.close();
 
-					institutionDataProvider.refreshAll();
-					Notification.show("Daten wurden aktualisiert");
-					this.close();
+			}catch(DataIntegrityViolationException error)
+			{
+				Notification.show("Doppelter Eintrag", 5000, Position.MIDDLE)
+						.addThemeVariants(NotificationVariant.LUMO_ERROR);
 
-				}catch(DataIntegrityViolationException error)
-				{
-					Notification.show("Doppelter Eintrag", 5000, Position.MIDDLE)
-							.addThemeVariants(NotificationVariant.LUMO_ERROR);
-				}
+			}catch(ValidationException err)
+			{
 			}
 		});
 
@@ -276,192 +237,20 @@ public class InstitutionDialog extends Dialog
 		cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		cancelButton.addClickListener(event ->
 		{
-			binder.removeBean();
+			fieldDragComponent.loadTemporaries();
 			this.close();
 		});
 
-		Span spacer = new Span();
-		spacer.setWidthFull();
+		this.setWidth("50rem");
+		this.setMaxWidth("65vw");
+		this.setHeight("62.5rem");
+		this.setMaxHeight("100vh");
 
 		this.add(inputLayout, fieldDragComponent);
-		this.getFooter().add(new HorizontalLayout(spacer, saveButton, cancelButton));
+		this.getFooter().add(saveButton, cancelButton);
 		this.setCloseOnEsc(false);
 		this.setCloseOnOutsideClick(false);
 		this.setModal(true);
 		this.open();
 	}
-
-//	public void changeNumberFieldsPallet(Field newPallet)
-//	{
-//		multipliersInputLayout.removeAll();
-//		instMultiplierMap.get(newPallet).values().forEach(multipliersInputLayout::add);
-//	}
-
-	public Set<Field> getGridFields()
-	{
-		return new HashSet<>();
-//		return fieldComponent.getInstitutionFieldsMap().keySet()
-//				.stream()
-//				.map(InstitutionField::getField)
-//				.collect(Collectors.toSet());
-	}
-
-//	public Field getOrderedFirstField()
-//	{
-//		return fieldsComboBox.getListDataView().getItems()
-//				.sorted((field1, field2) ->
-//				{
-//					return field1.getName().compareTo(field2.getName());
-//
-//				}).findFirst()
-//				.orElse(null);
-//	}
-//
-//	public void initInstitutionMultiplier(Field field)
-//	{
-//		instMultiplierMap.computeIfAbsent(field, t ->
-//		{
-//
-//			Set<InstitutionMultiplier> instMultiplierByField = (item.getId() == null) ? new HashSet<InstitutionMultiplier>() :
-//					institutionMultiplierRepository
-//							.findAllByInstitutionId(item.getId())
-//							.stream()
-//							.filter(institutionMultiplier -> institutionMultiplier.getInstitutionField().getField().getId().equals(field.getId()))
-//							.collect(Collectors.toSet());
-//
-//
-//			return Stream.concat
-//					(
-//							instMultiplierByField
-//									.stream()
-//									.map(institutionMultiplier ->
-//									{
-//										NumberField textField = new NumberField(institutionMultiplier.getCourse().getName());
-//										//textField.setAllowedCharPattern("[0-9.,]");
-//										textField.setMin(0);
-//										textField.setMax(Double.MAX_VALUE);
-//										textField.setTooltipText(institutionMultiplier.getCourse().getName());
-//										textField.getElement().getStyle().set("margin", "5px");
-//										textField.setWidth("calc(20% - 10px)");
-//
-//										textField.setPlaceholder(String.valueOf
-//												(
-//														//Multiplier.getGlobalMultiplier(fieldMultiplierRepository, institutionMultiplier.getInstitutionField().getField().getId(), institutionMultiplier.getCourse().getId())
-//														0
-//
-//												).replace(".", ","));
-//
-//										if(institutionMultiplier.isLocal())
-//											textField.setValue(institutionMultiplier.getMultiplier());
-//
-//										textField.addValueChangeListener(e ->
-//										{
-//											institutionMultiplier.setMultiplier((textField.isEmpty())
-//													? 0//Multiplier.getGlobalMultiplier(fieldMultiplierRepository, institutionMultiplier.getInstitutionField().getField().getId(), institutionMultiplier.getCourse().getId())
-//													: textField.getValue());
-//
-//											institutionMultiplier.setLocal(!textField.isEmpty());
-//										});
-//
-//										return new AbstractMap.SimpleEntry<>(institutionMultiplier, textField);
-//									}),
-//							courseRepository.findAll()
-//									.stream()
-//									.filter(course ->
-//									{
-//										return instMultiplierByField.stream()
-//												.noneMatch(institutionMultiplier ->
-//												{
-//													return institutionMultiplier.getCourse().getId().equals(course.getId());
-//												});
-//									})
-//									.map(course ->
-//									{
-//										InstitutionMultiplierKey id = new InstitutionMultiplierKey();
-////										id.setInstitutionId(item.getId());
-////										id.setFieldId(field.getId());
-//										id.setCourseId(course.getId());
-//
-//										InstitutionMultiplier institutionMultiplier = new InstitutionMultiplier();
-//										institutionMultiplier.setId(id);
-////										institutionMultiplier.setInstitution(item);
-////										institutionMultiplier.setField(field);
-//										institutionMultiplier.setCourse(course);
-//
-//										institutionMultiplier.setMultiplier
-//												(
-//														0//Multiplier.getGlobalMultiplier(fieldMultiplierRepository, field.getId(), course.getId())
-//												);
-//
-//										NumberField textField = new NumberField(course.getName());
-//										//textField.setAllowedCharPattern("[0-9.,]");
-//										textField.setMin(0);
-//										textField.setMax(Double.MAX_VALUE);
-//										textField.setTooltipText(course.getName());
-//										textField.getElement().getStyle().set("margin", "5px");
-//										textField.setWidth("calc(20% - 10px)");
-//
-//										textField.setPlaceholder(String.valueOf
-//												(
-//														0//Multiplier.getGlobalMultiplier(fieldMultiplierRepository, institutionMultiplier.getInstitutionField().getField().getId(), institutionMultiplier.getCourse().getId())
-//
-//												).replace(".", ","));
-//
-//										textField.addValueChangeListener(e ->
-//										{
-//											institutionMultiplier.setMultiplier((textField.isEmpty())
-//													?0// Multiplier.getGlobalMultiplier(fieldMultiplierRepository, institutionMultiplier.getInstitutionField().getField().getId(), institutionMultiplier.getCourse().getId())
-//													: textField.getValue());
-//
-//											institutionMultiplier.setLocal(!textField.isEmpty());
-//										});
-//
-//										return new AbstractMap.SimpleEntry<>(institutionMultiplier, textField);
-//									})
-//
-//					).sorted((entry1, entry2) ->
-//			{
-//				return entry1.getKey().getCourse().getName().compareTo(entry2.getKey().getCourse().getName());
-//
-//			}).collect(Collectors.toMap
-//					(
-//							Map.Entry::getKey,
-//							Map.Entry::getValue,
-//							(oldValue, newValue) -> newValue,
-//							LinkedHashMap::new
-//					));
-//
-//		});
-//	}
-	
-//	public Set<InstitutionField> updateInstitutionFields(Collection<InstitutionField> oldValues,
-//														 Collection<InstitutionField> newValues,
-//														 InstitutionFieldsRepository repository)
-//	{
-//		Set<InstitutionField> institutionFieldsMap = new HashSet<InstitutionField>();
-//		Set<InstitutionField> tmp = new HashSet<InstitutionField>();
-//
-//		if(oldValues != null)
-//			institutionFieldsMap.addAll(oldValues);
-//
-//		institutionFieldsMap.removeAll(newValues);
-//		for(InstitutionField institutionFields : institutionFieldsMap)
-//		{
-//			repository
-//					.findById(institutionFields.getId())
-//					.ifPresent(item ->
-//							{
-//								repository.deleteAllByInstitutionId(item.getId().getInstitutionId());
-//							});
-//		}
-//
-//		for(InstitutionField institutionField : newValues)
-//		{
-////			System.out.println(institutionField.toString());
-//			tmp.add(repository.save(institutionField));
-//		}
-//
-//		institutionFieldsMap = tmp;
-//		return institutionFieldsMap;
-//	}
 }

@@ -22,24 +22,37 @@ import de.bauersoft.views.DialogState;
 import org.springframework.dao.DataIntegrityViolationException;
 
 public class AdditiveDialog extends Dialog
-
 {
-	public AdditiveDialog(AdditiveService service, AdditiveDataProvider dataProvider, Additive item, DialogState state)
+	private final AdditiveService additiveService;
+	private final AdditiveDataProvider additiveDataProvider;
+	private final Additive item;
+	private final DialogState state;
+
+	public AdditiveDialog(AdditiveService additiveService, AdditiveDataProvider additiveDataProvider, Additive item, DialogState state)
 	{
-		this.setHeaderTitle(state.toString());
+        this.additiveService = additiveService;
+        this.additiveDataProvider = additiveDataProvider;
+        this.item = item;
+        this.state = state;
+        this.setHeaderTitle(state.toString());
 
 		Binder<Additive> binder = new Binder<>(Additive.class);
 
 		FormLayout inputLayout = new FormLayout();
+		inputLayout.setWidth("50vw");
+		inputLayout.setMaxWidth("50em");
+		inputLayout.setHeight("50vh");
+		inputLayout.setMaxHeight("13em");
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
 		TextField nameTextField = new TextField();
 		nameTextField.setMaxLength(64);
 		nameTextField.setRequired(true);
+		nameTextField.setAutofocus(true);
 		nameTextField.setMinWidth("20em");
 
 		TextArea descriptionTextArea = new TextArea();
-		descriptionTextArea.setMaxLength(512);
+		descriptionTextArea.setMaxLength(1024);
 		descriptionTextArea.setSizeFull();
 		descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 
@@ -53,7 +66,9 @@ public class AdditiveDialog extends Dialog
 					: ValidationResult.error("Name ist erforderlich");
 
 		}).bind(Additive::getName, Additive::setName);
+
 		binder.bind(descriptionTextArea, "description");
+
 		binder.setBean(item);
 
 		Button saveButton = new Button("Speichern");
@@ -67,8 +82,8 @@ public class AdditiveDialog extends Dialog
 			{
 				try
 				{
-					service.update(binder.getBean());
-					dataProvider.refreshAll();
+					additiveService.update(binder.getBean());
+					additiveDataProvider.refreshAll();
 
 					Notification.show("Daten wurden aktualisiert");
 					this.close();
@@ -89,19 +104,12 @@ public class AdditiveDialog extends Dialog
 		cancelButton.addClickListener(e ->
 		{
 			binder.removeBean();
+			additiveDataProvider.refreshAll();
 			this.close();
 		});
 
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
-		inputLayout.setHeight("50vh");
-		inputLayout.setMaxHeight("13em");
-
-		Span spacer = new Span();
-		spacer.setWidthFull();
-
 		this.add(inputLayout);
-		this.getFooter().add(new HorizontalLayout(spacer, saveButton, cancelButton));
+		this.getFooter().add(saveButton, cancelButton);
 		this.setCloseOnEsc(false);
 		this.setCloseOnOutsideClick(false);
 		this.setModal(true);

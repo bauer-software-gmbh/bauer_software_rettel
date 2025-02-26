@@ -1,13 +1,14 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.institution.InstitutionPattern;
-import de.bauersoft.data.entities.institution.InstitutionPatternKey;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
+import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPattern;
+import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPatternKey;
+import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import de.bauersoft.data.repositories.institutionPattern.InstitutionPatternGridDataRepository;
 import de.bauersoft.data.repositories.institutionPattern.InstitutionPatternRepository;
-import de.bauersoft.views.institution.InstitutionView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -125,5 +126,10 @@ public class InstitutionPatternService implements ServiceBase<InstitutionPattern
     public GridDataRepository<InstitutionPattern> getCustomRepository()
     {
         return null;
+    }
+
+    public Optional<InstitutionPattern> findByInstitutionFieldAndPattern(InstitutionField institutionField, Pattern pattern)
+    {
+        return repository.findByInstitutionFieldAndPattern(institutionField, pattern);
     }
 }

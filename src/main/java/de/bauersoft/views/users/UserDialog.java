@@ -74,6 +74,7 @@ public class UserDialog extends Dialog
 
         TextField nameTextField = new TextField();
         nameTextField.setMaxLength(50);
+        nameTextField.setAutofocus(true);
         nameTextField.setRequired(true);
         nameTextField.setMinWidth("20em");
 

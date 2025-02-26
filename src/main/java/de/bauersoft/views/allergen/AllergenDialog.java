@@ -24,8 +24,18 @@ import org.springframework.dao.DataIntegrityViolationException;
 public class AllergenDialog extends Dialog
 {
 
-    public AllergenDialog(AllergenService service, AllergenDataProvider dataProvider, Allergen item, DialogState state)
+    private final AllergenService allergenService;
+    private final AllergenDataProvider allergenDataProvider;
+    private final Allergen item;
+    private final DialogState state;
+
+    public AllergenDialog(AllergenService allergenService, AllergenDataProvider allergenDataProvider, Allergen item, DialogState state)
     {
+        this.allergenService = allergenService;
+        this.allergenDataProvider = allergenDataProvider;
+        this.item = item;
+        this.state = state;
+
         this.setHeaderTitle(state.toString());
 
         Binder<Allergen> binder = new Binder<>(Allergen.class);
@@ -40,10 +50,12 @@ public class AllergenDialog extends Dialog
 
         TextField nameTextField = new TextField();
         nameTextField.setMaxLength(64);
+        nameTextField.setRequired(true);
+        nameTextField.setAutofocus(true);
         nameTextField.setMinWidth("20em");
 
         TextArea descriptionTextArea = new TextArea();
-        descriptionTextArea.setMaxLength(512);
+        descriptionTextArea.setMaxLength(1024);
         descriptionTextArea.setSizeFull();
         descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 
@@ -71,8 +83,9 @@ public class AllergenDialog extends Dialog
             {
                 try
                 {
-                    service.update(binder.getBean());
-                    dataProvider.refreshAll();
+                    allergenService.update(binder.getBean());
+                    allergenDataProvider.refreshAll();
+
                     Notification.show("Daten wurden aktualisiert");
                     this.close();
 
@@ -92,14 +105,12 @@ public class AllergenDialog extends Dialog
         cancelButton.addClickListener(e ->
         {
             binder.removeBean();
+            allergenDataProvider.refreshAll();
             this.close();
         });
 
-        Span spacer = new Span();
-        spacer.setWidthFull();
-
         this.add(inputLayout);
-        this.getFooter().add(new HorizontalLayout(spacer, saveButton, cancelButton));
+        this.getFooter().add(saveButton, cancelButton);
         this.setCloseOnEsc(false);
         this.setCloseOnOutsideClick(false);
         this.setModal(true);

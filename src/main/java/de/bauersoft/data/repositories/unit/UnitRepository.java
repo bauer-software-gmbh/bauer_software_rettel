@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface UnitRepository extends JpaRepository<Unit, Long>, JpaSpecificationExecutor<Unit>
 {
-    boolean existsUntitByName(String name);
+    boolean existsUnitByName(String name);
 }

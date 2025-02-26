@@ -21,20 +21,37 @@ import de.bauersoft.data.providers.UnitDataProvider;
 import de.bauersoft.services.UnitService;
 import de.bauersoft.views.DialogState;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 
 public class UnitDialog extends Dialog
 {
-	public UnitDialog(UnitService service, UnitDataProvider dataProvider, Unit item, DialogState state)
+	private final UnitService unitService;
+	private final UnitDataProvider unitDataProvider;
+	private final Unit item;
+
+	private final DialogState state;
+
+	public UnitDialog(UnitService unitService, UnitDataProvider unitDataProvider, Unit item, DialogState state)
 	{
-		Binder<Unit> binder = new Binder<>(Unit.class);
+        this.unitService = unitService;
+        this.unitDataProvider = unitDataProvider;
+        this.item = item;
+        this.state = state;
 		this.setHeaderTitle(state.toString());
 
+		Binder<Unit> binder = new Binder<>(Unit.class);
+
 		FormLayout inputLayout = new FormLayout();
+		inputLayout.setWidth("50vw");
+		inputLayout.setMaxWidth("50em");
+		inputLayout.setHeight("50vh");
+		inputLayout.setMaxHeight("13em");
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
 		TextField nameTextField = new TextField();
 		nameTextField.setMaxLength(64);
 		nameTextField.setRequired(true);
+		nameTextField.setAutofocus(true);
 		nameTextField.setMinWidth("20em");
 
 		TextField shorthandTextField = new TextField();
@@ -45,11 +62,15 @@ public class UnitDialog extends Dialog
 		ComboBox<Unit> parentComboBox = new ComboBox<Unit>();
 		DataProvider<Unit, Void> internalDataProvider = DataProvider.fromFilteringCallbacks(query ->
 		{
-			return dataProvider.fetch(query);
+			return unitDataProvider.fetch(query);
 
-		}, query -> dataProvider.size(query));
+		}, query -> unitDataProvider.size(query));
 
-		parentComboBox.setItems(internalDataProvider.withConvertedFilter(value -> null));
+
+		parentComboBox.setItems(query ->
+		{
+			return unitService.getRepository().findAll(PageRequest.of(query.getPage(), query.getPageSize())).stream();
+		},query -> (int) unitService.getRepository().count());
 		parentComboBox.setItemLabelGenerator(unit -> unit.getName());
 
 		NumberField parentFactorNumberField = new NumberField();
@@ -81,6 +102,7 @@ public class UnitDialog extends Dialog
 		binder.forField(parentFactorNumberField)
 				.withConverter(input -> input.floatValue(), output -> output.doubleValue())
 				.bind(Unit::getParentFactor, Unit::setParentFactor);
+
 		binder.setBean(item);
 
 		Button saveButton = new Button("Speichern");
@@ -94,8 +116,8 @@ public class UnitDialog extends Dialog
 			{
 				try
 				{
-					service.update(binder.getBean());
-					dataProvider.refreshAll();
+					unitService.update(binder.getBean());
+					unitDataProvider.refreshAll();
 					Notification.show("Daten wurden aktualisiert");
 					this.close();
 
@@ -115,24 +137,15 @@ public class UnitDialog extends Dialog
 		cancelButton.addClickListener(e ->
 		{
 			binder.removeBean();
-			dataProvider.refreshAll();
+			unitDataProvider.refreshAll();
 			this.close();
 		});
 
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
-		inputLayout.setHeight("50vh");
-		inputLayout.setMaxHeight("13em");
-
-		Span spacer = new Span();
-		spacer.setWidthFull();
-
 		this.add(inputLayout);
-		this.getFooter().add(new HorizontalLayout(spacer, saveButton, cancelButton));
+		this.getFooter().add(saveButton, cancelButton);
 		this.setCloseOnEsc(false);
 		this.setCloseOnOutsideClick(false);
 		this.setModal(true);
 		this.open();
-
 	}
 }

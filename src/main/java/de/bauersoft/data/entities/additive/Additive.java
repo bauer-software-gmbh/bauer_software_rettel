@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -21,12 +22,12 @@ import java.util.Set;
 @Builder
 public class Additive extends AbstractEntity
 {
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 64)
     private String name;
     
     @Column(nullable = false, length = 1024)
     private String description;
 
     @ManyToMany(mappedBy = "additives", fetch = FetchType.EAGER)
-    private Set<Ingredient> ingredients;
+    private Set<Ingredient> ingredients = new HashSet<>();
 }

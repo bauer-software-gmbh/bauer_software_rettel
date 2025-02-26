@@ -1,4 +1,4 @@
-package de.bauersoft.data.entities.institution;
+package de.bauersoft.data.entities.institutionFieldPattern;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -37,5 +37,14 @@ public class InstitutionPatternKey
     public int hashCode()
     {
         return Objects.hash(institutionFieldId, patternId);
+    }
+
+    @Override
+    public String toString()
+    {
+        return "InstitutionPatternKey{" +
+                "institutionFieldId=" + institutionFieldId +
+                ", patternId=" + patternId +
+                '}';
     }
 }

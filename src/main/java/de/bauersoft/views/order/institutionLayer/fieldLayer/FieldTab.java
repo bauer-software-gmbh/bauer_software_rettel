@@ -2,7 +2,7 @@ package de.bauersoft.views.order.institutionLayer.fieldLayer;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.tabs.Tab;
-import de.bauersoft.data.entities.institution.InstitutionField;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.views.order.OrderManager;
 import de.bauersoft.views.order.institutionLayer.fieldLayer.calendarLayer.CalendarCluster;
 import lombok.Getter;

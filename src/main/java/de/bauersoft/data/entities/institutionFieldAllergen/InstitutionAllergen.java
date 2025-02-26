@@ -1,6 +1,8 @@
-package de.bauersoft.data.entities.institution;
+package de.bauersoft.data.entities.institutionFieldAllergen;
 
 import de.bauersoft.data.entities.allergen.Allergen;
+import de.bauersoft.components.container.ContainerID;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class InstitutionAllergen
+public class InstitutionAllergen implements ContainerID<InstitutionAllergenKey>
 {
     @EmbeddedId
     private InstitutionAllergenKey id;
@@ -28,6 +30,16 @@ public class InstitutionAllergen
     @JoinColumn(name = "allergen_id", referencedColumnName = "id")
     private Allergen allergen;
 
-    @Column(columnDefinition = "integer default 0")
+    @Column(nullable = false, columnDefinition = "integer default 0")
     private int amount;
+
+    @Override
+    public String toString()
+    {
+        return "InstitutionAllergen{" +
+                "id=" + id +
+                ", allergen=" + allergen +
+                ", amount=" + amount +
+                '}';
+    }
 }

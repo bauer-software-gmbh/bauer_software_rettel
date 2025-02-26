@@ -8,14 +8,19 @@ import com.vaadin.flow.theme.Theme;
 import java.text.DateFormatSymbols;
 import java.time.DayOfWeek;
 import java.time.temporal.WeekFields;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
+import de.bauersoft.test.Mapper;
+import de.bauersoft.test.TestClass;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * The entry point of the Spring Boot application.
@@ -27,8 +32,10 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 @Theme(value = "rettels")
 @Push
+@EnableScheduling
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator
 {
+
 	public static void main(String[] args)
 	{
 		SpringApplication.run(Application.class, args);

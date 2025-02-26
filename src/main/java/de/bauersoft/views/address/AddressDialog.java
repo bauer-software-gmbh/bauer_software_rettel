@@ -6,11 +6,9 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -48,16 +46,17 @@ public class AddressDialog extends Dialog
 
         TextField streetTextField = new TextField();
         streetTextField.setMaxLength(64);
+        streetTextField.setAutofocus(true);
         streetTextField.setRequired(true);
         streetTextField.setMinWidth("20em");
 
         TextField houseNumberTextField = new TextField();
-        houseNumberTextField.setMaxLength(64);
+        houseNumberTextField.setMaxLength(8);
         houseNumberTextField.setRequired(true);
         houseNumberTextField.setMinWidth("20em");
 
         TextField postalCodeTextField = new TextField();
-        postalCodeTextField.setMaxLength(64);
+        postalCodeTextField.setMaxLength(5);
         postalCodeTextField.setRequired(true);
         postalCodeTextField.setMinWidth("20em");
 
@@ -114,6 +113,7 @@ public class AddressDialog extends Dialog
                 {
                     addressService.update(binder.getBean());
 					addressDataProvider.refreshAll();
+
                     Notification.show("Daten wurden aktualisiert");
                     this.close();
 
@@ -133,14 +133,12 @@ public class AddressDialog extends Dialog
         cancelButton.addClickListener(e ->
         {
             binder.removeBean();
+            addressDataProvider.refreshAll();
             this.close();
         });
 
-        Span spacer = new Span();
-        spacer.setWidthFull();
-
         this.add(inputLayout);
-        this.getFooter().add(new HorizontalLayout(spacer, saveButton, cancelButton));
+        this.getFooter().add(saveButton, cancelButton);
         this.setCloseOnEsc(false);
         this.setCloseOnOutsideClick(false);
         this.setModal(true);

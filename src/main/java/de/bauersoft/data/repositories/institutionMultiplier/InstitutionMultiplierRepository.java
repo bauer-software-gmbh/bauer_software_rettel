@@ -1,14 +1,9 @@
 package de.bauersoft.data.repositories.institutionMultiplier;
 
-import de.bauersoft.data.entities.institution.InstitutionMultiplier;
-import de.bauersoft.data.entities.institution.InstitutionMultiplierKey;
-import jakarta.transaction.Transactional;
+import de.bauersoft.data.entities.institutionFieldMultiplier.InstitutionMultiplier;
+import de.bauersoft.data.entities.institutionFieldMultiplier.InstitutionMultiplierKey;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-
-import java.util.List;
 
 public interface InstitutionMultiplierRepository extends JpaRepository<InstitutionMultiplier, InstitutionMultiplierKey>, JpaSpecificationExecutor<InstitutionMultiplier>
 {
