@@ -85,7 +85,7 @@ public class ForecastScheduler
             Order order = new Order();
             order.setInstitution(institution);
             order.setField(field);
-            order.setLocalDate(LocalDate.now());
+            order.setOrderDate(LocalDate.now());
 
             orderService.update(order);
 

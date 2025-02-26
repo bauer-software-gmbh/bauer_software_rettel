@@ -1,6 +1,11 @@
 package de.bauersoft.components.container;
 
+import com.vaadin.flow.component.notification.Notification;
 import de.bauersoft.services.ServiceBase;
+import de.bauersoft.views.institution.institutionFields.components.allergen.AllergenContainer;
+import de.bauersoft.views.institution.institutionFields.components.closingTime.ClosingTimesContainer;
+import de.bauersoft.views.institution.institutionFields.components.multiplier.MultiplierContainer;
+import de.bauersoft.views.institution.institutionFields.components.pattern.PatternContainer;
 
 import java.util.List;
 import java.util.Map;
@@ -164,6 +169,11 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
         {
             Container<T, ID> container = entry.getValue();
             ContainerState state = container.getState();
+
+            if(container instanceof AllergenContainer multiplierContainer)
+            {
+                System.out.println("ClosingTimesContainer: " + multiplierContainer.getState() + " - t" + multiplierContainer.getTempState());
+            }
             switch(state)
             {
                 case UPDATE ->

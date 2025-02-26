@@ -3,6 +3,7 @@ package de.bauersoft.views.institution.institutionFields.components.closingTime;
 import com.vaadin.componentfactory.DateRange;
 import com.vaadin.componentfactory.EnhancedDateRangePicker;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -55,14 +56,13 @@ public class ClosingTimesComponent extends VerticalLayout
         addButton.addClickListener(event ->
         {
             int key = closingTimesMapContainer.getNextKey();
-            ClosingTimesContainer closingTimesContainer = (ClosingTimesContainer) closingTimesMapContainer.addIfAbsent(key, () ->
+            ClosingTimesContainer closingTimesContainer = ((ClosingTimesContainer) closingTimesMapContainer.addIfAbsent(key, () ->
             {
                 InstitutionClosingTime institutionClosingTime = new InstitutionClosingTime();
                 institutionClosingTime.setInstitutionField(institutionField);
 
                 return institutionClosingTime;
-            }, ContainerState.IGNORE);
-            closingTimesContainer.setKey(key);
+            }, ContainerState.UPDATE)).setKey(key);
 
             ClosingTimeLine closingTimeLine = new ClosingTimeLine(closingTimesContainer);
             closingTimeLines.add(closingTimeLine);
@@ -72,7 +72,7 @@ public class ClosingTimesComponent extends VerticalLayout
 
         for(Container<InstitutionClosingTime, Long> container : closingTimesMapContainer.getContainers())
         {
-            if(container.getState().equals(ContainerState.DELETE) || container.getState().equals(ContainerState.IGNORE)) continue;
+            if(!container.getState().view()) continue;
             ClosingTimeLine closingTimeLine = new ClosingTimeLine((ClosingTimesContainer) container);
 
             closingTimeLines.add(closingTimeLine);
@@ -107,28 +107,28 @@ public class ClosingTimesComponent extends VerticalLayout
 
             headerField.setPlaceholder("Sommerferien, Winterferien, o. s. ä.");
 
+            headerField.setValue(Objects.requireNonNullElse(closingTimesContainer.getEntity().getHeader(), "").trim());
             headerField.addValueChangeListener(event ->
             {
+                Notification.show("Value Changed 1");
                 closingTimesContainer.setTempHeader(event.getValue());
                 closingTimesContainer.setTempState(ContainerState.UPDATE);
             });
-
-            headerField.setValue(Objects.requireNonNullElse(closingTimesContainer.getEntity().getHeader(), "").trim());
 
             dateRangePicker = new EnhancedDateRangePicker();
             dateRangePicker.setLocale(Locale.GERMAN);
             dateRangePicker.setI18n(i18n);
             dateRangePicker.setWidthFull();
 
+            dateRangePicker.setValue(new DateRange(closingTimesContainer.getEntity().getStartDate(), closingTimesContainer.getEntity().getEndDate()));
             dateRangePicker.addValueChangeListener(event ->
             {
+                Notification.show("Value Changed 2");
                 closingTimesContainer.setTempStartDate(event.getValue().getStartDate());
                 closingTimesContainer.setTempEndDate(event.getValue().getEndDate());
 
                 closingTimesContainer.setTempState(ContainerState.UPDATE);
             });
-
-            dateRangePicker.setValue(new DateRange(closingTimesContainer.getEntity().getStartDate(), closingTimesContainer.getEntity().getEndDate()));
 
             removeButton = new Button(LineAwesomeIcon.MINUS_SOLID.create());
             removeButton.addClickListener(event ->

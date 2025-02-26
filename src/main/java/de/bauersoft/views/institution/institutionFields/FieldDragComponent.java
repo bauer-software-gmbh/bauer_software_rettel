@@ -96,13 +96,13 @@ public class FieldDragComponent extends FlexLayout
         {
             if(event.getItem() == null) return;
 
-            PatternMapContainer patternListContainer = patternMapContainerMap
+            PatternMapContainer patternMapContainer = patternMapContainerMap
                     .computeIfAbsent(event.getItem().getField(), field ->
             {
                 PatternMapContainer container = new PatternMapContainer();
 
                 for(InstitutionPattern institutionPattern : event.getItem().getInstitutionPatterns())
-                    container.addContainer(institutionPattern.getPattern(), institutionPattern).setState(ContainerState.UPDATE);
+                    container.addContainer(institutionPattern.getPattern(), institutionPattern, ContainerState.SHOW);
 
                 return container;
             });
@@ -113,7 +113,7 @@ public class FieldDragComponent extends FlexLayout
                 MultiplierMapContainer container = new MultiplierMapContainer();
 
                 for(InstitutionMultiplier institutionMultiplier : event.getItem().getInstitutionMultipliers())
-                    container.addContainer(institutionMultiplier.getCourse(), institutionMultiplier).setState(ContainerState.UPDATE);
+                    container.addContainer(institutionMultiplier.getCourse(), institutionMultiplier, ContainerState.SHOW);
 
                 return container;
             });
@@ -123,7 +123,7 @@ public class FieldDragComponent extends FlexLayout
                 AllergenMapContainer container = new AllergenMapContainer();
 
                 for(InstitutionAllergen institutionAllergen : event.getItem().getInstitutionAllergens())
-                    container.addContainer(institutionAllergen.getAllergen(), institutionAllergen).setState(ContainerState.UPDATE);
+                    container.addContainer(institutionAllergen.getAllergen(), institutionAllergen, ContainerState.SHOW);
 
                 return container;
             });
@@ -135,13 +135,13 @@ public class FieldDragComponent extends FlexLayout
                 for(InstitutionClosingTime institutionClosingTimes : event.getItem().getInstitutionClosingTimes())
                 {
                     int key = container.getNextKey();
-                    ((ClosingTimesContainer) container.addContainer(key, institutionClosingTimes, ContainerState.UPDATE)).setKey(key);
+                    ((ClosingTimesContainer) container.addContainer(key, institutionClosingTimes, ContainerState.SHOW)).setKey(key);
                 }
 
                 return container;
             });
 
-            InstitutionFieldDialog institutionFieldDialog = new InstitutionFieldDialog(institutionDialog, this, event.getItem(), patternListContainer, multiplierListContainer, allergenListContainer, closingTimesMapContainer);
+            InstitutionFieldDialog institutionFieldDialog = new InstitutionFieldDialog(institutionDialog, this, event.getItem(), patternMapContainer, multiplierListContainer, allergenListContainer, closingTimesMapContainer);
             institutionFieldDialog.open();
         });
 
@@ -185,8 +185,8 @@ public class FieldDragComponent extends FlexLayout
 
         this.add(institutionFieldsGrid, fieldVirtualList);
         this.setWidthFull();
-        this.setMaxHeight("25em");
-        this.setHeight("25em");
+        this.setMaxHeight("25rem");
+        this.setHeight("25rem");
         this.setWidthFull();
     }
 

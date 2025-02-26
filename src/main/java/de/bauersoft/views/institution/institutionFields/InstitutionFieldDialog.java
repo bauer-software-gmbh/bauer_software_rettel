@@ -88,13 +88,14 @@ public class InstitutionFieldDialog extends Dialog
             this.close();
         });
 
+        this.setWidth("50rem");
+        this.setMaxWidth("65vw");
+        this.setHeight("59.375rem");
+        this.setMaxHeight("90vh");
+
         this.getFooter().add(okButton, cancelButton);
         this.add(patternComponent, multiplierComponent, new HorizontalLayout(closingTimesComponent, allergenComponent));
-
-        this.setHeightFull();
-        this.setWidth("47.5vw");
-        this.setMaxWidth("47.5vw");
-
+        this.setCloseOnEsc(false);
         this.setCloseOnOutsideClick(false);
         this.setModal(true);
     }

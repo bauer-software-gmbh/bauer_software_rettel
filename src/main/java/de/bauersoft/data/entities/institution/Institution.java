@@ -25,8 +25,10 @@ public class Institution extends AbstractEntity
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Column(length = 1024)
     private String description;
 
+    @Column(length = 256)
     private String customerId;
 
     @Column(nullable = false, columnDefinition = "TIME default '00:00:05'")

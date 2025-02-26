@@ -10,6 +10,7 @@ import java.util.Objects;
 public class MultiplierContainer extends Container<InstitutionMultiplier, InstitutionMultiplierKey>
 {
     private double tempMultiplier;
+    private ContainerState tempState;
 
     public MultiplierContainer(InstitutionMultiplier entity)
     {
@@ -33,10 +34,21 @@ public class MultiplierContainer extends Container<InstitutionMultiplier, Instit
         this.tempMultiplier = tempMultiplier;
     }
 
+    public ContainerState getTempState()
+    {
+        return tempState;
+    }
+
+    public void setTempState(ContainerState tempState)
+    {
+        this.tempState = tempState;
+    }
+
     @Override
     public MultiplierContainer loadTemporaries()
     {
         tempMultiplier = Objects.requireNonNullElse(getEntity().getMultiplier(), 0d);
+        tempState = getState();
         return this;
     }
 
@@ -44,6 +56,7 @@ public class MultiplierContainer extends Container<InstitutionMultiplier, Instit
     public MultiplierContainer acceptTemporaries()
     {
         getEntity().setMultiplier(tempMultiplier);
+        setState(tempState);
         return this;
     }
 }

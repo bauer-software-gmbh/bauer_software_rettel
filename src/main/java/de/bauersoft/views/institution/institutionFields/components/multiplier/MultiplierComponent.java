@@ -54,10 +54,9 @@ public class MultiplierComponent extends FlexLayout
                 institutionMultiplier.setCourse(course);
 
                 return institutionMultiplier;
-            }).setState(ContainerState.UPDATE);
+            }, ContainerState.SHOW);
 
             MultiplierField multiplierField = new MultiplierField(multiplierContainer);
-
 
             multiplierFieldMap.put(course, multiplierField);
             this.add(multiplierField);
@@ -116,13 +115,8 @@ public class MultiplierComponent extends FlexLayout
             this.addValueChangeListener(event ->
             {
                 multiplierContainer.setTempMultiplier(Objects.requireNonNullElse(event.getValue(), 1d));
+                multiplierContainer.setTempState(ContainerState.UPDATE);
             });
-
-//            this.getStyle()
-////                .setWidth("calc(100% / 5 - 1em)")
-////                .setMaxWidth("calc(100% / 5 - 1em)")
-////                .setMarginLeft("5px")
-////                .setMarginRight("5px");
         }
 
     }

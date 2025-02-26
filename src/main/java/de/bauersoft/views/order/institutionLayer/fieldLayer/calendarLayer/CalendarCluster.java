@@ -91,6 +91,7 @@ public class CalendarCluster extends VerticalLayout
 
             try
             {
+                orders.forEach(order -> order.setCustomerOrdered(true));
                 this.save();
 
                 fieldTab.getTab()
@@ -149,7 +150,7 @@ public class CalendarCluster extends VerticalLayout
                 this.remove(allergenComponent);
 
             Optional<Offer> offerOptional = orderManager.getOfferService().findByLocalDateAndField(event.getValue(), institutionField.getField());
-            Optional<Order> orderOptional = orderManager.getOrderService().findByLocalDateAndInstitutionAndField(event.getValue(), institutionField.getInstitution(), institutionField.getField());
+            Optional<Order> orderOptional = orderManager.getOrderService().findByOrderDateAndInstitutionAndField(event.getValue(), institutionField.getInstitution(), institutionField.getField());
             if(offerOptional.isEmpty())
             {
                 String text = "Für den " + DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN).format(event.getValue()) + " ist kein Angebot vorhanden.";
@@ -177,12 +178,17 @@ public class CalendarCluster extends VerticalLayout
             Order order = orderOptional.orElseGet(() ->
             {
                 Order newOrder = new Order();
-                newOrder.setLocalDate(event.getValue());
+                newOrder.setOrderDate(event.getValue());
                 newOrder.setInstitution(institutionField.getInstitution());
                 newOrder.setField(institutionField.getField());
 
                 return newOrder;
             });
+
+            fieldTab.getTab()
+                    .getStyle()
+                    .setColor((order.isCustomerOrdered()) ? "green" : "red")
+                    .setFontWeight(Style.FontWeight.BOLD);
 
             orders.add(order);
 

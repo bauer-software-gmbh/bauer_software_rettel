@@ -126,9 +126,9 @@ public class OrderService implements ServiceBase<Order, Long>
         return customRepository;
     }
 
-    public Optional<Order> findByLocalDateAndInstitutionAndField(LocalDate localDate, Institution institution, Field field)
+    public Optional<Order> findByOrderDateAndInstitutionAndField(LocalDate orderDate, Institution institution, Field field)
     {
-        return repository.findByLocalDateAndInstitutionAndField(localDate, institution, field);
+        return repository.findByOrderDateAndInstitutionAndField(orderDate, institution, field);
     }
 
     public boolean existsByInstitution(Institution institution)

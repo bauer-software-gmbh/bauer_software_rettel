@@ -151,7 +151,7 @@ public class VariantBoxComponent extends HorizontalLayout
                     .set("border-radius", "var(--lumo-border-radius-m)")
                     .set("padding", "var(--lumo-space-s)")
                     .set("background-color", "var(--lumo-base-color)")
-                    .set("height", "15em")
+                    .set("height", "10em")
                     .set("overflow", "auto")
                     .set("white-space", "pre-wrap")
                     .set("box-shadow", "var(--lumo-box-shadow-xs)")

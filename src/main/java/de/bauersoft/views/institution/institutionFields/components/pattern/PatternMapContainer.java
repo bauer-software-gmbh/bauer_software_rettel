@@ -1,5 +1,6 @@
 package de.bauersoft.views.institution.institutionFields.components.pattern;
 
+import com.vaadin.flow.component.notification.Notification;
 import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPattern;
 import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPatternKey;

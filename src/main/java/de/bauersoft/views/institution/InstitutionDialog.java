@@ -100,18 +100,20 @@ public class InstitutionDialog extends Dialog
 		nameTextField = new TextField();
 		nameTextField.setMaxLength(64);
 		nameTextField.setRequired(true);
-		nameTextField.setMaxWidth("20em");
+		nameTextField.setWidthFull();
 
 		descriptionTextArea = new TextArea();
-		descriptionTextArea.setMaxLength(512);
+		descriptionTextArea.setMaxLength(1024);
 		descriptionTextArea.setSizeFull();
-		descriptionTextArea.setMaxHeight("calc(4* var(--lumo-text-field-size))");
+		descriptionTextArea.setHeight("calc(3* var(--lumo-text-field-size))");
+		descriptionTextArea.setMaxHeight("calc(3* var(--lumo-text-field-size))");
 
 		customerIdTextField = new TextField();
 		customerIdTextField.setWidthFull();
 		customerIdTextField.setMaxLength(256);
 
 		datePickerLayout = new HorizontalLayout();
+		datePickerLayout.setWidthFull();
 
 		Span orderStartSpan = new Span("Von ");
 		orderStartSpan.getStyle().setAlignSelf(Style.AlignSelf.CENTER);
@@ -239,8 +241,10 @@ public class InstitutionDialog extends Dialog
 			this.close();
 		});
 
-		this.setWidth("50vw");
-		this.setMaxWidth("50vw");
+		this.setWidth("50rem");
+		this.setMaxWidth("65vw");
+		this.setHeight("62.5rem");
+		this.setMaxHeight("100vh");
 
 		this.add(inputLayout, fieldDragComponent);
 		this.getFooter().add(saveButton, cancelButton);

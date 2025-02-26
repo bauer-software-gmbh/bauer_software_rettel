@@ -1,6 +1,7 @@
 package de.bauersoft.views.institution.institutionFields.components.pattern;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -27,22 +28,22 @@ public class PatternComponent extends FlexLayout
     private final InstitutionFieldDialog institutionFieldDialog;
     private final InstitutionField institutionField;
 
-    private final PatternMapContainer patternListContainer;
+    private final PatternMapContainer patternMapContainer;
 
     private final Map<Pattern, PatternBox> patternBoxMap;
 
-    public PatternComponent(InstitutionDialog institutionDialog, InstitutionFieldDialog institutionFieldDialog, PatternMapContainer patternListContainer)
+    public PatternComponent(InstitutionDialog institutionDialog, InstitutionFieldDialog institutionFieldDialog, PatternMapContainer patternMapContainer)
     {
         this.institutionDialog = institutionDialog;
         this.institutionFieldDialog = institutionFieldDialog;
         this.institutionField = institutionFieldDialog.getInstitutionField();
-        this.patternListContainer = patternListContainer;
+        this.patternMapContainer = patternMapContainer;
 
         patternBoxMap = new HashMap<>();
 
         for(Pattern pattern : institutionDialog.getPatternService().findAll())
         {
-            PatternContainer patternContainer = (PatternContainer) patternListContainer.addIfAbsent(pattern, () ->
+            PatternContainer patternContainer = (PatternContainer) patternMapContainer.addIfAbsent(pattern, () ->
             {
                 InstitutionPattern institutionPattern = new InstitutionPattern();
                 institutionPattern.setId(new InstitutionPatternKey(null, pattern.getId()));
@@ -50,7 +51,7 @@ public class PatternComponent extends FlexLayout
                 institutionPattern.setPattern(pattern);
 
                 return institutionPattern;
-            }).setState(ContainerState.UPDATE);
+            }, ContainerState.SHOW);
 
             PatternBox patternBox = new PatternBox(patternContainer);
 
@@ -129,6 +130,8 @@ public class PatternComponent extends FlexLayout
             amountField.addValueChangeListener(event ->
             {
                 patternContainer.setTempAmount(Objects.requireNonNullElse(event.getValue(), 0).intValue());
+                patternContainer.setTempState(ContainerState.UPDATE);
+                Notification.show("UPDATE");
             });
 
             amountBinder = new Binder<>();

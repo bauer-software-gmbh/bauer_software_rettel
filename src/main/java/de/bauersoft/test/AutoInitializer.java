@@ -267,7 +267,7 @@ public class AutoInitializer
             {
                 Offer offer = Offer
                         .builder()
-                        .localDate(LocalDate.now())
+                        .orderDate(LocalDate.now())
                         .field(fieldService.getRepository().findById(Integer.valueOf(i).longValue() + 1l).get())
                         .build();
 
@@ -290,7 +290,7 @@ public class AutoInitializer
 //                Offer offer = Offer
 //                        .builder()
 //                        .field(fieldService.getRepository().findById(Integer.valueOf(i).longValue() + 1l).get())
-//                        .localDate(Week.getDate(DayOfWeek.of(i+ 1), LocalDate.now()))
+//                        .orderDate(Week.getDate(DayOfWeek.of(i+ 1), LocalDate.now()))
 //                        .menus(menuService.getRepository().findAll().stream().collect(Collectors.toSet()))
 //                        .build();
 //
@@ -301,7 +301,7 @@ public class AutoInitializer
 //            {
 //                Offer offerN = Offer
 //                        .builder()
-//                        .localDate(LocalDate.now())
+//                        .orderDate(LocalDate.now())
 //                        .field(fieldService.getRepository().findById(Integer.valueOf(i).longValue() + 1l).get())
 //                        .menus(menuService.getRepository().findAll().stream().collect(Collectors.toSet()))
 //                        .build();
