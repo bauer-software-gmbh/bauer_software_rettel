@@ -37,16 +37,18 @@ public class ComponentDialog extends Dialog
 	private final RecipeRepository recipeRepository;
 	private final CourseRepository courseRepository;
 	private final ComponentRepository componentRepository;
+	private final UnitService unitService;
 	private final Component item;
 	private final DialogState state;
 
-	public ComponentDialog(ComponentService componentService, ComponentDataProvider componentDataProvider, RecipeRepository recipeRepository, CourseRepository courseRepository, ComponentRepository componentRepository, Component item, DialogState state)
+	public ComponentDialog(ComponentService componentService, ComponentDataProvider componentDataProvider, RecipeRepository recipeRepository, CourseRepository courseRepository, ComponentRepository componentRepository, UnitService unitService, Component item, DialogState state)
 	{
         this.componentService = componentService;
         this.componentDataProvider = componentDataProvider;
         this.recipeRepository = recipeRepository;
         this.courseRepository = courseRepository;
         this.componentRepository = componentRepository;
+        this.unitService = unitService;
         this.item = item;
         this.state = state;
 

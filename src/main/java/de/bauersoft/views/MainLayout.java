@@ -135,6 +135,11 @@ public class MainLayout extends AppLayout
         {
             nav.addItem(new SideNavItem("Bestellungen", OrderView.class, LineAwesomeIcon.CLIPBOARD_SOLID.create()));
         }
+
+        if(accessChecker.hasAccess(KitchenView.class))
+        {
+            nav.addItem(new SideNavItem("Küche", KitchenView.class, LineAwesomeIcon.CHECK_CIRCLE_SOLID.create()));
+        }
 //		if (accessChecker.hasAccess(DashboardView.class)) {
 //			nav.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.CHART_AREA_SOLID.create()));
 //		}

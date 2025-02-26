@@ -1,6 +1,8 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import de.bauersoft.data.entities.field.Field;
+import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;

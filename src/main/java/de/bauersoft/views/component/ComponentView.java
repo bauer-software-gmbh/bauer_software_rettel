@@ -36,10 +36,11 @@ public class ComponentView extends Div
 	private final CourseRepository courseRepository;
 	private final ComponentRepository componentRepository;
 	private final VariantService variantService;
+	private final UnitService unitService;
 
     AutoFilterGrid<Component> grid = new AutoFilterGrid<>(Component.class, false, true);
 
-    public ComponentView(ComponentService componentService, ComponentDataProvider componentDataProvider, RecipeRepository recipeRepository, CourseRepository courseRepository, ComponentRepository componentRepository, VariantService variantService)
+    public ComponentView(ComponentService componentService, ComponentDataProvider componentDataProvider, RecipeRepository recipeRepository, CourseRepository courseRepository, ComponentRepository componentRepository, VariantService variantService, UnitService unitService)
     {
         this.componentService = componentService;
         this.componentDataProvider = componentDataProvider;
@@ -47,6 +48,7 @@ public class ComponentView extends Div
         this.courseRepository = courseRepository;
         this.componentRepository = componentRepository;
         this.variantService = variantService;
+        this.unitService = unitService;
 
         setClassName("content");
 
@@ -66,13 +68,13 @@ public class ComponentView extends Div
 
         grid.addItemDoubleClickListener(event ->
 		{
-			new ComponentDialog(componentService, componentDataProvider, recipeRepository, courseRepository, componentRepository, event.getItem(), DialogState.EDIT);
+			new ComponentDialog(componentService, componentDataProvider, recipeRepository, courseRepository, componentRepository, unitService, event.getItem(), DialogState.EDIT);
 		});
 
         GridContextMenu<Component> contextMenu = grid.addContextMenu();
         contextMenu.addItem("Neue Komponente", event ->
 		{
-			new ComponentDialog(componentService, componentDataProvider, recipeRepository, courseRepository, componentRepository, new Component(), DialogState.NEW);
+			new ComponentDialog(componentService, componentDataProvider, recipeRepository, courseRepository, componentRepository, unitService, new Component(), DialogState.NEW);
 		});
 
 		GridMenuItem<Component> deleteItem = contextMenu.addItem("Löschen", event ->

@@ -137,11 +137,6 @@ public class OrderService implements ServiceBase<Order, Long>
     }
 
     public List<Order> getOrdersForLocalDate(LocalDate localDate) {
-        return repository.findByLocalDate(localDate);
-    }
-
-    public  Optional<Order> findAllByOrderDateAndInstitutionIdAndFieldId(LocalDate orderDate, long institutionId, long fieldId)
-    {
-        return repository.findByLocalDateAndInstitutionIdAndFieldId(orderDate, institutionId, fieldId);
+        return repository.findByOrderDate(localDate);
     }
 }

@@ -17,9 +17,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import de.bauersoft.data.entities.component.Component;
 import de.bauersoft.data.entities.course.Course;
-import de.bauersoft.data.entities.institution.InstitutionField;
-import de.bauersoft.data.entities.institution.InstitutionMultiplier;
-import de.bauersoft.data.entities.institution.InstitutionPattern;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
+import de.bauersoft.data.entities.institutionFieldMultiplier.InstitutionMultiplier;
 import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.data.entities.order.OrderData;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
@@ -38,7 +37,7 @@ import java.util.stream.Collectors;
         value = "./themes/rettels/views/kitchen.css")
 @PageTitle("Küche")
 @Route(value = "kitchen", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "CHEF"})
 public class KitchenView extends Div {
     private final InstitutionFieldsService institutionFieldsService;
     private KitchenDTO kitchenDTO;
@@ -224,7 +223,7 @@ public class KitchenView extends Div {
             long fieldId = order.getField().getId();
             long rowKey = institutionId * 1000 + fieldId; // Eindeutiger Schlüssel für jede Zeile
 
-            int neuerIstWert = kitchenDTO.getOrderAmount(institutionId, fieldId).orElse(0);
+            int neuerIstWert = kitchenDTO.getOrderAmount(order.getInstitution(), order.getField()).orElse(0);
             int vorherigerSollWert = lastKnownSollWertMapGrid .getOrDefault(rowKey, -1); // -1 als Default für "noch nicht gesetzt"
 
             // Falls der Wert noch nie gespeichert wurde, initialisiere ihn
@@ -276,7 +275,7 @@ public class KitchenView extends Div {
                             .sum()
                     ).orElse(0);
 
-            int istWert = kitchenDTO.getOrderAmount(institutionId, fieldId).orElse(0);
+            int istWert = kitchenDTO.getOrderAmount(order.getInstitution(), order.getField()).orElse(0);
 
             return sollWert - istWert;
 
@@ -333,7 +332,7 @@ public class KitchenView extends Div {
 
             confirmButton.addClickListener(event -> {
                 rowStatusMapGrid.put(rowKey, false); // Status zurücksetzen
-                lastKnownSollWertMapGrid.put(rowKey, kitchenDTO.getOrderAmount(institutionId, fieldId).orElse(0)); // Aktualisiert den gespeicherten Wert
+                lastKnownSollWertMapGrid.put(rowKey, kitchenDTO.getOrderAmount(order.getInstitution(), order.getField()).orElse(0)); // Aktualisiert den gespeicherten Wert
 
                 confirmButton.setEnabled(false);
                 order.setConfirmed(true); // 🔥 Bestätigungsstatus direkt in `Order` setzen

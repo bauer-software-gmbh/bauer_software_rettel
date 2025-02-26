@@ -2,9 +2,11 @@ package de.bauersoft.data.model;
 
 import de.bauersoft.data.entities.component.Component;
 import de.bauersoft.data.entities.course.Course;
-import de.bauersoft.data.entities.institution.InstitutionField;
-import de.bauersoft.data.entities.institution.InstitutionMultiplier;
-import de.bauersoft.data.entities.institution.InstitutionPattern;
+import de.bauersoft.data.entities.field.Field;
+import de.bauersoft.data.entities.institution.Institution;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
+import de.bauersoft.data.entities.institutionFieldMultiplier.InstitutionMultiplier;
+import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPattern;
 import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.data.entities.order.OrderData;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
@@ -77,11 +79,6 @@ public class KitchenDTO {
                 .reduce(Integer::sum); // Summiere alle Amount-Werte
     }
 
-    public Optional<Integer> getChildCount(long institutionId, long fieldId) {
-        return Optional.ofNullable(institutionFieldsMap.get(institutionId * 10000 + fieldId))
-                .map(InstitutionField::getChildCount);
-    }
-
     public Optional<Integer> getOrderAmountForPattern(long institutionId, long fieldId, long patternId) {
         return localDateOrders.stream()
                 .filter(order -> order.getInstitution().getId() == institutionId && order.getField().getId() == fieldId)
@@ -91,9 +88,9 @@ public class KitchenDTO {
                 .reduce(Integer::sum); // Summiere alle Bestellmengen
     }
 
-    public Optional<Integer> getOrderAmount(long institutionId, long fieldId)
+    public Optional<Integer> getOrderAmount(Institution institution, Field field)
     {
-        Optional<Order> order = orderService.findAllByOrderDateAndInstitutionIdAndFieldId(LocalDate.now(), institutionId, fieldId);
+        Optional<Order> order = orderService.findByOrderDateAndInstitutionAndField(LocalDate.now(), institution, field);
 
         return order.flatMap(o -> o.getOrderData().stream()
                 .filter(item -> DefaultPattern.DEFAULT.equalsDefault(item.getVariant().getPattern()))
@@ -109,7 +106,7 @@ public class KitchenDTO {
         List<Order> allOrders = orderService.findAll();
         System.out.println("📌 Alle Orders in der DB: " + allOrders.size());
         for (Order order : allOrders) {
-            System.out.println("📌 Order-ID: " + order.getId() + " | Datum: " + order.getLocalDate());
+            System.out.println("📌 Order-ID: " + order.getId() + " | Datum: " + order.getOrderDate());
         }
 
         this.localDateOrders = orderService.getOrdersForLocalDate(today);
@@ -127,7 +124,7 @@ public class KitchenDTO {
             System.out.println("✅ InstitutionField gespeichert: " + institutionField.getInstitution().getName());
             institutionFieldsMap.put(key, institutionField);
 
-            Optional<Order> order = orderService.findAllByOrderDateAndInstitutionIdAndFieldId(today, institutionId, fieldId);
+            Optional<Order> order = orderService.findByOrderDateAndInstitutionAndField(today, institutionField.getInstitution(), institutionField.getField());
             order.flatMap(o -> o.getOrderData().stream()
                     .filter(item -> DefaultPattern.DEFAULT.equalsDefault(item.getVariant().getPattern()))
                     .findFirst()).ifPresent(od -> {
