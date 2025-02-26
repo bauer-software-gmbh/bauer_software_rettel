@@ -63,7 +63,7 @@ public class UsersView extends Div
 
         GridMenuItem<User> deleteItem = contextMenu.addItem("Löschen", event -> {
             event.getItem().ifPresent(item -> {
-                userService.delete(item.getId());
+                userService.deleteById(item.getId());
                 userDataProvider.refreshAll();
             });
         });
@@ -74,5 +74,6 @@ public class UsersView extends Div
         });
 
         this.add(grid);
+
     }
 }

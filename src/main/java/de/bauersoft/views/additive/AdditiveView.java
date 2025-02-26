@@ -85,7 +85,6 @@ public class AdditiveView extends Div
 		{
 			deleteItem.setVisible(event.getItem().isPresent());
 		});
-
 		this.add(grid);
 	}
 }

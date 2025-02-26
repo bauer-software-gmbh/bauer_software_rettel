@@ -71,7 +71,6 @@ public class CourseView extends Div
 
 					return;
 				}
-
 				service.deleteById(item.getId());
 				dataProvider.refreshAll();
 			});

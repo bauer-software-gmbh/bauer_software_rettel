@@ -22,7 +22,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 public class AddressDialog extends Dialog
 {
-
     private final AddressService addressService;
     private final AddressDataProvider addressDataProvider;
     private Address item;

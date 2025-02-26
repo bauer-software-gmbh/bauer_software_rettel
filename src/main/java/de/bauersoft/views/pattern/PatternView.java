@@ -107,7 +107,6 @@ public class PatternView extends Div
 		{
 			deleteItem.setVisible(event.getItem().isPresent());
 		});
-
         this.add(grid);
     }
 }

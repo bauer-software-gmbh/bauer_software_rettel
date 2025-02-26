@@ -12,6 +12,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -19,21 +20,22 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import de.bauersoft.data.entities.component.Component;
 import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.recipe.Recipe;
+import de.bauersoft.data.entities.unit.Unit;
 import de.bauersoft.data.providers.ComponentDataProvider;
 import de.bauersoft.data.repositories.component.ComponentRepository;
 import de.bauersoft.data.repositories.course.CourseRepository;
 import de.bauersoft.data.repositories.recipe.RecipeRepository;
 import de.bauersoft.services.ComponentService;
+import de.bauersoft.services.UnitService;
 import de.bauersoft.views.DialogState;
 import org.springframework.dao.DataIntegrityViolationException;
 
 public class ComponentDialog extends Dialog
 {
 	public ComponentDialog(ComponentService service, ComponentDataProvider provider, RecipeRepository recipeRepository,
-			CourseRepository courseRepository, ComponentRepository componentRepository, Component item,
-			DialogState state)
+						   CourseRepository courseRepository, ComponentRepository componentRepository, Component item, UnitService unitService,
+						   DialogState state)
 	{
-
 		//TODO Recipes sollte Pflichtfeld sein
 		Binder<Component> binder = new Binder<>(Component.class);
 
@@ -52,11 +54,21 @@ public class ComponentDialog extends Dialog
 		descriptionTextArea.setSizeFull();
 		descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 
-		ComboBox<Course> courseComboBox = new ComboBox<>();
+		ComboBox<Course> courseComboBox = new ComboBox<>("Menükomponente");
 		courseComboBox.setItemLabelGenerator(course -> course.getName());
 		courseComboBox.setItems(courseRepository.findAll());
-		courseComboBox.setMinWidth("20em");
+		courseComboBox.setWidthFull();
 		courseComboBox.setRequired(true);
+
+		ComboBox<Unit> unitComboBox = new ComboBox<>("Einheit");
+		unitComboBox.setItemLabelGenerator(unit -> unit.getName());
+		unitComboBox.setItems(unitService.findAll());
+		unitComboBox.setWidthFull();
+		unitComboBox.setRequired(true);
+
+		HorizontalLayout comboBoxLayout = new HorizontalLayout();
+		comboBoxLayout.setWidthFull();
+		comboBoxLayout.add(courseComboBox, unitComboBox);
 
 		MultiSelectComboBox<Recipe> recipeMultiSelectComboBox = new MultiSelectComboBox<>();
 		recipeMultiSelectComboBox.setWidthFull();
@@ -67,7 +79,7 @@ public class ComponentDialog extends Dialog
 
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(courseComboBox, "Menükomponente"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(comboBoxLayout, "Eigenschaften"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(recipeMultiSelectComboBox, "Rezept"), 1);
 
 		binder.forField(nameTextField).asRequired((value, context) ->
@@ -87,6 +99,14 @@ public class ComponentDialog extends Dialog
 					: ValidationResult.error("Gang ist erforderlich");
 
 		}).bind(Component::getCourse, Component::setCourse);
+
+		binder.forField(unitComboBox).asRequired((value, context) ->
+		{
+			return (value != null)
+					? ValidationResult.ok()
+					: ValidationResult.error("Einheit ist erforderlich");
+
+		}).bind(Component::getUnit, Component::setUnit);
 
 		binder.bind(recipeMultiSelectComboBox, "recipes");
 

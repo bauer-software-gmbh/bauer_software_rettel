@@ -3,6 +3,7 @@ package de.bauersoft.data.entities.component;
 import de.bauersoft.data.entities.AbstractEntity;
 import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.recipe.Recipe;
+import de.bauersoft.data.entities.unit.Unit;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,6 +27,10 @@ public class Component extends AbstractEntity
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
     @JoinColumn(name = "course_id", referencedColumnName = "id")
     private Course course;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "unit_id", referencedColumnName = "id")
+    private Unit unit;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
     @JoinTable(

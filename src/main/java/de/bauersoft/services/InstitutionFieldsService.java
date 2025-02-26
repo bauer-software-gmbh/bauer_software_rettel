@@ -2,6 +2,8 @@ package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import de.bauersoft.data.entities.additive.Additive;
+import de.bauersoft.data.entities.field.Field;
+import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.institution.InstitutionField;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
@@ -126,5 +128,10 @@ public class InstitutionFieldsService implements ServiceBase<InstitutionField, L
     public GridDataRepository<InstitutionField> getCustomRepository()
     {
         return customRepository;
+    }
+
+    public Optional<InstitutionField> findByInstitutionAndField(Institution institution, Field field)
+    {
+        return repository.findByInstitutionAndField(institution, field);
     }
 }

@@ -31,7 +31,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 public class IngredientDialog extends Dialog
 {
-
     public IngredientDialog(IngredientService service,
                             UnitRepository unitRepository,
                             AllergenRepository allergenRepository,

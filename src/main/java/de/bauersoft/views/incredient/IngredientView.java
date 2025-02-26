@@ -24,7 +24,6 @@ import jakarta.annotation.security.RolesAllowed;
 
 import java.util.stream.Collectors;
 
-
 @PageTitle("Zutaten")
 @Route(value = "incredient", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
@@ -96,5 +95,6 @@ public class IngredientView extends Div
 		});
 
         this.add(grid);
+
     }
 }

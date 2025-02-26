@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 @AnonymousAllowed
 public class MenueView extends Div
 {
-
     private final FieldService fieldService;
 
     private ComboBox<Field> fieldsComboBox;
@@ -49,18 +48,12 @@ public class MenueView extends Div
         getStyle().set("align-items", "center");
         getStyle().set("justify-content", "flex-start");
 
-        List<Field> fields = fieldService.getRepository().findAll().stream()
-                .filter(field ->
-                {
-                    return DefaultField.KINDERGARTEN.equalsDefault(field)
-                            || DefaultField.KINDERTAGESSTAETTE.equalsDefault(field)
-                            || DefaultField.GRUNDSCHULE.equalsDefault(field);
-
-                }).collect(Collectors.toList());
+        List<Field> fields = fieldService.getRepository().findAll();
 
         fieldsComboBox = new ComboBox<>();
         fieldsComboBox.setItems(fields);
         fieldsComboBox.setItemLabelGenerator(Field::getName);
+
 
         this.add(fieldsComboBox);
 

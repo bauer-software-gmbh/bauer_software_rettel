@@ -30,6 +30,9 @@ public class Menu extends AbstractEntity
     @ManyToMany(mappedBy = "menus", fetch = FetchType.EAGER)
     private Set<Offer> offers;
 
+    @Transient
+    private boolean confirmed = false;
+
     @Override
     public String toString()
     {

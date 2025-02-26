@@ -33,7 +33,6 @@ public class AllergenView extends Div
 						AllergenDataProvider dataProvider,
 						IngredientService ingredientService,
 						OrderAllergenService orderAllergenService)
-
 	{
 		setClassName("content");
 

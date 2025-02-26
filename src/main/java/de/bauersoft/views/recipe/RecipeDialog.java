@@ -32,7 +32,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 public class RecipeDialog extends Dialog
 {
-
 	private final RecipeService recipeService;
 	private final RecipeRepository recipeRepository;
 	private final IngredientService ingredientService;
