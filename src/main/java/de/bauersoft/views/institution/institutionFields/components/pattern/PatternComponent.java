@@ -1,6 +1,7 @@
 package de.bauersoft.views.institution.institutionFields.components.pattern;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
@@ -20,7 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Getter
-public class PatternComponent extends VerticalLayout
+public class PatternComponent extends FlexLayout
 {
     private final InstitutionDialog institutionDialog;
     private final InstitutionFieldDialog institutionFieldDialog;
@@ -30,8 +31,6 @@ public class PatternComponent extends VerticalLayout
 
     private final Map<Pattern, PatternBox> patternBoxMap;
 
-    private final HorizontalLayout horizontalLayout;
-
     public PatternComponent(InstitutionDialog institutionDialog, InstitutionFieldDialog institutionFieldDialog, PatternMapContainer patternListContainer)
     {
         this.institutionDialog = institutionDialog;
@@ -40,9 +39,6 @@ public class PatternComponent extends VerticalLayout
         this.patternListContainer = patternListContainer;
 
         patternBoxMap = new HashMap<>();
-
-        horizontalLayout = new HorizontalLayout();
-        horizontalLayout.setWidthFull();
 
         for(Pattern pattern : institutionDialog.getPatternService().findAll())
         {
@@ -59,11 +55,9 @@ public class PatternComponent extends VerticalLayout
             PatternBox patternBox = new PatternBox(patternContainer);
 
             patternBoxMap.put(pattern, patternBox);
-            horizontalLayout.add(patternBox);
+            this.add(patternBox);
         }
 
-        this.add(horizontalLayout);
-        this.setWidthFull();
         this.getStyle()
                 .setFlexWrap(Style.FlexWrap.WRAP)
                 .setDisplay(Style.Display.FLEX)

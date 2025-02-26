@@ -1,4 +1,4 @@
-package de.bauersoft.views.institution.institutionFields.components.closings;
+package de.bauersoft.views.institution.institutionFields.components.closingTime;
 
 import de.bauersoft.components.container.Container;
 import de.bauersoft.components.container.ContainerState;
@@ -14,6 +14,8 @@ public class ClosingTimesContainer extends Container<InstitutionClosingTime, Lon
 
     private LocalDate tempStartDate;
     private LocalDate tempEndDate;
+
+    private String tempHeader;
 
     public ClosingTimesContainer(InstitutionClosingTime entity)
     {
@@ -71,6 +73,16 @@ public class ClosingTimesContainer extends Container<InstitutionClosingTime, Lon
         return this;
     }
 
+    public String getTempHeader()
+    {
+        return tempHeader;
+    }
+
+    public void setTempHeader(String tempHeader)
+    {
+        this.tempHeader = tempHeader;
+    }
+
     @Override
     public ClosingTimesContainer loadTemporaries()
     {
@@ -78,6 +90,8 @@ public class ClosingTimesContainer extends Container<InstitutionClosingTime, Lon
 
         tempStartDate = getEntity().getStartDate();
         tempEndDate = getEntity().getEndDate();
+
+        tempHeader = getEntity().getHeader();
         return this;
     }
 
@@ -88,6 +102,8 @@ public class ClosingTimesContainer extends Container<InstitutionClosingTime, Lon
 
         getEntity().setStartDate(tempStartDate);
         getEntity().setEndDate(tempEndDate);
+
+        getEntity().setHeader(tempHeader);
         return this;
     }
 }

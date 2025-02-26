@@ -25,6 +25,9 @@ public class InstitutionClosingTime extends AbstractEntity implements ContainerI
     @Column(nullable = false)
     private LocalDate endDate;
 
+    @Column(length = 64)
+    private String header;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "institution_field_id", nullable = false)
     private InstitutionField institutionField;

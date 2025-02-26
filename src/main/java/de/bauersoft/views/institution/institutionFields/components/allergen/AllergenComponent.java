@@ -7,6 +7,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.dom.Style;
 import de.bauersoft.data.entities.allergen.Allergen;
 import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
 import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergenKey;
@@ -182,6 +183,8 @@ public class AllergenComponent extends VerticalLayout
 
             allergenComboBox.setValue(creationContainer.getEntity().getAllergen());
             amountField.setValue(Objects.requireNonNullElse(creationContainer.getEntity().getAmount(), 0).doubleValue());
+
+            this.setWidthFull();
         }
 
         private void initiateComponents()

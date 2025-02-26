@@ -1,4 +1,4 @@
-package de.bauersoft.views.institution.institutionFields.components.closings;
+package de.bauersoft.views.institution.institutionFields.components.closingTime;
 
 import de.bauersoft.components.container.Container;
 import de.bauersoft.components.container.ContainerState;

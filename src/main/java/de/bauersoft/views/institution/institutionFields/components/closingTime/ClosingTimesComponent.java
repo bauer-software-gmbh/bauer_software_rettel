@@ -1,11 +1,11 @@
-package de.bauersoft.views.institution.institutionFields.components.closings;
+package de.bauersoft.views.institution.institutionFields.components.closingTime;
 
 import com.vaadin.componentfactory.DateRange;
 import com.vaadin.componentfactory.EnhancedDateRangePicker;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import de.bauersoft.components.container.Container;
 import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.institutionClosingTime.InstitutionClosingTime;
@@ -15,9 +15,7 @@ import de.bauersoft.views.institution.institutionFields.InstitutionFieldDialog;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.time.DayOfWeek;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class ClosingTimesComponent extends VerticalLayout
 {
@@ -92,6 +90,8 @@ public class ClosingTimesComponent extends VerticalLayout
     {
         private final ClosingTimesContainer closingTimesContainer;
 
+        private final TextField headerField;
+
         private final EnhancedDateRangePicker dateRangePicker;
 
         private final Button removeButton;
@@ -100,8 +100,25 @@ public class ClosingTimesComponent extends VerticalLayout
         {
             this.closingTimesContainer = closingTimesContainer;
 
+            headerField = new TextField();
+            headerField.setWidthFull();
+            headerField.getStyle()
+                    .set("--lumo-text-field-size", "var(--lumo-size-xs)");
+
+            headerField.setPlaceholder("Sommerferien, Winterferien, o. s. ä.");
+
+            headerField.addValueChangeListener(event ->
+            {
+                closingTimesContainer.setTempHeader(event.getValue());
+                closingTimesContainer.setTempState(ContainerState.UPDATE);
+            });
+
+            headerField.setValue(Objects.requireNonNullElse(closingTimesContainer.getEntity().getHeader(), "").trim());
+
             dateRangePicker = new EnhancedDateRangePicker();
+            dateRangePicker.setLocale(Locale.GERMAN);
             dateRangePicker.setI18n(i18n);
+            dateRangePicker.setWidthFull();
 
             dateRangePicker.addValueChangeListener(event ->
             {
@@ -121,7 +138,21 @@ public class ClosingTimesComponent extends VerticalLayout
                 ClosingTimesComponent.this.remove(this);
             });
 
-            this.add(removeButton, dateRangePicker);
+            VerticalLayout controls = new VerticalLayout(headerField, dateRangePicker);
+            controls.getStyle()
+                    .setMargin("0px")
+                    .setPadding("0px")
+                    .set("gap", "0px");
+
+            controls.setWidthFull();
+
+            this.add(removeButton, controls);
+            this.setAlignItems(Alignment.END);
+            this.setWidthFull();
+            this.getStyle()
+                    .setMargin("0px")
+                    .setPadding("0px")
+                    .set("gap", "var(--lumo-space-m)");
         }
     }
 }

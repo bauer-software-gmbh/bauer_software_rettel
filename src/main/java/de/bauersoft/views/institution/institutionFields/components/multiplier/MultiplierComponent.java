@@ -58,15 +58,26 @@ public class MultiplierComponent extends FlexLayout
 
             MultiplierField multiplierField = new MultiplierField(multiplierContainer);
 
+
             multiplierFieldMap.put(course, multiplierField);
             this.add(multiplierField);
+            this.setFlexBasis("20%", multiplierField); // Stellt sicher, dass nur 5 Elemente in einer Reihe sind
+            this.setFlexShrink(0, multiplierField);
+            multiplierField.getStyle()
+                    .set("padding", "10px")
+                    .set("text-align", "center")
+                    .setMaxWidth("calc(100% / 6)");
         }
 
+        this.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        // this.setFlexGrow(1);
         this.getStyle()
                 .setFlexWrap(Style.FlexWrap.WRAP)
                 .set("padding", "var(--lumo-space-s)")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
                 .set("border-radius", "var(--lumo-border-radius-s)");
+
+        this.getStyle().set("gap", "0px").set("padding", "0px").set("margin", "0px");
     }
 
     public class MultiplierField extends NumberField
@@ -107,11 +118,11 @@ public class MultiplierComponent extends FlexLayout
                 multiplierContainer.setTempMultiplier(Objects.requireNonNullElse(event.getValue(), 1d));
             });
 
-            this.getStyle()
-                .setWidth("calc(100% / 5 - 1em)")
-                .setMaxWidth("calc(100% / 5 - 1em)")
-                .setMarginLeft("5px")
-                .setMarginRight("5px");
+//            this.getStyle()
+////                .setWidth("calc(100% / 5 - 1em)")
+////                .setMaxWidth("calc(100% / 5 - 1em)")
+////                .setMarginLeft("5px")
+////                .setMarginRight("5px");
         }
 
     }
