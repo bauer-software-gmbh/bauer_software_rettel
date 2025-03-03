@@ -22,7 +22,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Ingredient extends AbstractEntity
 {
     @Column(nullable = false, unique = true)

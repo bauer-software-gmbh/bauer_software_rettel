@@ -19,7 +19,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Additive extends AbstractEntity
 {
     @Column(nullable = false, unique = true, length = 64)

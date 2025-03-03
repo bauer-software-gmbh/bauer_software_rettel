@@ -23,7 +23,7 @@ import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Allergene")
 @Route(value = "allergen", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "KUCHEN_ADMIN"})
 @Uses(Icon.class)
 public class AllergenView extends Div
 {

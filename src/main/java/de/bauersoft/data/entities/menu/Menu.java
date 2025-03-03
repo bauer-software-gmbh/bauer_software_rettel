@@ -15,7 +15,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Menu extends AbstractEntity
 {
     @Column(nullable = false, unique = true, length = 64)

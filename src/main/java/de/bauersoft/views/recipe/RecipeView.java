@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @PageTitle("Rezepte")
 @Route(value = "recipe", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "KUCHE_ADMIN", "OFFICE_ADMIN"})
 public class RecipeView extends Div
 {
     private final AutoFilterGrid<Recipe> grid = new AutoFilterGrid<>(Recipe.class, false, true);

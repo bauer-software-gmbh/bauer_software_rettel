@@ -19,11 +19,10 @@ public class DefaultPatternInitializer
                 if(patternRepository.existsByName(defaultPattern.getName()))
                     continue;
 
-                Pattern pattern = Pattern.builder()
-                        .name(defaultPattern.getName())
-                        .description(defaultPattern.getDescription())
-                        .religious(defaultPattern.getReligious())
-                        .build();
+                Pattern pattern = new Pattern();
+                pattern.setName(defaultPattern.getName());
+                pattern.setDescription(defaultPattern.getDescription());
+                pattern.setReligious(defaultPattern.getReligious());
 
                 patternRepository.save(pattern);
             }

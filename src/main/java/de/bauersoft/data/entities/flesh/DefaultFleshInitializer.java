@@ -18,9 +18,8 @@ public class DefaultFleshInitializer
                 if(fleshRepository.existsByName(defaultFlesh.getName()))
                     continue;
 
-                Flesh flesh = Flesh.builder()
-                        .name(defaultFlesh.getName())
-                        .build();
+                Flesh flesh = new Flesh();
+                flesh.setName(defaultFlesh.getName());
 
                 fleshRepository.save(flesh);
             }

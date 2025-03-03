@@ -2,11 +2,12 @@ package de.bauersoft.data.entities.role;
 
 public enum Role
 {
-    USER,
-    ORDERER,
-    ORDER_TIME_BYPASS,
-    STAFF,
-    CHEF,
-    ACCOUNTENT,
-    ADMIN;
+    ADMIN,
+    KUCHE,
+    KUCHE_ADMIN,
+    OFFICE,
+    OFFICE_ADMIN,
+    INSTITUTION,
+    BESTELLUBERSICHT,
+    ORDER_TIME_BYPASS;
 }

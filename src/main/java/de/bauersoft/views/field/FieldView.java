@@ -20,7 +20,7 @@ import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Einrichtungsart")
 @Route(value = "field", layout = MainLayout.class)
-@RolesAllowed(value = {"ADMIN", "ACCOUNTENT"})
+@RolesAllowed({"ADMIN", "OFFICE", "OFFICE_ADMIN"})
 public class FieldView extends Div
 {
 	private final FieldService fieldService;

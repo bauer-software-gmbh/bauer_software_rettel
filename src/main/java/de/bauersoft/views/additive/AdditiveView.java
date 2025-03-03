@@ -22,7 +22,7 @@ import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Zusatzstoffe")
 @Route(value = "additive", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "KUCHE_ADMIN"})
 @Uses(Icon.class)
 public class AdditiveView extends Div
 {

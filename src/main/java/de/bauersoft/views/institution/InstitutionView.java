@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @PageTitle("Institutionen")
 @Route(value = "institution", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "OFFICE", "OFFICE_ADMIN"})
 @CssImport(value = "./themes/rettels/components/auto-filter-grid.css", themeFor = "vaadin-grid")
 public class InstitutionView extends Div
 {

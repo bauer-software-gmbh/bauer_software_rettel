@@ -20,7 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @PageTitle("Benutzer")
 @Route(value = "user", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "OFFICE_ADMIN"})
 @Uses(Icon.class)
 public class UsersView extends Div
 {

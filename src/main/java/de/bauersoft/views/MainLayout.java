@@ -22,6 +22,7 @@ import de.bauersoft.security.AuthenticatedUser;
 import de.bauersoft.views.additive.AdditiveView;
 import de.bauersoft.views.address.AddressView;
 import de.bauersoft.views.allergen.AllergenView;
+import de.bauersoft.views.closingTime.ClosingTimeView;
 import de.bauersoft.views.component.ComponentView;
 import de.bauersoft.views.course.CourseView;
 import de.bauersoft.views.field.FieldView;
@@ -122,48 +123,37 @@ public class MainLayout extends AppLayout
     {
         SideNav nav = new SideNav();
         if(accessChecker.hasAccess(WelcomeView.class))
-        {
             nav.addItem(new SideNavItem("Willkommen", WelcomeView.class, LineAwesomeIcon.HOME_SOLID.create()));
-        }
 
         if(accessChecker.hasAccess(MenueView.class))
-        {
             nav.addItem(new SideNavItem("Speiseplan", MenueView.class, LineAwesomeIcon.UTENSILS_SOLID.create()));
-        }
 
         if(accessChecker.hasAccess(OrderView.class))
-        {
             nav.addItem(new SideNavItem("Bestellungen", OrderView.class, LineAwesomeIcon.CLIPBOARD_SOLID.create()));
-        }
+
+        if(accessChecker.hasAccess(ClosingTimeView.class))
+            nav.addItem(new SideNavItem("Schließtage", ClosingTimeView.class, LineAwesomeIcon.CALENDAR_ALT_SOLID.create()));
 
         if(accessChecker.hasAccess(KitchenView.class))
-        {
             nav.addItem(new SideNavItem("Küche", KitchenView.class, LineAwesomeIcon.CHECK_CIRCLE_SOLID.create()));
-        }
-//		if (accessChecker.hasAccess(DashboardView.class)) {
-//			nav.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.CHART_AREA_SOLID.create()));
-//		}
+
+
         if(accessChecker.hasAccess(UsersView.class) || accessChecker.hasAccess(FieldView.class)
                 || accessChecker.hasAccess(InstitutionView.class) || accessChecker.hasAccess(AddressView.class))
         {
             SideNavItem accounting = new SideNavItem("Accounting");
             if(accessChecker.hasAccess(UsersView.class))
-            {
                 accounting.addItem(new SideNavItem("Benutzer", UsersView.class, LineAwesomeIcon.USERS_SOLID.create()));
-            }
+
             if(accessChecker.hasAccess(InstitutionView.class))
-            {
-                accounting.addItem(
-                        new SideNavItem("Institutionen", InstitutionView.class, LineAwesomeIcon.USERS_SOLID.create()));
-            }
+                accounting.addItem(new SideNavItem("Institutionen", InstitutionView.class, LineAwesomeIcon.USERS_SOLID.create()));
+
             if(accessChecker.hasAccess(AddressView.class))
-            {
                 accounting.addItem(new SideNavItem("Adressen", AddressView.class, LineAwesomeIcon.USERS_SOLID.create()));
-            }
+
             if(accessChecker.hasAccess(FieldView.class))
-            {
                 accounting.addItem(new SideNavItem("Einrichtungsart", FieldView.class, LineAwesomeIcon.USERS_SOLID.create()));
-            }
+
             nav.addItem(accounting);
         }
         if(accessChecker.hasAccess(ComponentView.class) || accessChecker.hasAccess(RecipeView.class)
@@ -173,11 +163,8 @@ public class MainLayout extends AppLayout
                 || accessChecker.hasAccess(MenuBuilderView.class) || accessChecker.hasAccess(OffersView.class))
         {
             SideNavItem backend = new SideNavItem("Backend");
-
             if(accessChecker.hasAccess(OffersView.class))
-            {
                 backend.addItem(new SideNavItem("Menü Planung", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
-            }
 
             if(accessChecker.hasAccess(MenuBuilderView.class))
             {
@@ -187,50 +174,39 @@ public class MainLayout extends AppLayout
             }
 
             if(accessChecker.hasAccess(ComponentView.class))
-            {
-                backend.addItem(
-                        new SideNavItem("Komponenten", ComponentView.class, LineAwesomeIcon.CARROT_SOLID.create()));
-            }
+                backend.addItem(new SideNavItem("Komponenten", ComponentView.class, LineAwesomeIcon.CARROT_SOLID.create()));
+
             if(accessChecker.hasAccess(RecipeView.class))
-            {
                 backend.addItem(new SideNavItem("Rezepte", RecipeView.class, LineAwesomeIcon.EDIT.create()));
-            }
+
             if(accessChecker.hasAccess(IngredientView.class))
-            {
-                backend.addItem(
-                        new SideNavItem("Zutaten", IngredientView.class, LineAwesomeIcon.CARROT_SOLID.create()));
-            }
+                backend.addItem(new SideNavItem("Zutaten", IngredientView.class, LineAwesomeIcon.CARROT_SOLID.create()));
+
 
             if(accessChecker.hasAccess(CourseView.class) || accessChecker.hasAccess(AllergenView.class)
                     || accessChecker.hasAccess(AdditiveView.class) || accessChecker.hasAccess(UnitView.class)
                     || accessChecker.hasAccess(PatternView.class))
             {
                 SideNavItem parameters = new SideNavItem("Parameter");
-
                 if(accessChecker.hasAccess(CourseView.class))
                 {
                     SideNavItem sideNavItem = new SideNavItem("Menükomponenten", CourseView.class, LineAwesomeIcon.STREAM_SOLID.create());
                     sideNavItem.getElement().setAttribute("title", "Gänge");
                     parameters.addItem(sideNavItem);
                 }
+
                 if(accessChecker.hasAccess(PatternView.class))
-                {
                     parameters.addItem(new SideNavItem("Ernährungsformen", PatternView.class, LineAwesomeIcon.CARROT_SOLID.create()));
-                }
+
                 if(accessChecker.hasAccess(AllergenView.class))
-                {
-                    parameters.addItem(new SideNavItem("Allergene", AllergenView.class,
-                            LineAwesomeIcon.CLOUD_MEATBALL_SOLID.create()));
-                }
+                    parameters.addItem(new SideNavItem("Allergene", AllergenView.class, LineAwesomeIcon.CLOUD_MEATBALL_SOLID.create()));
+
                 if(accessChecker.hasAccess(AdditiveView.class))
-                {
-                    parameters.addItem(new SideNavItem("Zusatzstoffe", AdditiveView.class,
-                            LineAwesomeIcon.FOLDER_PLUS_SOLID.create()));
-                }
+                    parameters.addItem(new SideNavItem("Zusatzstoffe", AdditiveView.class, LineAwesomeIcon.FOLDER_PLUS_SOLID.create()));
+
                 if(accessChecker.hasAccess(UnitView.class))
-                {
                     parameters.addItem(new SideNavItem("Einheiten", UnitView.class, LineAwesomeIcon.RULER_SOLID.create()));
-                }
+
                 backend.addItem(parameters);
             }
 

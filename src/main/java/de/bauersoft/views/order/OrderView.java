@@ -11,7 +11,7 @@ import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Bestellübersicht")
 @Route(value = "order", layout = MainLayout.class)
-@RolesAllowed(value = {"ADMIN", "ORDERER"})
+@RolesAllowed({"ADMIN", "KUCHE_ADMIN", "OFFICE_ADMIN", "INSTITUTION", "BESTELLUBERSICHT"})
 public class OrderView extends Div
 {
     private final OrderManager orderManager;

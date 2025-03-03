@@ -15,7 +15,6 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Unit extends AbstractEntity
 {
     @Column(nullable = false, unique = true, length = 64)

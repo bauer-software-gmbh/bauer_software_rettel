@@ -12,7 +12,6 @@ import java.util.Objects;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class OrderDataKey implements Serializable
 {
     @Column(nullable = false)

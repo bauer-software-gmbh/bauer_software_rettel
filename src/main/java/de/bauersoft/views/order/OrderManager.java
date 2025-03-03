@@ -3,6 +3,7 @@ package de.bauersoft.views.order;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.Style;
+import de.bauersoft.data.entities.role.Role;
 import de.bauersoft.data.entities.user.User;
 import de.bauersoft.data.repositories.institution.InstitutionRepository;
 import de.bauersoft.security.AuthenticatedUser;
@@ -56,7 +57,8 @@ public class OrderManager extends Div
         this.setWidthFull();
         this.setHeightFull();
 
-        if(getInstitutionService().findAllByUsersId(getUser().getId()).size() < 1)
+        if(!getUser().getRoles().contains(Role.BESTELLUBERSICHT) &&
+                getInstitutionService().findAllByUsersId(getUser().getId()).size() < 1)
         {
             Span div = new Span("Ihr Account ist noch nicht mit einer Institution verknüpft!");
             div.getStyle()

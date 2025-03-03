@@ -12,7 +12,6 @@ import java.util.Objects;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class FieldMultiplierKey implements Serializable
 {
     @Column(nullable = false)

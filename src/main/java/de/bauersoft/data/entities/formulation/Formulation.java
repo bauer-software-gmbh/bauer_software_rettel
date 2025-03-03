@@ -15,7 +15,6 @@ import java.util.Objects;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 //Fragile angelegenheit aber works lol
 public class Formulation
 {

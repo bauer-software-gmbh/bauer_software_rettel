@@ -20,7 +20,7 @@ import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Adressen")
 @Route(value = "address", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "OFFICE", "OFFICE_ADMIN"})
 public class AddressView extends Div
 {
 	private final AddressService addressService;
