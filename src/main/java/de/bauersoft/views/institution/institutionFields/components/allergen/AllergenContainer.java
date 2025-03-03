@@ -13,6 +13,8 @@ public class AllergenContainer extends Container<InstitutionAllergen, Institutio
     private int tempAmount;
     private ContainerState tempState;
 
+    private boolean isNew;
+
     public AllergenContainer(InstitutionAllergen entity)
     {
         super(entity);
@@ -52,6 +54,17 @@ public class AllergenContainer extends Container<InstitutionAllergen, Institutio
     public void setTempState(ContainerState tempState)
     {
         this.tempState = tempState;
+    }
+
+    public boolean isNew()
+    {
+        return isNew;
+    }
+
+    public AllergenContainer setIsNew(boolean isNew)
+    {
+        this.isNew = isNew;
+        return this;
     }
 
     @Override
