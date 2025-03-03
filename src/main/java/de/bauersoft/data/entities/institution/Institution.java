@@ -22,13 +22,13 @@ import java.util.Set;
 @Setter
 public class Institution extends AbstractEntity
 {
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 64)
     private String name;
 
     @Column(length = 1024)
     private String description;
 
-    @Column(length = 256)
+    @Column(length = 255)
     private String customerId;
 
     @Column(nullable = false, columnDefinition = "TIME default '00:00:05'")
