@@ -120,6 +120,8 @@ public class AllergenComponent extends VerticalLayout
                 {
                     allergenPool.remove(allergen);
 
+                    allergenComboBox.setTooltipText(allergen.getName());
+
                     allergenComboBox.setValue(container.getEntity().getAllergen());
                     amountField.setValue(Objects.requireNonNullElse(container.getEntity().getAmount(), 0).doubleValue());
                 }

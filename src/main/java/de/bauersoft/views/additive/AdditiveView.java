@@ -47,7 +47,7 @@ public class AdditiveView extends Div
 		grid.addColumn("name").setHeader("Name");
 		grid.addColumn("description").setHeader("Beschreibung");
 
-		grid.setItems(additiveDataProvider);
+		grid.setDataProvider(additiveDataProvider);
 
 		grid.addItemDoubleClickListener(event ->
 		{
