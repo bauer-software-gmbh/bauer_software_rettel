@@ -59,7 +59,7 @@ public class ClosingTimesComponent extends VerticalLayout
             ClosingTimesContainer closingTimesContainer = ((ClosingTimesContainer) closingTimesMapContainer.addIfAbsent(key, () ->
             {
                 InstitutionClosingTime institutionClosingTime = new InstitutionClosingTime();
-                institutionClosingTime.setInstitutionField(institutionField);
+                //institutionClosingTime.setInstitutionField(institutionField);
 
                 return institutionClosingTime;
             }, ContainerState.UPDATE)).setKey(key);

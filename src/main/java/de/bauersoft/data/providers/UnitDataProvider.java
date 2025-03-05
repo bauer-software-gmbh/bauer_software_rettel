@@ -15,64 +15,64 @@ import java.util.stream.Stream;
 @Service
 public class UnitDataProvider implements ConfigurableFilterDataProvider<Unit, Void, List<SerializableFilter<Unit,?>>>, DataProvider<Unit, Void> {
 
-	private List<SerializableFilter<Unit,?>> filter;
-	private List<SerializablePredicate<Unit>> predicates = new ArrayList<>();
-	private UnitService service;
-	private List<DataProviderListener<Unit>> listeners = new ArrayList<>();
+    private List<SerializableFilter<Unit,?>> filter;
+    private List<SerializablePredicate<Unit>> predicates = new ArrayList<>();
+    private UnitService service;
+    private List<DataProviderListener<Unit>> listeners = new ArrayList<>();
 
-	public UnitDataProvider(UnitService service) {
-		this.service = service;
-	}
+    public UnitDataProvider(UnitService service) {
+        this.service = service;
+    }
 
-	@Override
-	public boolean isInMemory() {
-		return false;
-	}
+    @Override
+    public boolean isInMemory() {
+        return false;
+    }
 
-	@Override
-	public int size(Query<Unit, Void> query) {
-		return (int) fetch(query).count();
-	}
+    @Override
+    public int size(Query<Unit, Void> query) {
+        return (int) fetch(query).count();
+    }
 
-	@Override
-	public Stream<Unit> fetch(Query<Unit, Void> query) {
-		Stream<Unit> stream = service.fetchAll(filter, query.getSortOrders()).stream();
-		for (SerializablePredicate<Unit> predicate : predicates) {
-			stream = stream.filter(predicate);
-		}
-		return stream.skip(query.getOffset()).limit(query.getLimit());
-	}
+    @Override
+    public Stream<Unit> fetch(Query<Unit, Void> query) {
+        Stream<Unit> stream = service.fetchAll(filter, query.getSortOrders()).stream();
+        for (SerializablePredicate<Unit> predicate : predicates) {
+            stream = stream.filter(predicate);
+        }
+        return stream.skip(query.getOffset()).limit(query.getLimit());
+    }
 
-	@Override
-	public void refreshItem(Unit item) {
-		DataChangeEvent<Unit> dataChangeEvent = new DataChangeEvent.DataRefreshEvent<>(this, item);
-		this.listeners.forEach(listener -> listener.onDataChange(dataChangeEvent));
-	}
+    @Override
+    public void refreshItem(Unit item) {
+        DataChangeEvent<Unit> dataChangeEvent = new DataChangeEvent.DataRefreshEvent<>(this, item);
+        this.listeners.forEach(listener -> listener.onDataChange(dataChangeEvent));
+    }
 
-	@Override
-	public void refreshAll() {
-		DataChangeEvent<Unit> dataChangeEvent = new DataChangeEvent<>(this);
-		this.listeners.forEach(listener -> listener.onDataChange(dataChangeEvent));
-	}
+    @Override
+    public void refreshAll() {
+        DataChangeEvent<Unit> dataChangeEvent = new DataChangeEvent<>(this);
+        this.listeners.forEach(listener -> listener.onDataChange(dataChangeEvent));
+    }
 
-	@Override
-	public Registration addDataProviderListener(DataProviderListener<Unit> listener) {
-		return Registration.addAndRemove(listeners, listener);
-	}
+    @Override
+    public Registration addDataProviderListener(DataProviderListener<Unit> listener) {
+        return Registration.addAndRemove(listeners, listener);
+    }
 
-	@Override
-	public void setFilter(List<SerializableFilter<Unit,?>> filter) {
-		this.filter = filter;
-		refreshAll();
-	}
+    @Override
+    public void setFilter(List<SerializableFilter<Unit,?>> filter) {
+        this.filter = filter;
+        refreshAll();
+    }
 
-	public void addFilter(SerializablePredicate<Unit> filter) {
-		this.predicates.add(filter);
-		refreshAll();
-	}
+    public void addFilter(SerializablePredicate<Unit> filter) {
+        this.predicates.add(filter);
+        refreshAll();
+    }
 
-	public void clearFilters() {
-		this.predicates.clear();
-		refreshAll();
-	}
+    public void clearFilters() {
+        this.predicates.clear();
+        refreshAll();
+    }
 }

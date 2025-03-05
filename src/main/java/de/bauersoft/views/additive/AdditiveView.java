@@ -11,7 +11,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
+import de.bauersoft.components.autofiltergrid.AutofilterGrid;
 import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.providers.AdditiveDataProvider;
 import de.bauersoft.services.AdditiveService;
@@ -30,7 +30,7 @@ public class AdditiveView extends Div
 	private final AdditiveDataProvider additiveDataProvider;
 	private final IngredientService ingredientService;
 
-	private final AutoFilterGrid<Additive> grid = new AutoFilterGrid<>(Additive.class, false, true);
+	private final AutofilterGrid<Additive> grid;
 
 	public AdditiveView(AdditiveService additiveService, AdditiveDataProvider additiveDataProvider, IngredientService ingredientService)
 	{
@@ -40,24 +40,24 @@ public class AdditiveView extends Div
 
         setClassName("content");
 
+		grid = new AutofilterGrid<>(additiveService.getRepository());
+
 		grid.setHeightFull();
 		grid.setWidthFull();
 		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-		grid.addColumn("name").setHeader("Name");
-		grid.addColumn("description").setHeader("Beschreibung");
-
-		grid.setDataProvider(additiveDataProvider);
+		grid.addColumn("name", "Name", Additive::getName);
+		grid.addColumn("description", "Beschreibung", Additive::getDescription);
 
 		grid.addItemDoubleClickListener(event ->
 		{
-			new AdditiveDialog(additiveService, additiveDataProvider, event.getItem(), DialogState.EDIT);
+			new AdditiveDialog(this, additiveService, additiveDataProvider, event.getItem(), DialogState.EDIT);
 		});
 		
 		GridContextMenu<Additive> contextMenu = grid.addContextMenu();
 		contextMenu.addItem("Neuer Zusatzstoff", event ->
 		{
-			new AdditiveDialog(additiveService, additiveDataProvider, new Additive(), DialogState.NEW);
+			new AdditiveDialog(this, additiveService, additiveDataProvider, new Additive(), DialogState.NEW);
 		});
 
 		GridMenuItem<Additive> deleteItem = contextMenu.addItem("Löschen", event ->
@@ -84,6 +84,7 @@ public class AdditiveView extends Div
 
 				additiveService.deleteById(item.getId());
 				additiveDataProvider.refreshAll();
+				grid.refreshAll();
 			});
 		});
 

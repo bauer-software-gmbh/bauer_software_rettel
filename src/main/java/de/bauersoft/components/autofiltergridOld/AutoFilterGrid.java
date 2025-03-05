@@ -1,4 +1,4 @@
-package de.bauersoft.components.autofiltergrid;
+package de.bauersoft.components.autofiltergridOld;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;

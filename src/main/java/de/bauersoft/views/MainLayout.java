@@ -72,7 +72,9 @@ public class MainLayout extends AppLayout
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
         Optional<User> maybeUser = authenticatedUser.get();
         HorizontalLayout layout = new HorizontalLayout();
-        layout.getStyle().setAlignItems(AlignItems.CENTER);
+        layout.getStyle()
+                .setAlignItems(AlignItems.CENTER)
+                .setMarginBottom("0px");
         layout.setWidthFull();
         layout.add(viewTitle);
         if(maybeUser.isPresent())
@@ -108,6 +110,7 @@ public class MainLayout extends AppLayout
         }
         addToNavbar(true, toggle, layout);
     }
+
 
     private void addDrawerContent()
     {

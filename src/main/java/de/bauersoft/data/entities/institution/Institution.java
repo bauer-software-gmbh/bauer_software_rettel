@@ -2,6 +2,7 @@ package de.bauersoft.data.entities.institution;
 
 import de.bauersoft.data.entities.AbstractEntity;
 import de.bauersoft.data.entities.address.Address;
+import de.bauersoft.data.entities.institutionClosingTime.InstitutionClosingTime;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.entities.user.User;
 import jakarta.persistence.*;
@@ -10,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,5 +51,16 @@ public class Institution extends AbstractEntity
 
     @OneToMany(mappedBy = "institution", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
     private Set<InstitutionField> institutionFields = new HashSet<>();
+
+    @OneToMany(mappedBy = "institution", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
+    private Set<InstitutionClosingTime> institutionClosingTimes = new HashSet<>();
+
+    public boolean isClosed()
+    {
+        return institutionClosingTimes.stream().anyMatch(closing ->
+        {
+            return LocalDate.now().isAfter(closing.getStartDate()) && LocalDate.now().isBefore(closing.getEndDate());
+        });
+    }
 
 }

@@ -25,16 +25,16 @@ import org.springframework.data.domain.PageRequest;
 
 public class UnitDialog extends Dialog
 {
+	private final UnitView unitView;
 	private final UnitService unitService;
-	private final UnitDataProvider unitDataProvider;
 	private final Unit item;
 
 	private final DialogState state;
 
-	public UnitDialog(UnitService unitService, UnitDataProvider unitDataProvider, Unit item, DialogState state)
+	public UnitDialog(UnitView unitView, UnitService unitService, Unit item, DialogState state)
 	{
+		this.unitView = unitView;
         this.unitService = unitService;
-        this.unitDataProvider = unitDataProvider;
         this.item = item;
         this.state = state;
 		this.setHeaderTitle(state.toString());
@@ -60,18 +60,12 @@ public class UnitDialog extends Dialog
 		shorthandTextField.setMinWidth("20em");
 
 		ComboBox<Unit> parentComboBox = new ComboBox<Unit>();
-		DataProvider<Unit, Void> internalDataProvider = DataProvider.fromFilteringCallbacks(query ->
-		{
-			return unitDataProvider.fetch(query);
-
-		}, query -> unitDataProvider.size(query));
-
-
+		parentComboBox.setItemLabelGenerator(unit -> unit.getName());
 		parentComboBox.setItems(query ->
 		{
-			return unitService.getRepository().findAll(PageRequest.of(query.getPage(), query.getPageSize())).stream();
-		},query -> (int) unitService.getRepository().count());
-		parentComboBox.setItemLabelGenerator(unit -> unit.getName());
+			return unitService.list(PageRequest.of(query.getPage(), query.getPageSize())).stream();
+
+		},query -> (int) unitService.count());
 
 		NumberField parentFactorNumberField = new NumberField();
 		parentFactorNumberField.setMin(0);
@@ -117,7 +111,8 @@ public class UnitDialog extends Dialog
 				try
 				{
 					unitService.update(binder.getBean());
-					unitDataProvider.refreshAll();
+					unitView.getGrid().refreshAll();
+
 					Notification.show("Daten wurden aktualisiert");
 					this.close();
 
@@ -137,7 +132,7 @@ public class UnitDialog extends Dialog
 		cancelButton.addClickListener(e ->
 		{
 			binder.removeBean();
-			unitDataProvider.refreshAll();
+			unitView.getGrid().refreshAll();
 			this.close();
 		});
 

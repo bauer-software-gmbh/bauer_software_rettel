@@ -2,6 +2,7 @@ package de.bauersoft.data.entities.institutionClosingTime;
 
 import de.bauersoft.components.container.ContainerID;
 import de.bauersoft.data.entities.AbstractEntity;
+import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,8 +30,8 @@ public class InstitutionClosingTime extends AbstractEntity implements ContainerI
     private String header;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "institution_field_id", nullable = false)
-    private InstitutionField institutionField;
+    @JoinColumn(name = "institution_id", nullable = false)
+    private Institution institution;
 
     @Override
     public String toString()
@@ -39,7 +40,7 @@ public class InstitutionClosingTime extends AbstractEntity implements ContainerI
                 "id=" + getId() +
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
-                ", institutionField=" + institutionField.getId() +
+                ", institution=" + institution.getId() +
                 '}';
     }
 }

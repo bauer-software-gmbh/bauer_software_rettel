@@ -132,11 +132,11 @@ public class FieldDragComponent extends FlexLayout
             {
                 ClosingTimesMapContainer container = new ClosingTimesMapContainer();
 
-                for(InstitutionClosingTime institutionClosingTimes : event.getItem().getInstitutionClosingTimes())
-                {
-                    int key = container.getNextKey();
-                    ((ClosingTimesContainer) container.addContainer(key, institutionClosingTimes, ContainerState.SHOW)).setKey(key);
-                }
+//                for(InstitutionClosingTime institutionClosingTimes : event.getItem().getInstitutionClosingTimes())
+//                {
+//                    int key = container.getNextKey();
+//                    ((ClosingTimesContainer) container.addContainer(key, institutionClosingTimes, ContainerState.SHOW)).setKey(key);
+//                }
 
                 return container;
             });
