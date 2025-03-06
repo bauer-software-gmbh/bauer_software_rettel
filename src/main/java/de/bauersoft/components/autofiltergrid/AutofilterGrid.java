@@ -39,7 +39,7 @@ public class AutofilterGrid<T> extends Grid<T>
 
     private Map<String, Column<T>> columns;
 
-    private GridFilter<T> filter;
+    private GridFilter filter;
 
     private HeaderRow headerRow;
 
@@ -105,20 +105,9 @@ public class AutofilterGrid<T> extends Grid<T>
         columns.put(fieldName, new Column<>(fieldName, column, valueProvider, converter));
         filter.getCriteriaMap().put(fieldName, "");
 
-        filter.getSpecificationMap().put(fieldName, (root, query, criteriaBuilder) ->
-        {
-            return criteriaBuilder.like(root.get(fieldName), "%");
-        });
-
         headerRow.getCell(column).setComponent(createFilterHeader(header, value ->
         {
             filter.getCriteriaMap().put(fieldName, value);
-
-            filter.getSpecificationMap().put(fieldName, (root, query, criteriaBuilder) ->
-            {
-                return criteriaBuilder.like(root.get(fieldName), "%" +value + "%" );
-            });
-
             filterDataProvider.refreshAll();
         }));
 
@@ -195,81 +184,81 @@ public class AutofilterGrid<T> extends Grid<T>
         return layout;
     }
 
-    public Specification<T> createSpecification(GridFilter<T> filter)
-    {
-        return (root, query, criteriaBuilder) ->
-        {
-            Predicate predicate = criteriaBuilder.conjunction();
-            Map<String, Specification<T>> filterCriteria = filter.getSpecificationMap();
-            for(Map.Entry<String, Specification<T>> entry : filterCriteria.entrySet())
-            {
-                String key = entry.getKey();
-                Specification<T> value = entry.getValue();
-
-                predicate = criteriaBuilder.and(value.toPredicate(root, query, criteriaBuilder));
-            }
-
-            return predicate;
-        };
-    }
-
-//    public Specification<T> createSpecification(GridFilter filter)
+//    public Specification<T> createSpecification(GridFilter<T> filter)
 //    {
 //        return (root, query, criteriaBuilder) ->
 //        {
 //            Predicate predicate = criteriaBuilder.conjunction();
-//            Map<String, String> filterCriteria = filter.getCriteriaMap();
-//            for(Map.Entry<String, String> entry : filterCriteria.entrySet())
+//            Map<String, Specification<T>> filterCriteria = filter.getSpecificationMap();
+//            for(Map.Entry<String, Specification<T>> entry : filterCriteria.entrySet())
 //            {
 //                String key = entry.getKey();
-//                String value = entry.getValue();
+//                Specification<T> value = entry.getValue();
 //
-//                if(value != null && !value.toString().isEmpty())
-//                {
-//                    Path<?> fieldPath = root.get(key);
-//
-//                    Class<?> fieldType = fieldPath.getJavaType();
-//
-//                    if(Number.class.isAssignableFrom(fieldType))
-//                    {
-//                        try
-//                        {
-//                            Number numericValue;
-//
-//                            if(fieldType.equals(Integer.class))
-//                            {
-//                                numericValue = Integer.parseInt(value);
-//                            }else if(fieldType.equals(Long.class))
-//                            {
-//                                numericValue = Long.parseLong(value);
-//                            }else if(fieldType.equals(Double.class))
-//                            {
-//                                numericValue = Double.parseDouble(value);
-//                            }else if(fieldType.equals(Float.class))
-//                            {
-//                                numericValue = Float.parseFloat(value);
-//                            }else
-//                            {
-//                                throw new IllegalArgumentException("Unsupported numeric type: " + fieldType);
-//                            }
-//
-//                            predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(columns.get(key).converter.apply(root, fieldPath, query, criteriaBuilder).as(String.class), value + "%"));
-//
-//                        }catch(NumberFormatException e)
-//                        {
-//                            System.err.println("Invalid number format for field " + key + ": " + value);
-//                        }
-//
-//                    }else
-//                    {
-//                        predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(columns.get(key).converter.apply(root, fieldPath, query, criteriaBuilder).as(String.class), "%" + value + "%"));
-//                    }
-//                }
+//                predicate = criteriaBuilder.and(value.toPredicate(root, query, criteriaBuilder));
 //            }
 //
 //            return predicate;
 //        };
 //    }
+
+    public Specification<T> createSpecification(GridFilter filter)
+    {
+        return (root, query, criteriaBuilder) ->
+        {
+            Predicate predicate = criteriaBuilder.conjunction();
+            Map<String, String> filterCriteria = filter.getCriteriaMap();
+            for(Map.Entry<String, String> entry : filterCriteria.entrySet())
+            {
+                String key = entry.getKey();
+                String value = entry.getValue();
+
+                if(value != null && !value.toString().isEmpty())
+                {
+                    Path<?> fieldPath = root.get(key);
+
+                    Class<?> fieldType = fieldPath.getJavaType();
+
+                    if(Number.class.isAssignableFrom(fieldType))
+                    {
+                        try
+                        {
+                            Number numericValue;
+
+                            if(fieldType.equals(Integer.class))
+                            {
+                                numericValue = Integer.parseInt(value);
+                            }else if(fieldType.equals(Long.class))
+                            {
+                                numericValue = Long.parseLong(value);
+                            }else if(fieldType.equals(Double.class))
+                            {
+                                numericValue = Double.parseDouble(value);
+                            }else if(fieldType.equals(Float.class))
+                            {
+                                numericValue = Float.parseFloat(value);
+                            }else
+                            {
+                                throw new IllegalArgumentException("Unsupported numeric type: " + fieldType);
+                            }
+
+                            predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(columns.get(key).converter.apply(root, fieldPath, query, criteriaBuilder).as(String.class), value + "%"));
+
+                        }catch(NumberFormatException e)
+                        {
+                            System.err.println("Invalid number format for field " + key + ": " + value);
+                        }
+
+                    }else
+                    {
+                        predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(columns.get(key).converter.apply(root, fieldPath, query, criteriaBuilder).as(String.class), "%" + value + "%"));
+                    }
+                }
+            }
+
+            return predicate;
+        };
+    }
 
     @AllArgsConstructor
     @NoArgsConstructor
