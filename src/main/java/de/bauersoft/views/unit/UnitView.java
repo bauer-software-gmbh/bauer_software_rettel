@@ -43,7 +43,10 @@ public class UnitView extends Div
         {
             return (unit.getParentUnit() == null) ? "" : unit.getParentUnit().getName();
 
-        }, (unitRoot, path, criteriaQuery, criteriaBuilder) -> path.get("name"));
+        }, (s, unitRoot, path, criteriaQuery, criteriaBuilder) ->
+		{
+			return criteriaBuilder.like(path.get("name"), "%" + s + "%");
+		});
 
         grid.addColumn("parentFactor", "Faktor", unit ->
         {

@@ -1,25 +1,40 @@
 package de.bauersoft.components.autofiltergrid;
 
+import jakarta.persistence.criteria.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
-public class GridFilter
+public class GridFilter<T>
 {
-    private Map<String, String> criteriaMap;
+    private Map<String,  QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate>> predicates;
+    private Map<String, String> filterInputMap;
 
     public GridFilter()
     {
-        criteriaMap = new HashMap<>();
+        predicates = new HashMap<>();
+        filterInputMap = new HashMap<>();
     }
 
-    public Map<String, String> getCriteriaMap()
+    public Map<String,  QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate>> getPredicates()
     {
-        return criteriaMap;
+        return predicates;
     }
 
-    public GridFilter setCriteriaMap(Map<String, String> criteriaMap)
+    public GridFilter<T> setPredicates(Map<String,  QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate>> predicates)
     {
-        this.criteriaMap = criteriaMap;
+        this.predicates = predicates;
+        return this;
+    }
+
+    public Map<String, String> getFilterInputMap()
+    {
+        return filterInputMap;
+    }
+
+    public GridFilter<T> setFilterInputMap(Map<String, String> filterInputMap)
+    {
+        this.filterInputMap = filterInputMap;
         return this;
     }
 }

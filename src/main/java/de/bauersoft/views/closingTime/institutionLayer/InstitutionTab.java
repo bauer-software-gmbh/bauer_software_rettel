@@ -96,17 +96,17 @@ public class InstitutionTab extends Div
         grid.addColumn("startDate", "Startdatum", institutionClosingTime ->
         {
             return institutionClosingTime.getStartDate().format(formatter).toString();
-        }, (institutionClosingTimeRoot, path, criteriaQuery, criteriaBuilder) ->
+        }, (s, institutionClosingTimeRoot, path, criteriaQuery, criteriaBuilder) ->
         {
-            return criteriaBuilder.function("DATE_FORMAT", String.class, path, criteriaBuilder.literal("%d.%m.%Y"));
+            return criteriaBuilder.like(criteriaBuilder.function("DATE_FORMAT", String.class, path, criteriaBuilder.literal("%d.%m.%Y")), "%" + s + "%");
         });
 
         grid.addColumn("endDate", "Enddatum", institutionClosingTime ->
         {
             return institutionClosingTime.getEndDate().format(formatter).toString();
-        }, (institutionClosingTimeRoot, path, criteriaQuery, criteriaBuilder) ->
+        }, (s, institutionClosingTimeRoot, path, criteriaQuery, criteriaBuilder) ->
         {
-            return criteriaBuilder.function("DATE_FORMAT", String.class, path, criteriaBuilder.literal("%d.%m.%Y"));
+            return criteriaBuilder.like(criteriaBuilder.function("DATE_FORMAT", String.class, path, criteriaBuilder.literal("%d.%m.%Y")), "%" + s + "%");
         });
 
         grid.addGridContextMenu("Neuer Schließzeitraum", event ->

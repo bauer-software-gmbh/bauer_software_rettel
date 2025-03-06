@@ -20,7 +20,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.boot.autoconfigure.rsocket.RSocketProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -30,16 +29,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class AutofilterGrid<T> extends Grid<T>
+public class AutofilterGridCopy<T> extends Grid<T>
 {
     private JpaSpecificationExecutor<T> specificationExecutor;
 
-    private CallbackDataProvider<T, GridFilter> CallbackDataProvider;
-    private ConfigurableFilterDataProvider<T, Void, GridFilter> filterDataProvider;
+    private CallbackDataProvider<T, GridFilterCopy> CallbackDataProvider;
+    private ConfigurableFilterDataProvider<T, Void, GridFilterCopy> filterDataProvider;
 
     private Map<String, Column<T>> columns;
 
-    private GridFilter filter;
+    private GridFilterCopy filter;
 
     private HeaderRow headerRow;
 
@@ -47,12 +46,12 @@ public class AutofilterGrid<T> extends Grid<T>
     private GridMenuItem<T> gridMenuAddItem;
     private GridMenuItem<T> gridMenuRemoveItem;
 
-    public AutofilterGrid(JpaSpecificationExecutor<T> specificationExecutor)
+    public AutofilterGridCopy(JpaSpecificationExecutor<T> specificationExecutor)
     {
         this.specificationExecutor = specificationExecutor;
 
         columns = new HashMap<>();
-        filter = new GridFilter();
+        filter = new GridFilterCopy();
 
         this.getHeaderRows().clear();
         headerRow = appendHeaderRow();
@@ -62,7 +61,7 @@ public class AutofilterGrid<T> extends Grid<T>
         this.CallbackDataProvider = DataProvider.fromFilteringCallbacks(
                 query ->
                 {
-                    GridFilter filter = query.getFilter().orElse(null);
+                    GridFilterCopy filter = query.getFilter().orElse(null);
 
                     Pageable pageable = PageRequest.of(query.getOffset() / query.getLimit(), query.getLimit());
                     Specification<T> specification = (filter == null) ? Specification.where(null) : createSpecification(filter);
@@ -73,7 +72,7 @@ public class AutofilterGrid<T> extends Grid<T>
                 },
                 query ->
                 {
-                    GridFilter filter = query.getFilter().orElse(null);
+                    GridFilterCopy filter = query.getFilter().orElse(null);
                     Specification<T> specification = (filter == null) ? Specification.where(null) : createSpecification(filter);
 
                     //Specification<T> userSpec =  (filter == null || filter.getSpecification() == null) ? Specification.where(null) : filter.getSpecification();
@@ -95,24 +94,19 @@ public class AutofilterGrid<T> extends Grid<T>
 
     public Grid.Column<T> addColumn(String fieldName, String header, ValueProvider<T, String> valueProvider)
     {
-        return addColumn(fieldName, header, valueProvider, (s, tRoot, path, criteriaQuery, criteriaBuilder) ->
-        {
-            return criteriaBuilder.like(path.as(String.class), "%" + s + "%");
-        });
+        return addColumn(fieldName, header, valueProvider, (tRoot, path, criteriaQuery, criteriaBuilder) -> path);
     }
 
-    public Grid.Column<T> addColumn(String fieldName, String header, ValueProvider<T, String> valueProvider, QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate> converter)
+    public Grid.Column<T> addColumn(String fieldName, String header, ValueProvider<T, String> valueProvider, QuadFunctionCopy<Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Expression<?>> converter)
     {
         Grid.Column<T> column = this.addColumn(valueProvider);
 
         columns.put(fieldName, new Column<>(fieldName, column, valueProvider, converter));
-        //filter.getCriteriaMap().put(fieldName, "");
-        filter.getFilterInputMap().put(fieldName, "");
-        filter.getPredicates().put(fieldName, converter);
+        filter.getCriteriaMap().put(fieldName, "");
 
         headerRow.getCell(column).setComponent(createFilterHeader(header, value ->
         {
-            filter.getFilterInputMap().put(fieldName, value);
+            filter.getCriteriaMap().put(fieldName, value);
             filterDataProvider.refreshAll();
         }));
 
@@ -207,22 +201,58 @@ public class AutofilterGrid<T> extends Grid<T>
 //        };
 //    }
 
-    public Specification<T> createSpecification(GridFilter filter)
+    public Specification<T> createSpecification(GridFilterCopy filter)
     {
         return (root, query, criteriaBuilder) ->
         {
             Predicate predicate = criteriaBuilder.conjunction();
-            Map<String, QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate>> predicates = filter.getPredicates();
-            Map<String, String> filterInputMap = filter.getFilterInputMap();
-            for(Map.Entry<String, QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate>> entry : predicates.entrySet())
+            Map<String, String> filterCriteria = filter.getCriteriaMap();
+            for(Map.Entry<String, String> entry : filterCriteria.entrySet())
             {
                 String key = entry.getKey();
-                QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate> value = entry.getValue();
+                String value = entry.getValue();
 
-                Path<?> fieldPath = root.get(key);
-                predicate = criteriaBuilder.and(predicate, value.apply(filterInputMap.get(key), root, root.get(key), query, criteriaBuilder));
+                if(value != null && !value.toString().isEmpty())
+                {
+                    Path<?> fieldPath = root.get(key);
 
+                    Class<?> fieldType = fieldPath.getJavaType();
 
+                    if(Number.class.isAssignableFrom(fieldType))
+                    {
+                        try
+                        {
+                            Number numericValue;
+
+                            if(fieldType.equals(Integer.class))
+                            {
+                                numericValue = Integer.parseInt(value);
+                            }else if(fieldType.equals(Long.class))
+                            {
+                                numericValue = Long.parseLong(value);
+                            }else if(fieldType.equals(Double.class))
+                            {
+                                numericValue = Double.parseDouble(value);
+                            }else if(fieldType.equals(Float.class))
+                            {
+                                numericValue = Float.parseFloat(value);
+                            }else
+                            {
+                                throw new IllegalArgumentException("Unsupported numeric type: " + fieldType);
+                            }
+
+                            predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(columns.get(key).converter.apply(root, fieldPath, query, criteriaBuilder).as(String.class), value + "%"));
+
+                        }catch(NumberFormatException e)
+                        {
+                            System.err.println("Invalid number format for field " + key + ": " + value);
+                        }
+
+                    }else
+                    {
+                        predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(columns.get(key).converter.apply(root, fieldPath, query, criteriaBuilder).as(String.class), "%" + value + "%"));
+                    }
+                }
             }
 
             return predicate;
@@ -238,7 +268,7 @@ public class AutofilterGrid<T> extends Grid<T>
         private String fieldName;
         private Grid.Column<T> gridColumn;
         private ValueProvider<T, String> valueProvider;
-        private QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate> converter;
+        private QuadFunctionCopy<Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Expression<?>> converter;
     }
 
     public JpaSpecificationExecutor<T> getSpecificationExecutor()
@@ -246,14 +276,20 @@ public class AutofilterGrid<T> extends Grid<T>
         return specificationExecutor;
     }
 
-    public CallbackDataProvider<T, GridFilter> getCallbackDataProvider()
+    public CallbackDataProvider<T, GridFilterCopy> getCallbackDataProvider()
     {
         return CallbackDataProvider;
     }
 
-    public ConfigurableFilterDataProvider<T, Void, GridFilter> getFilterDataProvider()
+    public ConfigurableFilterDataProvider<T, Void, GridFilterCopy> getFilterDataProvider()
     {
         return filterDataProvider;
+    }
+
+
+    public GridFilterCopy getFilter()
+    {
+        return filter;
     }
 
     public Map<String, Column<T>> getGridColumns()
@@ -261,10 +297,7 @@ public class AutofilterGrid<T> extends Grid<T>
         return columns;
     }
 
-    public GridFilter getFilter()
-    {
-        return filter;
-    }
+
 
     public HeaderRow getHeaderRow()
     {
