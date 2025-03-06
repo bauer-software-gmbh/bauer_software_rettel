@@ -7,34 +7,51 @@ import java.util.Map;
 
 public class GridFilter<T>
 {
-    private Map<String,  QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate>> predicates;
-    private Map<String, String> filterInputMap;
+    private final String attributeName;
 
-    public GridFilter()
+    private String filterInput;
+    private GridFilterFunction<T> filterFunction;
+
+    public GridFilter(String attributeName)
     {
-        predicates = new HashMap<>();
-        filterInputMap = new HashMap<>();
+        this.attributeName = attributeName;
+
+        filterInput = "";
+        filterFunction = (root, path, criteriaQuery, criteriaBuilder, parent, filter) ->
+        {
+            return criteriaBuilder.like(path.as(String.class), "%" + filter + "%");
+        };
     }
 
-    public Map<String,  QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate>> getPredicates()
+    public String getAttributeName()
     {
-        return predicates;
+        return attributeName;
     }
 
-    public GridFilter<T> setPredicates(Map<String,  QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate>> predicates)
+    public GridFilterFunction<T> getFilterFunction()
     {
-        this.predicates = predicates;
+        return filterFunction;
+    }
+
+    public GridFilter<T> setFilterFunction(GridFilterFunction<T> filterFunction)
+    {
+        this.filterFunction = filterFunction;
         return this;
     }
 
-    public Map<String, String> getFilterInputMap()
+    public String getFilterInput()
     {
-        return filterInputMap;
+        return filterInput;
     }
 
-    public GridFilter<T> setFilterInputMap(Map<String, String> filterInputMap)
+    public GridFilter<T> setFilterInput(String filterInput)
     {
-        this.filterInputMap = filterInputMap;
+        this.filterInput = filterInput;
         return this;
+    }
+
+    public interface GridFilterFunction<T>
+    {
+        Predicate apply(Root<T> root, Path<?> path, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder, Predicate parent, String filterInput);
     }
 }

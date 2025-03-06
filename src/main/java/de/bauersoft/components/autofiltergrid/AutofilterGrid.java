@@ -15,77 +15,54 @@ import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.ValueProvider;
-import jakarta.persistence.criteria.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.boot.autoconfigure.rsocket.RSocketProperties;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class AutofilterGrid<T> extends Grid<T>
 {
     private JpaSpecificationExecutor<T> specificationExecutor;
 
-    private CallbackDataProvider<T, GridFilter> CallbackDataProvider;
-    private ConfigurableFilterDataProvider<T, Void, GridFilter> filterDataProvider;
-
-    private Map<String, Column<T>> columns;
-
-    private GridFilter filter;
+    private List<GridFilter<T>> gridFilters;
 
     private HeaderRow headerRow;
 
-    private GridContextMenu<T> gridContextMenu;
-    private GridMenuItem<T> gridMenuAddItem;
-    private GridMenuItem<T> gridMenuRemoveItem;
+    private final AutofilterGridContextMenu autofilterGridContextMenu;
+
+    private CallbackDataProvider<T, GridFilter<T>> CallbackDataProvider;
+    private ConfigurableFilterDataProvider<T, Void, GridFilter<T>> filterDataProvider;
 
     public AutofilterGrid(JpaSpecificationExecutor<T> specificationExecutor)
     {
         this.specificationExecutor = specificationExecutor;
 
-        columns = new HashMap<>();
-        filter = new GridFilter();
+        gridFilters = new ArrayList<>();
 
         this.getHeaderRows().clear();
         headerRow = appendHeaderRow();
 
-        this.setColumnRendering(ColumnRendering.LAZY);
+        autofilterGridContextMenu = new AutofilterGridContextMenu();
 
         this.CallbackDataProvider = DataProvider.fromFilteringCallbacks(
                 query ->
                 {
-                    GridFilter filter = query.getFilter().orElse(null);
-
                     Pageable pageable = PageRequest.of(query.getOffset() / query.getLimit(), query.getLimit());
-                    Specification<T> specification = (filter == null) ? Specification.where(null) : createSpecification(filter);
-
-                    //Specification<T> userSpec =  (filter == null || filter.getSpecification() == null) ? Specification.where(null) : filter.getSpecification();
-
-                    return specificationExecutor.findAll(specification, pageable).stream();
+                    return specificationExecutor.findAll(createSpecification(), pageable).stream();
                 },
-                query ->
-                {
-                    GridFilter filter = query.getFilter().orElse(null);
-                    Specification<T> specification = (filter == null) ? Specification.where(null) : createSpecification(filter);
-
-                    //Specification<T> userSpec =  (filter == null || filter.getSpecification() == null) ? Specification.where(null) : filter.getSpecification();
-
-                    return (int) specificationExecutor.count(specification);
-                }
+                query -> (int) specificationExecutor.count(createSpecification())
         );
 
         filterDataProvider = CallbackDataProvider.withConfigurableFilter();
-        filterDataProvider.setFilter(filter);
-
         this.setDataProvider(filterDataProvider);
+
+        this.setColumnRendering(ColumnRendering.LAZY);
     }
 
     public void refreshAll()
@@ -93,26 +70,25 @@ public class AutofilterGrid<T> extends Grid<T>
         filterDataProvider.refreshAll();
     }
 
-    public Grid.Column<T> addColumn(String fieldName, String header, ValueProvider<T, String> valueProvider)
+    public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider)
     {
-        return addColumn(fieldName, header, valueProvider, (s, tRoot, path, criteriaQuery, criteriaBuilder) ->
+        return addColumn(attributeName, header, valueProvider, (root, path, criteriaQuery, criteriaBuilder, parent, filter) ->
         {
-            return criteriaBuilder.like(path.as(String.class), "%" + s + "%");
+            return criteriaBuilder.like(path.as(String.class), "%" + filter + "%");
         });
     }
 
-    public Grid.Column<T> addColumn(String fieldName, String header, ValueProvider<T, String> valueProvider, QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate> converter)
+    public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider, GridFilter.GridFilterFunction<T> filterFunction)
     {
         Grid.Column<T> column = this.addColumn(valueProvider);
 
-        columns.put(fieldName, new Column<>(fieldName, column, valueProvider, converter));
-        //filter.getCriteriaMap().put(fieldName, "");
-        filter.getFilterInputMap().put(fieldName, "");
-        filter.getPredicates().put(fieldName, converter);
+        GridFilter<T> gridFilter = new GridFilter<>(attributeName);
+        gridFilter.setFilterFunction(filterFunction);
+        gridFilters.add(gridFilter);
 
         headerRow.getCell(column).setComponent(createFilterHeader(header, value ->
         {
-            filter.getFilterInputMap().put(fieldName, value);
+            gridFilter.setFilterInput(value);
             filterDataProvider.refreshAll();
         }));
 
@@ -147,27 +123,9 @@ public class AutofilterGrid<T> extends Grid<T>
         return column;
     }
 
-    public GridContextMenu<T> addGridContextMenu(String addItemLabel,
-                                             ComponentEventListener<GridContextMenu.GridContextMenuItemClickEvent<T>> addEvent,
-                                             String removeItemLabel,
-                                             ComponentEventListener<GridContextMenu.GridContextMenuItemClickEvent<T>> removeEvent)
-    {
-        this.gridContextMenu = super.addContextMenu();
-
-        gridMenuAddItem = gridContextMenu.addItem(addItemLabel, addEvent);
-        gridMenuRemoveItem = gridContextMenu.addItem(removeItemLabel, removeEvent);
-
-        gridContextMenu.addGridContextMenuOpenedListener(event ->
-        {
-            gridMenuRemoveItem.setVisible(event.getItem().isPresent());
-        });
-
-        return gridContextMenu;
-    }
-
     private VerticalLayout createFilterHeader(String header, Consumer<String> onFilterChangeConsumer)
     {
-        NativeLabel label = new NativeLabel((header == null || header.isEmpty()) ? " d" : header);
+        NativeLabel label = new NativeLabel((header == null || header.isEmpty()) ? "\u200B" : header);
         label.getStyle()
                 .set("padding-top", "var(--lumo-space-m)")
                 .set("font-size", "var(--lumo-font-size-m)");
@@ -189,81 +147,34 @@ public class AutofilterGrid<T> extends Grid<T>
         return layout;
     }
 
-//    public Specification<T> createSpecification(GridFilter<T> filter)
-//    {
-//        return (root, query, criteriaBuilder) ->
-//        {
-//            Predicate predicate = criteriaBuilder.conjunction();
-//            Map<String, Specification<T>> filterCriteria = filter.getSpecificationMap();
-//            for(Map.Entry<String, Specification<T>> entry : filterCriteria.entrySet())
-//            {
-//                String key = entry.getKey();
-//                Specification<T> value = entry.getValue();
-//
-//                predicate = criteriaBuilder.and(value.toPredicate(root, query, criteriaBuilder));
-//            }
-//
-//            return predicate;
-//        };
-//    }
-
-    public Specification<T> createSpecification(GridFilter filter)
+    private Specification<T> createSpecification()
     {
         return (root, query, criteriaBuilder) ->
         {
             Predicate predicate = criteriaBuilder.conjunction();
-            Map<String, QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate>> predicates = filter.getPredicates();
-            Map<String, String> filterInputMap = filter.getFilterInputMap();
-            for(Map.Entry<String, QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate>> entry : predicates.entrySet())
+            for(GridFilter<T> gridFilter : gridFilters)
             {
-                String key = entry.getKey();
-                QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate> value = entry.getValue();
+                Path<?> path = root.get(gridFilter.getAttributeName());
+                String filterInput = gridFilter.getFilterInput();
+                if(filterInput == null || filterInput.isEmpty()) continue;
 
-                Path<?> fieldPath = root.get(key);
-                predicate = criteriaBuilder.and(predicate, value.apply(filterInputMap.get(key), root, root.get(key), query, criteriaBuilder));
-
-
+                predicate = criteriaBuilder.and(predicate, gridFilter.getFilterFunction().apply(root, path, query, criteriaBuilder, predicate, filterInput));
             }
 
             return predicate;
         };
     }
 
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Getter
-    @Setter
-    private class Column<T>
-    {
-        private String fieldName;
-        private Grid.Column<T> gridColumn;
-        private ValueProvider<T, String> valueProvider;
-        private QuadFunction<String, Root<T>, Path<?>, CriteriaQuery<?>, CriteriaBuilder, Predicate> converter;
-    }
+
 
     public JpaSpecificationExecutor<T> getSpecificationExecutor()
     {
         return specificationExecutor;
     }
 
-    public CallbackDataProvider<T, GridFilter> getCallbackDataProvider()
+    public List<GridFilter<T>> getGridFilters()
     {
-        return CallbackDataProvider;
-    }
-
-    public ConfigurableFilterDataProvider<T, Void, GridFilter> getFilterDataProvider()
-    {
-        return filterDataProvider;
-    }
-
-    public Map<String, Column<T>> getGridColumns()
-    {
-        return columns;
-    }
-
-    public GridFilter getFilter()
-    {
-        return filter;
+        return gridFilters;
     }
 
     public HeaderRow getHeaderRow()
@@ -271,18 +182,104 @@ public class AutofilterGrid<T> extends Grid<T>
         return headerRow;
     }
 
-    public GridContextMenu<T> getGridContextMenu()
+    public AutofilterGridContextMenu getAutofilterGridContextMenu()
     {
-        return gridContextMenu;
+        return autofilterGridContextMenu;
     }
 
-    public GridMenuItem<T> getGridMenuAddItem()
+    public CallbackDataProvider<T, GridFilter<T>> getCallbackDataProvider()
     {
-        return gridMenuAddItem;
+        return CallbackDataProvider;
     }
 
-    public GridMenuItem<T> getGridMenuRemoveItem()
+    public ConfigurableFilterDataProvider<T, Void, GridFilter<T>> getFilterDataProvider()
     {
-        return gridMenuRemoveItem;
+        return filterDataProvider;
     }
+
+
+
+    public AutofilterGridContextMenu AutofilterGridContextMenu()
+    {
+        return autofilterGridContextMenu;
+    }
+
+    public class AutofilterGridContextMenu
+    {
+        private GridContextMenu<T> gridContextMenu;
+
+        private GridMenuItem<T> gridMenuAddItem;
+        private GridMenuItem<T> gridMenuDeleteItem;
+
+        private AutofilterGridContextMenu() {}
+
+        public AutofilterGridContextMenu enableGridContextMenu()
+        {
+            gridContextMenu = AutofilterGrid.super.addContextMenu();
+            return this;
+        }
+
+        public AutofilterGridContextMenu enableAddItem(String label, ComponentEventListener<GridContextMenu.GridContextMenuItemClickEvent<T>> clickListener)
+        {
+            if(gridContextMenu == null)
+                enableGridContextMenu();
+
+            if(gridMenuAddItem == null)
+                gridMenuAddItem = gridContextMenu.addItem(label, clickListener);
+
+            return this;
+        }
+
+        public AutofilterGridContextMenu enableDeleteItem(String label, ComponentEventListener<GridContextMenu.GridContextMenuItemClickEvent<T>> clickListener)
+        {
+            if(gridContextMenu == null)
+                enableGridContextMenu();
+
+            if(gridMenuDeleteItem == null)
+            {
+                gridMenuDeleteItem = gridContextMenu.addItem(label, clickListener);
+
+                gridContextMenu.addGridContextMenuOpenedListener(event ->
+                {
+                    gridMenuDeleteItem.setVisible(event.getItem().isPresent());
+                });
+            }
+
+            return this;
+        }
+
+        public GridContextMenu<T> getGridContextMenu()
+        {
+            return gridContextMenu;
+        }
+
+        public AutofilterGridContextMenu setGridContextMenu(GridContextMenu<T> gridContextMenu)
+        {
+            this.gridContextMenu = gridContextMenu;
+            return this;
+        }
+
+        public GridMenuItem<T> getGridMenuAddItem()
+        {
+            return gridMenuAddItem;
+        }
+
+        public AutofilterGridContextMenu setGridMenuAddItem(GridMenuItem<T> gridMenuAddItem)
+        {
+            this.gridMenuAddItem = gridMenuAddItem;
+            return this;
+        }
+
+        public GridMenuItem<T> getGridMenuDeleteItem()
+        {
+            return gridMenuDeleteItem;
+        }
+
+        public AutofilterGridContextMenu setGridMenuDeleteItem(GridMenuItem<T> gridMenuDeleteItem)
+        {
+            this.gridMenuDeleteItem = gridMenuDeleteItem;
+            return this;
+        }
+    }
+
 }

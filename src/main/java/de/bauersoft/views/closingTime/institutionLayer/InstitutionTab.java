@@ -80,7 +80,7 @@ public class InstitutionTab extends Div
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
         grid.setSizeFull();
 
-        //grid.getFilter().setSpecification((root, query, criteriaBuilder) -> root.get("institution").get("id").in(1));
+        //grid.getFilterInput().setSpecification((root, query, criteriaBuilder) -> root.get("institution").get("id").in(1));
 
         grid.addComponentColumn("Löschen", "4em", institutionClosingTime ->
         {
@@ -92,44 +92,42 @@ public class InstitutionTab extends Div
             return button;
         });
 
-        grid.addColumn("header", "Beschreibung", InstitutionClosingTime::getHeader);
+        grid.addColumn("header", "Beschreibung", InstitutionClosingTime::getHeader, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+        {
+            return criteriaBuilder.like(criteriaBuilder.lower(path.as(String.class)), "%" + filterInput.toLowerCase() + "%");
+        });
+
         grid.addColumn("startDate", "Startdatum", institutionClosingTime ->
         {
             return institutionClosingTime.getStartDate().format(formatter).toString();
-        }, (s, institutionClosingTimeRoot, path, criteriaQuery, criteriaBuilder) ->
+        }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
-            return criteriaBuilder.like(criteriaBuilder.function("DATE_FORMAT", String.class, path, criteriaBuilder.literal("%d.%m.%Y")), "%" + s + "%");
+            return criteriaBuilder.like(
+                    criteriaBuilder.function("DATE_FORMAT", String.class, path, criteriaBuilder.literal("%d.%m.%Y")),
+                    "%" + filterInput + "%"
+            );
         });
 
         grid.addColumn("endDate", "Enddatum", institutionClosingTime ->
         {
             return institutionClosingTime.getEndDate().format(formatter).toString();
-        }, (s, institutionClosingTimeRoot, path, criteriaQuery, criteriaBuilder) ->
+        }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
-            return criteriaBuilder.like(criteriaBuilder.function("DATE_FORMAT", String.class, path, criteriaBuilder.literal("%d.%m.%Y")), "%" + s + "%");
+            return criteriaBuilder.like(
+                    criteriaBuilder.function("DATE_FORMAT", String.class, path, criteriaBuilder.literal("%d.%m.%Y")),
+                    "%" + filterInput + "%"
+            );
         });
 
-        grid.addGridContextMenu("Neuer Schließzeitraum", event ->
-        {
-            new ClosingTimeDialog(closingTimeManager, this, new InstitutionClosingTime(), DialogState.NEW);
+        grid.AutofilterGridContextMenu()
+                .enableGridContextMenu()
+                        .enableAddItem("Neue Schließzeit", event ->
+                        {
 
-        }, "Löschen", event ->
-        {
+                        }).enableDeleteItem("Löschen", event ->
+                        {
 
-        });
-
-        GridMenuItem<InstitutionClosingTime> openItem = grid.getGridContextMenu().addItem("Öffnen", event ->
-        {
-            Optional<InstitutionClosingTime> item = event.getItem();
-
-            if(item.isEmpty()) return;
-            new ClosingTimeDialog(closingTimeManager, this, item.get(), DialogState.EDIT);
-        });
-
-        grid.getGridContextMenu().addGridContextMenuOpenedListener(event ->
-        {
-            openItem.setVisible(event.getItem().isPresent());
-        });
+                        });
 
         grid.addItemDoubleClickListener(event ->
         {
