@@ -18,10 +18,8 @@ public class DefaultFieldInitializer
                 if(fieldRepository.existsByName(value.getName()))
                     continue;
 
-                Field field = Field
-                        .builder()
-                        .name(value.getName())
-                        .build();
+                Field field = new Field();
+                field.setName(value.getName());
 
                 fieldRepository.save(field);
             }

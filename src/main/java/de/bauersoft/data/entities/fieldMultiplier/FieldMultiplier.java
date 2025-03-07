@@ -12,7 +12,6 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class FieldMultiplier implements ContainerID<FieldMultiplierKey>
 {
     @EmbeddedId

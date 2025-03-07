@@ -8,7 +8,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
+import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
 import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.entities.variant.Variant;
 import de.bauersoft.data.providers.MenuDataProvider;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @PageTitle("Menü-Baukasten")
 @Route(value = "menubuilder", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "KITCHEN_ADMIN", "OFFICE_ADMIN"})
 public class MenuBuilderView extends Div
 {
     private AutoFilterGrid<Menu> menuGrid = new AutoFilterGrid<>(Menu.class, false, true);

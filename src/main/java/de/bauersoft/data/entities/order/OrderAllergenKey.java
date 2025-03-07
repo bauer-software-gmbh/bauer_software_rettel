@@ -12,7 +12,6 @@ import java.util.Objects;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class OrderAllergenKey implements Serializable
 {
     @Column(nullable = false)

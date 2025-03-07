@@ -133,13 +133,13 @@ public class UserService implements ServiceBase<User, Long>
     public User createUser(String name, String surname, String email, String password, Role... roles)
     {
         String encodedPassword = passwordEncoder.encode(password);
-        User user = User.builder()
-                .name(name)
-                .surname(surname)
-                .email(email)
-                .password(encodedPassword)
-                .roles(Arrays.stream(roles).collect(Collectors.toSet()))
-                .build();
+
+        User user = new User();
+        user.setName(name);
+        user.setSurname(surname);
+        user.setEmail(email);
+        user.setPassword(encodedPassword);
+        user.setRoles(Arrays.stream(roles).collect(Collectors.toSet()));
 
         return repository.save(user);
     }

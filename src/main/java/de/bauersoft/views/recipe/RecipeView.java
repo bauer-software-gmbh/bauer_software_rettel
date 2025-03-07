@@ -9,7 +9,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
+import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
 import de.bauersoft.data.entities.recipe.Recipe;
 import de.bauersoft.data.providers.RecipeDataProvider;
 import de.bauersoft.services.*;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @PageTitle("Rezepte")
 @Route(value = "recipe", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "KITCHEN_ADMIN", "OFFICE_ADMIN"})
 public class RecipeView extends Div
 {
     private final AutoFilterGrid<Recipe> grid = new AutoFilterGrid<>(Recipe.class, false, true);

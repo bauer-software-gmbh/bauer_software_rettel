@@ -14,7 +14,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Course extends AbstractEntity
 {
 

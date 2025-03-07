@@ -74,7 +74,7 @@ public class ForecastScheduler
 
         for(InstitutionField institutionField : institutionFieldsService.findAll())
         {
-            if(institutionField.isClosed()) continue;
+//            if(institutionField.isClosed()) continue;
 
             Institution institution = institutionField.getInstitution();
             Field field = institutionField.getField();

@@ -21,7 +21,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Order extends AbstractEntity
 {
     @Transient

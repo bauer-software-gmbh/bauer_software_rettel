@@ -42,6 +42,22 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
         });
     }
 
+    public Container<T, ID> addIfAbsent(M mapper, Supplier<T> entitySupplier, Consumer<Container<T, ID>> onNew)
+    {
+        Objects.requireNonNull(mapper);
+        Objects.requireNonNull(entitySupplier);
+        return containers.computeIfAbsent(mapper, k ->
+        {
+            T entity = entitySupplier.get();
+            Objects.requireNonNull(entity);
+
+            Container<T, ID> container = createContainer(entity);
+            onNew.accept(container);
+
+            return container;
+        });
+    }
+
     public Container<T, ID> addIfAbsent(M mapper, Supplier<T> entitySupplier, ContainerState state)
     {
         Objects.requireNonNull(mapper);
@@ -52,6 +68,22 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
             Objects.requireNonNull(entity);
 
             return createContainer(entity, state);
+        });
+    }
+
+    public Container<T, ID> addIfAbsent(M mapper, Supplier<T> entitySupplier, Consumer<Container<T, ID>> onNew, ContainerState state)
+    {
+        Objects.requireNonNull(mapper);
+        Objects.requireNonNull(entitySupplier);
+        return containers.computeIfAbsent(mapper, k ->
+        {
+            T entity = entitySupplier.get();
+            Objects.requireNonNull(entity);
+
+            Container<T, ID> container = createContainer(entity, state);
+            onNew.accept(container);
+
+            return container;
         });
     }
 
@@ -170,10 +202,11 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
             Container<T, ID> container = entry.getValue();
             ContainerState state = container.getState();
 
-            if(container instanceof AllergenContainer multiplierContainer)
+            if(container instanceof AllergenContainer allergenContainer)
             {
-                System.out.println("ClosingTimesContainer: " + multiplierContainer.getState() + " - t" + multiplierContainer.getTempState());
+                System.out.println("Container: (" + container.getClass() + ") " + allergenContainer.getState());
             }
+
             switch(state)
             {
                 case UPDATE ->

@@ -1,5 +1,6 @@
 package de.bauersoft.test;
 
+import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.allergen.Allergen;
 import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.field.Field;
@@ -11,7 +12,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
-import java.util.*;
+import java.util.UUID;
+import java.util.stream.IntStream;
 
 @Configuration
 public class AutoInitializer
@@ -28,18 +30,32 @@ public class AutoInitializer
                                        CourseService courseService,
                                        AllergenService allergenService,
                                        PatternService patternService,
-                                       UnitService unitService)
+                                       UnitService unitService,
+                                       AdditiveService additiveService)
     {
         return args ->
         {
-//            for(long i = unitService.count(); i < 10000; i++)
-//            {
-//                Unit unit = new Unit();
-//                unit.setName(UUID.randomUUID().toString());
-//                unit.setShorthand(unit.getName() + " - S");
+//            int totalUnits = 1000000;
+//            int existingUnits = (int) unitService.count();
 //
-//                unitService.update(unit);
-//            }
+//            // Berechne, wie viele Units noch zu erstellen sind
+//            int unitsToCreate = totalUnits - existingUnits;
+//
+//            // Verwende Parallel Stream, um Units parallel zu erstellen
+//            IntStream.range(existingUnits, totalUnits)
+//                    .parallel()
+//                    .forEach(i -> {
+//                        Additive unit = new Additive();
+//                        unit.setName(UUID.randomUUID().toString());
+//                        unit.setDescription(UUID.randomUUID().toString());
+//
+//                        additiveService.update(unit);
+//                        System.out.println("Creating unit: " + i);
+//                    });
+
+            //new UnitCreator().createUnits(unitService);
+
+
 
             for(int i = courseService.findAll().size(); i < 5; i++)
             {

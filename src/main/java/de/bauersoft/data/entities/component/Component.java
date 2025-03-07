@@ -16,7 +16,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Component extends AbstractEntity
 {
     @Column(nullable = false, unique = true, length = 64)

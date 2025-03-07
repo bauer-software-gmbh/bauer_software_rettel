@@ -50,7 +50,7 @@ import java.util.stream.Stream;
 
 @PageTitle("Menü Planung")
 @Route(value = "offers", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "KITCHEN_ADMIN", "OFFICE_ADMIN"})
 public class OffersView extends Div
 {
     private final OffersDataProvider dataProvider;
@@ -325,11 +325,11 @@ public class OffersView extends Div
 
         Offer offer = optionalOffer.orElseGet(() ->
         {
-            Offer newOffer = Offer.builder()
-                    .localDate(date)
-                    .field(fieldComboBox.getValue())
-                    .menus(new HashSet<>()) // Leere Menge für Menüs
-                    .build();
+            Offer newOffer = new Offer();
+            newOffer.setLocalDate(date);
+            newOffer.setField(fieldComboBox.getValue());
+            newOffer.setMenus(new HashSet<>());
+
             return offerService.update(newOffer); // Speichern und zurückgeben
         });
 
@@ -421,11 +421,11 @@ public class OffersView extends Div
                 Offer offer = offerService.getByLocalDateAndField(dropDate, selectedField)
                         .orElseGet(() ->
                         {
-                            Offer newOffer = Offer.builder()
-                                    .localDate(dropDate)
-                                    .field(selectedField)
-                                    .menus(new HashSet<>()) // Neues Offer hat noch keine Menüs
-                                    .build();
+                            Offer newOffer = new Offer();
+                            newOffer.setLocalDate(dropDate);
+                            newOffer.setField(selectedField);
+                            newOffer.setMenus(new HashSet<>()); // Neues Offer hat noch keine Menüs
+
                             return offerService.update(newOffer); // Speichern und zurückgeben
                         });
 

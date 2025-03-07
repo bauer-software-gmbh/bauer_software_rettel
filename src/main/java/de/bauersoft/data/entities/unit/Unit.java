@@ -15,7 +15,6 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Unit extends AbstractEntity
 {
     @Column(nullable = false, unique = true, length = 64)
@@ -25,7 +24,7 @@ public class Unit extends AbstractEntity
     private String shorthand;
 
     @Column(nullable = false, columnDefinition = "float default 0.0")
-    private float parentFactor;
+    private Float parentFactor;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_unit_id", referencedColumnName = "id")

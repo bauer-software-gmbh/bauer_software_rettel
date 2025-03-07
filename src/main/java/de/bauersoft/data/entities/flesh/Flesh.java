@@ -12,7 +12,6 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Flesh extends AbstractEntity
 {
     @Column(nullable = false, unique = true)

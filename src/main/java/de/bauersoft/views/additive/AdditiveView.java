@@ -11,7 +11,8 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
+import de.bauersoft.components.autofilter.FilterDataProvider;
+import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.providers.AdditiveDataProvider;
 import de.bauersoft.services.AdditiveService;
@@ -22,7 +23,7 @@ import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Zusatzstoffe")
 @Route(value = "additive", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "KITCHEN_ADMIN"})
 @Uses(Icon.class)
 public class AdditiveView extends Div
 {
@@ -30,9 +31,13 @@ public class AdditiveView extends Div
 	private final AdditiveDataProvider additiveDataProvider;
 	private final IngredientService ingredientService;
 
-	private final AutoFilterGrid<Additive> grid = new AutoFilterGrid<>(Additive.class, false, true);
+	private final FilterDataProvider<Additive, Long> filterDataProvider;
 
-	public AdditiveView(AdditiveService additiveService, AdditiveDataProvider additiveDataProvider, IngredientService ingredientService)
+	private final AutofilterGrid<Additive, Long> grid;
+
+	public AdditiveView(AdditiveService additiveService,
+						AdditiveDataProvider additiveDataProvider,
+						IngredientService ingredientService)
 	{
         this.additiveService = additiveService;
         this.additiveDataProvider = additiveDataProvider;
@@ -40,24 +45,26 @@ public class AdditiveView extends Div
 
         setClassName("content");
 
+		filterDataProvider = new FilterDataProvider<>(additiveService);
+
+		grid = new AutofilterGrid<>(filterDataProvider);
+
 		grid.setHeightFull();
 		grid.setWidthFull();
 		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-		grid.addColumn("name").setHeader("Name");
-		grid.addColumn("description").setHeader("Beschreibung");
-
-		grid.setItems(additiveDataProvider);
+		grid.addColumn("name", "Name", Additive::getName);
+		grid.addColumn("description", "Beschreibung", Additive::getDescription);
 
 		grid.addItemDoubleClickListener(event ->
 		{
-			new AdditiveDialog(additiveService, additiveDataProvider, event.getItem(), DialogState.EDIT);
+			new AdditiveDialog(this, additiveService, additiveDataProvider, event.getItem(), DialogState.EDIT);
 		});
 		
 		GridContextMenu<Additive> contextMenu = grid.addContextMenu();
 		contextMenu.addItem("Neuer Zusatzstoff", event ->
 		{
-			new AdditiveDialog(additiveService, additiveDataProvider, new Additive(), DialogState.NEW);
+			new AdditiveDialog(this, additiveService, additiveDataProvider, new Additive(), DialogState.NEW);
 		});
 
 		GridMenuItem<Additive> deleteItem = contextMenu.addItem("Löschen", event ->
@@ -84,6 +91,7 @@ public class AdditiveView extends Div
 
 				additiveService.deleteById(item.getId());
 				additiveDataProvider.refreshAll();
+				filterDataProvider.refreshAll();
 			});
 		});
 

@@ -14,7 +14,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Field extends AbstractEntity
 {
     @Column(nullable = false, unique = true, length = 64)

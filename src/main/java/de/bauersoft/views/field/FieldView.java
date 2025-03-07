@@ -9,7 +9,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
+import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.providers.FieldDataProvider;
 import de.bauersoft.services.*;
@@ -20,7 +20,7 @@ import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Einrichtungsart")
 @Route(value = "field", layout = MainLayout.class)
-@RolesAllowed(value = {"ADMIN", "ACCOUNTENT"})
+@RolesAllowed({"ADMIN", "OFFICE", "OFFICE_ADMIN"})
 public class FieldView extends Div
 {
 	private final FieldService fieldService;

@@ -11,7 +11,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
+import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
 import de.bauersoft.data.entities.allergen.Allergen;
 import de.bauersoft.data.providers.AllergenDataProvider;
 import de.bauersoft.services.AllergenService;
@@ -23,7 +23,7 @@ import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Allergene")
 @Route(value = "allergen", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "KITCHEN_ADMIN"})
 @Uses(Icon.class)
 public class AllergenView extends Div
 {

@@ -11,7 +11,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
+import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.providers.AddressDataProvider;
 import de.bauersoft.data.providers.InstitutionDataProvider;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @PageTitle("Institutionen")
 @Route(value = "institution", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "OFFICE", "OFFICE_ADMIN"})
 @CssImport(value = "./themes/rettels/components/auto-filter-grid.css", themeFor = "vaadin-grid")
 public class InstitutionView extends Div
 {

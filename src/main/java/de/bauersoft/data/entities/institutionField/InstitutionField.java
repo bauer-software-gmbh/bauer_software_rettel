@@ -45,16 +45,16 @@ public class InstitutionField extends AbstractEntity
     @OneToMany(mappedBy = "institutionField", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     private Set<InstitutionPattern> institutionPatterns = new HashSet<>();
 
-    @OneToMany(mappedBy = "institutionField", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    private Set<InstitutionClosingTime> institutionClosingTimes = new HashSet<>();
+//    @OneToMany(mappedBy = "institutionField", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+//    private Set<InstitutionClosingTime> institutionClosingTimes = new HashSet<>();
 
-    public boolean isClosed()
-    {
-        return institutionClosingTimes.stream().anyMatch(closing ->
-        {
-            return LocalDate.now().isAfter(closing.getStartDate()) && LocalDate.now().isBefore(closing.getEndDate());
-        });
-    }
+//    public boolean isClosed()
+//    {
+//        return institutionClosingTimes.stream().anyMatch(closing ->
+//        {
+//            return LocalDate.now().isAfter(closing.getStartDate()) && LocalDate.now().isBefore(closing.getEndDate());
+//        });
+//    }
 
     @Override
     public String toString()

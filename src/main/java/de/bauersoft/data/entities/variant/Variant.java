@@ -18,10 +18,9 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Variant extends AbstractEntity
 {
-    @Column(length = 1024)
+    @Column(length = 10240)
     private String description;
 
     @ManyToOne(fetch = FetchType.EAGER)

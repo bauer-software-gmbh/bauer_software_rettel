@@ -23,13 +23,15 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 public class AdditiveDialog extends Dialog
 {
+	private final AdditiveView additiveView;
 	private final AdditiveService additiveService;
 	private final AdditiveDataProvider additiveDataProvider;
 	private final Additive item;
 	private final DialogState state;
 
-	public AdditiveDialog(AdditiveService additiveService, AdditiveDataProvider additiveDataProvider, Additive item, DialogState state)
+	public AdditiveDialog(AdditiveView additiveView, AdditiveService additiveService, AdditiveDataProvider additiveDataProvider, Additive item, DialogState state)
 	{
+		this.additiveView = additiveView;
         this.additiveService = additiveService;
         this.additiveDataProvider = additiveDataProvider;
         this.item = item;

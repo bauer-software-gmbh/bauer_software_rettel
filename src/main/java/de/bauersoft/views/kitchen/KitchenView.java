@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
         value = "./themes/rettels/views/kitchen.css")
 @PageTitle("Küche")
 @Route(value = "kitchen", layout = MainLayout.class)
-@RolesAllowed({"ADMIN", "CHEF"})
+@RolesAllowed({"ADMIN", "KITCHEN", "KITCHEN_ADMIN", "OFFICE", "OFFICE_ADMIN"})
 public class KitchenView extends Div {
     private final InstitutionFieldsService institutionFieldsService;
     private KitchenDTO kitchenDTO;

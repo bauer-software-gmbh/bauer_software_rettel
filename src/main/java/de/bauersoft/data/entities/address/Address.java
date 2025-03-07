@@ -19,7 +19,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Address extends AbstractGroupByEntity<Address>
 {
     @Column(nullable = false, length = 64)

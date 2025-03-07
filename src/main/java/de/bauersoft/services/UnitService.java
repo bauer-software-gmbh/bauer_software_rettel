@@ -1,7 +1,6 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.unit.Unit;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UnitService implements ServiceBase<Unit, Long>
@@ -122,5 +122,30 @@ public class UnitService implements ServiceBase<Unit, Long>
     public GridDataRepository<Unit> getCustomRepository()
     {
         return customRepository;
+    }
+
+    public List<Unit> findAllByName(Pageable pageable, String name)
+    {
+        return repository.findAllByName(pageable, name);
+    }
+
+    public int countAllByName(String name)
+    {
+        return repository.countAllByName(name);
+    }
+
+    public Set<Unit> findAllByShorthand(String shorthand)
+    {
+        return repository.findAllByShorthand(shorthand);
+    }
+
+    public Set<Unit> findAllByParentUnitName(String parentUnitName)
+    {
+        return repository.findAllByParentUnitName(parentUnitName);
+    }
+
+    public Set<Unit> findAllByParentFactor(float parentFactor)
+    {
+        return repository.findAllByParentFactor(parentFactor);
     }
 }

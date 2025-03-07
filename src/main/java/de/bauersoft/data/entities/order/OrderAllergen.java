@@ -12,7 +12,6 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class OrderAllergen
 {
     @EmbeddedId

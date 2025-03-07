@@ -8,7 +8,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import de.bauersoft.components.autofiltergrid.AutoFilterGrid;
+import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
 import de.bauersoft.data.entities.user.User;
 import de.bauersoft.data.providers.UserDataProvider;
 import de.bauersoft.security.AuthenticatedUser;
@@ -20,7 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @PageTitle("Benutzer")
 @Route(value = "user", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "OFFICE_ADMIN"})
 @Uses(Icon.class)
 public class UsersView extends Div
 {
