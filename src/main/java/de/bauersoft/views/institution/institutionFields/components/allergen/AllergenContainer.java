@@ -1,16 +1,16 @@
 package de.bauersoft.views.institution.institutionFields.components.allergen;
 
-import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
-import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergenKey;
 import de.bauersoft.components.container.Container;
 import de.bauersoft.components.container.ContainerState;
+import de.bauersoft.data.entities.allergen.Allergen;
+import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
 
-import java.util.Objects;
+import java.util.Set;
 
 
-public class AllergenContainer extends Container<InstitutionAllergen, InstitutionAllergenKey>
+public class AllergenContainer extends Container<InstitutionAllergen, Long>
 {
-    private int tempAmount;
+    private Set<Allergen> tempAllergens;
     private ContainerState tempState;
 
     private boolean isNew;
@@ -25,16 +25,6 @@ public class AllergenContainer extends Container<InstitutionAllergen, Institutio
     {
         super(entity, state);
         loadTemporaries();
-    }
-
-    public int getTempAmount()
-    {
-        return tempAmount;
-    }
-
-    public void setTempAmount(int tempAmount)
-    {
-        this.tempAmount = tempAmount;
     }
 
     @Override
@@ -70,7 +60,6 @@ public class AllergenContainer extends Container<InstitutionAllergen, Institutio
     @Override
     public AllergenContainer loadTemporaries()
     {
-        tempAmount = Objects.requireNonNullElse(getEntity().getAmount(), 0);
         tempState = getState();
         return this;
     }
@@ -78,8 +67,6 @@ public class AllergenContainer extends Container<InstitutionAllergen, Institutio
     @Override
     public AllergenContainer acceptTemporaries()
     {
-        getEntity().setAmount(tempAmount);
-
         setState(tempState);
         return this;
     }

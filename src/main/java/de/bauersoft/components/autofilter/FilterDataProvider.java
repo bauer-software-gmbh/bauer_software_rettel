@@ -24,7 +24,6 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
         super(query ->
         {
             Pageable pageable = PageRequest.of(query.getOffset() / query.getLimit(), query.getLimit());
-
             Specification<T> filter = query.getFilter().orElse(Specification.where(null));
 
             return service.getRepository().findAll(filter, pageable).stream();

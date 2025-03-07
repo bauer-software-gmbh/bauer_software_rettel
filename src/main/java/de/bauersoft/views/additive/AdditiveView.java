@@ -28,26 +28,23 @@ import jakarta.annotation.security.RolesAllowed;
 public class AdditiveView extends Div
 {
 	private final AdditiveService additiveService;
-	private final AdditiveDataProvider additiveDataProvider;
 	private final IngredientService ingredientService;
 
-	private final FilterDataProvider<Additive, Long> filterDataProvider;
+	private final AdditiveDataProvider additiveDataProvider;
 
 	private final AutofilterGrid<Additive, Long> grid;
 
 	public AdditiveView(AdditiveService additiveService,
-						AdditiveDataProvider additiveDataProvider,
-						IngredientService ingredientService)
+                        IngredientService ingredientService,
+						AdditiveDataProvider additiveDataProvider)
 	{
         this.additiveService = additiveService;
-        this.additiveDataProvider = additiveDataProvider;
         this.ingredientService = ingredientService;
+        this.additiveDataProvider = additiveDataProvider;
 
         setClassName("content");
 
-		filterDataProvider = new FilterDataProvider<>(additiveService);
-
-		grid = new AutofilterGrid<>(filterDataProvider);
+		grid = new AutofilterGrid<>(additiveDataProvider);
 
 		grid.setHeightFull();
 		grid.setWidthFull();
@@ -58,13 +55,13 @@ public class AdditiveView extends Div
 
 		grid.addItemDoubleClickListener(event ->
 		{
-			new AdditiveDialog(this, additiveService, additiveDataProvider, event.getItem(), DialogState.EDIT);
+			new AdditiveDialog(additiveService, additiveDataProvider, event.getItem(), DialogState.EDIT);
 		});
 		
 		GridContextMenu<Additive> contextMenu = grid.addContextMenu();
 		contextMenu.addItem("Neuer Zusatzstoff", event ->
 		{
-			new AdditiveDialog(this, additiveService, additiveDataProvider, new Additive(), DialogState.NEW);
+			new AdditiveDialog(additiveService, additiveDataProvider, new Additive(), DialogState.NEW);
 		});
 
 		GridMenuItem<Additive> deleteItem = contextMenu.addItem("Löschen", event ->
@@ -91,7 +88,6 @@ public class AdditiveView extends Div
 
 				additiveService.deleteById(item.getId());
 				additiveDataProvider.refreshAll();
-				filterDataProvider.refreshAll();
 			});
 		});
 

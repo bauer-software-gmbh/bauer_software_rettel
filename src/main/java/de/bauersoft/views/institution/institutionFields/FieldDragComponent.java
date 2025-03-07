@@ -122,8 +122,8 @@ public class FieldDragComponent extends FlexLayout
             {
                 AllergenMapContainer container = new AllergenMapContainer();
 
-                for(InstitutionAllergen institutionAllergen : event.getItem().getInstitutionAllergens())
-                    container.addContainer(institutionAllergen.getAllergen(), institutionAllergen, ContainerState.SHOW);
+//                for(InstitutionAllergen institutionAllergen : event.getItem().getInstitutionAllergens())
+//                    container.addContainer(institutionAllergen.getAllergen(), institutionAllergen, ContainerState.SHOW);
 
                 return container;
             });
@@ -253,16 +253,16 @@ public class FieldDragComponent extends FlexLayout
                 multiplierListContainer.run(institutionMultiplierService);
             }
 
-            AllergenMapContainer allergenMapContainer = allergenMapContainerMap.get(institutionField.getField());
-            if(allergenMapContainer != null)
-            {
-                allergenMapContainer.evaluate(container ->
-                {
-                    container.getEntity().getId().setInstitutionFieldId(institutionField.getId());
-                });
-
-                allergenMapContainer.run(institutionAllergenService);
-            }
+//            AllergenMapContainer allergenMapContainer = allergenMapContainerMap.get(institutionField.getField());
+//            if(allergenMapContainer != null)
+//            {
+//                allergenMapContainer.evaluate(container ->
+//                {
+//                    container.getEntity().getId().setInstitutionFieldId(institutionField.getId());
+//                });
+//
+//                allergenMapContainer.run(institutionAllergenService);
+//            }
 
             ClosingTimesMapContainer closingTimesMapContainer = closingTimesMapContainerMap.get(institutionField.getField());
             if(closingTimesMapContainer != null)

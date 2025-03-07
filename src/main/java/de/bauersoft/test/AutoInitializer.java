@@ -6,13 +6,17 @@ import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
+import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
 import de.bauersoft.services.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
+import java.util.List;
+import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Configuration
@@ -91,6 +95,38 @@ public class AutoInitializer
 
                 institutionFieldsService.updateAll(institution.getInstitutionFields());
             }
+
+            InstitutionField institutionField = institutionFieldsService.findAll().get(0);
+
+//            for(int i = 0; i < 5; i++)
+//            {
+//                InstitutionAllergen institutionAllergen = new InstitutionAllergen();
+//                institutionAllergen.setInstitutionField(institutionField);
+//                institutionAllergen.setAllergens(allergenService.findAll().stream().collect(Collectors.toSet()));
+//
+//                institutionAllergenService.update(institutionAllergen);
+//            }
+
+//            Allergen allergen = new Allergen();
+//            allergen.setName("UwU");
+//
+//            allergenService.update(allergen);
+//
+//            for(InstitutionAllergen institutionAllergen : institutionAllergenService.findAll())
+//            {
+//                if(institutionAllergen.getAllergens().size() < 1) continue;
+//
+//                List<Allergen> allergens = institutionAllergen.getAllergens().stream().collect(Collectors.toList());
+//                allergens.remove(0);
+//
+//                allergens.add(allergen);
+//
+//
+//                institutionAllergen.setAllergens(allergens.stream().collect(Collectors.toSet()));
+//
+//
+//                institutionAllergenService.update(institutionAllergen);
+//            }
 
 //            for(InstitutionField institutionField : institutionFieldsService.findAll())
 //            {

@@ -2,25 +2,19 @@ package de.bauersoft.views.institution.institutionFields.components.allergen;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import de.bauersoft.data.entities.allergen.Allergen;
-import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
-import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergenKey;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.views.institution.InstitutionDialog;
-import de.bauersoft.components.container.Container;
-import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.views.institution.institutionFields.InstitutionFieldDialog;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AllergenComponent extends VerticalLayout
@@ -60,16 +54,16 @@ public class AllergenComponent extends VerticalLayout
 
         this.add(addButton);
 
-        for(Container<InstitutionAllergen, InstitutionAllergenKey> container : allergenMapContainer.getContainers())
-        {
-            if(!container.getState().view())
-                continue;
-
-            AllergenRow allergenRow = new AllergenRow((AllergenContainer) container);
-
-            allergenRows.add(allergenRow);
-            this.add(allergenRow);
-        }
+//        for(Container<InstitutionAllergen, InstitutionAllergenKey> container : allergenMapContainer.getContainers())
+//        {
+//            if(!container.getState().view())
+//                continue;
+//
+//            AllergenRow allergenRow = new AllergenRow((AllergenContainer) container);
+//
+//            allergenRows.add(allergenRow);
+//            this.add(allergenRow);
+//        }
 
         this.setWidthFull();
         this.getStyle()
@@ -109,93 +103,93 @@ public class AllergenComponent extends VerticalLayout
             this.currentContainer = new AtomicReference<>();
             this.currentContainer.set(allergenContainer);
 
-            initiateComponents();
-
-            if(currentContainer.get() != null)
-            {
-                AllergenContainer container = currentContainer.get();
-
-                Allergen allergen = container.getEntity().getAllergen();
-                if(allergen != null)
-                {
-                    allergenPool.remove(allergen);
-
-                    allergenComboBox.setTooltipText(allergen.getName());
-
-                    allergenComboBox.setValue(container.getEntity().getAllergen());
-                    amountField.setValue(Objects.requireNonNullElse(container.getEntity().getAmount(), 0).doubleValue());
-                }
-            }
-
-            allergenComboBox.addValueChangeListener(event ->
-            {
-                Allergen oldValue = event.getOldValue();
-                if(oldValue != null)
-                {
-                    allergenPool.add(oldValue);
-
-                    AllergenContainer container = currentContainer.get();
-                    if(container != null)
-                        container.setTempState((container.isNew()) ? ContainerState.HIDE : ContainerState.DELETE);
-                }
-
-                Allergen value = event.getValue();
-                if(value == null)
-                {
-                    allergenComboBox.setTooltipText("");
-
-                }else
-                {
-                    allergenPool.remove(value);
-                    allergenComboBox.setTooltipText(value.getName());
-
-                    AllergenContainer container = (AllergenContainer) allergenMapContainer.addIfAbsent(value, () ->
-                    {
-                        InstitutionAllergen institutionAllergen = new InstitutionAllergen();
-                        institutionAllergen.setId(new InstitutionAllergenKey(null, value.getId()));
-                        institutionAllergen.setInstitutionField(institutionField);
-                        institutionAllergen.setAllergen(value);
-
-                        institutionAllergen.setAmount(0);
-
-                        return institutionAllergen;
-                    }, newContainer ->
-                    {
-                        ((AllergenContainer) newContainer).setIsNew(true);
-                    });
-
-                    container.setTempState(ContainerState.UPDATE);
-
-                    this.currentContainer.set(container);
-
-                    amountField.setValue(Objects.requireNonNullElse(container.getTempAmount(), 0).doubleValue());
-                }
-
-                allergenDataProvider.refreshAll();
-            });
-
-            amountField.addValueChangeListener(event ->
-            {
-                AllergenContainer container = currentContainer.get();
-                if(container != null)
-                {
-                    container.setTempAmount(Objects.requireNonNullElse(event.getValue(), 0d).intValue());
-                    container.setTempState(ContainerState.UPDATE);
-                }
-            });
-
-            removeButton.addClickListener(event ->
-            {
-                allergenComboBox.setValue(null);
-
-                AllergenComponent.this.remove(this);
-
-                AllergenContainer container = currentContainer.get();
-                if(container != null)
-                    container.setTempState((container.isNew()) ? ContainerState.HIDE : ContainerState.DELETE);
-            });
-
-            this.setWidthFull();
+//            initiateComponents();
+//
+//            if(currentContainer.get() != null)
+//            {
+//                AllergenContainer container = currentContainer.get();
+//
+//                Allergen allergen = container.getEntity().getAllergen();
+//                if(allergen != null)
+//                {
+//                    allergenPool.remove(allergen);
+//
+//                    allergenComboBox.setTooltipText(allergen.getName());
+//
+//                    allergenComboBox.setValue(container.getEntity().getAllergen());
+//                    amountField.setValue(Objects.requireNonNullElse(container.getEntity().getAmount(), 0).doubleValue());
+//                }
+//            }
+//
+//            allergenComboBox.addValueChangeListener(event ->
+//            {
+//                Allergen oldValue = event.getOldValue();
+//                if(oldValue != null)
+//                {
+//                    allergenPool.add(oldValue);
+//
+//                    AllergenContainer container = currentContainer.get();
+//                    if(container != null)
+//                        container.setTempState((container.isNew()) ? ContainerState.HIDE : ContainerState.DELETE);
+//                }
+//
+//                Allergen value = event.getValue();
+//                if(value == null)
+//                {
+//                    allergenComboBox.setTooltipText("");
+//
+//                }else
+//                {
+//                    allergenPool.remove(value);
+//                    allergenComboBox.setTooltipText(value.getName());
+//
+//                    AllergenContainer container = (AllergenContainer) allergenMapContainer.addIfAbsent(value, () ->
+//                    {
+//                        InstitutionAllergen institutionAllergen = new InstitutionAllergen();
+//                        institutionAllergen.setId(new InstitutionAllergenKey(null, value.getId()));
+//                        institutionAllergen.setInstitutionField(institutionField);
+//                        institutionAllergen.setAllergen(value);
+//
+//                        institutionAllergen.setAmount(0);
+//
+//                        return institutionAllergen;
+//                    }, newContainer ->
+//                    {
+//                        ((AllergenContainer) newContainer).setIsNew(true);
+//                    });
+//
+//                    container.setTempState(ContainerState.UPDATE);
+//
+//                    this.currentContainer.set(container);
+//
+//                    amountField.setValue(Objects.requireNonNullElse(container.getTempAmount(), 0).doubleValue());
+//                }
+//
+//                allergenDataProvider.refreshAll();
+//            });
+//
+//            amountField.addValueChangeListener(event ->
+//            {
+//                AllergenContainer container = currentContainer.get();
+//                if(container != null)
+//                {
+//                    container.setTempAmount(Objects.requireNonNullElse(event.getValue(), 0d).intValue());
+//                    container.setTempState(ContainerState.UPDATE);
+//                }
+//            });
+//
+//            removeButton.addClickListener(event ->
+//            {
+//                allergenComboBox.setValue(null);
+//
+//                AllergenComponent.this.remove(this);
+//
+//                AllergenContainer container = currentContainer.get();
+//                if(container != null)
+//                    container.setTempState((container.isNew()) ? ContainerState.HIDE : ContainerState.DELETE);
+//            });
+//
+//            this.setWidthFull();
         }
 
         private void initiateComponents()

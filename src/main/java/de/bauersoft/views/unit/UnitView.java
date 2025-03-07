@@ -43,7 +43,12 @@ public class UnitView extends Div
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
         grid.addColumn("name", "Name", Unit::getName);
-        grid.addColumn("shorthand", "Abkürzung", Unit::getShorthand);
+        grid.addColumn("shorthand", "Abkürzung",
+                Unit::getShorthand,
+                (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+                {
+                    return criteriaBuilder.like(path.as(String.class), filterInput);
+                });
 
         grid.addColumn("parentUnit", "Parent", unit ->
         {

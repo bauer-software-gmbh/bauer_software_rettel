@@ -1,9 +1,8 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
-import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergenKey;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
+import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import de.bauersoft.data.repositories.institutionAllergen.InstitutionAllergenGridDataRepository;
@@ -18,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class InstitutionAllergenService implements ServiceBase<InstitutionAllergen, InstitutionAllergenKey>
+public class InstitutionAllergenService implements ServiceBase<InstitutionAllergen, Long>
 {
     private InstitutionAllergenRepository repository;
     private InstitutionAllergenGridDataRepository customRepository;
@@ -30,9 +29,9 @@ public class InstitutionAllergenService implements ServiceBase<InstitutionAllerg
     }
 
     @Override
-    public Optional<InstitutionAllergen> get(InstitutionAllergenKey institutionAllergenKey)
+    public Optional<InstitutionAllergen> get(Long id)
     {
-        return repository.findById(institutionAllergenKey);
+        return repository.findById(id);
     }
 
     @Override
@@ -54,9 +53,9 @@ public class InstitutionAllergenService implements ServiceBase<InstitutionAllerg
     }
 
     @Override
-    public void deleteById(InstitutionAllergenKey institutionAllergenKey)
+    public void deleteById(Long id)
     {
-        repository.deleteById(institutionAllergenKey.getInstitutionFieldId(), institutionAllergenKey.getAllergenId());
+        repository.deleteById(id);
     }
 
     @Override
@@ -72,9 +71,9 @@ public class InstitutionAllergenService implements ServiceBase<InstitutionAllerg
     }
 
     @Override
-    public void deleteAllById(Collection<InstitutionAllergenKey> institutionAllergenKeys)
+    public void deleteAllById(Collection<Long> ids)
     {
-        repository.deleteAllById(institutionAllergenKeys);
+        repository.deleteAllById(ids);
     }
 
     @Override
@@ -123,11 +122,6 @@ public class InstitutionAllergenService implements ServiceBase<InstitutionAllerg
     public GridDataRepository<InstitutionAllergen> getCustomRepository()
     {
         return customRepository;
-    }
-
-    public void deleteAllByInstitutionFieldId(Long institutionFieldId)
-    {
-        repository.deleteAllByInstitutionFieldId(institutionFieldId);
     }
 
     public List<InstitutionAllergen> findAllByInstitutionField(InstitutionField institutionField)

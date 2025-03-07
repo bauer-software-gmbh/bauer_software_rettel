@@ -23,6 +23,8 @@ import de.bauersoft.views.DialogState;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.Objects;
+
 public class UnitDialog extends Dialog
 {
 	private final UnitView unitView;
@@ -93,9 +95,7 @@ public class UnitDialog extends Dialog
 		}).bind(Unit::getShorthand, Unit::setShorthand);
 
 		binder.forField(parentComboBox).bind(Unit::getParentUnit, Unit::setParentUnit);
-		binder.forField(parentFactorNumberField)
-				.withConverter(input -> input.floatValue(), output -> output.doubleValue())
-				.bind(Unit::getParentFactor, Unit::setParentFactor);
+		binder.forField(parentFactorNumberField).bind(Unit::getParentFactor, Unit::setParentFactor);
 
 		binder.setBean(item);
 
