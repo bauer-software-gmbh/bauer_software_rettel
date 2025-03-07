@@ -50,7 +50,7 @@ import java.util.stream.Stream;
 
 @PageTitle("Menü Planung")
 @Route(value = "offers", layout = MainLayout.class)
-@RolesAllowed({"ADMIN", "KUCHE_ADMIN", "OFFICE_ADMIN"})
+@RolesAllowed({"ADMIN", "KITCHEN_ADMIN", "OFFICE_ADMIN"})
 public class OffersView extends Div
 {
     private final OffersDataProvider dataProvider;

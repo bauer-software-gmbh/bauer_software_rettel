@@ -11,6 +11,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.providers.AdditiveDataProvider;
@@ -22,13 +23,15 @@ import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Zusatzstoffe")
 @Route(value = "additive", layout = MainLayout.class)
-@RolesAllowed({"ADMIN", "KUCHE_ADMIN"})
+@RolesAllowed({"ADMIN", "KITCHEN_ADMIN"})
 @Uses(Icon.class)
 public class AdditiveView extends Div
 {
 	private final AdditiveService additiveService;
 	private final AdditiveDataProvider additiveDataProvider;
 	private final IngredientService ingredientService;
+
+	private final FilterDataProvider<Additive, Long> filterDataProvider;
 
 	private final AutofilterGrid<Additive, Long> grid;
 
@@ -42,7 +45,9 @@ public class AdditiveView extends Div
 
         setClassName("content");
 
-		grid = new AutofilterGrid<>(additiveDataProvider);
+		filterDataProvider = new FilterDataProvider<>(additiveService);
+
+		grid = new AutofilterGrid<>(filterDataProvider);
 
 		grid.setHeightFull();
 		grid.setWidthFull();
@@ -86,7 +91,7 @@ public class AdditiveView extends Div
 
 				additiveService.deleteById(item.getId());
 				additiveDataProvider.refreshAll();
-				grid.refreshAll();
+				filterDataProvider.refreshAll();
 			});
 		});
 

@@ -9,6 +9,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.unit.Unit;
 import de.bauersoft.data.providers.UnitDataProvider;
 import de.bauersoft.services.IngredientService;
@@ -23,6 +24,8 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed("ADMIN")
 public class UnitView extends Div
 {
+    private final FilterDataProvider<Unit, Long> filterDataProvider;
+
     private final AutofilterGrid<Unit, Long> grid;
 
     public UnitView(UnitService unitService,
@@ -31,7 +34,9 @@ public class UnitView extends Div
     {
         setClassName("content");
 
-        grid = new AutofilterGrid<>(unitDataProvider);
+        filterDataProvider = new FilterDataProvider<>(unitService);
+
+        grid = new AutofilterGrid<>(filterDataProvider);
 
         grid.setWidthFull();
         grid.setHeightFull();
@@ -92,7 +97,7 @@ public class UnitView extends Div
                 }
 
                 unitService.deleteById(item.getId());
-                grid.refreshAll();
+                filterDataProvider.refreshAll();
             });
         });
 
@@ -103,8 +108,8 @@ public class UnitView extends Div
         this.add(grid);
     }
 
-    public AutofilterGrid<Unit, Long> getGrid()
+    public FilterDataProvider<Unit, Long> getFilterDataProvider()
     {
-        return grid;
+        return filterDataProvider;
     }
 }

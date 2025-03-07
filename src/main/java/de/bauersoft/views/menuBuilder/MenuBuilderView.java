@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @PageTitle("Menü-Baukasten")
 @Route(value = "menubuilder", layout = MainLayout.class)
-@RolesAllowed({"ADMIN", "KUCHE_ADMIN", "OFFICE_ADMIN"})
+@RolesAllowed({"ADMIN", "KITCHEN_ADMIN", "OFFICE_ADMIN"})
 public class MenuBuilderView extends Div
 {
     private AutoFilterGrid<Menu> menuGrid = new AutoFilterGrid<>(Menu.class, false, true);

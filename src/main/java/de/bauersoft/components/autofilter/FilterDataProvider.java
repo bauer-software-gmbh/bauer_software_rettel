@@ -2,7 +2,6 @@ package de.bauersoft.components.autofilter;
 
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
-import de.bauersoft.components.autofilter.grid.GridFilter;
 import de.bauersoft.services.ServiceBase;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
@@ -61,6 +60,15 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
     public FilterDataProvider<T, ID> addFilter(Filter<T> filter)
     {
         filters.add(filter);
+
+        callFilters();
+        return this;
+    }
+
+    public FilterDataProvider<T, ID> callFilters()
+    {
+        filterDataProvider.setFilter(buildFilter());
+        filterDataProvider.refreshAll();
         return this;
     }
 

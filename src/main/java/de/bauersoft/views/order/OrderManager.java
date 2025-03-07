@@ -57,7 +57,7 @@ public class OrderManager extends Div
         this.setWidthFull();
         this.setHeightFull();
 
-        if(!getUser().getRoles().contains(Role.BESTELLUBERSICHT) &&
+        if(!getUser().getRoles().contains(Role.ORDER_SHOW_ALL_INSTITUTIONS) &&
                 getInstitutionService().findAllByUsersId(getUser().getId()).size() < 1)
         {
             Span div = new Span("Ihr Account ist noch nicht mit einer Institution verknüpft!");

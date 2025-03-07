@@ -26,7 +26,7 @@ import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Komponenten")
 @Route(value = "component", layout = MainLayout.class)
-@RolesAllowed({"ADMIN", "KUCHE_ADMIN", "OFFICE_ADMIN"})
+@RolesAllowed({"ADMIN", "KITCHEN_ADMIN", "OFFICE_ADMIN"})
 @Uses(Icon.class)
 public class ComponentView extends Div
 {

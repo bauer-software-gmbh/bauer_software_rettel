@@ -7,8 +7,9 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.dom.Style;
+import de.bauersoft.components.autofilter.Filter;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.autofilter.grid.AutofilterGrid;
-import de.bauersoft.components.autofilter.grid.GridFilter;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.institutionClosingTime.InstitutionClosingTime;
 import de.bauersoft.services.InstitutionClosingTimeService;
@@ -54,6 +55,8 @@ public class InstitutionTab extends Div
     private final InstitutionClosingTimeService closingTimeService;
     private final InstitutionService institutionService;
 
+    private final FilterDataProvider<InstitutionClosingTime, Long> filterDataProvider;
+
     private final Tab tab;
 
     private Button addButton;
@@ -61,7 +64,9 @@ public class InstitutionTab extends Div
 
     private AutofilterGrid<InstitutionClosingTime, Long> grid;
 
-    public InstitutionTab(ClosingTimeManager manager, InstitutionTabSheet institutionTabSheet, Institution institution)
+    public InstitutionTab(ClosingTimeManager manager,
+                          InstitutionTabSheet institutionTabSheet,
+                          Institution institution)
     {
         this.manager = manager;
         this.institutionTabSheet = institutionTabSheet;
@@ -69,6 +74,8 @@ public class InstitutionTab extends Div
 
         closingTimeService = manager.getClosingTimeService();
         institutionService = manager.getInstitutionService();
+
+        filterDataProvider = new FilterDataProvider<>(closingTimeService);
 
         tab = new Tab(institution.getName());
 
@@ -86,17 +93,17 @@ public class InstitutionTab extends Div
                 .setJustifyContent(Style.JustifyContent.CENTER)
                 .setAlignItems(Style.AlignItems.CENTER);
 
-        grid = new AutofilterGrid<>(manager.getClosingTimeDataProvider(), false);
+        grid = new AutofilterGrid<>(filterDataProvider);
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
         grid.setSizeFull();
 
-        grid.addFilter(new GridFilter<InstitutionClosingTime>("institution", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+        grid.addFilter(new Filter<InstitutionClosingTime>("institution", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
             CriteriaBuilder.In<Long> inClause = criteriaBuilder.in(path.get("id"));
             inClause.value(institution.getId());
 
             return inClause;
-        }).ignoreFilterInput(true));
+        }).setIgnoreFilterInput(true));
 
         grid.addComponentColumn("Löschen", "4em", institutionClosingTime ->
         {
@@ -169,6 +176,6 @@ public class InstitutionTab extends Div
     private void deleteItem(InstitutionClosingTime institutionClosingTime)
     {
         this.closingTimeService.delete(institutionClosingTime);
-        grid.refreshAll();
+        filterDataProvider.refreshAll();
     }
 }

@@ -147,7 +147,7 @@ public class ClosingTimeDialog extends Dialog
                 item.setInstitution(institutionTab.getInstitution());
 
                 closingTimeService.update(item);
-                institutionTab.getGrid().refreshAll();
+                institutionTab.getFilterDataProvider().refreshAll();
 
                 Notification.show("Daten wurden aktualisiert");
                 this.close();
@@ -171,7 +171,7 @@ public class ClosingTimeDialog extends Dialog
         cancelButton.addClickListener(e ->
         {
             binder.removeBean();
-            institutionTab.getGrid().refreshAll();
+            institutionTab.getFilterDataProvider().refreshAll();
             this.close();
         });
 

@@ -10,88 +10,36 @@ import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.CallbackDataProvider;
-import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.ValueProvider;
-import de.bauersoft.data.providers.DataProviderBase;
+import de.bauersoft.components.autofilter.Filter;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.services.ServiceBase;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Predicate;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 public class AutofilterGrid<T, ID> extends Grid<T>
 {
-    private DataProviderBase<T, ID, ServiceBase<T, ID>> dataProvider;
+    private FilterDataProvider<T, ID> dataProvider;
     private ServiceBase<T, ID> service;
-
-    private List<GridFilter<T>> gridFilters;
 
     private HeaderRow headerRow;
 
     private final AutofilterGridContextMenu autofilterGridContextMenu;
 
-    private CallbackDataProvider<T, Specification<T>> callbackDataProvider;
-    private ConfigurableFilterDataProvider<T, Void, Specification<T>> filterDataProvider;
-
-    public AutofilterGrid(DataProviderBase<T, ID, ServiceBase<T, ID>> dataProvider)
-    {
-        this(dataProvider, true);
-    }
-
-    public AutofilterGrid(DataProviderBase<T, ID, ServiceBase<T, ID>> dataProvider, boolean filteringTroughDataProvider)
+    public AutofilterGrid(FilterDataProvider<T, ID> dataProvider)
     {
         this.dataProvider = dataProvider;
         this.service = dataProvider.getService();
-
-        gridFilters = new ArrayList<>();
 
         this.getHeaderRows().clear();
         headerRow = appendHeaderRow();
 
         autofilterGridContextMenu = new AutofilterGridContextMenu();
 
-       if(!filteringTroughDataProvider)
-       {
-           this.callbackDataProvider = DataProvider.fromFilteringCallbacks(
-                   query ->
-                   {
-                       Pageable pageable = PageRequest.of(query.getOffset() / query.getLimit(), query.getLimit());
-
-                       Specification<T> filter = query.getFilter().orElse(Specification.where(null));
-
-                       return service.getRepository().findAll(filter, pageable).stream();
-                   },
-                   query ->
-                   {
-                       Specification<T> filter = query.getFilter().orElse(Specification.where(null));
-                       return (int) service.getRepository().count(filter);
-                   }
-           );
-
-           this.filterDataProvider = this.callbackDataProvider.withConfigurableFilter();
-
-       }else
-       {
-           this.callbackDataProvider = dataProvider.getCallbackDataProvider();
-           this.filterDataProvider = dataProvider.getConfigurableFilterDataProvider();
-       }
-
-        this.setDataProvider(filterDataProvider);
+        this.setDataProvider(dataProvider.getFilterDataProvider());
 
         this.setColumnRendering(ColumnRendering.LAZY);
-    }
-
-    public void refreshAll()
-    {
-        filterDataProvider.refreshAll();
     }
 
     public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider)
@@ -102,21 +50,19 @@ public class AutofilterGrid<T, ID> extends Grid<T>
         });
     }
 
-    public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider, GridFilter.GridFilterFunction<T> filterFunction)
+    public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider, Filter.FilterFunction<T> filterFunction)
     {
         Grid.Column<T> column = this.addColumn(valueProvider);
 
-        GridFilter<T> gridFilter = new GridFilter<>(attributeName);
-        gridFilter.setFilterFunction(filterFunction);
-        gridFilters.add(gridFilter);
+        Filter<T> filter = new Filter<>(attributeName);
+        filter.setFilterFunction(filterFunction);
+
+        dataProvider.getFilters().add(filter);
 
         headerRow.getCell(column).setComponent(createFilterHeader(header, value ->
         {
-            gridFilter.setFilterInput(value);
-
-            filterDataProvider.setFilter(createSpecification());
-
-            filterDataProvider.refreshAll();
+            filter.setFilterInput(value);
+            dataProvider.callFilters();
         }));
 
         return column;
@@ -174,60 +120,23 @@ public class AutofilterGrid<T, ID> extends Grid<T>
         return layout;
     }
 
-    public AutofilterGrid<T, ID> addFilter(GridFilter<T> filter)
+    public AutofilterGrid<T, ID> addFilter(Filter<T> filter)
     {
-        this.gridFilters.add(filter);
-        filterDataProvider.setFilter(createSpecification());
-
+        dataProvider.addFilter(filter);
         return this;
     }
 
-    private Specification<T> createSpecification()
-    {
-        return (root, query, criteriaBuilder) ->
-        {
-            Predicate predicate = criteriaBuilder.conjunction();
-            for(GridFilter<T> gridFilter : gridFilters)
-            {
-                Path<?> path = root.get(gridFilter.getAttributeName());
-                String filterInput = gridFilter.getFilterInput();
-                if(!gridFilter.isIgnoreFilterInput() && (filterInput == null || filterInput.isEmpty())) continue;
 
-                predicate = criteriaBuilder.and(predicate, gridFilter.getFilterFunction().apply(root, path, query, criteriaBuilder, predicate, filterInput));
-            }
-
-            return predicate;
-        };
-    }
-
-    public DataProviderBase<T, ID, ServiceBase<T, ID>> getNDataProvider()
-    {
-        return dataProvider;
-    }
 
     public ServiceBase<T, ID> getService()
     {
         return service;
     }
 
-    public List<GridFilter<T>> getGridFilters()
-    {
-        return gridFilters;
-    }
 
     public HeaderRow getHeaderRow()
     {
         return headerRow;
-    }
-
-    public CallbackDataProvider<T, Specification<T>> getCallbackDataProvider()
-    {
-        return callbackDataProvider;
-    }
-
-    public ConfigurableFilterDataProvider<T, Void, Specification<T>> getFilterDataProvider()
-    {
-        return filterDataProvider;
     }
 
     public AutofilterGridContextMenu AutofilterGridContextMenu()

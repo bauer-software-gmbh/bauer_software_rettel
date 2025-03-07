@@ -25,7 +25,7 @@ public class InstitutionTabSheet extends TabSheet
 
         institutionTabMap = new HashMap<>();
 
-        if(orderManager.getUser().getRoles().contains(Role.BESTELLUBERSICHT))
+        if(orderManager.getUser().getRoles().contains(Role.ORDER_SHOW_ALL_INSTITUTIONS))
         {
             for(Institution institution : orderManager.getInstitutionService().findAll())
             {

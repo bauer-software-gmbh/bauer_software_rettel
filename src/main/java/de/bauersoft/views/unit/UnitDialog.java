@@ -111,7 +111,7 @@ public class UnitDialog extends Dialog
 				try
 				{
 					unitService.update(binder.getBean());
-					unitView.getGrid().refreshAll();
+					unitView.getFilterDataProvider().refreshAll();
 
 					Notification.show("Daten wurden aktualisiert");
 					this.close();
@@ -132,7 +132,7 @@ public class UnitDialog extends Dialog
 		cancelButton.addClickListener(e ->
 		{
 			binder.removeBean();
-			unitView.getGrid().refreshAll();
+			unitView.getFilterDataProvider().refreshAll();
 			this.close();
 		});
 
