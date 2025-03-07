@@ -1,9 +1,6 @@
-package de.bauersoft.components.autofiltergrid;
+package de.bauersoft.components.autofilter.grid;
 
 import jakarta.persistence.criteria.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class GridFilter<T>
 {
@@ -11,6 +8,8 @@ public class GridFilter<T>
 
     private String filterInput;
     private GridFilterFunction<T> filterFunction;
+
+    private boolean ignoreFilterInput;
 
     public GridFilter(String attributeName)
     {
@@ -21,6 +20,12 @@ public class GridFilter<T>
         {
             return criteriaBuilder.like(path.as(String.class), "%" + filter + "%");
         };
+    }
+
+    public GridFilter(String attributeName, GridFilterFunction<T> filterFunction)
+    {
+        this.attributeName = attributeName;
+        this.filterFunction = filterFunction;
     }
 
     public String getAttributeName()
@@ -49,6 +54,21 @@ public class GridFilter<T>
         this.filterInput = filterInput;
         return this;
     }
+
+
+
+    public boolean isIgnoreFilterInput()
+    {
+        return ignoreFilterInput;
+    }
+
+    public GridFilter<T> ignoreFilterInput(boolean ignoreFilterInput)
+    {
+        this.ignoreFilterInput = ignoreFilterInput;
+        return this;
+    }
+
+
 
     public interface GridFilterFunction<T>
     {

@@ -6,20 +6,25 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.dom.Style;
 import de.bauersoft.data.entities.institutionClosingTime.InstitutionClosingTime;
 import de.bauersoft.services.InstitutionClosingTimeService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.closingTime.ClosingTimeManager;
-import de.bauersoft.views.closingTime.ClosingTimeView;
 import de.bauersoft.views.closingTime.institutionLayer.InstitutionTab;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -38,7 +43,7 @@ public class ClosingTimeDialog extends Dialog
                 .setFirstDayOfWeek(DayOfWeek.MONDAY.getValue());
     }
 
-    private final ClosingTimeManager closingTimeManager;
+    private final ClosingTimeManager manager;
     private final InstitutionTab institutionTab;
     private final InstitutionClosingTime item;
     private DialogState dialogState;
@@ -48,17 +53,19 @@ public class ClosingTimeDialog extends Dialog
     private final Binder<InstitutionClosingTime> binder;
 
     private final TextField descriptionField;
+
     private final EnhancedDateRangePicker dateRangePicker;
+    private final Div infoIcon;
+    private final HorizontalLayout dateRangePickerLayout;
 
-
-    public ClosingTimeDialog(ClosingTimeManager closingTimeManager, InstitutionTab institutionTab, InstitutionClosingTime item, DialogState dialogState)
+    public ClosingTimeDialog(ClosingTimeManager manager, InstitutionTab institutionTab, InstitutionClosingTime item, DialogState dialogState)
     {
-        this.closingTimeManager = closingTimeManager;
+        this.manager = manager;
         this.institutionTab = institutionTab;
         this.item = item;
         this.dialogState = dialogState;
 
-        closingTimeService = closingTimeManager.getClosingTimeService();
+        closingTimeService = manager.getClosingTimeService();
 
         this.setHeaderTitle(dialogState.toString());
 
@@ -75,8 +82,44 @@ public class ClosingTimeDialog extends Dialog
         dateRangePicker.setI18n(i18n);
         dateRangePicker.setWidthFull();
 
-        binder.bind(descriptionField, InstitutionClosingTime::getHeader, InstitutionClosingTime::setHeader);
-        binder.forField(dateRangePicker).bind(institutionClosingTime ->
+        infoIcon = new Div(VaadinIcon.INFO_CIRCLE.create());
+        infoIcon.getElement().addEventListener("mouseover", event ->
+        {
+            infoIcon.getElement().setProperty("title", """
+                    Um einen Schließzeitraum von einem Tag zu erstellen, genügt es, 
+                    in der Kalenderübersicht den gewünschten Tag zu doppelklicken.
+                    """);
+        });
+
+        infoIcon.getElement().addEventListener("mouseout", event ->
+        {
+            infoIcon.getElement().removeProperty("title");
+        });
+
+        dateRangePickerLayout = new HorizontalLayout(dateRangePicker, infoIcon);
+        dateRangePickerLayout.setWidthFull();
+        dateRangePickerLayout.getStyle()
+                        .setAlignItems(Style.AlignItems.CENTER);
+
+        binder.forField(descriptionField)
+                .asRequired("Beschreibung darf nicht leer sein")
+                .bind(InstitutionClosingTime::getHeader, InstitutionClosingTime::setHeader);
+
+        binder.forField(dateRangePicker)
+                .withValidator((value, context) ->
+        {
+            LocalDate startDate = value.getStartDate();
+            LocalDate endDate = value.getEndDate();
+
+            if(startDate == null)
+                return ValidationResult.error("Startdatum darf nicht leer sein");
+
+            if(endDate != null && startDate.isAfter(endDate))
+                return ValidationResult.error("Startdatum muss vor dem Enddatum liegen");
+
+            return ValidationResult.ok();
+
+        }).bind(institutionClosingTime ->
         {
             return new DateRange(institutionClosingTime.getStartDate(), institutionClosingTime.getEndDate());
 
@@ -101,7 +144,9 @@ public class ClosingTimeDialog extends Dialog
             {
                 binder.writeBean(item);
 
-                closingTimeService.update(binder.getBean());
+                item.setInstitution(institutionTab.getInstitution());
+
+                closingTimeService.update(item);
                 institutionTab.getGrid().refreshAll();
 
                 Notification.show("Daten wurden aktualisiert");
@@ -114,7 +159,7 @@ public class ClosingTimeDialog extends Dialog
 
             }catch(ValidationException ex)
             {
-                ex.printStackTrace();
+
             }
         });
 
@@ -130,7 +175,7 @@ public class ClosingTimeDialog extends Dialog
             this.close();
         });
 
-        this.add(descriptionField, dateRangePicker);
+        this.add(descriptionField, dateRangePickerLayout);
 
         this.getFooter().add(saveButton, cancelButton);
         this.setCloseOnEsc(false);

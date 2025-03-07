@@ -129,8 +129,6 @@ public class AllergenComponent extends VerticalLayout
 
             allergenComboBox.addValueChangeListener(event ->
             {
-                Notification.show(event.getValue() + " - " + event.getOldValue());
-
                 Allergen oldValue = event.getOldValue();
                 if(oldValue != null)
                 {

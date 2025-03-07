@@ -23,10 +23,10 @@ public class InstitutionClosingTime extends AbstractEntity implements ContainerI
     @Column(nullable = false)
     private LocalDate startDate;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDate endDate;
 
-    @Column(length = 64)
+    @Column(nullable = false, length = 64)
     private String header;
 
     @ManyToOne(fetch = FetchType.EAGER)

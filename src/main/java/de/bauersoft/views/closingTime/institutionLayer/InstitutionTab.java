@@ -3,26 +3,30 @@ package de.bauersoft.views.closingTime.institutionLayer;
 import com.vaadin.componentfactory.EnhancedDateRangePicker;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.dom.Style;
-import de.bauersoft.components.autofiltergrid.AutofilterGrid;
+import de.bauersoft.components.autofilter.grid.AutofilterGrid;
+import de.bauersoft.components.autofilter.grid.GridFilter;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.institutionClosingTime.InstitutionClosingTime;
 import de.bauersoft.services.InstitutionClosingTimeService;
+import de.bauersoft.services.InstitutionService;
 import de.bauersoft.views.DialogState;
-import de.bauersoft.views.closingTime.institutionLayer.dialogLayer.ClosingTimeDialog;
 import de.bauersoft.views.closingTime.ClosingTimeManager;
+import de.bauersoft.views.closingTime.institutionLayer.dialogLayer.ClosingTimeDialog;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
 import lombok.Getter;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Optional;
+import java.util.Objects;
 
 @Getter
 public class InstitutionTab extends Div
@@ -43,51 +47,66 @@ public class InstitutionTab extends Div
         formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
     }
 
-    private final ClosingTimeManager closingTimeManager;
+    private final ClosingTimeManager manager;
     private final InstitutionTabSheet institutionTabSheet;
     private final Institution institution;
 
     private final InstitutionClosingTimeService closingTimeService;
+    private final InstitutionService institutionService;
 
     private final Tab tab;
 
-    private HorizontalLayout buttonLayout;
     private Button addButton;
-    private final AutofilterGrid<InstitutionClosingTime> grid;
+    private HorizontalLayout buttonLayout;
 
-    public InstitutionTab(ClosingTimeManager closingTimeManager, InstitutionTabSheet institutionTabSheet, Institution institution)
+    private AutofilterGrid<InstitutionClosingTime, Long> grid;
+
+    public InstitutionTab(ClosingTimeManager manager, InstitutionTabSheet institutionTabSheet, Institution institution)
     {
-        this.closingTimeManager = closingTimeManager;
+        this.manager = manager;
         this.institutionTabSheet = institutionTabSheet;
         this.institution = institution;
 
-        closingTimeService = closingTimeManager.getClosingTimeService();
+        closingTimeService = manager.getClosingTimeService();
+        institutionService = manager.getInstitutionService();
 
         tab = new Tab(institution.getName());
-
-                buttonLayout = new HorizontalLayout();
-        buttonLayout.getStyle()
-                .setJustifyContent(Style.JustifyContent.CENTER);
 
         addButton = new Button("Schließzeitraum hinzufügen");
         addButton.getStyle()
                 .setFontSize("var(--lumo-font-size-xl)")
                 .setBorder("1px solid grey");
 
-        buttonLayout.add(addButton);
+        addButton.addClickListener(event ->
+        {
+            new ClosingTimeDialog(manager, this, new InstitutionClosingTime(), DialogState.NEW);
+        });
+        buttonLayout = new HorizontalLayout(addButton);
+        buttonLayout.getStyle()
+                .setJustifyContent(Style.JustifyContent.CENTER)
+                .setAlignItems(Style.AlignItems.CENTER);
 
-        grid = new AutofilterGrid<>(closingTimeService.getRepository());
+        grid = new AutofilterGrid<>(manager.getClosingTimeDataProvider(), false);
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
         grid.setSizeFull();
 
-        //grid.getFilterInput().setSpecification((root, query, criteriaBuilder) -> root.get("institution").get("id").in(1));
+        grid.addFilter(new GridFilter<InstitutionClosingTime>("institution", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+        {
+            CriteriaBuilder.In<Long> inClause = criteriaBuilder.in(path.get("id"));
+            inClause.value(institution.getId());
+
+            return inClause;
+        }).ignoreFilterInput(true));
 
         grid.addComponentColumn("Löschen", "4em", institutionClosingTime ->
         {
             Button button = new Button(LineAwesomeIcon.TRASH_SOLID.create());
             button.setWidth("4em");
 
-
+            button.addClickListener(event ->
+            {
+                this.deleteItem(institutionClosingTime);
+            });
 
             return button;
         });
@@ -100,6 +119,7 @@ public class InstitutionTab extends Div
         grid.addColumn("startDate", "Startdatum", institutionClosingTime ->
         {
             return institutionClosingTime.getStartDate().format(formatter).toString();
+
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
             return criteriaBuilder.like(
@@ -110,33 +130,45 @@ public class InstitutionTab extends Div
 
         grid.addColumn("endDate", "Enddatum", institutionClosingTime ->
         {
-            return institutionClosingTime.getEndDate().format(formatter).toString();
+            return (institutionClosingTime.getEndDate() == null) ? institutionClosingTime.getStartDate().format(formatter) : institutionClosingTime.getEndDate().format(formatter).toString();
+
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
-            return criteriaBuilder.like(
-                    criteriaBuilder.function("DATE_FORMAT", String.class, path, criteriaBuilder.literal("%d.%m.%Y")),
+            Expression<?> date = criteriaBuilder.selectCase()
+                    .when(criteriaBuilder.isNull(path), root.get("startDate").as(LocalDate.class))
+                    .otherwise(path);
+
+            return criteriaBuilder.like(criteriaBuilder.function("DATE_FORMAT", String.class, date, criteriaBuilder.literal("%d.%m.%Y")),
                     "%" + filterInput + "%"
             );
         });
 
         grid.AutofilterGridContextMenu()
                 .enableGridContextMenu()
-                        .enableAddItem("Neue Schließzeit", event ->
+                        .enableAddItem("Neuer Schließzeitraum", event ->
                         {
+                            new ClosingTimeDialog(manager, this, new InstitutionClosingTime(), DialogState.NEW);
 
                         }).enableDeleteItem("Löschen", event ->
                         {
-
+                            deleteItem(event.getItem().get());
                         });
 
         grid.addItemDoubleClickListener(event ->
         {
-            new ClosingTimeDialog(closingTimeManager, this, event.getItem(), DialogState.EDIT);
+            if(Objects.requireNonNullElse(event.getColumn().getHeaderText(), "").equals("Löschen")) return;
+            new ClosingTimeDialog(manager, this, event.getItem(), DialogState.EDIT);
         });
 
         this.add(buttonLayout, grid);
 
         this.setHeightFull();
         this.setWidthFull();
+    }
+
+    private void deleteItem(InstitutionClosingTime institutionClosingTime)
+    {
+        this.closingTimeService.delete(institutionClosingTime);
+        grid.refreshAll();
     }
 }

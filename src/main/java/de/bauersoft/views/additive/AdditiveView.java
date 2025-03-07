@@ -11,7 +11,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import de.bauersoft.components.autofiltergrid.AutofilterGrid;
+import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.providers.AdditiveDataProvider;
 import de.bauersoft.services.AdditiveService;
@@ -30,9 +30,11 @@ public class AdditiveView extends Div
 	private final AdditiveDataProvider additiveDataProvider;
 	private final IngredientService ingredientService;
 
-	private final AutofilterGrid<Additive> grid;
+	private final AutofilterGrid<Additive, Long> grid;
 
-	public AdditiveView(AdditiveService additiveService, AdditiveDataProvider additiveDataProvider, IngredientService ingredientService)
+	public AdditiveView(AdditiveService additiveService,
+						AdditiveDataProvider additiveDataProvider,
+						IngredientService ingredientService)
 	{
         this.additiveService = additiveService;
         this.additiveDataProvider = additiveDataProvider;
@@ -40,7 +42,7 @@ public class AdditiveView extends Div
 
         setClassName("content");
 
-		grid = new AutofilterGrid<>(additiveService.getRepository());
+		grid = new AutofilterGrid<>(additiveDataProvider);
 
 		grid.setHeightFull();
 		grid.setWidthFull();

@@ -15,7 +15,7 @@ import de.bauersoft.services.IngredientService;
 import de.bauersoft.services.UnitService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
-import de.bauersoft.components.autofiltergrid.AutofilterGrid;
+import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Einheiten")
@@ -23,14 +23,15 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed("ADMIN")
 public class UnitView extends Div
 {
-    private final AutofilterGrid<Unit> grid;
+    private final AutofilterGrid<Unit, Long> grid;
 
     public UnitView(UnitService unitService,
-                    IngredientService ingredientService)
+                    IngredientService ingredientService,
+                    UnitDataProvider unitDataProvider)
     {
         setClassName("content");
 
-        grid = new AutofilterGrid<>(unitService.getRepository());
+        grid = new AutofilterGrid<>(unitDataProvider);
 
         grid.setWidthFull();
         grid.setHeightFull();
@@ -102,7 +103,7 @@ public class UnitView extends Div
         this.add(grid);
     }
 
-    public AutofilterGrid<Unit> getGrid()
+    public AutofilterGrid<Unit, Long> getGrid()
     {
         return grid;
     }

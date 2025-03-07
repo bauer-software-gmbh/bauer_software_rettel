@@ -2,31 +2,24 @@ package de.bauersoft.views.closingTime;
 
 import com.vaadin.componentfactory.EnhancedDateRangePicker;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import de.bauersoft.components.autofiltergrid.AutofilterGrid;
+import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import de.bauersoft.data.entities.institutionClosingTime.InstitutionClosingTime;
 import de.bauersoft.data.entities.user.User;
+import de.bauersoft.data.providers.InstitutionClosingTimeDataProvider;
 import de.bauersoft.security.AuthenticatedUser;
 import de.bauersoft.services.InstitutionClosingTimeService;
 import de.bauersoft.services.InstitutionService;
-import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Optional;
 
 @PageTitle("Schließtage")
 @Route(value = "closingtime", layout = MainLayout.class)
@@ -50,20 +43,24 @@ public class ClosingTimeView extends Div
     }
 
     private final AuthenticatedUser authenticatedUser;
+
     private final InstitutionClosingTimeService closingTimeService;
     private final InstitutionService institutionService;
+
+    private final InstitutionClosingTimeDataProvider closingTimeDataProvider;
 
     private User user;
 
     private HorizontalLayout buttonLayout;
     private Button addButton;
-    private AutofilterGrid<InstitutionClosingTime> grid;
+    private AutofilterGrid<InstitutionClosingTime, Long> grid;
 
     private ClosingTimeManager closingTimeManager;
 
-    public ClosingTimeView(AuthenticatedUser authenticatedUser, InstitutionClosingTimeService closingTimeService, InstitutionService institutionService)
+    public ClosingTimeView(AuthenticatedUser authenticatedUser, InstitutionClosingTimeService closingTimeService, InstitutionService institutionService, InstitutionClosingTimeDataProvider closingTimeDataProvider)
     {
         this.institutionService = institutionService;
+        this.closingTimeDataProvider = closingTimeDataProvider;
         setClassName("content");
 
         this.authenticatedUser = authenticatedUser;
@@ -72,7 +69,7 @@ public class ClosingTimeView extends Div
         if(authenticatedUser.get().isEmpty()) return;
         this.user = authenticatedUser.get().get();
 
-        closingTimeManager = new ClosingTimeManager(this, authenticatedUser, user, closingTimeService, institutionService);
+        closingTimeManager = new ClosingTimeManager(this, authenticatedUser, user, closingTimeService, institutionService, closingTimeDataProvider);
 
         this.add(closingTimeManager);
 
@@ -153,7 +150,7 @@ public class ClosingTimeView extends Div
 //        this.add(buttonLayout, grid);
     }
 
-    public AutofilterGrid<InstitutionClosingTime> getGrid()
+    public AutofilterGrid<InstitutionClosingTime, Long> getGrid()
     {
         return grid;
     }
