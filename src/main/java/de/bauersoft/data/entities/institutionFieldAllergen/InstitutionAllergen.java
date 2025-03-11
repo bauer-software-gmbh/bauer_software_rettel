@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -28,5 +29,5 @@ public class InstitutionAllergen extends AbstractEntity implements ContainerID<L
     @JoinTable(name = "institution_allergen",
             joinColumns = @JoinColumn(name = "institution_allergen_group_id"),
             inverseJoinColumns = @JoinColumn(name = "allergen_id"))
-    private Set<Allergen> allergens;
+    private Set<Allergen> allergens = new HashSet<>();
 }

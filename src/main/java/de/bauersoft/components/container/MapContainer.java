@@ -3,9 +3,6 @@ package de.bauersoft.components.container;
 import com.vaadin.flow.component.notification.Notification;
 import de.bauersoft.services.ServiceBase;
 import de.bauersoft.views.institution.institutionFields.components.allergen.AllergenContainer;
-import de.bauersoft.views.institution.institutionFields.components.closingTime.ClosingTimesContainer;
-import de.bauersoft.views.institution.institutionFields.components.multiplier.MultiplierContainer;
-import de.bauersoft.views.institution.institutionFields.components.pattern.PatternContainer;
 
 import java.util.List;
 import java.util.Map;
@@ -16,11 +13,15 @@ import java.util.function.Supplier;
 
 public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
 {
+    private int mapper;
+
     private final Map<M, Container<T, ID>> containers;
 
     public MapContainer()
     {
         containers = new ConcurrentHashMap<>();
+
+        mapper = 1;
     }
 
     public abstract Container<T, ID> createContainer();
@@ -204,7 +205,7 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
 
             if(container instanceof AllergenContainer allergenContainer)
             {
-                System.out.println("Container: (" + container.getClass() + ") " + allergenContainer.getState());
+                Notification.show(allergenContainer.getTempState() + " - s " + allergenContainer.getState());
             }
 
             switch(state)
@@ -224,5 +225,15 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
         }
 
         return this;
+    }
+
+    public int getMapper()
+    {
+        return mapper;
+    }
+
+    public synchronized int nextMapper()
+    {
+        return ++mapper;
     }
 }

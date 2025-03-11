@@ -1,6 +1,8 @@
 package de.bauersoft.views.closingTime;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import de.bauersoft.data.entities.role.Role;
 import de.bauersoft.data.entities.user.User;
 import de.bauersoft.data.providers.InstitutionClosingTimeDataProvider;
 import de.bauersoft.security.AuthenticatedUser;
@@ -21,7 +23,7 @@ public class ClosingTimeManager extends Div
 
     private final InstitutionClosingTimeDataProvider closingTimeDataProvider;
 
-    private final InstitutionTabSheet institutionTabSheet;
+    private InstitutionTabSheet institutionTabSheet;
 
     public ClosingTimeManager(ClosingTimeView closingTimeView, AuthenticatedUser authenticatedUser, User user, InstitutionClosingTimeService closingTimeService, InstitutionService institutionService, InstitutionClosingTimeDataProvider closingTimeDataProvider)
     {
@@ -32,11 +34,22 @@ public class ClosingTimeManager extends Div
         this.institutionService = institutionService;
         this.closingTimeDataProvider = closingTimeDataProvider;
 
+        this.setWidthFull();
+        this.setHeightFull();
+
+        if(!getUser().getRoles().contains(Role.CLOSING_TIMES_SHOW_ALL_INSTITUTIONS) &&
+                getInstitutionService().findAllByUsersId(getUser().getId()).size() < 1)
+        {
+            Span div = new Span("Ihr Account ist noch nicht mit einer Institution verknüpft!");
+            div.getStyle()
+                    .set("margin", "var(--lumo-space-l)");
+
+            this.add(div);
+            return;
+        }
+
         institutionTabSheet = new InstitutionTabSheet(this);
 
         this.add(institutionTabSheet);
-
-        this.setWidthFull();
-        this.setHeightFull();
     }
 }

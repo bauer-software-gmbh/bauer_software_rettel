@@ -5,13 +5,15 @@ import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.allergen.Allergen;
 import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
 
+import java.util.HashSet;
 import java.util.Set;
-
 
 public class AllergenContainer extends Container<InstitutionAllergen, Long>
 {
-    private Set<Allergen> tempAllergens;
+    private int mapper;
+
     private ContainerState tempState;
+    private Set<Allergen> tempAllergens;
 
     private boolean isNew;
 
@@ -27,12 +29,14 @@ public class AllergenContainer extends Container<InstitutionAllergen, Long>
         loadTemporaries();
     }
 
-    @Override
-    public AllergenContainer setState(ContainerState state)
+    public int getMapper()
     {
-        super.setState(state);
-        this.tempState = state;
+        return mapper;
+    }
 
+    public AllergenContainer setMapper(int mapper)
+    {
+        this.mapper = mapper;
         return this;
     }
 
@@ -41,9 +45,21 @@ public class AllergenContainer extends Container<InstitutionAllergen, Long>
         return tempState;
     }
 
-    public void setTempState(ContainerState tempState)
+    public AllergenContainer setTempState(ContainerState tempState)
     {
         this.tempState = tempState;
+        return this;
+    }
+
+    public Set<Allergen> getTempAllergens()
+    {
+        return tempAllergens;
+    }
+
+    public AllergenContainer setTempAllergens(Set<Allergen> tempAllergens)
+    {
+        this.tempAllergens = tempAllergens;
+        return this;
     }
 
     public boolean isNew()
@@ -61,6 +77,7 @@ public class AllergenContainer extends Container<InstitutionAllergen, Long>
     public AllergenContainer loadTemporaries()
     {
         tempState = getState();
+        tempAllergens = new HashSet<>(getEntity().getAllergens());
         return this;
     }
 
@@ -68,6 +85,7 @@ public class AllergenContainer extends Container<InstitutionAllergen, Long>
     public AllergenContainer acceptTemporaries()
     {
         setState(tempState);
+        getEntity().setAllergens(tempAllergens);
         return this;
     }
 }

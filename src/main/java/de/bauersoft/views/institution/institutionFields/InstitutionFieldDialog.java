@@ -3,13 +3,10 @@ package de.bauersoft.views.institution.institutionFields;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.views.institution.InstitutionDialog;
 import de.bauersoft.views.institution.institutionFields.components.allergen.AllergenComponent;
 import de.bauersoft.views.institution.institutionFields.components.allergen.AllergenMapContainer;
-import de.bauersoft.views.institution.institutionFields.components.closingTime.ClosingTimesComponent;
-import de.bauersoft.views.institution.institutionFields.components.closingTime.ClosingTimesMapContainer;
 import de.bauersoft.views.institution.institutionFields.components.multiplier.MultiplierComponent;
 import de.bauersoft.views.institution.institutionFields.components.multiplier.MultiplierMapContainer;
 import de.bauersoft.views.institution.institutionFields.components.pattern.PatternComponent;
@@ -26,9 +23,7 @@ public class InstitutionFieldDialog extends Dialog
     private final PatternMapContainer patternMapContainer;
     private final MultiplierMapContainer multiplierMapContainer;
     private final AllergenMapContainer allergenMapContainer;
-    private final ClosingTimesMapContainer closingTimesMapContainer;
 
-    private final ClosingTimesComponent closingTimesComponent;
     private final PatternComponent patternComponent;
     private final MultiplierComponent multiplierComponent;
     private final AllergenComponent allergenComponent;
@@ -36,7 +31,7 @@ public class InstitutionFieldDialog extends Dialog
     private final Button okButton;
     private final Button cancelButton;
 
-    public InstitutionFieldDialog(InstitutionDialog institutionDialog, FieldDragComponent fieldDragComponent, InstitutionField institutionField, PatternMapContainer patternMapContainer, MultiplierMapContainer multiplierMapContainer, AllergenMapContainer allergenMapContainer, ClosingTimesMapContainer closingTimesMapContainer)
+    public InstitutionFieldDialog(InstitutionDialog institutionDialog, FieldDragComponent fieldDragComponent, InstitutionField institutionField, PatternMapContainer patternMapContainer, MultiplierMapContainer multiplierMapContainer, AllergenMapContainer allergenMapContainer)
     {
         this.institutionDialog = institutionDialog;
         this.fieldDragComponent = fieldDragComponent;
@@ -44,7 +39,6 @@ public class InstitutionFieldDialog extends Dialog
         this.patternMapContainer = patternMapContainer;
         this.multiplierMapContainer = multiplierMapContainer;
         this.allergenMapContainer = allergenMapContainer;
-        this.closingTimesMapContainer = closingTimesMapContainer;
 
         setHeaderTitle(institutionField.getInstitution().getName() + " - " + institutionField.getField().getName());
 
@@ -58,8 +52,6 @@ public class InstitutionFieldDialog extends Dialog
 
         allergenComponent = new AllergenComponent(institutionDialog, this, allergenMapContainer);
 
-        closingTimesComponent = new ClosingTimesComponent(institutionDialog, this, closingTimesMapContainer);
-
         okButton = new Button("Ok");
         okButton.setMinWidth("150px");
         okButton.setMaxWidth("180px");
@@ -70,8 +62,7 @@ public class InstitutionFieldDialog extends Dialog
 
             patternMapContainer.acceptTemporaries();
             multiplierMapContainer.acceptTemporaries();
-            allergenMapContainer.acceptTemporaries();
-            closingTimesMapContainer.acceptTemporaries();
+            allergenMapContainer.acceptTemporaries();;
             this.close();
         });
 
@@ -84,7 +75,6 @@ public class InstitutionFieldDialog extends Dialog
             patternMapContainer.loadTemporaries();
             multiplierMapContainer.loadTemporaries();
             allergenMapContainer.loadTemporaries();
-            closingTimesMapContainer.loadTemporaries();
             this.close();
         });
 
@@ -94,7 +84,7 @@ public class InstitutionFieldDialog extends Dialog
         this.setMaxHeight("90vh");
 
         this.getFooter().add(okButton, cancelButton);
-        this.add(patternComponent, multiplierComponent, new HorizontalLayout(closingTimesComponent, allergenComponent));
+        this.add(patternComponent, multiplierComponent, allergenComponent);
         this.setCloseOnEsc(false);
         this.setCloseOnOutsideClick(false);
         this.setModal(true);

@@ -2,6 +2,7 @@ package de.bauersoft.views.closingTime.institutionLayer;
 
 import com.vaadin.flow.component.tabs.TabSheet;
 import de.bauersoft.data.entities.institution.Institution;
+import de.bauersoft.data.entities.role.Role;
 import de.bauersoft.views.closingTime.ClosingTimeManager;
 import lombok.Getter;
 
@@ -21,12 +22,25 @@ public class InstitutionTabSheet extends TabSheet
 
         institutionTabMap = new HashMap<>();
 
-        for(Institution institution : closingTimeManager.getInstitutionService().findAllByUsersId(closingTimeManager.getUser().getId()))
+        if(closingTimeManager.getUser().getRoles().contains(Role.CLOSING_TIMES_SHOW_ALL_INSTITUTIONS))
         {
-            InstitutionTab institutionTab = new InstitutionTab(closingTimeManager, this, institution);
-            institutionTabMap.put(institution, institutionTab);
+            for(Institution institution : closingTimeManager.getInstitutionService().findAll())
+            {
+                InstitutionTab institutionTab = new InstitutionTab(closingTimeManager, this, institution);
+                institutionTabMap.put(institution, institutionTab);
 
-            this.add(institutionTab.getTab(), institutionTab);
+                this.add(institutionTab.getTab(), institutionTab);
+            }
+
+        }else
+        {
+            for(Institution institution : closingTimeManager.getInstitutionService().findAllByUsersId(closingTimeManager.getUser().getId()))
+            {
+                InstitutionTab institutionTab = new InstitutionTab(closingTimeManager, this, institution);
+                institutionTabMap.put(institution, institutionTab);
+
+                this.add(institutionTab.getTab(), institutionTab);
+            }
         }
 
         this.setWidthFull();
