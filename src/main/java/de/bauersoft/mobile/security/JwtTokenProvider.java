@@ -1,6 +1,7 @@
 package de.bauersoft.mobile.security;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ public class JwtTokenProvider {
 
     // Token generieren
     public String generateToken(UserDetails userDetails) {
+
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())  // Benutzername als Subject
                 .setIssuedAt(new Date())  // Erstellungszeitpunkt
@@ -41,7 +43,8 @@ public class JwtTokenProvider {
     // Token validieren
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(getSigningKey()).build()
+                    .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
             logger.warn("JWT Token ist abgelaufen: {}", e.getMessage());
