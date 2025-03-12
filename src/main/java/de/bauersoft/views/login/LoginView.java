@@ -14,7 +14,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import de.bauersoft.security.AuthenticatedUser;
 
 @AnonymousAllowed
-@PageTitle("ui/Login")
+@PageTitle("Login")
 @Route(value = "login")
 @CssImport("./themes/rettels/views/login.css")
 public class LoginView extends Div implements BeforeEnterObserver {

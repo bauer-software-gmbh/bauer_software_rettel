@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @PageTitle("Speiseplan")
-@Route(value = "menue", layout = MainLayout.class)
+@Route(value = "ui/menue", layout = MainLayout.class)
 @AnonymousAllowed
 public class MenueView extends Div
 {

@@ -15,6 +15,7 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.dom.Style.AlignItems;
 import com.vaadin.flow.dom.Style.Display;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import de.bauersoft.data.entities.user.User;
