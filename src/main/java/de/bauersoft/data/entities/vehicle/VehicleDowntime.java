@@ -9,13 +9,13 @@ import java.time.LocalDate;
 @Table(name = "vehicle_downtime")
 public class VehicleDowntime extends AbstractEntity
 {
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "vehicle_id", referencedColumnName = "id", nullable = false)
+    private Vehicle vehicle;
+
     @Column(nullable = false)
     private LocalDate startDate;
 
     @Column(nullable = false)
     private LocalDate endDate;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "vehicle_id", referencedColumnName = "id", nullable = false)
-    private Vehicle vehicle;
 }

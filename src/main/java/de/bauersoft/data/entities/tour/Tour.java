@@ -40,22 +40,22 @@ public class Tour extends AbstractEntity
     @Column(nullable = false, columnDefinition = "INTEGER default 1")
     private int requiredDrivers;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "driver_id", referencedColumnName = "id", nullable = false)
     private Driver driver;
 
     @Column(nullable = false)
     private LocalDate drivesUntil;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Driver coDriver;
 
     @Column(nullable = false)
     private LocalDate coDrivesUntil;
 
-    @OneToMany(mappedBy = "tour", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
+    @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     private Set<TourInstitution> institutions;
 
-    @ManyToMany(mappedBy = "driveableTours", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "driveableTours", fetch = FetchType.LAZY)
     private Set<Driver> possibleDrivers;
 }
