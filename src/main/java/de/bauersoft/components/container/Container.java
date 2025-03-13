@@ -10,6 +10,7 @@ public abstract class Container<T extends ContainerID<ID>, ID>
     private T entity;
 
     private ContainerState state;
+    private ContainerState tempState;
 
     public Container(T entity)
     {
@@ -17,6 +18,7 @@ public abstract class Container<T extends ContainerID<ID>, ID>
 
         this.entity = entity;
         this.state = ContainerState.IGNORE;
+        this.tempState = ContainerState.IGNORE;
     }
 
     public Container(T entity, ContainerState state)
@@ -25,6 +27,7 @@ public abstract class Container<T extends ContainerID<ID>, ID>
 
         this.entity = entity;
         this.state = state;
+        this.tempState = state;
     }
 
     public T getEntity()
@@ -43,6 +46,17 @@ public abstract class Container<T extends ContainerID<ID>, ID>
     public ContainerState getState()
     {
         return state;
+    }
+
+    public ContainerState getTempState()
+    {
+        return tempState;
+    }
+
+    public Container<T, ID> setTempState(ContainerState tempState)
+    {
+        this.tempState = tempState;
+        return this;
     }
 
     public Container<T, ID> setState(ContainerState state)

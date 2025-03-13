@@ -1,30 +1,30 @@
 package de.bauersoft.test;
 
-import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.allergen.Allergen;
 import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
+import de.bauersoft.data.entities.order.Order;
+import de.bauersoft.data.entities.order.OrderAllergen;
+import de.bauersoft.data.entities.variant.Variant;
 import de.bauersoft.services.*;
+import de.bauersoft.views.order.OrderView;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Configuration
 public class AutoInitializer
 {
 
     @Bean
-    @Order(2)
     public CommandLineRunner testInits(InstitutionService institutionService,
                                        InstitutionFieldsService institutionFieldsService,
                                        InstitutionAllergenService institutionAllergenService,
@@ -35,7 +35,11 @@ public class AutoInitializer
                                        AllergenService allergenService,
                                        PatternService patternService,
                                        UnitService unitService,
-                                       AdditiveService additiveService)
+                                       AdditiveService additiveService,
+                                       OrderService orderService,
+                                       OrderAllergenService orderAllergenService,
+                                       OrderDataService orderDataService,
+                                       VariantService variantService)
     {
         return args ->
         {
@@ -96,7 +100,63 @@ public class AutoInitializer
                 institutionFieldsService.updateAll(institution.getInstitutionFields());
             }
 
-            InstitutionField institutionField = institutionFieldsService.findAll().get(0);
+            for(long i = variantService.count(); i < 5; i++)
+            {
+                Variant variant = new Variant();
+                variant.setPattern(patternService.findAll().get(0));
+
+                variantService.update(variant);
+            }
+
+//            Set<InstitutionAllergen> institutionAllergens = new HashSet<>();
+//            for(int i = 0; i < 5; i++)
+//            {
+//                InstitutionAllergen institutionAllergen = new InstitutionAllergen();
+//                institutionAllergen.setInstitutionField(institutionFieldsService.findAll().get(0));
+//                institutionAllergen.setAllergens(allergenService.findAll().stream().collect(Collectors.toSet()));
+//
+//                institutionAllergens.add(institutionAllergen);
+//            }
+
+
+//            de.bauersoft.data.entities.order.Order order = new de.bauersoft.data.entities.order.Order();
+//            order.setField(fieldService.findAll().get(0));
+//            order.setInstitution(institutionService.findAll().get(0));
+//            order.setOrderDate(LocalDate.now());
+//
+//            orderService.update(order);
+//
+//            Optional<de.bauersoft.data.entities.order.Order> orderOptional = orderService.findByOrderDateAndInstitutionAndField(LocalDate.now(), institutionService.findAll().get(0), fieldService.findAll().get(0));
+//            if(orderOptional.isEmpty())
+//                throw new RuntimeException("Order not found");
+
+            Order order = orderService.findAll().get(0);
+            System.out.println(order.toString());
+//
+//            List<OrderAllergen> orderAllergens = new ArrayList<>();
+//            for(int i = 0; i < 5; i++)
+//            {
+//                OrderAllergen orderAllergen = new OrderAllergen();
+//                orderAllergen.set_order(order);
+//                orderAllergen.setAllergens(allergenService.findAll().stream().collect(Collectors.toSet()));
+//
+//                orderAllergens.add(orderAllergen);
+//            }
+//
+//            System.out.println("id: " + order.getId());
+
+//            orderAllergenService.updateAll(orderAllergens);
+
+
+//            List<OrderAllergen> orderAllergens = new ArrayList<>(order.getOrderAllergens());
+//            orderAllergens.remove(0);
+//
+//            order.setOrderAllergens(orderAllergens.stream().collect(Collectors.toSet()));
+//            orderService.update(order);
+
+
+
+            //InstitutionField institutionField = institutionFieldsService.findAll().get(0);
 
 //            for(int i = 0; i < 5; i++)
 //            {

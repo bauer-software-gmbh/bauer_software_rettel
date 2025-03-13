@@ -4,7 +4,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.tabs.Tab;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.views.order.OrderManager;
-import de.bauersoft.views.order.institutionLayer.fieldLayer.calendarLayer.CalendarCluster;
+import de.bauersoft.views.order.institutionLayer.fieldLayer.calenderLayer.CalenderComponent;
 import lombok.Getter;
 
 @Getter
@@ -16,7 +16,7 @@ public class FieldTab extends Div
 
     private final Tab tab;
 
-    private CalendarCluster calendarCluster;
+    private final CalenderComponent calenderComponent;
 
     public FieldTab(OrderManager orderManager, FieldTabSheet fieldTabSheet, InstitutionField institutionField)
     {
@@ -26,8 +26,8 @@ public class FieldTab extends Div
 
         tab = new Tab(institutionField.getField().getName());
 
-        calendarCluster = new CalendarCluster(orderManager, this);
-
-        this.add(calendarCluster);
+        calenderComponent = new CalenderComponent(orderManager, this);
+        this.add(calenderComponent);
     }
 }
+

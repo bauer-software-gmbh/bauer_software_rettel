@@ -1,7 +1,7 @@
-package de.bauersoft.data.entities.driver;
+package de.bauersoft.data.entities.tourPlanning.driver;
 
 import de.bauersoft.data.entities.AbstractEntity;
-import de.bauersoft.data.entities.tour.Tour;
+import de.bauersoft.data.entities.tourPlanning.tour.Tour;
 import de.bauersoft.data.entities.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,7 @@
 package de.bauersoft.views.order;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.Style;
 import de.bauersoft.data.entities.role.Role;
@@ -31,6 +32,8 @@ public class OrderManager extends Div
     private final InstitutionPatternService institutionPatternService;
     private final InstitutionAllergenService institutionAllergenService;
 
+    private Paragraph paragraph;
+
     private InstitutionTabSheet institutionTabSheet;
 
     public OrderManager(AuthenticatedUser authenticatedUser, InstitutionService institutionService, FieldService fieldService, MenuService menuService, VariantService variantService, OfferService offerService, AllergenService allergenService, OrderService orderService, OrderDataService orderDataService, OrderAllergenService orderAllergenService, InstitutionPatternService institutionPatternService, InstitutionAllergenService institutionAllergenService)
@@ -57,14 +60,17 @@ public class OrderManager extends Div
         this.setWidthFull();
         this.setHeightFull();
 
-        if(!getUser().getRoles().contains(Role.ORDER_SHOW_ALL_INSTITUTIONS) &&
-                getInstitutionService().findAllByUsersId(getUser().getId()).size() < 1)
-        {
-            Span div = new Span("Ihr Account ist noch nicht mit einer Institution verknüpft!");
-            div.getStyle()
-                    .set("margin", "var(--lumo-space-l)");
+        paragraph = new Paragraph();
+        paragraph.getStyle()
+                .setMargin("var(--lumo-space-s)");
 
-            this.add(div);
+        if(!getUser().getRoles().contains(Role.ORDER_SHOW_ALL_INSTITUTIONS) &&
+                !getUser().getRoles().contains(Role.ADMIN) &&
+                institutionService.findAllByUsersId(getUser().getId()).size() < 1)
+        {
+            paragraph.setText("Ihr Account ist mit keiner Institution verknüpft!");
+            this.add(paragraph);
+
             return;
         }
 

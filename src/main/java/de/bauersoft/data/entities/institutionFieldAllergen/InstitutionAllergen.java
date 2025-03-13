@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "institution_allergen_group")
+@Table(name = "institution_allergen")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -26,8 +26,8 @@ public class InstitutionAllergen extends AbstractEntity implements ContainerID<L
     private InstitutionField institutionField;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "institution_allergen",
-            joinColumns = @JoinColumn(name = "institution_allergen_group_id"),
+    @JoinTable(name = "institution_allergens",
+            joinColumns = @JoinColumn(name = "institution_allergen_id"),
             inverseJoinColumns = @JoinColumn(name = "allergen_id"))
     private Set<Allergen> allergens = new HashSet<>();
 }

@@ -85,24 +85,24 @@ public class AllergenView extends Div
 									cancel = true;
 								}
 
-								if(orderAllergenService.getRepository().existsByAllergenId(item.getId()))
-								{
-									//TODO später durch fancy dialog ersetzen
-									Div div = new Div();
-									div.setMaxWidth("33vw");
-									div.getStyle().set("white-space", "normal");
-									div.getStyle().set("word-wrap", "break-word");
-
-									div.add(new Text("Das Allergen \"" + item.getName() + "\" kann nicht gelöscht werden, da es noch in einigen Bestellungen verwendet wird."));
-
-									Notification notification = new Notification(div);
-									notification.setDuration(5000);
-									notification.setPosition(Notification.Position.MIDDLE);
-									notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
-									notification.open();
-
-									cancel = true;
-								}
+//								if(orderAllergenService.getRepository().existsByAllergenId(item.getId()))
+//								{
+//									//TODO später durch fancy dialog ersetzen
+//									Div div = new Div();
+//									div.setMaxWidth("33vw");
+//									div.getStyle().set("white-space", "normal");
+//									div.getStyle().set("word-wrap", "break-word");
+//
+//									div.add(new Text("Das Allergen \"" + item.getName() + "\" kann nicht gelöscht werden, da es noch in einigen Bestellungen verwendet wird."));
+//
+//									Notification notification = new Notification(div);
+//									notification.setDuration(5000);
+//									notification.setPosition(Notification.Position.MIDDLE);
+//									notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+//									notification.open();
+//
+//									cancel = true;
+//								}
 
 								if(cancel) return;
 

@@ -1,8 +1,8 @@
-package de.bauersoft.data.entities.tour;
+package de.bauersoft.data.entities.tourPlanning.tour;
 
 import de.bauersoft.data.entities.AbstractEntity;
-import de.bauersoft.data.entities.driver.Driver;
-import de.bauersoft.data.entities.vehicle.Vehicle;
+import de.bauersoft.data.entities.tourPlanning.driver.Driver;
+import de.bauersoft.data.entities.tourPlanning.vehicle.Vehicle;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -53,7 +53,7 @@ public class Tour extends AbstractEntity
     @Column(nullable = false)
     private LocalDate coDrivesUntil;
 
-    @OneToMany(mappedBy = "tour", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
+    @OneToMany(mappedBy = "tour", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     private Set<TourInstitution> institutions;
 
     @ManyToMany(mappedBy = "driveableTours", fetch = FetchType.EAGER)

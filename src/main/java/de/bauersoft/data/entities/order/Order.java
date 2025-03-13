@@ -1,5 +1,6 @@
 package de.bauersoft.data.entities.order;
 
+import de.bauersoft.components.container.ContainerID;
 import de.bauersoft.data.entities.AbstractEntity;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
@@ -21,7 +22,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Order extends AbstractEntity
+public class Order extends AbstractEntity implements ContainerID<Long>
 {
     @Transient
     private boolean confirmed = false;
@@ -34,28 +35,27 @@ public class Order extends AbstractEntity
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
-    @OnDelete(action = OnDeleteAction.RESTRICT)
     private Institution institution;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
-    @OnDelete(action = OnDeleteAction.RESTRICT)
     private Field field;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN default false")
     private boolean customerOrdered = false;
 
-    @OneToMany(mappedBy = "_order", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "_order", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
     private Set<OrderData> orderData = new HashSet<>();
 
-    @OneToMany(mappedBy = "_order", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "_order", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
     private Set<OrderAllergen> orderAllergens = new HashSet<>();
 
     @Override
     public String toString()
     {
         return "Order{" +
-                "orderDate=" + orderDate +
+                "id=" + getId() +
+                ", orderDate=" + orderDate +
                 ", institution=" + institution +
                 ", field=" + field +
                 ", orderData=" + orderData +

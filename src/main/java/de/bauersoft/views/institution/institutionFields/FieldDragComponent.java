@@ -119,15 +119,7 @@ public class FieldDragComponent extends FlexLayout
                 AllergenMapContainer container = new AllergenMapContainer();
 
                 for(InstitutionAllergen institutionAllergen : event.getItem().getInstitutionAllergens())
-                {
                     container.addContainer(container.nextMapper(), institutionAllergen, ContainerState.SHOW);
-                    String allergens = institutionAllergen.getAllergens()
-                            .stream()
-                            .map(allergen -> allergen.getName())
-                            .collect(Collectors.joining(", "));
-
-                    System.out.println(institutionAllergen.getId() + " " + allergens);
-                }
 
                 return container;
             });

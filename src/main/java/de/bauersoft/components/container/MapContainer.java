@@ -197,31 +197,45 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
      */
     public MapContainer<T, ID, M> run(ServiceBase<T, ID> service)
     {
+        return run(service, null);
+    }
+
+    public MapContainer<T, ID, M> run(ServiceBase<T, ID> service, Consumer<Container<T, ID>> onRun)
+    {
         Objects.requireNonNull(service);
         for(Map.Entry<M, Container<T, ID>> entry : containers.entrySet())
         {
             Container<T, ID> container = entry.getValue();
             ContainerState state = container.getState();
 
-            if(container instanceof AllergenContainer allergenContainer)
-            {
-                Notification.show(allergenContainer.getTempState() + " - s " + allergenContainer.getState());
-            }
+            Notification.show(container.getState().toString());
 
-            switch(state)
+            try
             {
-                case UPDATE ->
+                switch(state)
                 {
-                    System.out.println("UPDATE: " + container.getEntity().toString());
-                    container.update(service);
+                    case UPDATE ->
+                    {
+                        System.out.println("UPDATE: " + container.getEntity().toString());
+                        container.update(service);
+                        container.setTempState(ContainerState.SHOW);
+                    }
+
+                    case DELETE ->
+                    {
+                        System.out.println("DELETE: " + container.getEntity().toString());
+                        container.delete(service);
+                        container.setTempState(ContainerState.IGNORE);
+                    }
                 }
 
-                case DELETE ->
-                {
-                    System.out.println("DELETE: " + container.getEntity().toString());
-                    container.delete(service);
-                }
+            }catch(Exception e)
+            {
+                e.printStackTrace();
             }
+
+            if(onRun != null)
+                onRun.accept(container);
         }
 
         return this;

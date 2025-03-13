@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.vaadin.flow.theme.lumo.Lumo;
 import de.bauersoft.test.Mapper;
 import de.bauersoft.test.TestClass;
 import org.springframework.boot.SpringApplication;

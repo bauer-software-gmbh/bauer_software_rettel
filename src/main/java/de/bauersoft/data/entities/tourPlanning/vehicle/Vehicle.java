@@ -1,4 +1,4 @@
-package de.bauersoft.data.entities.vehicle;
+package de.bauersoft.data.entities.tourPlanning.vehicle;
 
 import de.bauersoft.data.entities.AbstractEntity;
 import jakarta.persistence.*;

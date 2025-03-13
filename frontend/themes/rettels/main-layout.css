@@ -23,6 +23,7 @@ vaadin-side-nav-item vaadin-icon {
 	background-color: var(--lumo-base-color);
 	width: 100%;
 	height: 100%;
+    position: fixed;
 }
 .offer_target{
 	border:1px solid var(--lumo-shade-70pct);

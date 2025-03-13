@@ -1,24 +1,24 @@
-package de.bauersoft.views.institution.institutionFields.components.allergen;
+package de.bauersoft.views.order.institutionLayer.fieldLayer.calenderLayer.orderLayer.allergenLayer;
 
 import de.bauersoft.components.container.Container;
 import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.allergen.Allergen;
-import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
+import de.bauersoft.data.entities.order.OrderAllergen;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class AllergenContainer extends Container<InstitutionAllergen, Long>
+public class AllergenContainer extends Container<OrderAllergen, Long>
 {
     private Set<Allergen> tempAllergens;
 
-    public AllergenContainer(InstitutionAllergen entity)
+    public AllergenContainer(OrderAllergen entity)
     {
         super(entity);
         loadTemporaries();
     }
 
-    public AllergenContainer(InstitutionAllergen entity, ContainerState state)
+    public AllergenContainer(OrderAllergen entity, ContainerState state)
     {
         super(entity, state);
         loadTemporaries();
@@ -46,7 +46,7 @@ public class AllergenContainer extends Container<InstitutionAllergen, Long>
     @Override
     public AllergenContainer acceptTemporaries()
     {
-        getEntity().setAllergens(tempAllergens);
+        getEntity().setAllergens(new HashSet<>(tempAllergens));
         setState(getTempState());
         return this;
     }
