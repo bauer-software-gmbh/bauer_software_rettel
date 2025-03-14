@@ -13,6 +13,13 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
+/**
+ * Utility-Klasse zur Verwaltung von JWT-Token.
+ * <p>
+ * Diese Klasse enthält Methoden zum Generieren, Validieren und Extrahieren von Informationen
+ * aus JSON Web Tokens (JWT).
+ * </p>
+ */
 @Component
 public class JwtTokenProvider {
 
@@ -24,45 +31,77 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration}")
     private long jwtExpirationMs;
 
-    // Schlüssel für das Token-Management
+    /**
+     * Erstellt den geheimen Schlüssel für die JWT-Signatur.
+     *
+     * @return Der generierte `Key` für die JWT-Signierung.
+     */
     private Key getSigningKey() {
+        logger.debug("🔑 Generiere JWT-Signatur-Schlüssel...");
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    // Token generieren
+    /**
+     * Erstellt ein neues JWT-Token für den angegebenen Benutzer.
+     *
+     * @param userDetails Die Benutzerinformationen für das Token.
+     * @return Ein signiertes JWT-Token als `String`.
+     */
     public String generateToken(UserDetails userDetails) {
+        logger.info("🛠️ Generiere JWT-Token für Benutzer: {}", userDetails.getUsername());
 
-        return Jwts.builder()
-                .setSubject(userDetails.getUsername())  // Benutzername als Subject
-                .setIssuedAt(new Date())  // Erstellungszeitpunkt
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))  // Ablaufzeit
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)  // Signieren mit HMAC SHA-256
+        String token = Jwts.builder()
+                .setSubject(userDetails.getUsername()) // Benutzername als Subject
+                .setIssuedAt(new Date()) // Erstellungszeitpunkt
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs)) // Ablaufzeit
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Signatur mit HMAC SHA-256
                 .compact();
+
+        logger.debug("✅ JWT-Token erfolgreich generiert: {}", token);
+        return token;
     }
 
-    // Token validieren
+    /**
+     * Überprüft, ob das übergebene JWT-Token gültig ist.
+     *
+     * @param token Das zu überprüfende JWT-Token.
+     * @return `true`, wenn das Token gültig ist, sonst `false`.
+     */
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(getSigningKey()).build()
-                    .parseClaimsJws(token);
+            logger.info("🔍 Validierung des JWT-Tokens...");
+            Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
+            logger.info("✅ JWT-Token ist gültig.");
             return true;
         } catch (ExpiredJwtException e) {
-            logger.warn("JWT Token ist abgelaufen: {}", e.getMessage());
+            logger.warn("⚠️ JWT-Token ist abgelaufen: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
-            logger.warn("Nicht unterstütztes JWT Token: {}", e.getMessage());
+            logger.warn("⚠️ Nicht unterstütztes JWT-Token: {}", e.getMessage());
         } catch (MalformedJwtException e) {
-            logger.warn("Ungültiges JWT Token: {}", e.getMessage());
+            logger.warn("⚠️ Ungültiges JWT-Token: {}", e.getMessage());
         } catch (SignatureException e) {
-            logger.warn("Ungültige Signatur: {}", e.getMessage());
+            logger.warn("⚠️ Ungültige JWT-Signatur: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-            logger.warn("Leeres oder ungültiges JWT Token: {}", e.getMessage());
+            logger.warn("⚠️ Leeres oder ungültiges JWT-Token: {}", e.getMessage());
         }
         return false;
     }
 
-    // Benutzername aus Token extrahieren
+    /**
+     * Extrahiert den Benutzernamen aus dem übergebenen JWT-Token.
+     *
+     * @param token Das JWT-Token.
+     * @return Der Benutzername (`subject`) aus dem Token.
+     */
     public String getUsernameFromToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build()
-                .parseClaimsJws(token).getBody().getSubject();
+        logger.info("📜 Extrahiere Benutzername aus JWT-Token...");
+        String username = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+        logger.info("✅ Benutzername aus Token: {}", username);
+        return username;
     }
 }
