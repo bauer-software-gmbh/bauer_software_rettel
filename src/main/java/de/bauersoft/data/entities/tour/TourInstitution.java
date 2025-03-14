@@ -2,6 +2,10 @@ package de.bauersoft.data.entities.tour;
 
 import de.bauersoft.data.entities.institution.Institution;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,6 +13,10 @@ import java.time.LocalTime;
 
 @Entity
 @Table(name = "tour_institutions")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class TourInstitution
 {
     @EmbeddedId
@@ -27,7 +35,7 @@ public class TourInstitution
     @Column(nullable = false)
     private LocalDate contractStart;
 
-    @Column(nullable = true, columnDefinition = "DATE default 31.12.9999")
+    @Column(nullable = true, columnDefinition = "DATE default '9999-12-31'")
     private LocalDate contractEnd;
 
     @Column(nullable = false)

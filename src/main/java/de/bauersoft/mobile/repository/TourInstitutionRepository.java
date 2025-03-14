@@ -11,5 +11,3 @@ public interface TourInstitutionRepository extends JpaRepository<TourInstitution
 {
     List<TourInstitution> findByTourId(Long tourId);
 }
-
-}
