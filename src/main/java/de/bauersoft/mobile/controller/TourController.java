@@ -1,8 +1,7 @@
 package de.bauersoft.mobile.controller;
 
-import de.bauersoft.data.entities.tour.Tour;
-import de.bauersoft.data.model.TourDTO;
-import de.bauersoft.services.TourService;
+import de.bauersoft.mobile.model.TourDTO;
+import de.bauersoft.mobile.service.TourService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
