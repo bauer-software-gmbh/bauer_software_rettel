@@ -11,16 +11,15 @@ import de.bauersoft.mobile.model.TourDTO;
 import de.bauersoft.data.repositories.address.AddressRepository;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import de.bauersoft.data.repositories.institution.InstitutionRepository;
-import de.bauersoft.data.repositories.tour.TourInstitutionRepository;
-import de.bauersoft.data.repositories.tour.TourRepository;
 import de.bauersoft.mobile.repository.DriverRepository;
+import de.bauersoft.mobile.repository.TourInstitutionRepository;
+import de.bauersoft.mobile.repository.TourRepository;
 import de.bauersoft.services.ServiceBase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 

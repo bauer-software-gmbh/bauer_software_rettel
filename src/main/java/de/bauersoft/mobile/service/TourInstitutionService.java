@@ -5,7 +5,7 @@ import de.bauersoft.data.entities.tour.TourInstitution;
 import de.bauersoft.data.entities.tour.TourInstitutionKey;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
-import de.bauersoft.data.repositories.tour.TourInstitutionRepository;
+import de.bauersoft.mobile.repository.TourInstitutionRepository;
 import de.bauersoft.services.ServiceBase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
