@@ -55,6 +55,10 @@ public class Institution extends AbstractEntity
     @OneToMany(mappedBy = "institution", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
     private Set<InstitutionClosingTime> institutionClosingTimes = new HashSet<>();
 
+    public <E> Institution(long l, String institutionB, String beschreibungDerInstitutionB, String s, LocalTime of, LocalTime of1, Address address2, Set<E> es, Set<E> of2, Set<E> of3) {
+        super();
+    }
+
     public boolean isClosed()
     {
         return institutionClosingTimes.stream().anyMatch(closing ->

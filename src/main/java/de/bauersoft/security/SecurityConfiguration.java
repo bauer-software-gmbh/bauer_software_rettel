@@ -12,6 +12,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @EnableWebSecurity
 @Configuration
@@ -37,7 +41,8 @@ public class SecurityConfiguration extends VaadinWebSecurity {
                         new AntPathRequestMatcher("/icons/*.png"),
                         new AntPathRequestMatcher("/icons/*.jpg")).permitAll()
 
-        );
+        )
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
         // Icons from the line-awesome addon
         http.authorizeHttpRequests(authorize -> authorize
@@ -54,6 +59,19 @@ public class SecurityConfiguration extends VaadinWebSecurity {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> web.ignoring().requestMatchers("/images/**");
+    }
+
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowPrivateNetwork(true);
+        config.setAllowedOrigins(List.of("https://localhost","http://localhost:8100"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Allowed HTTP methods
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config); // Apply CORS configuration to all endpoints
+        return source;
     }
 
 }

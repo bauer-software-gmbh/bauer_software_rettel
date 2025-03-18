@@ -1,12 +1,11 @@
-package de.bauersoft.mobile.service;
+package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import de.bauersoft.data.entities.tour.TourInstitution;
 import de.bauersoft.data.entities.tour.TourInstitutionKey;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
-import de.bauersoft.mobile.repository.TourInstitutionRepository;
-import de.bauersoft.services.ServiceBase;
+import de.bauersoft.data.repositories.tour.TourInstitutionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;

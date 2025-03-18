@@ -1,4 +1,4 @@
-package de.bauersoft.mobile.repository;
+package de.bauersoft.data.repositories.tour;
 
 import de.bauersoft.data.entities.tour.Tour;
 import org.springframework.data.jpa.repository.JpaRepository;

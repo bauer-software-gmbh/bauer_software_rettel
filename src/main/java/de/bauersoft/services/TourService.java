@@ -1,4 +1,4 @@
-package de.bauersoft.mobile.service;
+package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import de.bauersoft.data.entities.address.Address;
@@ -7,14 +7,13 @@ import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.tour.Tour;
 import de.bauersoft.data.entities.tour.TourInstitution;
 import de.bauersoft.data.filters.SerializableFilter;
-import de.bauersoft.mobile.model.TourDTO;
+import de.bauersoft.mobile.model.DTO.TourDTO;
 import de.bauersoft.data.repositories.address.AddressRepository;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import de.bauersoft.data.repositories.institution.InstitutionRepository;
-import de.bauersoft.mobile.repository.DriverRepository;
-import de.bauersoft.mobile.repository.TourInstitutionRepository;
-import de.bauersoft.mobile.repository.TourRepository;
-import de.bauersoft.services.ServiceBase;
+import de.bauersoft.data.repositories.driver.DriverRepository;
+import de.bauersoft.data.repositories.tour.TourInstitutionRepository;
+import de.bauersoft.data.repositories.tour.TourRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -27,20 +26,14 @@ import java.util.*;
 public class TourService implements ServiceBase<Tour, Long>
 {
     private final TourRepository repository;
-    private final DriverRepository driverRepository;
     private final TourInstitutionRepository tourInstitutionRepository;
-    private final InstitutionRepository institutionRepository;
-    private final AddressRepository addressRepository;
 
     public TourService(TourRepository repository, DriverRepository driverRepository,
                        TourInstitutionRepository tourInstitutionRepository,
                        InstitutionRepository institutionRepository, AddressRepository addressRepository)
     {
         this.repository = repository;
-        this.driverRepository = driverRepository;
         this.tourInstitutionRepository = tourInstitutionRepository;
-        this.institutionRepository = institutionRepository;
-        this.addressRepository = addressRepository;
     }
 
     @Override

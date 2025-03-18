@@ -12,8 +12,10 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import static org.springframework.security.config.Customizer.withDefaults;
+import java.util.List;
 
 /**
  * Sicherheitskonfiguration für die API-Endpunkte.
@@ -61,7 +63,7 @@ public class ApiSecurityConfig {
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT → Kein Session-Management
                 .csrf(AbstractHttpConfigurer::disable) // CSRF deaktivieren, da wir kein session-basiertes Auth verwenden
-                .cors(withDefaults()) // CORS-Standardkonfiguration
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS-Standardkonfiguration
                 .formLogin(AbstractHttpConfigurer::disable) // Form-basiertes Login deaktivieren
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT-Filter vor Username/Passwort-Authentifizierung setzen
 
@@ -80,5 +82,18 @@ public class ApiSecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         logger.info("🛠️ Initialisiere AuthenticationManager...");
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowPrivateNetwork(true);
+        config.setAllowedOrigins(List.of("https://localhost","http://localhost:8100"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Allowed HTTP methods
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config); // Apply CORS configuration to all endpoints
+        return source;
     }
 }

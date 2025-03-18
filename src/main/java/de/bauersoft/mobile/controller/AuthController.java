@@ -123,6 +123,10 @@ public class AuthController {
             response.put("account_info", accountInfo);
 
             logger.info("📤 Login-Erfolg - Token wird zurückgegeben.");
+
+            logger.info("🔑 JWT-Token generiert für Benutzer: {}", userDetails.getUsername());
+            logger.info("📤 Token zurückgegeben: {}", auth_token);
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("❌ Fehler beim Login für Anfrage: {} - {}", requestData, e.getMessage(), e);

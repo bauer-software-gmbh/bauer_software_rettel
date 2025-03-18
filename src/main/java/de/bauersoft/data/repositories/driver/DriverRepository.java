@@ -1,4 +1,4 @@
-package de.bauersoft.mobile.repository;
+package de.bauersoft.data.repositories.driver;
 
 import de.bauersoft.data.entities.driver.Driver;
 import org.springframework.data.jpa.repository.JpaRepository;
