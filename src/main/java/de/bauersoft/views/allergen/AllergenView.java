@@ -33,33 +33,33 @@ public class AllergenView extends Div
 	private final IngredientService ingredientService;
 	private final OrderAllergenService orderAllergenService;
 
-	private final AllergenDataProvider allergenDataProvider;
+	private final FilterDataProvider<Allergen, Long> filterDataProvider;
 
 	private final AutofilterGrid<Allergen, Long> grid;
 
-	public AllergenView(AllergenService allergenService, IngredientService ingredientService, OrderAllergenService orderAllergenService, AllergenDataProvider allergenDataProvider)
+	public AllergenView(AllergenService allergenService, IngredientService ingredientService, OrderAllergenService orderAllergenService)
 	{
         this.allergenService = allergenService;
         this.ingredientService = ingredientService;
         this.orderAllergenService = orderAllergenService;
-        this.allergenDataProvider = allergenDataProvider;
 
         setClassName("content");
 
-		grid = new AutofilterGrid<>(allergenDataProvider);
+		filterDataProvider = new FilterDataProvider<>(allergenService);
+		grid = new AutofilterGrid<>(filterDataProvider);
 
 		grid.setWidthFull();
 		grid.setHeightFull();
 		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-		grid.addColumn("name", "Name", Allergen::getName);
-		grid.addColumn("description", "Beschreibung", Allergen::getDescription);
+		grid.addColumn("name", "Name", Allergen::getName, false);
+		grid.addColumn("description", "Beschreibung", Allergen::getDescription, false);
 
 		grid.AutofilterGridContextMenu()
 						.enableGridContextMenu()
 						.enableAddItem("Neues Allergen", event ->
 						{
-							new AllergenDialog(allergenService, allergenDataProvider, new Allergen(), DialogState.EDIT);
+							new AllergenDialog(filterDataProvider, allergenService, new Allergen(), DialogState.EDIT);
 
 						}).enableDeleteItem("Löschen", event ->
 						{
@@ -68,7 +68,6 @@ public class AllergenView extends Div
 								boolean cancel = false;
 								if(ingredientService.getRepository().existsByAllergensId(item.getId()))
 								{
-									//TODO später durch fancy dialog ersetzen
 									Div div = new Div();
 									div.setMaxWidth("33vw");
 									div.getStyle().set("white-space", "normal");
@@ -107,13 +106,13 @@ public class AllergenView extends Div
 								if(cancel) return;
 
 								allergenService.deleteById(item.getId());
-								allergenDataProvider.refreshAll();
+								filterDataProvider.refreshAll();
 							});
 						});
 
 		grid.addItemDoubleClickListener(event ->
 		{
-			new AllergenDialog(allergenService, allergenDataProvider, event.getItem(), DialogState.EDIT);
+			new AllergenDialog(filterDataProvider, allergenService, event.getItem(), DialogState.EDIT);
 		});
 
 		this.add(grid);

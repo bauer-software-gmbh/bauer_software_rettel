@@ -1,4 +1,4 @@
-package de.bauersoft.views.incredient;
+package de.bauersoft.views.ingredient;
 
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -17,6 +17,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.allergen.Allergen;
 import de.bauersoft.data.entities.ingredient.Ingredient;
@@ -25,18 +26,34 @@ import de.bauersoft.data.providers.IngredientDataProvider;
 import de.bauersoft.data.repositories.additive.AdditiveRepository;
 import de.bauersoft.data.repositories.allergen.AllergenRepository;
 import de.bauersoft.data.repositories.unit.UnitRepository;
+import de.bauersoft.services.AdditiveService;
+import de.bauersoft.services.AllergenService;
 import de.bauersoft.services.IngredientService;
+import de.bauersoft.services.UnitService;
 import de.bauersoft.views.DialogState;
 import org.springframework.dao.DataIntegrityViolationException;
 
 public class IngredientDialog extends Dialog
 {
-    public IngredientDialog(IngredientService service,
-                            UnitRepository unitRepository,
-                            AllergenRepository allergenRepository,
-                            AdditiveRepository additiveRepository,
-                            IngredientDataProvider dataProvider, Ingredient item, DialogState state)
+
+    private final FilterDataProvider<Ingredient, Long> filterDataProvider;
+    private final IngredientService ingredientService;
+    private final UnitService unitService;
+    private final AllergenService allergenService;
+    private final AdditiveService additiveService;
+    private final Ingredient item;
+    private final DialogState state;
+
+    public IngredientDialog(FilterDataProvider<Ingredient, Long> filterDataProvider, IngredientService ingredientService, UnitService unitService, AllergenService allergenService, AdditiveService additiveService, Ingredient item, DialogState state)
     {
+        this.filterDataProvider = filterDataProvider;
+        this.ingredientService = ingredientService;
+        this.unitService = unitService;
+        this.allergenService = allergenService;
+        this.additiveService = additiveService;
+        this.item = item;
+        this.state = state;
+
         this.setHeaderTitle(state.toString());
 
         Binder<Ingredient> binder = new Binder<>(Ingredient.class);
@@ -61,18 +78,27 @@ public class IngredientDialog extends Dialog
         descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 
         ComboBox<Unit> unitComboBox = new ComboBox<>();
-        unitComboBox.setItemLabelGenerator(unit -> unit.getName());
-        unitComboBox.setItems(unitRepository.findAll());
+        unitComboBox.setItems(query ->
+        {
+            return FilterDataProvider.lazyStream(unitService, query);
+        }, query -> (int) unitService.count());
+        unitComboBox.setItemLabelGenerator(Unit::getName);
         unitComboBox.setRequired(true);
 
         MultiSelectComboBox<Allergen> allergenMultiSelectComboBox = new MultiSelectComboBox<>();
-        allergenMultiSelectComboBox.setItemLabelGenerator(allergen -> allergen.getName());
-        allergenMultiSelectComboBox.setItems(allergenRepository.findAll());
+        allergenMultiSelectComboBox.setItems(query ->
+        {
+            return FilterDataProvider.lazyStream(allergenService, query);
+        }, query -> (int) allergenService.count());
+        allergenMultiSelectComboBox.setItemLabelGenerator(Allergen::getName);
         allergenMultiSelectComboBox.setWidthFull();
 
         MultiSelectComboBox<Additive> additiveMultiSelectComboBox = new MultiSelectComboBox<>();
-        additiveMultiSelectComboBox.setItemLabelGenerator(allergen -> allergen.getName());
-        additiveMultiSelectComboBox.setItems(additiveRepository.findAll());
+        additiveMultiSelectComboBox.setItems(query ->
+        {
+            return  FilterDataProvider.lazyStream(additiveService, query);
+        }, query -> (int) additiveService.count());
+        additiveMultiSelectComboBox.setItemLabelGenerator(Additive::getName);
         additiveMultiSelectComboBox.setWidthFull();
 
         inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
@@ -100,7 +126,8 @@ public class IngredientDialog extends Dialog
 
         binder.bind(allergenMultiSelectComboBox, "allergens");
         binder.bind(additiveMultiSelectComboBox, "additives");
-        binder.setBean(item);
+
+        binder.readBean(item);
 
         Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
@@ -108,13 +135,14 @@ public class IngredientDialog extends Dialog
         saveButton.setMaxWidth("180px");
         saveButton.addClickListener(event ->
         {
-			binder.validate();
+			binder.writeBeanIfValid(item);
             if(binder.isValid())
             {
                 try
                 {
-                    service.update(binder.getBean());
-                    dataProvider.refreshAll();
+                    ingredientService.update(item);
+                    filterDataProvider.refreshAll();
+
                     Notification.show("Daten wurden aktualisiert");
                     this.close();
 
@@ -122,6 +150,7 @@ public class IngredientDialog extends Dialog
                 {
                     Notification.show("Doppelter Eintrag", 5000, Position.MIDDLE)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
+
 					error.printStackTrace();
                 }
             }
@@ -135,14 +164,12 @@ public class IngredientDialog extends Dialog
         cancelButton.addClickListener(e ->
         {
             binder.removeBean();
+            filterDataProvider.refreshAll();
             this.close();
         });
 
-        Span spacer = new Span();
-        spacer.setWidthFull();
-
         this.add(inputLayout);
-        this.getFooter().add(new HorizontalLayout(spacer, saveButton, cancelButton));
+        this.getFooter().add(saveButton, cancelButton);
         this.setCloseOnEsc(false);
         this.setCloseOnOutsideClick(false);
         this.setModal(true);

@@ -51,9 +51,9 @@ public class UsersView extends Div
 		grid.setWidthFull();
 		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-        grid.addColumn("name", "Name", User::getName);
-        grid.addColumn("surname", "Nachname", User::getSurname);
-        grid.addColumn("email", "E-Mail", User::getEmail);
+        grid.addColumn("name", "Name", User::getName, false);
+        grid.addColumn("surname", "Nachname", User::getSurname, false);
+        grid.addColumn("email", "E-Mail", User::getEmail, false);
 
         grid.AutofilterGridContextMenu()
                         .enableGridContextMenu()

@@ -70,7 +70,7 @@ public class AdditiveDialog extends Dialog
 
 		binder.bind(descriptionTextArea, "description");
 
-		binder.setBean(item);
+		binder.readBean(item);
 
 		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
@@ -78,12 +78,12 @@ public class AdditiveDialog extends Dialog
 		saveButton.setMaxWidth("180px");
 		saveButton.addClickListener(event ->
 		{
-			binder.validate();
+			binder.writeBeanIfValid(item);
 			if(binder.isValid())
 			{
 				try
 				{
-					additiveService.update(binder.getBean());
+					additiveService.update(item);
 					additiveDataProvider.refreshAll();
 
 					Notification.show("Daten wurden aktualisiert");

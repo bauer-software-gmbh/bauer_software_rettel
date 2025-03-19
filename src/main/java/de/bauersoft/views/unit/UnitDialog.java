@@ -14,8 +14,10 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.provider.DataProvider;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.unit.Unit;
 import de.bauersoft.data.providers.UnitDataProvider;
 import de.bauersoft.services.UnitService;
@@ -27,15 +29,15 @@ import java.util.Objects;
 
 public class UnitDialog extends Dialog
 {
-	private final UnitView unitView;
+	private final FilterDataProvider<Unit, Long> filterDataProvider;
 	private final UnitService unitService;
 	private final Unit item;
 
 	private final DialogState state;
 
-	public UnitDialog(UnitView unitView, UnitService unitService, Unit item, DialogState state)
+	public UnitDialog(FilterDataProvider<Unit, Long> filterDataProvider, UnitService unitService, Unit item, DialogState state)
 	{
-		this.unitView = unitView;
+        this.filterDataProvider = filterDataProvider;
         this.unitService = unitService;
         this.item = item;
         this.state = state;
@@ -62,12 +64,12 @@ public class UnitDialog extends Dialog
 		shorthandTextField.setMinWidth("20em");
 
 		ComboBox<Unit> parentComboBox = new ComboBox<Unit>();
-		parentComboBox.setItemLabelGenerator(unit -> unit.getName());
 		parentComboBox.setItems(query ->
 		{
-			return unitService.list(PageRequest.of(query.getPage(), query.getPageSize())).stream();
+			return FilterDataProvider.lazyStream(unitService, query);
 
 		},query -> (int) unitService.count());
+		parentComboBox.setItemLabelGenerator(Unit::getName);
 
 		NumberField parentFactorNumberField = new NumberField();
 		parentFactorNumberField.setMin(0);
@@ -97,7 +99,7 @@ public class UnitDialog extends Dialog
 		binder.forField(parentComboBox).bind(Unit::getParentUnit, Unit::setParentUnit);
 		binder.forField(parentFactorNumberField).bind(Unit::getParentFactor, Unit::setParentFactor);
 
-		binder.setBean(item);
+		binder.readBean(item);
 
 		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
@@ -105,13 +107,13 @@ public class UnitDialog extends Dialog
 		saveButton.setMaxWidth("180px");
 		saveButton.addClickListener(e ->
 		{
-			binder.validate();
+			binder.writeBeanIfValid(item);
 			if(binder.isValid())
 			{
 				try
 				{
-					unitService.update(binder.getBean());
-					unitView.getFilterDataProvider().refreshAll();
+					unitService.update(item);
+					filterDataProvider.refreshAll();
 
 					Notification.show("Daten wurden aktualisiert");
 					this.close();
@@ -121,7 +123,7 @@ public class UnitDialog extends Dialog
 					Notification.show("Doppelter Eintrag", 5000, Notification.Position.MIDDLE)
 							.addThemeVariants(NotificationVariant.LUMO_ERROR);
 				}
-			}
+            }
 		});
 
 		Button cancelButton = new Button("Abbrechen");
@@ -132,7 +134,7 @@ public class UnitDialog extends Dialog
 		cancelButton.addClickListener(e ->
 		{
 			binder.removeBean();
-			unitView.getFilterDataProvider().refreshAll();
+			filterDataProvider.refreshAll();
 			this.close();
 		});
 

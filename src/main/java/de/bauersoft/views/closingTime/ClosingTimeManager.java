@@ -21,23 +21,21 @@ public class ClosingTimeManager extends Div
     private final InstitutionClosingTimeService closingTimeService;
     private final InstitutionService institutionService;
 
-    private final InstitutionClosingTimeDataProvider closingTimeDataProvider;
-
     private InstitutionTabSheet institutionTabSheet;
 
-    public ClosingTimeManager(ClosingTimeView closingTimeView, AuthenticatedUser authenticatedUser, User user, InstitutionClosingTimeService closingTimeService, InstitutionService institutionService, InstitutionClosingTimeDataProvider closingTimeDataProvider)
+    public ClosingTimeManager(ClosingTimeView closingTimeView, AuthenticatedUser authenticatedUser, User user, InstitutionClosingTimeService closingTimeService, InstitutionService institutionService)
     {
         this.closingTimeView = closingTimeView;
         this.authenticatedUser = authenticatedUser;
         this.user = user;
         this.closingTimeService = closingTimeService;
         this.institutionService = institutionService;
-        this.closingTimeDataProvider = closingTimeDataProvider;
 
         this.setWidthFull();
         this.setHeightFull();
 
-        if(!getUser().getRoles().contains(Role.CLOSING_TIMES_SHOW_ALL_INSTITUTIONS) &&
+        if(!user.getRoles().contains(Role.CLOSING_TIMES_SHOW_ALL_INSTITUTIONS) &&
+                !user.getRoles().contains(Role.ADMIN) &&
                 getInstitutionService().findAllByUsersId(getUser().getId()).size() < 1)
         {
             Span div = new Span("Ihr Account ist noch nicht mit einer Institution verknüpft!");

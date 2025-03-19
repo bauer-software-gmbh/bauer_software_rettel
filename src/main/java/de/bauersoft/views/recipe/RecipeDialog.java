@@ -16,6 +16,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.recipe.Recipe;
 import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.data.providers.RecipeDataProvider;
@@ -32,34 +33,29 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 public class RecipeDialog extends Dialog
 {
+	private final FilterDataProvider<Recipe, Long> filterDataProvider;
 	private final RecipeService recipeService;
-	private final RecipeRepository recipeRepository;
 	private final IngredientService ingredientService;
-	private final IngredientRepository ingredientRepository;
 	private final FormulationService formulationService;
-	private final FormulationRepository formulationRepository;
 	private final PatternService patternService;
-	private final PatternRepository patternRepository;
-	private final RecipeDataProvider recipeDataProvider;
 	private final Recipe item;
 	private final DialogState state;
 
-	public RecipeDialog(RecipeService recipeService, IngredientService ingredientService,
-						FormulationService formulationService, PatternService patternService,
-						RecipeDataProvider recipeDataProvider, Recipe item, DialogState state)
+	public RecipeDialog(FilterDataProvider<Recipe, Long> filterDataProvider,
+						RecipeService recipeService,
+						IngredientService ingredientService,
+                        FormulationService formulationService,
+						PatternService patternService,
+                        Recipe item,
+						DialogState state)
 	{
-		this.recipeService = recipeService;
+        this.filterDataProvider = filterDataProvider;
+        this.recipeService = recipeService;
 		this.ingredientService = ingredientService;
 		this.formulationService = formulationService;
 		this.patternService = patternService;
-		this.recipeDataProvider = recipeDataProvider;
 		this.item = item;
 		this.state = state;
-
-		this.recipeRepository = recipeService.getRepository();
-		this.ingredientRepository = ingredientService.getRepository();
-		this.formulationRepository = formulationService.getRepository();
-		this.patternRepository = patternService.getRepository();
 
 		this.setHeaderTitle(state.toString());
 
@@ -85,8 +81,11 @@ public class RecipeDialog extends Dialog
 		descriptionTextArea.setWidthFull();
 
 		MultiSelectComboBox<Pattern> patternMultiSelectComboBox = new MultiSelectComboBox<>();
-		patternMultiSelectComboBox.setItemLabelGenerator(pattern -> pattern.getName());
-		patternMultiSelectComboBox.setItems(patternRepository.findAll());
+		patternMultiSelectComboBox.setItems(query ->
+		{
+			return FilterDataProvider.lazyStream(patternService, query);
+		}, query -> (int) patternService.count());
+		patternMultiSelectComboBox.setItemLabelGenerator(Pattern::getName);
 		patternMultiSelectComboBox.setWidthFull();
 
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
@@ -105,12 +104,12 @@ public class RecipeDialog extends Dialog
 		binder.bind(patternMultiSelectComboBox, "patterns");
 		
 		FormulationComponent formulationComponent = new FormulationComponent();
-		formulationComponent.setFormulations(formulationRepository.findAllByRecipeId(item.getId()));
-		formulationComponent.setIngredients(ingredientRepository.findAll());
+		formulationComponent.setFormulations(formulationService.findAllByRecipeId(item.getId()));
+		formulationComponent.setIngredients(ingredientService.findAll());
 		formulationComponent.updateView();
 		formulationComponent.setHeight("50vh");
 
-		binder.setBean(item);
+		binder.readBean(item);
 
 		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
@@ -118,18 +117,17 @@ public class RecipeDialog extends Dialog
 		saveButton.setMaxWidth("180px");
 		saveButton.addClickListener(e ->
 		{
-			binder.validate();
+			binder.writeBeanIfValid(item);;
 			if(binder.isValid() && formulationComponent.isValid())
 			{
 				try
 				{
-					Recipe recipe = binder.getBean();
-					recipeService.update(recipe);
+					recipeService.update(item);
 
-					formulationComponent.accept(recipe);
-					formulationService.updateFormulations(recipe.getFormulations().stream().toList(), formulationComponent.getFormulationsMap().keySet().stream().toList());
+					formulationComponent.accept(item);
+					formulationService.updateFormulations(item.getFormulations().stream().toList(), formulationComponent.getFormulationsMap().keySet().stream().toList());
 
-					recipeDataProvider.refreshAll();
+					filterDataProvider.refreshAll();
 
 					Notification.show("Daten wurden aktualisiert");
 					this.close();
@@ -150,7 +148,7 @@ public class RecipeDialog extends Dialog
 		cancelButton.addClickListener(e ->
 		{
 			binder.removeBean();
-			recipeDataProvider.refreshAll();
+			filterDataProvider.refreshAll();
 			this.close();
 		});
 

@@ -11,15 +11,15 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import de.bauersoft.components.autofilter.FilterDataProvider;
+import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
 import de.bauersoft.data.entities.component.Component;
 import de.bauersoft.data.providers.ComponentDataProvider;
 import de.bauersoft.data.repositories.component.ComponentRepository;
 import de.bauersoft.data.repositories.course.CourseRepository;
 import de.bauersoft.data.repositories.recipe.RecipeRepository;
-import de.bauersoft.services.ComponentService;
-import de.bauersoft.services.UnitService;
-import de.bauersoft.services.VariantService;
+import de.bauersoft.services.*;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
@@ -31,82 +31,66 @@ import jakarta.annotation.security.RolesAllowed;
 public class ComponentView extends Div
 {
 	private final ComponentService componentService;
-	private final ComponentDataProvider componentDataProvider;
-	private final RecipeRepository recipeRepository;
-	private final CourseRepository courseRepository;
-	private final ComponentRepository componentRepository;
+	private final RecipeService recipeService;
+	private final CourseService courseService;
 	private final VariantService variantService;
 	private final UnitService unitService;
 
-    AutoFilterGrid<Component> grid = new AutoFilterGrid<>(Component.class, false, true);
+	private final FilterDataProvider<Component, Long> filterDataProvider;
+    private final AutofilterGrid<Component, Long> grid;
 
-    public ComponentView(ComponentService componentService, ComponentDataProvider componentDataProvider, RecipeRepository recipeRepository, CourseRepository courseRepository, ComponentRepository componentRepository, VariantService variantService, UnitService unitService)
+    public ComponentView(ComponentService componentService, RecipeService recipeService, CourseService courseService, VariantService variantService, UnitService unitService)
     {
         this.componentService = componentService;
-        this.componentDataProvider = componentDataProvider;
-        this.recipeRepository = recipeRepository;
-        this.courseRepository = courseRepository;
-        this.componentRepository = componentRepository;
+        this.recipeService = recipeService;
+        this.courseService = courseService;
         this.variantService = variantService;
         this.unitService = unitService;
 
         setClassName("content");
 
+		filterDataProvider = new FilterDataProvider<>(componentService);
+		grid = new AutofilterGrid<>(filterDataProvider);
+
 		grid.setHeightFull();
 		grid.setWidthFull();
 		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-		grid.setDataProvider(componentDataProvider);
+		grid.addColumn("name", "Name", Component::getName, false);
+		grid.addColumn("description", "Beschreibung", Component::getDescription, false);
 
-        grid.addColumn("name").setHeader("Name");
-        grid.addColumn("description").setHeader("Beschreibung");
 
-        grid.addColumn(item ->
-		{
-			return item.getCourse() != null ? item.getCourse().getName() : "";
-		}).setHeader("Gang");
+       	grid.AutofilterGridContextMenu()
+			   .enableGridContextMenu()
+			   .enableAddItem("Neue Menükomponente", event ->
+			   {
+				   new ComponentDialog(filterDataProvider, componentService, recipeService, courseService, unitService, new Component(), DialogState.NEW);
 
-        grid.addItemDoubleClickListener(event ->
-		{
-			new ComponentDialog(componentService, componentDataProvider, recipeRepository, courseRepository, componentRepository, unitService, event.getItem(), DialogState.EDIT);
-		});
+			   }).enableDeleteItem("Löschen", event ->
+			   {
+				   event.getItem().ifPresent(item ->
+				   {
+					   if(variantService.getRepository().existsByComponentsId(item.getId()))
+					   {
+						   Div div = new Div();
+						   div.setMaxWidth("33vw");
+						   div.getStyle().set("white-space", "normal");
+						   div.getStyle().set("word-wrap", "break-word");
 
-        GridContextMenu<Component> contextMenu = grid.addContextMenu();
-        contextMenu.addItem("Neue Komponente", event ->
-		{
-			new ComponentDialog(componentService, componentDataProvider, recipeRepository, courseRepository, componentRepository, unitService, new Component(), DialogState.NEW);
-		});
+						   div.add(new Text("Die Komponente \"" + item.getName() + "\" kann nicht gelöscht werden, da sie noch von einigen Menü-Varianten verwendet wird."));
 
-		GridMenuItem<Component> deleteItem = contextMenu.addItem("Löschen", event ->
-		{
-			event.getItem().ifPresent(item ->
-			{
-				if(variantService.getRepository().existsByComponentsId(item.getId()))
-				{
-					Div div = new Div();
-					div.setMaxWidth("33vw");
-					div.getStyle().set("white-space", "normal");
-					div.getStyle().set("word-wrap", "break-word");
+						   Notification notification = new Notification(div);
+						   notification.setDuration(5000);
+						   notification.setPosition(Notification.Position.MIDDLE);
+						   notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+						   notification.open();
+						   return;
+					   }
 
-					div.add(new Text("Die Komponente \"" + item.getName() + "\" kann nicht gelöscht werden, da sie noch von einigen Menü-Varianten verwendet wird."));
-
-					Notification notification = new Notification(div);
-					notification.setDuration(5000);
-					notification.setPosition(Notification.Position.MIDDLE);
-					notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
-					notification.open();
-					return;
-				}
-
-				componentService.deleteById(item.getId());
-				componentDataProvider.refreshAll();
-			});
-		});
-
-		contextMenu.addGridContextMenuOpenedListener(event ->
-		{
-			deleteItem.setVisible(event.getItem().isPresent());
-		});
+					   componentService.deleteById(item.getId());
+					   filterDataProvider.refreshAll();
+				   });
+			   });
 
         this.add(grid);
     }

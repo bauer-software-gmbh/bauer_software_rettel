@@ -50,8 +50,8 @@ public class AdditiveView extends Div
 		grid.setWidthFull();
 		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-		grid.addColumn("name", "Name", Additive::getName);
-		grid.addColumn("description", "Beschreibung", Additive::getDescription);
+		grid.addColumn("name", "Name", Additive::getName, false);
+		grid.addColumn("description", "Beschreibung", Additive::getDescription, false);
 
 		grid.addItemDoubleClickListener(event ->
 		{
@@ -70,7 +70,6 @@ public class AdditiveView extends Div
 			{
 				if(ingredientService.getRepository().existsByAdditivesId(item.getId()))
 				{
-					//TODO später durch fancy dialog ersetzen
 					Div div = new Div();
 					div.setMaxWidth("33vw");
 					div.getStyle().set("white-space", "normal");

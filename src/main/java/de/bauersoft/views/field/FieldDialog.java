@@ -13,6 +13,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.providers.FieldDataProvider;
 import de.bauersoft.data.repositories.course.CourseRepository;
@@ -28,25 +29,21 @@ import org.springframework.dao.DataIntegrityViolationException;
 @Getter
 public class FieldDialog extends Dialog
 {
-    private FieldService fieldService;
-    private FieldDataProvider fieldDataProvider;
-    private FieldMultiplierService fieldMultiplierService;
-    private FieldMultiplierRepository fieldMultiplierRepository;
-    private CourseService courseService;
-    private CourseRepository courseRepository;
+    private final FilterDataProvider<Field, Long> filterDataProvider;
+    private final FieldService fieldService;
+    private final FieldMultiplierService fieldMultiplierService;
+    private final CourseService courseService;
 
     private Field item;
 
     private DialogState state;
 
-    public FieldDialog(FieldService fieldService, FieldDataProvider fieldDataProvider, FieldMultiplierService fieldMultiplierService, CourseService courseService, Field item, DialogState state)
+    public FieldDialog(FilterDataProvider<Field, Long> filterDataProvider, FieldService fieldService, FieldMultiplierService fieldMultiplierService, CourseService courseService, Field item, DialogState state)
     {
+        this.filterDataProvider = filterDataProvider;
         this.fieldService = fieldService;
-        this.fieldDataProvider = fieldDataProvider;
         this.fieldMultiplierService = fieldMultiplierService;
-        this.fieldMultiplierRepository = fieldMultiplierService.getRepository();
         this.courseService = courseService;
-        this.courseRepository = courseService.getRepository();
         this.item = item;
         this.state = state;
 
@@ -87,30 +84,31 @@ public class FieldDialog extends Dialog
         {
             multiplierComponent.getMultiplierMapContainer().acceptTemporaries();
 
-            try
+            binder.writeBeanIfValid(item);
+            if(binder.isValid())
             {
-                binder.writeBean(item);
-                fieldService.update(item);
-
-                multiplierComponent.getMultiplierMapContainer().evaluate(container ->
+                try
                 {
-                    container.getEntity().getId().setFieldId(item.getId());
-                });
+                    fieldService.update(item);
 
-                multiplierComponent.getMultiplierMapContainer().run(fieldMultiplierService);
+                    multiplierComponent.getMultiplierMapContainer().evaluate(container ->
+                    {
+                        container.getEntity().getId().setFieldId(item.getId());
+                    });
 
-                fieldDataProvider.refreshAll();
+                    multiplierComponent.getMultiplierMapContainer().run(fieldMultiplierService);
 
-                Notification.show("Daten wurden aktualisiert");
-                this.close();
+                    filterDataProvider.refreshAll();
 
-            }catch(DataIntegrityViolationException error)
-            {
-                Notification.show("Doppelter Eintrag", 5000, Notification.Position.MIDDLE)
-                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    Notification.show("Daten wurden aktualisiert");
+                    this.close();
 
-            }catch(ValidationException err)
-            {
+                }catch(DataIntegrityViolationException error)
+                {
+                    Notification.show("Doppelter Eintrag", 5000, Notification.Position.MIDDLE)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+
+                }
             }
         });
 
@@ -121,8 +119,9 @@ public class FieldDialog extends Dialog
         cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         cancelButton.addClickListener(e ->
         {
+            binder.removeBean();
             multiplierComponent.getMultiplierMapContainer().loadTemporaries();
-            fieldDataProvider.refreshAll();
+            filterDataProvider.refreshAll();
             this.close();
         });
 

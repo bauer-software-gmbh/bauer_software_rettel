@@ -100,13 +100,13 @@ public class AutoInitializer
                 institutionFieldsService.updateAll(institution.getInstitutionFields());
             }
 
-            for(long i = variantService.count(); i < 5; i++)
-            {
-                Variant variant = new Variant();
-                variant.setPattern(patternService.findAll().get(0));
-
-                variantService.update(variant);
-            }
+//            for(long i = variantService.count(); i < 5; i++)
+//            {
+//                Variant variant = new Variant();
+//                variant.setPattern(patternService.findAll().get(0));
+//
+//                variantService.update(variant);
+//            }
 
 //            Set<InstitutionAllergen> institutionAllergens = new HashSet<>();
 //            for(int i = 0; i < 5; i++)
@@ -130,8 +130,8 @@ public class AutoInitializer
 //            if(orderOptional.isEmpty())
 //                throw new RuntimeException("Order not found");
 
-            Order order = orderService.findAll().get(0);
-            System.out.println(order.toString());
+//            Order order = orderService.findAll().get(0);
+//            System.out.println(order.toString());
 //
 //            List<OrderAllergen> orderAllergens = new ArrayList<>();
 //            for(int i = 0; i < 5; i++)

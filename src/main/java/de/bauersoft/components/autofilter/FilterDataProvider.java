@@ -2,6 +2,8 @@ package de.bauersoft.components.autofilter;
 
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
 import de.bauersoft.services.ServiceBase;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
@@ -11,8 +13,9 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
-public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specification<T>>
+public class    FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specification<T>>
 {
     private ConfigurableFilterDataProvider<T, Void, Specification<T>> filterDataProvider;
     private ServiceBase<T, ID> service;
@@ -46,6 +49,23 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
         return filterDataProvider;
     }
 
+    public DataProvider<T, String> getDataProvider()
+    {
+        return DataProvider.fromFilteringCallbacks(
+                query ->
+                {
+                    Specification<T> filter = buildFilter();
+                    Pageable pageable = PageRequest.of(query.getOffset() / query.getLimit(), query.getLimit());
+                    return service.getRepository().findAll(filter, pageable).stream();
+                },
+                query ->
+                {
+                    Specification<T> filter = buildFilter();
+                    return (int) service.getRepository().count(filter);
+                }
+        );
+    }
+
     public ServiceBase<T, ID> getService()
     {
         return service;
@@ -73,7 +93,7 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
 
 
 
-    private Specification<T> buildFilter()
+    public Specification<T> buildFilter()
     {
         return (root, query, criteriaBuilder) ->
         {
@@ -90,6 +110,22 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
 
             return predicate;
         };
+    }
+
+    public static <T> Stream<T> lazyStream(ServiceBase<T, ?> service, Query<T, ?> query)
+    {
+        int offset = query.getOffset();
+        int limit = query.getLimit();
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+
+        return service.list(pageable).stream();
+    }
+
+    public static Pageable pageable(Query<?, ?> query)
+    {
+        int offset = query.getOffset();
+        int limit = query.getLimit();
+        return PageRequest.of(offset / limit, limit);
     }
 
 }

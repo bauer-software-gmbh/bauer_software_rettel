@@ -118,10 +118,7 @@ public class InstitutionTab extends Div
             return button;
         });
 
-        grid.addColumn("header", "Beschreibung", InstitutionClosingTime::getHeader, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
-        {
-            return criteriaBuilder.like(criteriaBuilder.lower(path.as(String.class)), "%" + filterInput.toLowerCase() + "%");
-        });
+        grid.addColumn("header", "Beschreibung", InstitutionClosingTime::getHeader, s -> "%" + s + "%", false);
 
         grid.addColumn("startDate", "Startdatum", institutionClosingTime ->
         {
@@ -137,7 +134,9 @@ public class InstitutionTab extends Div
 
         grid.addColumn("endDate", "Enddatum", institutionClosingTime ->
         {
-            return (institutionClosingTime.getEndDate() == null) ? institutionClosingTime.getStartDate().format(formatter) : institutionClosingTime.getEndDate().format(formatter).toString();
+            return (institutionClosingTime.getEndDate() == null) ?
+                    institutionClosingTime.getStartDate().format(formatter) :
+                    institutionClosingTime.getEndDate().format(formatter);
 
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {

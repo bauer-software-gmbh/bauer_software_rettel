@@ -8,8 +8,12 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import de.bauersoft.components.autofilter.FilterDataProvider;
+import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
 import de.bauersoft.data.entities.menu.Menu;
+import de.bauersoft.data.entities.order.OrderData;
+import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.data.entities.variant.Variant;
 import de.bauersoft.data.providers.MenuDataProvider;
 import de.bauersoft.data.repositories.component.ComponentRepository;
@@ -25,6 +29,8 @@ import de.bauersoft.services.offer.OfferService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 
 import java.util.stream.Collectors;
 
@@ -34,97 +40,131 @@ import java.util.stream.Collectors;
 @RolesAllowed({"ADMIN", "KITCHEN_ADMIN", "OFFICE_ADMIN"})
 public class MenuBuilderView extends Div
 {
-    private AutoFilterGrid<Menu> menuGrid = new AutoFilterGrid<>(Menu.class, false, true);
+    private final MenuService menuService;
+    private final CourseService courseService;
+    private final ComponentService componentService;
+    private final PatternService patternService;
+    private final RecipeService recipeService;
+    private final VariantService variantService;
+    private final FleshService fleshService;
+    private final OfferService offerService;
+    private final OrderDataService orderDataService;
 
-    public MenuBuilderView(MenuService menuService, MenuRepository menuRepository, CourseRepository courseRepository,
-                           ComponentRepository componentRepository, PatternRepository patternRepository,
-                           MenuDataProvider menuDataProvider,
-                           RecipeRepository recipeRepository, MBMenuRepository mbMenuRepository,
-                           MBComponentRepository mbComponentRepository, MBPatternRepository mbPatternRepository,
-                           VariantService variantService, FleshService fleshService,
-                           OfferService offerService, OrderDataService orderDataService)
+    private final FilterDataProvider<Menu, Long> filterDataProvider;
+    private final AutofilterGrid<Menu, Long> grid;
+
+    public MenuBuilderView(MenuService menuService, CourseService courseService, ComponentService componentService, PatternService patternService, RecipeService recipeService, VariantService variantService, FleshService fleshService, OfferService offerService, OrderDataService orderDataService)
     {
+        this.menuService = menuService;
+        this.courseService = courseService;
+        this.componentService = componentService;
+        this.patternService = patternService;
+        this.recipeService = recipeService;
+        this.variantService = variantService;
+        this.fleshService = fleshService;
+        this.offerService = offerService;
+        this.orderDataService = orderDataService;
+
+
         setClassName("content");
-        menuGrid.addColumn("name");
-        //menuGrid.addColumn("courses");
 
-        menuGrid.addItemDoubleClickListener(event ->
+        filterDataProvider = new FilterDataProvider<>(menuService);
+        grid = new AutofilterGrid<>(filterDataProvider);
 
-           new MenuBuilderDialog(menuService, menuRepository, courseRepository, componentRepository, patternRepository,
-                   menuDataProvider, event.getItem(), DialogState.EDIT,
-                   recipeRepository, variantService, fleshService, orderDataService)
-        );
+        grid.setHeightFull();
+        grid.setWidthFull();
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
-        menuGrid.setDataProvider(menuDataProvider);
-
-        GridContextMenu<Menu> contextMenu = menuGrid.addContextMenu();
-        contextMenu.addItem("new", event ->
-
-            new MenuBuilderDialog(menuService, menuRepository, courseRepository, componentRepository, patternRepository,
-                    menuDataProvider, new Menu(), DialogState.NEW,
-                    recipeRepository, variantService, fleshService, orderDataService)
-        );
-
-        contextMenu.addItem("delete", event ->
+        grid.addColumn("name", "Name", Menu::getName, false);
+        grid.addColumn("flesh", "Fleischsorte", menu ->
         {
-            event.getItem().ifPresent(item ->
-            {
-                boolean cancel = false;
-                if(offerService.existsByMenusId(item.getId()))
-                {
-                    Div div = new Div();
-                    div.setMaxWidth("33vw");
-                    div.getStyle().set("white-space", "normal");
-                    div.getStyle().set("word-wrap", "break-word");
+            return (menu.getFlesh() != null) ?
+                    menu.getFlesh().getName() :
+                    "";
 
-                    div.add(new Text("Das Menu " + item.getName() + " kann nicht gelöscht werden da es in einigen Angeboten eingeplant ist."));
+        }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+        {
+            return criteriaBuilder.like(criteriaBuilder.lower(path.get("name").as(String.class)), filterInput.toLowerCase() + "%");
+        });
+        grid.addColumn("variants", "Ernährungsformen", menu ->
+        {
+            return menu.getVariants().stream().map(Variant::getPattern).map(Pattern::getName).collect(Collectors.joining(", "));
 
-                    Notification notification = new Notification(div);
-                    notification.setDuration(5000);
-                    notification.setPosition(Notification.Position.MIDDLE);
-                    notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
-                    notification.open();
-                    cancel = true;
-                }
-
-                if(orderDataService.existsAnyByVariantIds(item.getVariants().stream().map(Variant::getId).collect(Collectors.toSet())))
-                {
-                    Div div = new Div();
-                    div.setMaxWidth("33vw");
-                    div.getStyle().set("white-space", "normal");
-                    div.getStyle().set("word-wrap", "break-word");
-
-                    div.add(new Text("Das Menu " + item.getName() + " kann nicht gelöscht werden da einige seiner Varianten in Bestellungen verwendet werden."));
-
-                    Notification notification = new Notification(div);
-                    notification.setDuration(5000);
-                    notification.setPosition(Notification.Position.MIDDLE);
-                    notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
-                    notification.open();
-                    cancel = true;
-                }
-
-                if(cancel) return;
-
-                String message = "";
-                for(int i = 0; i < 100; i++)
-                {
-                    message += "-";
-                }
-
-                message += "1 - ID: " + item.getId();
-                System.out.println(message);
-
-                variantService.deleteAllByMenuId(item.getId());
-                menuService.deleteById(item.getId());
-
-                menuDataProvider.refreshAll();
-            });
+        }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+        {
+            Join<Menu, Variant> variantJoin = root.join("variants", JoinType.LEFT);
+            Join<Variant, Pattern> patternJoin = variantJoin.join("pattern", JoinType.LEFT);
+            return criteriaBuilder.like(criteriaBuilder.lower(patternJoin.get("name")), filterInput.toLowerCase() + "%");
         });
 
-        menuGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-        menuGrid.setHeightFull();
+        grid.AutofilterGridContextMenu()
+                        .enableGridContextMenu()
+                        .enableAddItem("Neues Menü", event ->
+                        {
+                            new MenuBuilderDialog(filterDataProvider, menuService, courseService, componentService, patternService, recipeService, variantService, fleshService, offerService, orderDataService, new Menu(), DialogState.NEW);
 
-        this.add(menuGrid);
+                        }).enableDeleteItem("Löschen", event ->
+                        {
+                            event.getItem().ifPresent(item ->
+                            {
+                                boolean cancel = false;
+                                if(offerService.existsByMenusId(item.getId()))
+                                {
+                                    Div div = new Div();
+                                    div.setMaxWidth("33vw");
+                                    div.getStyle().set("white-space", "normal");
+                                    div.getStyle().set("word-wrap", "break-word");
+
+                                    div.add(new Text("Das Menu " + item.getName() + " kann nicht gelöscht werden da es in einigen Angeboten eingeplant ist."));
+
+                                    Notification notification = new Notification(div);
+                                    notification.setDuration(5000);
+                                    notification.setPosition(Notification.Position.MIDDLE);
+                                    notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+                                    notification.open();
+                                    cancel = true;
+                                }
+
+                                if(orderDataService.existsAnyByVariantIds(item.getVariants().stream().map(Variant::getId).collect(Collectors.toSet())))
+                                {
+                                    Div div = new Div();
+                                    div.setMaxWidth("33vw");
+                                    div.getStyle().set("white-space", "normal");
+                                    div.getStyle().set("word-wrap", "break-word");
+
+                                    div.add(new Text("Das Menu " + item.getName() + " kann nicht gelöscht werden da einige seiner Varianten in Bestellungen verwendet werden."));
+
+                                    Notification notification = new Notification(div);
+                                    notification.setDuration(5000);
+                                    notification.setPosition(Notification.Position.MIDDLE);
+                                    notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+                                    notification.open();
+                                    cancel = true;
+                                }
+
+                                if(cancel) return;
+
+                                String message = "";
+                                for(int i = 0; i < 100; i++)
+                                {
+                                    message += "-";
+                                }
+
+                                message += "1 - ID: " + item.getId();
+                                System.out.println(message);
+
+                                variantService.deleteAllByMenuId(item.getId());
+                                menuService.deleteById(item.getId());
+
+                                filterDataProvider.refreshAll();
+                            });
+                        });
+
+        grid.addItemDoubleClickListener(event ->
+        {
+            new MenuBuilderDialog(filterDataProvider, menuService, courseService, componentService, patternService, recipeService, variantService, fleshService, offerService, orderDataService, event.getItem(), DialogState.NEW);
+        });
+
+        this.add(grid);
     }
 }
