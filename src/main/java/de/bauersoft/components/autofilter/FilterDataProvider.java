@@ -1,21 +1,20 @@
 package de.bauersoft.components.autofilter;
 
-import com.vaadin.flow.data.provider.CallbackDataProvider;
-import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.*;
 import de.bauersoft.services.ServiceBase;
+import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class    FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specification<T>>
+public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specification<T>>
 {
     private ConfigurableFilterDataProvider<T, Void, Specification<T>> filterDataProvider;
     private ServiceBase<T, ID> service;
@@ -49,22 +48,22 @@ public class    FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specif
         return filterDataProvider;
     }
 
-    public DataProvider<T, String> getDataProvider()
-    {
-        return DataProvider.fromFilteringCallbacks(
-                query ->
-                {
-                    Specification<T> filter = buildFilter();
-                    Pageable pageable = PageRequest.of(query.getOffset() / query.getLimit(), query.getLimit());
-                    return service.getRepository().findAll(filter, pageable).stream();
-                },
-                query ->
-                {
-                    Specification<T> filter = buildFilter();
-                    return (int) service.getRepository().count(filter);
-                }
-        );
-    }
+//    public DataProvider<T, String> getDataProvider()
+//    {
+//        return DataProvider.fromFilteringCallbacks(
+//                query ->
+//                {
+//                    Specification<T> filter = buildFilter();
+//                    Pageable pageable = PageRequest.of(query.getOffset() / query.getLimit(), query.getLimit());
+//                    return service.getRepository().findAll(filter, pageable).stream();
+//                },
+//                query ->
+//                {
+//                    Specification<T> filter = buildFilter();
+//                    return (int) service.getRepository().count(filter);
+//                }
+//        );
+//    }
 
     public ServiceBase<T, ID> getService()
     {
@@ -100,7 +99,7 @@ public class    FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specif
             Predicate predicate = criteriaBuilder.conjunction();
             for(Filter<T> filter : filters)
             {
-                Path<?> path = root.get(filter.getAttributeName());
+                Path<?> path = filter.getPathProvider().apply(root);
                 String filterInput = filter.getFilterInput();
 
                 if(!filter.isIgnoreFilterInput() && (filterInput == null || filterInput.isEmpty())) continue;

@@ -1,19 +1,42 @@
 package de.bauersoft.components.autofilter;
 
+import com.vaadin.flow.function.ValueProvider;
 import jakarta.persistence.criteria.*;
 
 public class Filter<T>
 {
-    private final String attributeName;
+    private String attributeName;
+    private ValueProvider<Root<?>, Path<?>> pathProvider;
 
     private String filterInput;
     private FilterFunction<T> filterFunction;
 
     private boolean ignoreFilterInput;
 
+    public Filter(ValueProvider<Root<?>, Path<?>> pathProvider)
+    {
+        this.pathProvider = pathProvider;
+
+        filterInput = "";
+        filterFunction = (root, path, criteriaQuery, criteriaBuilder, parent, input) ->
+        {
+            return criteriaBuilder.like(path.as(String.class), "%" + input + "%");
+        };
+    }
+
+    public Filter(ValueProvider<Root<?>, Path<?>> pathProvider, FilterFunction<T> filterFunction)
+    {
+        this.pathProvider = pathProvider;
+        this.filterFunction = filterFunction;
+
+        filterInput = "";
+    }
+
     public Filter(String attributeName)
     {
         this.attributeName = attributeName;
+
+        pathProvider = root -> root.get(attributeName);
 
         filterInput = "";
         filterFunction = (root, path, criteriaQuery, criteriaBuilder, parent, input) ->
@@ -25,6 +48,7 @@ public class Filter<T>
     public Filter(String attributeName, FilterFunction<T> filterFunction)
     {
         this.attributeName = attributeName;
+        pathProvider = root -> root.get(attributeName);
         this.filterFunction = filterFunction;
     }
 
@@ -42,6 +66,16 @@ public class Filter<T>
     {
         this.filterInput = filterInput;
         return this;
+    }
+
+    public ValueProvider<Root<?>, Path<?>> getPathProvider()
+    {
+        return pathProvider;
+    }
+
+    public void setPathProvider(ValueProvider<Root<?>, Path<?>> pathProvider)
+    {
+        this.pathProvider = pathProvider;
     }
 
     public FilterFunction<T> getFilterFunction()
