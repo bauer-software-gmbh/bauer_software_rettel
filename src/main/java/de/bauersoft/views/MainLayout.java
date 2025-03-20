@@ -164,7 +164,7 @@ public class MainLayout extends AppLayout
         if(accessChecker.hasAccess(UsersView.class) || accessChecker.hasAccess(FieldView.class)
                 || accessChecker.hasAccess(InstitutionView.class) || accessChecker.hasAccess(AddressView.class))
         {
-            SideNavItem accounting = new SideNavItem("Accounting");
+            SideNavItem accounting = new SideNavItem("Verwaltung");
             if(accessChecker.hasAccess(UsersView.class))
                 accounting.addItem(new SideNavItem("Benutzer", UsersView.class, LineAwesomeIcon.USERS_SOLID.create()));
 
@@ -185,7 +185,7 @@ public class MainLayout extends AppLayout
                 || accessChecker.hasAccess(UnitView.class) || accessChecker.hasAccess(PatternView.class)
                 || accessChecker.hasAccess(MenuBuilderView.class) || accessChecker.hasAccess(OffersView.class))
         {
-            SideNavItem backend = new SideNavItem("Backend");
+            SideNavItem backend = new SideNavItem("Planung Küche");
             if(accessChecker.hasAccess(OffersView.class))
                 backend.addItem(new SideNavItem("Menü Planung", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
 
