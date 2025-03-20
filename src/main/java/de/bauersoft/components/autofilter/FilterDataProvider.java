@@ -99,7 +99,7 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
             Predicate predicate = criteriaBuilder.conjunction();
             for(Filter<T> filter : filters)
             {
-                Path<?> path = filter.getPathProvider().apply(root);
+                Path<?> path = root.get(filter.getAttributeName());
                 String filterInput = filter.getFilterInput();
 
                 if(!filter.isIgnoreFilterInput() && (filterInput == null || filterInput.isEmpty())) continue;

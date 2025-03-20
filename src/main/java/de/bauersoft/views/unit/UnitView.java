@@ -52,11 +52,12 @@ public class UnitView extends Div
             criteriaQuery.orderBy(criteriaBuilder.asc(path.as(String.class)));
             return criteriaBuilder.conjunction();
         }).setIgnoreFilterInput(true));
+        grid.addColumn("name", "Name", Unit::getName, false);
 
-        grid.addColumn("Name", Unit::getName, root -> root.get("name"), (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
-        {
-            return criteriaBuilder.like(path.as(String.class), "%" + filterInput + "%");
-        });
+//        grid.addColumn("Name", Unit::getName, root -> root.get("name"), (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+//        {
+//            return criteriaBuilder.like(path.as(String.class), "%" + filterInput + "%");
+//        });
 
         grid.addColumn("shorthand", "Abkürzung", Unit::getShorthand, s -> "%" + s + "%", false);
 
