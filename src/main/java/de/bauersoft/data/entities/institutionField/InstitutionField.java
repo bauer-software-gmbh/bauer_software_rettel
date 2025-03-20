@@ -3,7 +3,6 @@ package de.bauersoft.data.entities.institutionField;
 import de.bauersoft.data.entities.AbstractEntity;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
-import de.bauersoft.data.entities.institutionClosingTime.InstitutionClosingTime;
 import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
 import de.bauersoft.data.entities.institutionFieldMultiplier.InstitutionMultiplier;
 import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPattern;
@@ -13,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 

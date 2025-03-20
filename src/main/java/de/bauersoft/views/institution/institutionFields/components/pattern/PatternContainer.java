@@ -11,7 +11,6 @@ import java.util.Objects;
 public class PatternContainer extends Container<InstitutionPattern, InstitutionPatternKey>
 {
     private int tempAmount;
-    private ContainerState tempState;
 
     public PatternContainer(InstitutionPattern entity)
     {
@@ -35,21 +34,11 @@ public class PatternContainer extends Container<InstitutionPattern, InstitutionP
         this.tempAmount = tempAmount;
     }
 
-    public ContainerState getTempState()
-    {
-        return tempState;
-    }
-
-    public void setTempState(ContainerState tempState)
-    {
-        this.tempState = tempState;
-    }
-
     @Override
     public PatternContainer loadTemporaries()
     {
         tempAmount = Objects.requireNonNullElse(getEntity().getAmount(), 0);
-        tempState = getState();
+        setTempState(getState());
         return this;
     }
 
@@ -57,7 +46,7 @@ public class PatternContainer extends Container<InstitutionPattern, InstitutionP
     public PatternContainer acceptTemporaries()
     {
         getEntity().setAmount(tempAmount);
-        setState(tempState);
+        setState(getTempState());
         return this;
     }
 }

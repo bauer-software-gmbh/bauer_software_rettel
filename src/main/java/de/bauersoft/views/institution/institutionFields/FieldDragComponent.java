@@ -13,16 +13,13 @@ import com.vaadin.flow.dom.Style;
 import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
-import de.bauersoft.data.entities.institutionClosingTime.InstitutionClosingTime;
-import de.bauersoft.data.entities.institutionField.*;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
 import de.bauersoft.data.entities.institutionFieldMultiplier.InstitutionMultiplier;
 import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPattern;
 import de.bauersoft.services.*;
 import de.bauersoft.views.institution.InstitutionDialog;
 import de.bauersoft.views.institution.institutionFields.components.allergen.AllergenMapContainer;
-import de.bauersoft.views.institution.institutionFields.components.closingTime.ClosingTimesContainer;
-import de.bauersoft.views.institution.institutionFields.components.closingTime.ClosingTimesMapContainer;
 import de.bauersoft.views.institution.institutionFields.components.multiplier.MultiplierMapContainer;
 import de.bauersoft.views.institution.institutionFields.components.pattern.PatternMapContainer;
 import lombok.Getter;
@@ -32,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Getter
 public class FieldDragComponent extends FlexLayout
@@ -42,7 +40,6 @@ public class FieldDragComponent extends FlexLayout
     private final Map<Field, PatternMapContainer> patternMapContainerMap;
     private final Map<Field, MultiplierMapContainer> multiplierMapContainerMap;
     private final Map<Field, AllergenMapContainer> allergenMapContainerMap;
-    private final Map<Field, ClosingTimesMapContainer> closingTimesMapContainerMap;
 
     private final List<InstitutionField> gridItems;
     private final Grid<InstitutionField> institutionFieldsGrid;
@@ -58,7 +55,6 @@ public class FieldDragComponent extends FlexLayout
         patternMapContainerMap = new HashMap<>();
         multiplierMapContainerMap = new HashMap<>();
         allergenMapContainerMap = new HashMap<>();
-        closingTimesMapContainerMap = new HashMap<>();
 
         gridItems = new ArrayList<>();
         gridItems.addAll(institution.getInstitutionFields());
@@ -123,25 +119,13 @@ public class FieldDragComponent extends FlexLayout
                 AllergenMapContainer container = new AllergenMapContainer();
 
                 for(InstitutionAllergen institutionAllergen : event.getItem().getInstitutionAllergens())
-                    container.addContainer(institutionAllergen.getAllergen(), institutionAllergen, ContainerState.SHOW);
+                    container.addContainer(container.nextMapper(), institutionAllergen, ContainerState.SHOW);
 
                 return container;
             });
 
-            ClosingTimesMapContainer closingTimesMapContainer = closingTimesMapContainerMap.computeIfAbsent(event.getItem().getField(), field ->
-            {
-                ClosingTimesMapContainer container = new ClosingTimesMapContainer();
 
-//                for(InstitutionClosingTime institutionClosingTimes : event.getItem().getInstitutionClosingTimes())
-//                {
-//                    int key = container.getNextKey();
-//                    ((ClosingTimesContainer) container.addContainer(key, institutionClosingTimes, ContainerState.SHOW)).setKey(key);
-//                }
-
-                return container;
-            });
-
-            InstitutionFieldDialog institutionFieldDialog = new InstitutionFieldDialog(institutionDialog, this, event.getItem(), patternMapContainer, multiplierListContainer, allergenListContainer, closingTimesMapContainer);
+            InstitutionFieldDialog institutionFieldDialog = new InstitutionFieldDialog(institutionDialog, this, event.getItem(), patternMapContainer, multiplierListContainer, allergenListContainer);
             institutionFieldDialog.open();
         });
 
@@ -255,20 +239,8 @@ public class FieldDragComponent extends FlexLayout
 
             AllergenMapContainer allergenMapContainer = allergenMapContainerMap.get(institutionField.getField());
             if(allergenMapContainer != null)
-            {
-                allergenMapContainer.evaluate(container ->
-                {
-                    container.getEntity().getId().setInstitutionFieldId(institutionField.getId());
-                });
-
                 allergenMapContainer.run(institutionAllergenService);
-            }
 
-            ClosingTimesMapContainer closingTimesMapContainer = closingTimesMapContainerMap.get(institutionField.getField());
-            if(closingTimesMapContainer != null)
-            {
-                closingTimesMapContainer.run(institutionClosingTimeService);
-            }
         }
 
     }

@@ -15,6 +15,7 @@ import de.bauersoft.services.InstitutionClosingTimeService;
 import de.bauersoft.services.InstitutionService;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
+import lombok.Getter;
 
 import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +25,7 @@ import java.util.Locale;
 @PageTitle("Schließtage")
 @Route(value = "closingtime", layout = MainLayout.class)
 @RolesAllowed({"ADMIN", "INSTITUTION"})
+@Getter
 public class ClosingTimeView extends Div
 {
     public static final EnhancedDateRangePicker.DatePickerI18n i18n;
@@ -47,20 +49,13 @@ public class ClosingTimeView extends Div
     private final InstitutionClosingTimeService closingTimeService;
     private final InstitutionService institutionService;
 
-    private final InstitutionClosingTimeDataProvider closingTimeDataProvider;
-
     private User user;
-
-    private HorizontalLayout buttonLayout;
-    private Button addButton;
-    private AutofilterGrid<InstitutionClosingTime, Long> grid;
 
     private ClosingTimeManager closingTimeManager;
 
-    public ClosingTimeView(AuthenticatedUser authenticatedUser, InstitutionClosingTimeService closingTimeService, InstitutionService institutionService, InstitutionClosingTimeDataProvider closingTimeDataProvider)
+    public ClosingTimeView(AuthenticatedUser authenticatedUser, InstitutionClosingTimeService closingTimeService, InstitutionService institutionService)
     {
         this.institutionService = institutionService;
-        this.closingTimeDataProvider = closingTimeDataProvider;
         setClassName("content");
 
         this.authenticatedUser = authenticatedUser;
@@ -69,89 +64,8 @@ public class ClosingTimeView extends Div
         if(authenticatedUser.get().isEmpty()) return;
         this.user = authenticatedUser.get().get();
 
-        closingTimeManager = new ClosingTimeManager(this, authenticatedUser, user, closingTimeService, institutionService, closingTimeDataProvider);
+        closingTimeManager = new ClosingTimeManager(this, authenticatedUser, user, closingTimeService, institutionService);
 
         this.add(closingTimeManager);
-
-//        if(authenticatedUser.get().isEmpty()) return;
-//        this.user = authenticatedUser.get().get();
-//
-//
-//
-//        buttonLayout = new HorizontalLayout();
-//        buttonLayout.getStyle()
-//                .setJustifyContent(Style.JustifyContent.CENTER);
-//
-//        addButton = new Button("Schließzeitraum hinzufügen");
-//        addButton.getStyle()
-//                .setFontSize("var(--lumo-font-size-xl)")
-//                .setBorder("1px solid grey");
-//
-//        buttonLayout.add(addButton);
-//
-//        grid = new AutofilterGrid<>(closingTimeService.getRepository());
-//        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
-//        grid.setSizeFull();
-//
-//        grid.addComponentColumn("Löschen", "4em", institutionClosingTime ->
-//        {
-//            Button button = new Button(LineAwesomeIcon.TRASH_SOLID.create());
-//            button.setWidth("4em");
-//
-//
-//
-//            return button;
-//        });
-//
-//        grid.addColumn("header", "Beschreibung", InstitutionClosingTime::getHeader);
-//        grid.addColumn("startDate", "Startdatum", institutionClosingTime ->
-//        {
-//            return institutionClosingTime.getStartDate().format(formatter).toString();
-//        }, (institutionClosingTimeRoot, path, criteriaQuery, criteriaBuilder) ->
-//        {
-//            return criteriaBuilder.function("DATE_FORMAT", String.class, path, criteriaBuilder.literal("%d.%m.%Y"));
-//        });
-//
-//        grid.addColumn("endDate", "Enddatum", institutionClosingTime ->
-//        {
-//            return institutionClosingTime.getEndDate().format(formatter).toString();
-//        }, (institutionClosingTimeRoot, path, criteriaQuery, criteriaBuilder) ->
-//        {
-//            return criteriaBuilder.function("DATE_FORMAT", String.class, path, criteriaBuilder.literal("%d.%m.%Y"));
-//        });
-//
-//        grid.addGridContextMenu("Neuer Schließzeitraum", event ->
-//        {
-//            new ClosingTimeDialog(this, new InstitutionClosingTime(), DialogState.NEW, closingTimeService);
-//
-//        }, "Löschen", event ->
-//        {
-//
-//        });
-//
-//        GridMenuItem<InstitutionClosingTime> openItem = grid.getGridContextMenu().addItem("Öffnen", event ->
-//        {
-//            Optional<InstitutionClosingTime> item = event.getItem();
-//
-//            if(item.isEmpty()) return;
-//            new ClosingTimeDialog(this, item.get(), DialogState.EDIT, closingTimeService);
-//        });
-//
-//        grid.getGridContextMenu().addGridContextMenuOpenedListener(event ->
-//        {
-//            openItem.setVisible(event.getItem().isPresent());
-//        });
-//
-//        grid.addItemDoubleClickListener(event ->
-//        {
-//            new ClosingTimeDialog(this, event.getItem(), DialogState.EDIT, closingTimeService);
-//        });
-//
-//        this.add(buttonLayout, grid);
-    }
-
-    public AutofilterGrid<InstitutionClosingTime, Long> getGrid()
-    {
-        return grid;
     }
 }

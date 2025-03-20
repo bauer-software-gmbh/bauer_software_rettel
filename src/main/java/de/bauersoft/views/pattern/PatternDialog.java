@@ -7,31 +7,29 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.pattern.Pattern;
-import de.bauersoft.data.providers.PatternDataProvider;
 import de.bauersoft.services.PatternService;
 import de.bauersoft.views.DialogState;
 import org.springframework.dao.DataIntegrityViolationException;
 
 public class PatternDialog extends Dialog
 {
+    private final FilterDataProvider<Pattern, Long> filterDataProvider;
     private final PatternService patternService;
-    private final PatternDataProvider patternDataProvider;
     private final Pattern item;
     private final DialogState state;
 
-    public PatternDialog(PatternService patternService, PatternDataProvider patternDataProvider, Pattern item, DialogState state)
+    public PatternDialog(FilterDataProvider<Pattern, Long> filterDataProvider, PatternService patternService, Pattern item, DialogState state)
     {
+        this.filterDataProvider = filterDataProvider;
         this.patternService = patternService;
-        this.patternDataProvider = patternDataProvider;
         this.item = item;
         this.state = state;
 
@@ -74,7 +72,7 @@ public class PatternDialog extends Dialog
         binder.bind(descriptionTextArea, "description");
 		binder.forField(religiousCheckbox).bind(Pattern::isReligious, Pattern::setReligious);
 
-        binder.setBean(item);
+        binder.readBean(item);
 
         Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
@@ -82,13 +80,13 @@ public class PatternDialog extends Dialog
         saveButton.setMaxWidth("180px");
         saveButton.addClickListener(e ->
         {
-            binder.validate();
+            binder.writeBeanIfValid(item);
             if(binder.isValid())
             {
 				try
 				{
-					patternService.update(binder.getBean());
-					patternDataProvider.refreshAll();
+					patternService.update(item);
+					filterDataProvider.refreshAll();
 
 					Notification.show("Daten wurden aktualisiert");
 					this.close();
@@ -109,7 +107,7 @@ public class PatternDialog extends Dialog
         cancelButton.addClickListener(e ->
         {
             binder.removeBean();
-            patternDataProvider.refreshAll();
+            filterDataProvider.refreshAll();
             this.close();
         });
 

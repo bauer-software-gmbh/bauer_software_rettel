@@ -10,13 +10,12 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofilter.FilterDataProvider;
+import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import de.bauersoft.data.entities.unit.Unit;
-import de.bauersoft.data.providers.UnitDataProvider;
 import de.bauersoft.services.IngredientService;
 import de.bauersoft.services.UnitService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
-import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Einheiten")
@@ -29,21 +28,19 @@ public class UnitView extends Div
     private final AutofilterGrid<Unit, Long> grid;
 
     public UnitView(UnitService unitService,
-                    IngredientService ingredientService,
-                    UnitDataProvider unitDataProvider)
+                    IngredientService ingredientService)
     {
         setClassName("content");
 
         filterDataProvider = new FilterDataProvider<>(unitService);
 
         grid = new AutofilterGrid<>(filterDataProvider);
-
         grid.setWidthFull();
         grid.setHeightFull();
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-        grid.addColumn("name", "Name", Unit::getName);
-        grid.addColumn("shorthand", "Abkürzung", Unit::getShorthand);
+        grid.addColumn("name", "Name", Unit::getName, false);
+        grid.addColumn("shorthand", "Abkürzung", Unit::getShorthand, s -> "%" + s + "%", false);
 
         grid.addColumn("parentUnit", "Parent", unit ->
         {
@@ -65,13 +62,13 @@ public class UnitView extends Div
 
         grid.addItemDoubleClickListener(event ->
         {
-            new UnitDialog(this, unitService, event.getItem(), DialogState.EDIT);
+            new UnitDialog(filterDataProvider, unitService, event.getItem(), DialogState.EDIT);
         });
 
         GridContextMenu<Unit> contextMenu = grid.addContextMenu();
         contextMenu.addItem("Neue Einheit", event ->
         {
-            new UnitDialog(this, unitService, new Unit(), DialogState.NEW);
+            new UnitDialog(filterDataProvider, unitService, new Unit(), DialogState.NEW);
         });
 
         GridMenuItem<Unit> deleteItem = contextMenu.addItem("Löschen", event ->
@@ -105,6 +102,7 @@ public class UnitView extends Div
         {
             deleteItem.setVisible(event.getItem().isPresent());
         });
+
         this.add(grid);
     }
 

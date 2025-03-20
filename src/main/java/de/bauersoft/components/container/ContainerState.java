@@ -6,10 +6,16 @@ public enum ContainerState
     HIDE,
     UPDATE,
     DELETE,
-    IGNORE;
+    IGNORE,
+    NEW;
 
-    public boolean view()
+    public boolean isVisible()
     {
         return this == SHOW || this == UPDATE;
+    }
+
+    public boolean isFunctional()
+    {
+        return this == UPDATE || this == DELETE;
     }
 }

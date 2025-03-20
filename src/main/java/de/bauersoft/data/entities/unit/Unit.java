@@ -23,8 +23,8 @@ public class Unit extends AbstractEntity
     @Column(nullable = false, unique = true, length = 8)
     private String shorthand;
 
-    @Column(nullable = false, columnDefinition = "float default 0.0")
-    private Float parentFactor;
+    @Column(columnDefinition = "float default 0.0")
+    private Double parentFactor;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_unit_id", referencedColumnName = "id")

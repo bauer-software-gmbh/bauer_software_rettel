@@ -42,17 +42,25 @@ public class AutofilterGrid<T, ID> extends Grid<T>
         this.setColumnRendering(ColumnRendering.LAZY);
     }
 
-    public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider)
+    public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider, boolean caseSensitive)
+    {
+        return addColumn(attributeName, header, valueProvider, s -> s.toLowerCase() + "%", caseSensitive);
+    }
+
+    public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider, ValueProvider<String, String> patternProvider, boolean caseSensitive)
     {
         return addColumn(attributeName, header, valueProvider, (root, path, criteriaQuery, criteriaBuilder, parent, filter) ->
         {
-            return criteriaBuilder.like(path.as(String.class), "%" + filter + "%");
+            return (caseSensitive) ?
+                    criteriaBuilder.like(path.as(String.class), patternProvider.apply(filter)) :
+                    criteriaBuilder.like(criteriaBuilder.lower(path.as(String.class)), patternProvider.apply(filter).toLowerCase());
         });
     }
 
     public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider, Filter.FilterFunction<T> filterFunction)
     {
         Grid.Column<T> column = this.addColumn(valueProvider);
+        column.setResizable(true);
 
         Filter<T> filter = new Filter<>(attributeName);
         filter.setFilterFunction(filterFunction);

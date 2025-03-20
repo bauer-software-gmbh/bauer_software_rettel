@@ -3,9 +3,6 @@ package de.bauersoft.components.container;
 import com.vaadin.flow.component.notification.Notification;
 import de.bauersoft.services.ServiceBase;
 import de.bauersoft.views.institution.institutionFields.components.allergen.AllergenContainer;
-import de.bauersoft.views.institution.institutionFields.components.closingTime.ClosingTimesContainer;
-import de.bauersoft.views.institution.institutionFields.components.multiplier.MultiplierContainer;
-import de.bauersoft.views.institution.institutionFields.components.pattern.PatternContainer;
 
 import java.util.List;
 import java.util.Map;
@@ -16,11 +13,15 @@ import java.util.function.Supplier;
 
 public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
 {
+    private int mapper;
+
     private final Map<M, Container<T, ID>> containers;
 
     public MapContainer()
     {
         containers = new ConcurrentHashMap<>();
+
+        mapper = 1;
     }
 
     public abstract Container<T, ID> createContainer();
@@ -196,33 +197,57 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
      */
     public MapContainer<T, ID, M> run(ServiceBase<T, ID> service)
     {
+        return run(service, null);
+    }
+
+    public MapContainer<T, ID, M> run(ServiceBase<T, ID> service, Consumer<Container<T, ID>> onRun)
+    {
         Objects.requireNonNull(service);
         for(Map.Entry<M, Container<T, ID>> entry : containers.entrySet())
         {
             Container<T, ID> container = entry.getValue();
             ContainerState state = container.getState();
 
-            if(container instanceof AllergenContainer allergenContainer)
-            {
-                System.out.println("Container: (" + container.getClass() + ") " + allergenContainer.getState());
-            }
+            Notification.show(container.getState().toString());
 
-            switch(state)
+            try
             {
-                case UPDATE ->
+                switch(state)
                 {
-                    System.out.println("UPDATE: " + container.getEntity().toString());
-                    container.update(service);
+                    case UPDATE ->
+                    {
+                        System.out.println("UPDATE: " + container.getEntity().toString());
+                        container.update(service);
+                        container.setTempState(ContainerState.SHOW);
+                    }
+
+                    case DELETE ->
+                    {
+                        System.out.println("DELETE: " + container.getEntity().toString());
+                        container.delete(service);
+                        container.setTempState(ContainerState.IGNORE);
+                    }
                 }
 
-                case DELETE ->
-                {
-                    System.out.println("DELETE: " + container.getEntity().toString());
-                    container.delete(service);
-                }
+            }catch(Exception e)
+            {
+                e.printStackTrace();
             }
+
+            if(onRun != null)
+                onRun.accept(container);
         }
 
         return this;
+    }
+
+    public int getMapper()
+    {
+        return mapper;
+    }
+
+    public synchronized int nextMapper()
+    {
+        return ++mapper;
     }
 }

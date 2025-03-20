@@ -1,19 +1,16 @@
 package de.bauersoft.views.institution.institutionFields.components.allergen;
 
-import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
-import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergenKey;
 import de.bauersoft.components.container.Container;
 import de.bauersoft.components.container.ContainerState;
+import de.bauersoft.data.entities.allergen.Allergen;
+import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
 
-import java.util.Objects;
+import java.util.HashSet;
+import java.util.Set;
 
-
-public class AllergenContainer extends Container<InstitutionAllergen, InstitutionAllergenKey>
+public class AllergenContainer extends Container<InstitutionAllergen, Long>
 {
-    private int tempAmount;
-    private ContainerState tempState;
-
-    private boolean isNew;
+    private Set<Allergen> tempAllergens;
 
     public AllergenContainer(InstitutionAllergen entity)
     {
@@ -27,60 +24,30 @@ public class AllergenContainer extends Container<InstitutionAllergen, Institutio
         loadTemporaries();
     }
 
-    public int getTempAmount()
+    public Set<Allergen> getTempAllergens()
     {
-        return tempAmount;
+        return tempAllergens;
     }
 
-    public void setTempAmount(int tempAmount)
+    public AllergenContainer setTempAllergens(Set<Allergen> tempAllergens)
     {
-        this.tempAmount = tempAmount;
-    }
-
-    @Override
-    public AllergenContainer setState(ContainerState state)
-    {
-        super.setState(state);
-        this.tempState = state;
-
-        return this;
-    }
-
-    public ContainerState getTempState()
-    {
-        return tempState;
-    }
-
-    public void setTempState(ContainerState tempState)
-    {
-        this.tempState = tempState;
-    }
-
-    public boolean isNew()
-    {
-        return isNew;
-    }
-
-    public AllergenContainer setIsNew(boolean isNew)
-    {
-        this.isNew = isNew;
+        this.tempAllergens = tempAllergens;
         return this;
     }
 
     @Override
     public AllergenContainer loadTemporaries()
     {
-        tempAmount = Objects.requireNonNullElse(getEntity().getAmount(), 0);
-        tempState = getState();
+        tempAllergens = new HashSet<>(getEntity().getAllergens());
+        setTempState(getState());
         return this;
     }
 
     @Override
     public AllergenContainer acceptTemporaries()
     {
-        getEntity().setAmount(tempAmount);
-
-        setState(tempState);
+        getEntity().setAllergens(tempAllergens);
+        setState(getTempState());
         return this;
     }
 }
