@@ -1,7 +1,6 @@
 package de.bauersoft.views.unit;
 
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
@@ -19,12 +18,6 @@ import de.bauersoft.services.UnitService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
-
-import java.util.Arrays;
-import java.util.Collections;
 
 @PageTitle("Einheiten")
 @Route(value = "unit", layout = MainLayout.class)
@@ -40,7 +33,7 @@ public class UnitView extends Div
     {
         setClassName("content");
 
-        filterDataProvider = new FilterDataProvider<Unit, Long>(unitService);
+        filterDataProvider = new FilterDataProvider<>(unitService);
 
         grid = new AutofilterGrid<>(filterDataProvider);
         grid.setWidthFull();
@@ -49,23 +42,21 @@ public class UnitView extends Div
 
         grid.addFilter(new Filter<Unit>("name", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
-            criteriaQuery.orderBy(criteriaBuilder.asc(path));
+            criteriaQuery.orderBy(criteriaBuilder.asc(path.as(String.class)));
             return criteriaBuilder.conjunction();
-
         }).setIgnoreFilterInput(true));
 
-        grid.addColumn("name", "Name", Unit::getName, false);
-
-        grid.addColumn("shorthand", "Abkürzung", Unit::getShorthand, false);
+        grid.addColumn("name", "Name", Unit::getName, s -> s + "%", false);
+        grid.addColumn("shorthand", "Abkürzung", Unit::getShorthand, s -> "%" + s + "%", false);
 
         grid.addColumn("parentUnit", "Parent", unit ->
         {
             return (unit.getParentUnit() == null) ? "" : unit.getParentUnit().getName();
 
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
-        {
-            return criteriaBuilder.like(path.get("name"), "%" + filterInput + "%");
-        });
+		{
+			return criteriaBuilder.like(path.get("name"), "%" + filterInput + "%");
+		});
 
         grid.addColumn("parentFactor", "Faktor", unit ->
         {
@@ -75,7 +66,6 @@ public class UnitView extends Div
             return criteriaBuilder.like(path.as(String.class), filterInput + "%");
         });
 
-        filterDataProvider.callFilters();
 
         grid.addItemDoubleClickListener(event ->
         {
