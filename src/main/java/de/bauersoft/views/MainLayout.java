@@ -36,6 +36,7 @@ import de.bauersoft.views.offers.OffersView;
 import de.bauersoft.views.order.OrderView;
 import de.bauersoft.views.pattern.PatternView;
 import de.bauersoft.views.recipe.RecipeView;
+import de.bauersoft.views.touren.TourenView;
 import de.bauersoft.views.unit.UnitView;
 import de.bauersoft.views.users.UsersView;
 import de.bauersoft.views.welcome.WelcomeView;
@@ -141,11 +142,14 @@ public class MainLayout extends AppLayout
         if(accessChecker.hasAccess(KitchenView.class))
             nav.addItem(new SideNavItem("Küche", KitchenView.class, LineAwesomeIcon.CHECK_CIRCLE_SOLID.create()));
 
+//        if(accessChecker.hasAccess(TourenView.class))
+//            nav.addItem(new SideNavItem("Touren", TourenView.class, LineAwesomeIcon.SHIPPING_FAST_SOLID.create()));
+
 
         if(accessChecker.hasAccess(UsersView.class) || accessChecker.hasAccess(FieldView.class)
                 || accessChecker.hasAccess(InstitutionView.class) || accessChecker.hasAccess(AddressView.class))
         {
-            SideNavItem accounting = new SideNavItem("Accounting");
+            SideNavItem accounting = new SideNavItem("Verwaltung");
             if(accessChecker.hasAccess(UsersView.class))
                 accounting.addItem(new SideNavItem("Benutzer", UsersView.class, LineAwesomeIcon.USERS_SOLID.create()));
 
@@ -166,7 +170,7 @@ public class MainLayout extends AppLayout
                 || accessChecker.hasAccess(UnitView.class) || accessChecker.hasAccess(PatternView.class)
                 || accessChecker.hasAccess(MenuBuilderView.class) || accessChecker.hasAccess(OffersView.class))
         {
-            SideNavItem backend = new SideNavItem("Backend");
+            SideNavItem backend = new SideNavItem("Planung Küche");
             if(accessChecker.hasAccess(OffersView.class))
                 backend.addItem(new SideNavItem("Menü Planung", OffersView.class, LineAwesomeIcon.COFFEE_SOLID.create()));
 

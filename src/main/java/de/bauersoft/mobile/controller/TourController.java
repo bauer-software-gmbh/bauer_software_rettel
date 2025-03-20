@@ -37,13 +37,12 @@ public class TourController {
         this.aesUtil = aesUtil;
     }
 
-    @GetMapping("/today")
+    @PostMapping("/today")
     public ResponseEntity<List<TourDTO>> getTodayToursForDriver(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @RequestParam(value = "username", required = false) String encryptedUsername) {
+            @RequestBody() String encryptedUsername) {
 
         String username = null;
-
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.replace("Bearer ", "");
@@ -67,9 +66,9 @@ public class TourController {
         LocalDateTime end = LocalDate.now().plusDays(1).atStartOfDay();
         logger.info("👤 User ID: {}", userId);
 
-        //List<TourDTO> tours = tourService.getToursForDriverAndDate(userId, start, end);
+        List<TourDTO> tours = tourService.getToursForDriverAndDate(userId, start, end);
 
-        List<TourDTO> tours = new ArrayList<>();
+        //List<TourDTO> tours = new ArrayList<>();
 
         TourDTO dummyTour = DummyTourData.getDummyTourDTO();
 
@@ -78,7 +77,7 @@ public class TourController {
         logger.info("🏢 Institutionen - Index 0: {}", dummyTour.getInstitutions().getFirst().getName());
         logger.info("🏠 Adressen: {}", dummyTour.getAddresses().size());
 
-        tours.add(dummyTour);
+        //tours.add(dummyTour);
 
         return ResponseEntity.ok(tours);
     }

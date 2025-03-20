@@ -58,7 +58,7 @@ public class ApiSecurityConfig {
         http
                 .securityMatcher("/api/**") // Nur API-Endpunkte betreffen
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/mobile/login", "/api/mobile/test").permitAll() // Öffentlich zugänglich
+                        .requestMatchers("/api/mobile/login", "/api/mobile/test", "/api/mobile/locations/**").permitAll() // Öffentlich zugänglich
                         .requestMatchers("/api/mobile/**").authenticated() // Alle anderen erfordern Authentifizierung
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT → Kein Session-Management

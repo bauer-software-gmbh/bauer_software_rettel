@@ -8,6 +8,7 @@ import de.bauersoft.services.RecipeService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -33,7 +34,11 @@ public class RecipeDataProvider implements ConfigurableFilterDataProvider<Recipe
 
 	@Override
 	public Stream<Recipe> fetch(Query<Recipe, Void> query) {
-		return this.service.fetchAll(filter,query.getSortOrders()).stream().skip(query.getOffset()).limit(query.getLimit());
+		return this.service.fetchAll(filter, query.getSortOrders())
+				.stream()
+				.sorted(Comparator.comparing(i -> i.getName().toLowerCase())) // Standard-Sortierung nach Name
+				.skip(query.getOffset())
+				.limit(query.getLimit());
 	}
 
 	@Override

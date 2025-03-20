@@ -76,7 +76,7 @@ importers:
         version: 24.3.13
       '@vaadin/bundles':
         specifier: 24.3.13
-        version: 24.3.13(ca9214d2937806ac24778035d144b3d0)
+        version: 24.3.13(b2xnrd3y3xjl4o3otbjfk7orx4)
       '@vaadin/button':
         specifier: 24.3.13
         version: 24.3.13
@@ -272,6 +272,9 @@ importers:
       date-fns:
         specifier: 2.29.3
         version: 2.29.3
+      leaflet:
+        specifier: ^1.9.4
+        version: 1.9.4
       lit:
         specifier: 3.1.2
         version: 3.1.2
@@ -2588,6 +2591,9 @@ packages:
     resolution: {integrity: sha512-p/nXbhSEcu3pZRdkW1OfJhpsVtW1gd4Wa1fnQc9YLiTfAjn0312eMKimbdIQzuZl9aa9xUGaRlP9T/CJE/ditQ==}
     engines: {node: '>=0.10.0'}
 
+  leaflet@1.9.4:
+    resolution: {integrity: sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==}
+
   lerc@3.0.0:
     resolution: {integrity: sha512-Rm4J/WaHhRa93nCN2mwWDZFoRVF18G1f47C+kvQWyHGEZxFpTUi73p7lMVSAndyxGt6lJ2/CFbOcf9ra5p8aww==}
 
@@ -4664,7 +4670,7 @@ snapshots:
       '@vaadin/a11y-base': 24.3.13
       '@vaadin/component-base': 24.3.13
 
-  '@vaadin/bundles@24.3.13(ca9214d2937806ac24778035d144b3d0)':
+  '@vaadin/bundles@24.3.13(b2xnrd3y3xjl4o3otbjfk7orx4)':
     optionalDependencies:
       '@polymer/polymer': 3.5.1
       '@vaadin/a11y-base': 24.3.13
@@ -6206,6 +6212,8 @@ snapshots:
       graceful-fs: 4.2.11
 
   jsonpointer@5.0.1: {}
+
+  leaflet@1.9.4: {}
 
   lerc@3.0.0: {}
 

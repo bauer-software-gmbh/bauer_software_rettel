@@ -111,6 +111,12 @@
     		<version>5.1.0</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
 
+		<dependency>
+			<groupId>software.xdev</groupId>
+			<artifactId>vaadin-maps-leaflet-flow</artifactId>
+			<version>4.2.0</version>
+		</dependency>
+
 		<!-- APACHE PDF -->
 
 		<dependency>

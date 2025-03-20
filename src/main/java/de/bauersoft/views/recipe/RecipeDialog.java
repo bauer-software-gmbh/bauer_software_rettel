@@ -30,6 +30,8 @@ import de.bauersoft.services.RecipeService;
 import de.bauersoft.views.DialogState;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.util.Comparator;
+
 public class RecipeDialog extends Dialog
 {
 	private final RecipeService recipeService;
@@ -86,7 +88,10 @@ public class RecipeDialog extends Dialog
 
 		MultiSelectComboBox<Pattern> patternMultiSelectComboBox = new MultiSelectComboBox<>();
 		patternMultiSelectComboBox.setItemLabelGenerator(pattern -> pattern.getName());
-		patternMultiSelectComboBox.setItems(patternRepository.findAll());
+		patternMultiSelectComboBox.setItems(patternRepository.findAll()
+				.stream()
+				.sorted(Comparator.comparing(Pattern::getName)) // Sortierung nach Name
+				.toList());
 		patternMultiSelectComboBox.setWidthFull();
 
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
@@ -103,10 +108,20 @@ public class RecipeDialog extends Dialog
 
 		binder.bind(descriptionTextArea, "description");
 		binder.bind(patternMultiSelectComboBox, "patterns");
-		
+
 		FormulationComponent formulationComponent = new FormulationComponent();
-		formulationComponent.setFormulations(formulationRepository.findAllByRecipeId(item.getId()));
-		formulationComponent.setIngredients(ingredientRepository.findAll());
+		formulationComponent.setFormulations(
+				formulationRepository.findAllByRecipeId(item.getId())
+						.stream()
+						.sorted(Comparator.comparing(f -> f.getIngredient().getName().toLowerCase()))
+						.toList()
+		);
+		formulationComponent.setIngredients(
+				ingredientRepository.findAll()
+						.stream()
+						.sorted(Comparator.comparing(i -> i.getName().toLowerCase()))
+						.toList()
+		);
 		formulationComponent.updateView();
 		formulationComponent.setHeight("50vh");
 

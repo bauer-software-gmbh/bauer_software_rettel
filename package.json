@@ -91,11 +91,13 @@
     "@vaadin/virtual-list": "24.3.13",
     "construct-style-sheets-polyfill": "3.1.0",
     "date-fns": "2.29.3",
+    "leaflet": "^1.9.4",
     "lit": "3.1.2",
     "moment": "2.29.4",
     "moment-timezone": "0.5.40",
     "print-js": "1.6.0",
-    "proj4": "2.9.2"
+    "proj4": "2.9.2",
+    "leaflet": "^1.9.4"
   },
   "devDependencies": {
     "@rollup/plugin-replace": "5.0.5",
@@ -208,7 +210,8 @@
     "moment-timezone": "$moment-timezone",
     "@fullcalendar/multimonth": "$@fullcalendar/multimonth",
     "@fullcalendar/moment": "$@fullcalendar/moment",
-    "@vaadin-component-factory/vcf-date-range-picker": "$@vaadin-component-factory/vcf-date-range-picker"
+    "@vaadin-component-factory/vcf-date-range-picker": "$@vaadin-component-factory/vcf-date-range-picker",
+    "leaflet": "$leaflet"
   },
   "vaadin": {
     "dependencies": {
@@ -324,6 +327,6 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "fded0389a35229c6103f20f46f8751072ad66a0c556cd86a63a518e5f8d3524b"
+    "hash": "1367b44ffa99810f284f4fe644efce5bf984122d8696100e273789a96e5e8153"
   }
 }

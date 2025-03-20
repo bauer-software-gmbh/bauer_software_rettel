@@ -11,6 +11,7 @@ import de.bauersoft.services.InstitutionService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -48,7 +49,11 @@ public class InstitutionDataProvider implements ConfigurableFilterDataProvider<I
 	@Override
 	public Stream<Institution> fetch(Query<Institution, Void> query)
 	{
-		return this.service.fetchAll(filter, query.getSortOrders()).stream().skip(query.getOffset()).limit(query.getLimit());
+		return this.service.fetchAll(filter, query.getSortOrders())
+				.stream()
+				.sorted(Comparator.comparing(i -> i.getName().toLowerCase())) // Standard-Sortierung nach Name
+				.skip(query.getOffset())
+				.limit(query.getLimit());
 	}
 
 	@Override
