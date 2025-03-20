@@ -8,6 +8,11 @@ public enum Role
     OFFICE,
     OFFICE_ADMIN,
     INSTITUTION,
+    ORDERER,
+    USER,
+    CHEF,
+    ACCOUNTENT,
+    STAFF,
     ORDER_SHOW_ALL_INSTITUTIONS,
     ORDER_TIME_BYPASS;
 }

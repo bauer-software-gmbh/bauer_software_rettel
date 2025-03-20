@@ -47,8 +47,9 @@ public class InstitutionDataProvider implements ConfigurableFilterDataProvider<I
 	}
 
 	@Override
-	public Stream<Institution> fetch(Query<Institution, Void> query)
-	{
+	public Stream<Institution> fetch(Query<Institution, Void> query) {
+//		return this.service.fetchAll(filter, query.getSortOrders()).stream().skip(query.getOffset()).limit(query.getLimit());
+
 		return this.service.fetchAll(filter, query.getSortOrders())
 				.stream()
 				.sorted(Comparator.comparing(i -> i.getName().toLowerCase())) // Standard-Sortierung nach Name
