@@ -3,12 +3,14 @@ package de.bauersoft.components.autofilter.grid;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Direction;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.ColumnRendering;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.NativeLabel;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -49,29 +51,11 @@ public class AutofilterGrid<T, ID> extends Grid<T>
 
     public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider, boolean caseSensitive)
     {
-        return addColumn(attributeName, header, valueProvider, s -> s.toLowerCase() + "%", caseSensitive, GridSortOrder.ASCENDING);
+        return addColumn(attributeName, header, valueProvider, s -> s.toLowerCase() + "%", caseSensitive);
     }
 
     public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider, ValueProvider<String, String> patternProvider, boolean caseSensitive)
     {
-        return addColumn(attributeName, header, valueProvider, patternProvider, caseSensitive, GridSortOrder.ASCENDING);
-    }
-
-    public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider, boolean caseSensitive, GridSortOrder gridSortOrder)
-    {
-        return addColumn(attributeName, header, valueProvider, s -> s.toLowerCase() + "%", caseSensitive, gridSortOrder);
-    }
-
-    public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider, ValueProvider<String, String> patternProvider, boolean caseSensitive, GridSortOrder gridSortOrder)
-    {
-        Filter<T> sortFilter = new Filter<T>(attributeName, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
-        {
-            criteriaQuery.orderBy(criteriaBuilder.asc(path.as(String.class)));
-            return criteriaBuilder.conjunction();
-        }).setIgnoreFilterInput(true);
-
-        this.addFilter(sortFilter);
-
         return addColumn(attributeName, header, valueProvider, (root, path, criteriaQuery, criteriaBuilder, parent, filter) ->
         {
             return (caseSensitive) ?
@@ -85,37 +69,15 @@ public class AutofilterGrid<T, ID> extends Grid<T>
         Grid.Column<T> column = this.addColumn(valueProvider);
         column.setResizable(true);
 
-        Filter<T> filter = new Filter<>(attributeName);
-        filter.setFilterFunction(filterFunction);
+        Filter<T> filter = new Filter<>(attributeName, filterFunction);
 
         dataProvider.getFilters().add(filter);
 
-        headerRow.getCell(column).setComponent(createFilterHeader(header, value ->
-        {
-            filter.setFilterInput(value);
-            dataProvider.callFilters();
-        }));
-
-        return column;
-    }
-
-    public Grid.Column<T> addColumn(String header, ValueProvider<T, String> valueProvider,ValueProvider<Root<?>, Path<?>> pathProvider, Filter.FilterFunction<T> filterFunction)
-    {
-        Grid.Column<T> column = this.addColumn(valueProvider);
-        column.setResizable(true);
-
-        Filter<T> filter = new Filter<>(pathProvider, filterFunction);
-        filter.setFilterFunction(filterFunction);
-
-        this.addFilter(filter);
-
-//        Filter<T> sortFilter = new Filter<T>(pathProvider, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+//        column.setHeader(createFilterHeader(header, value ->
 //        {
-//            criteriaQuery.orderBy(criteriaBuilder.asc(path.as(String.class)));
-//            return criteriaBuilder.conjunction();
-//        }).setIgnoreFilterInput(true);
-//
-//        this.addFilter(sortFilter);
+//            filter.setFilterInput(value);
+//            dataProvider.callFilters();
+//        }));
 
         headerRow.getCell(column).setComponent(createFilterHeader(header, value ->
         {
@@ -123,8 +85,35 @@ public class AutofilterGrid<T, ID> extends Grid<T>
             dataProvider.callFilters();
         }));
 
+//        HeaderRow.HeaderCell headerCell = headerRow.getCell(column);
+//        headerCell.setComponent(createFilterHeader(header, value ->
+//        {
+//            filter.setFilterInput(value);
+//            dataProvider.callFilters();
+//        }));
+
+
         return column;
     }
+
+//    public Grid.Column<T> addColumn(String header, ValueProvider<T, String> valueProvider,ValueProvider<Root<?>, Path<?>> pathProvider, Filter.FilterFunction<T> filterFunction)
+//    {
+//        Grid.Column<T> column = this.addColumn(valueProvider);
+//        column.setResizable(true);
+//
+//        Filter<T> filter = new Filter<>(pathProvider, filterFunction);
+//        filter.setFilterFunction(filterFunction);
+//
+//        this.addFilter(filter);
+//
+//        headerRow.getCell(column).setComponent(createFilterHeader(header, value ->
+//        {
+//            filter.setFilterInput(value);
+//            dataProvider.callFilters();
+//        }));
+//
+//        return column;
+//    }
 
     @Override
     public <V extends Component> Grid.Column<T> addComponentColumn(ValueProvider<T, V> componentProvider)

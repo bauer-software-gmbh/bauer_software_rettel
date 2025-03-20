@@ -89,7 +89,7 @@ public class Filter<T>
         return this;
     }
 
-    public boolean isIgnoreFilterInput()
+    public boolean ignoreFilterInput()
     {
         return ignoreFilterInput;
     }

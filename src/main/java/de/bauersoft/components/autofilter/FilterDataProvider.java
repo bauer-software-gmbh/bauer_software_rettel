@@ -7,7 +7,6 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
@@ -91,21 +90,30 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
     }
 
 
-
     public Specification<T> buildFilter()
     {
         return (root, query, criteriaBuilder) ->
         {
             Predicate predicate = criteriaBuilder.conjunction();
+            List<Order> orders = new ArrayList<>();
             for(Filter<T> filter : filters)
             {
                 Path<?> path = root.get(filter.getAttributeName());
                 String filterInput = filter.getFilterInput();
 
-                if(!filter.isIgnoreFilterInput() && (filterInput == null || filterInput.isEmpty())) continue;
+                if(filter.ignoreFilterInput()) continue;
+
+//                orders.add(criteriaBuilder.asc(path));
+//                System.out.println("Added order: " + filter.getAttributeName());
+
+                if(filterInput == null || filterInput.isEmpty()) continue;
 
                 predicate = criteriaBuilder.and(predicate, filter.getFilterFunction().apply(root, path, query, criteriaBuilder, predicate, filterInput));
             }
+
+//            System.out.println("order size: " + orders.size());
+//            if(!orders.isEmpty())
+//                query.orderBy(orders);
 
             return predicate;
         };
