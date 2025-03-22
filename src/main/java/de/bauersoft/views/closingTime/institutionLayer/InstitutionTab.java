@@ -118,6 +118,18 @@ public class InstitutionTab extends Div
             return button;
         });
 
+//        grid.addFilter(new Filter<InstitutionClosingTime>("startDate", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+//        {
+//            criteriaQuery.orderBy(criteriaBuilder.asc(path));
+//            return criteriaBuilder.conjunction();
+//        }).setIgnoreFilterInput(true));
+
+//        grid.addFilter(new Filter<InstitutionClosingTime>("endDate", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+//        {
+//            criteriaQuery.orderBy(criteriaBuilder.asc(path));
+//            return criteriaBuilder.conjunction();
+//        }).setIgnoreFilterInput(true));
+
         grid.addColumn("header", "Beschreibung", InstitutionClosingTime::getHeader, s -> "%" + s + "%", false);
 
         grid.addColumn("startDate", "Startdatum", institutionClosingTime ->

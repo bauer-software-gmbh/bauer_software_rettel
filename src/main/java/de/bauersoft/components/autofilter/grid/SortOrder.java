@@ -1,6 +1,6 @@
 package de.bauersoft.components.autofilter.grid;
 
-public enum GridSortOrder
+public enum SortOrder
 {
     ASCENDING,
     DESCENDING,

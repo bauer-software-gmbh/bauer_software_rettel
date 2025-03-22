@@ -3,6 +3,7 @@ package de.bauersoft.components.autofilter.grid;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Direction;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.ColumnRendering;
 import com.vaadin.flow.component.grid.Grid;
@@ -11,6 +12,7 @@ import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -21,14 +23,20 @@ import de.bauersoft.data.entities.unit.Unit;
 import de.bauersoft.services.ServiceBase;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
+import lombok.Getter;
 import org.springframework.data.domain.Sort;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class AutofilterGrid<T, ID> extends Grid<T>
 {
     private FilterDataProvider<T, ID> dataProvider;
     private ServiceBase<T, ID> service;
+
+    private final List<Column> columns;
 
     private HeaderRow headerRow;
 
@@ -38,6 +46,8 @@ public class AutofilterGrid<T, ID> extends Grid<T>
     {
         this.dataProvider = dataProvider;
         this.service = dataProvider.getService();
+
+        columns = new ArrayList<>();
 
         this.getHeaderRows().clear();
         headerRow = appendHeaderRow();
@@ -66,34 +76,18 @@ public class AutofilterGrid<T, ID> extends Grid<T>
 
     public Grid.Column<T> addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider, Filter.FilterFunction<T> filterFunction)
     {
-        Grid.Column<T> column = this.addColumn(valueProvider);
-        column.setResizable(true);
-
         Filter<T> filter = new Filter<>(attributeName, filterFunction);
+        addFilter(filter);
 
-        dataProvider.getFilters().add(filter);
-
-//        column.setHeader(createFilterHeader(header, value ->
-//        {
-//            filter.setFilterInput(value);
-//            dataProvider.callFilters();
-//        }));
-
-        headerRow.getCell(column).setComponent(createFilterHeader(header, value ->
+        Column column = new Column(header, valueProvider, s ->
         {
-            filter.setFilterInput(value);
+            filter.setFilterInput(s);
             dataProvider.callFilters();
-        }));
+        });
 
-//        HeaderRow.HeaderCell headerCell = headerRow.getCell(column);
-//        headerCell.setComponent(createFilterHeader(header, value ->
-//        {
-//            filter.setFilterInput(value);
-//            dataProvider.callFilters();
-//        }));
+        columns.add(column);
 
-
-        return column;
+        return column.getGridColumn();
     }
 
 //    public Grid.Column<T> addColumn(String header, ValueProvider<T, String> valueProvider,ValueProvider<Root<?>, Path<?>> pathProvider, Filter.FilterFunction<T> filterFunction)
@@ -171,6 +165,100 @@ public class AutofilterGrid<T, ID> extends Grid<T>
     {
         dataProvider.addFilter(filter);
         return this;
+    }
+
+    @Getter
+    public class Column extends VerticalLayout
+    {
+        private SortOrder sortOrder;
+        private SortType sortType;
+
+        private final String header;
+        private final ValueProvider<T, String> valueProvider;
+        private final Consumer<String> onFilterChangeConsumer;
+
+        private final Grid.Column<T> gridColumn;
+
+        private final NativeLabel label;
+        private final HorizontalLayout inputLayout;
+        private final TextField inputField;
+        private final Button sortButton;
+
+        public Column(String header, ValueProvider<T, String> valueProvider, Consumer<String> onFilterChangeConsumer)
+        {
+            sortOrder = SortOrder.NONE;
+            sortType = SortType.ALPHA;
+
+            this.header = header;
+            this.valueProvider = valueProvider;
+            this.onFilterChangeConsumer = onFilterChangeConsumer;
+
+            gridColumn = AutofilterGrid.super.addColumn(valueProvider);
+            headerRow.getCell(gridColumn).setComponent(this);
+
+            label = new NativeLabel((header == null || header.isEmpty()) ? "\u200B" : header);
+            label.getStyle()
+                    .set("padding-top", "var(--lumo-space-m)")
+                    .set("font-size", "var(--lumo-font-size-m)");
+
+            inputLayout = new HorizontalLayout();
+            inputLayout.setWidthFull();
+
+            inputField = new TextField();
+            inputField.setValueChangeMode(ValueChangeMode.EAGER);
+            inputField.setClearButtonVisible(true);
+            inputField.setWidthFull();
+            inputField.getStyle().set("max-width", "100%");
+            inputField.addValueChangeListener(event ->
+            {
+                onFilterChangeConsumer.accept(event.getValue());
+            });
+
+            sortButton = new Button(LineAwesomeIcon.SORT_SOLID.create());
+            sortButton.addClickListener(event ->
+            {
+                setSortOrder(nextSortOrder(sortOrder));
+
+                for(Column column : columns)
+                {
+                    if(column == this) continue;
+                    column.setSortOrder(SortOrder.NONE);
+                }
+            });
+
+            inputLayout.add(inputField, sortButton);
+
+            this.add(label, inputLayout);
+            this.getThemeList().clear();
+            this.getThemeList().add("spacing-xs");
+        }
+
+        public static SortOrder nextSortOrder(SortOrder currentSortOrder)
+        {
+            switch(currentSortOrder)
+            {
+                case ASCENDING:
+                    return SortOrder.DESCENDING;
+
+                case DESCENDING:
+                    return SortOrder.NONE;
+
+                case NONE:
+                    return SortOrder.ASCENDING;
+
+                default:
+                    return SortOrder.NONE;
+            }
+        }
+
+        public SortOrder setSortOrder(SortOrder sortOrder)
+        {
+            this.sortOrder = sortOrder;
+            sortButton.setIcon(sortType.get(sortOrder).create());
+
+            return sortOrder;
+        }
+
     }
 
 

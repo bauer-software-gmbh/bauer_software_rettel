@@ -101,19 +101,15 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
                 Path<?> path = root.get(filter.getAttributeName());
                 String filterInput = filter.getFilterInput();
 
-                if(filter.ignoreFilterInput()) continue;
+                if(filter.getAttributeName().equals("name"))
+                    orders.add(criteriaBuilder.asc(path));
 
-//                orders.add(criteriaBuilder.asc(path));
-//                System.out.println("Added order: " + filter.getAttributeName());
-
-                if(filterInput == null || filterInput.isEmpty()) continue;
+                if(!filter.ignoreFilterInput() && (filterInput == null || filterInput.isEmpty())) continue;
 
                 predicate = criteriaBuilder.and(predicate, filter.getFilterFunction().apply(root, path, query, criteriaBuilder, predicate, filterInput));
             }
 
-//            System.out.println("order size: " + orders.size());
-//            if(!orders.isEmpty())
-//                query.orderBy(orders);
+            //query.orderBy(orders);
 
             return predicate;
         };
