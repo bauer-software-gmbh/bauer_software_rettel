@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
+//@Component
 public class ForecastScheduler
 {
 
@@ -47,7 +47,7 @@ public class ForecastScheduler
         this.fieldService = fieldService;
     }
 
-    @Scheduled(cron = "0 1 0 * * *")
+    //@Scheduled(cron = "0 1 0 * * *")
     public void loadForecast()
     {
         System.out.println("Forecast loaded");
