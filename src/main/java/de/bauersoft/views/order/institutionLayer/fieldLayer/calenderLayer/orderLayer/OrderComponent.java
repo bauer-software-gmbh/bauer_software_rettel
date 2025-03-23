@@ -7,11 +7,18 @@ import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
+import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
+import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPattern;
 import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.entities.offer.Offer;
 import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.data.entities.order.OrderAllergen;
 import de.bauersoft.data.entities.order.OrderData;
+import de.bauersoft.data.entities.order.OrderDataKey;
+import de.bauersoft.data.entities.pattern.Pattern;
+import de.bauersoft.data.entities.variant.Variant;
+import de.bauersoft.services.InstitutionAllergenService;
+import de.bauersoft.services.InstitutionPatternService;
 import de.bauersoft.services.OrderDataService;
 import de.bauersoft.services.OrderService;
 import de.bauersoft.services.offer.OfferService;
@@ -22,10 +29,13 @@ import de.bauersoft.views.order.institutionLayer.fieldLayer.calenderLayer.orderL
 import de.bauersoft.views.order.institutionLayer.fieldLayer.calenderLayer.orderLayer.variantLayer.VariantComponent;
 import de.bauersoft.views.order.institutionLayer.fieldLayer.calenderLayer.orderLayer.variantLayer.VariantMapContainer;
 import lombok.Getter;
+import org.aspectj.weaver.ast.Or;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Getter
 public class OrderComponent extends VerticalLayout
@@ -43,6 +53,8 @@ public class OrderComponent extends VerticalLayout
     private final OrderService orderService;
     private final OfferService offerService;
     private final OrderDataService orderDataService;
+    private final InstitutionPatternService institutionPatternService;
+    private final InstitutionAllergenService institutionAllergenService;
 
     private final VariantMapContainer variantMapContainer;
     private final AllergenMapContainer allergenMapContainer;
@@ -74,6 +86,8 @@ public class OrderComponent extends VerticalLayout
         orderService = orderManager.getOrderService();
         offerService = orderManager.getOfferService();
         orderDataService = orderManager.getOrderDataService();
+        institutionPatternService = orderManager.getInstitutionPatternService();
+        institutionAllergenService = orderManager.getInstitutionAllergenService();
 
         variantMapContainer = new VariantMapContainer();
         allergenMapContainer = new AllergenMapContainer();
@@ -95,16 +109,6 @@ public class OrderComponent extends VerticalLayout
         }
         offer = offerOptional.get();
 
-        order = orderOptional.orElseGet(() ->
-                {
-                    Order order = new Order();
-                    order.setOrderDate(localDate);
-                    order.setInstitution(institution);
-                    order.setField(field);
-
-                    return order;
-                });
-
         menuOptional = offer.getMenus().stream().findFirst();
         if(menuOptional.isEmpty())
         {
@@ -116,6 +120,45 @@ public class OrderComponent extends VerticalLayout
         }
 
         menu = menuOptional.get();
+
+        order = orderOptional.orElseGet(() ->
+                {
+                    Order order = new Order();
+                    order.setOrderDate(localDate);
+                    order.setInstitution(institution);
+                    order.setField(field);
+
+                    Map<Pattern, Variant> menuVariants = menu.getVariants()
+                            .stream()
+                            .collect(Collectors.toMap(Variant::getPattern, v -> v));
+
+                    for(InstitutionPattern institutionPattern : institutionPatternService.findAllByInstitutionField_Id(institutionField.getId()))
+                    {
+                        Pattern pattern = institutionPattern.getPattern();
+
+                        Variant variant = menuVariants.get(pattern);
+                        if(variant == null) continue;
+
+                        OrderData orderData = new OrderData();
+                        orderData.setId(new OrderDataKey(null, variant.getId()));
+                        orderData.set_order(order);
+                        orderData.setVariant(variant);
+                        orderData.setAmount(institutionPattern.getAmount());
+
+                        variantMapContainer.addContainer(variant, orderData, ContainerState.UPDATE);
+                    }
+
+                    for(InstitutionAllergen institutionAllergen : institutionAllergenService.findAllByInstitutionField_Id(institutionField.getId()))
+                    {
+                        OrderAllergen orderAllergen = new OrderAllergen();
+                        orderAllergen.set_order(order);
+                        orderAllergen.setAllergens(institutionAllergen.getAllergens());
+
+                        allergenMapContainer.addContainer(allergenMapContainer.nextMapper(), orderAllergen, ContainerState.UPDATE);
+                    }
+
+                    return order;
+                });
 
         this.remove(paragraph);
 

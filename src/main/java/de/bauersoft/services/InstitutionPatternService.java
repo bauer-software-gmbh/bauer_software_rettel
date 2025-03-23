@@ -132,4 +132,9 @@ public class InstitutionPatternService implements ServiceBase<InstitutionPattern
     {
         return repository.findByInstitutionFieldAndPattern(institutionField, pattern);
     }
+
+    public List<InstitutionPattern> findAllByInstitutionField_Id(Long institutionFieldId)
+    {
+        return repository.findAllByInstitutionField_Id(institutionFieldId);
+    }
 }
