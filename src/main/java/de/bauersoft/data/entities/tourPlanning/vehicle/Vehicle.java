@@ -12,7 +12,7 @@ import java.util.Set;
 @Entity
 @Table(name = "vehicle", uniqueConstraints =
         {
-                @jakarta.persistence.UniqueConstraint(columnNames = {"license_plate"})
+                @UniqueConstraint(columnNames = {"license_plate"})
         })
 @AllArgsConstructor
 @NoArgsConstructor

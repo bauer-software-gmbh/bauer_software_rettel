@@ -11,6 +11,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.autofilter.grid.AutofilterGrid;
+import de.bauersoft.components.autofilter.grid.SortType;
 import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
 import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.allergen.Allergen;
@@ -62,10 +63,23 @@ public class IngredientView extends Div
 
         grid.addColumn("name", "Name", Ingredient::getName, false);
         grid.addColumn("description", "Beschreibung", Ingredient::getDescription, false);
+
         grid.addColumn("unit", "Einheit", ingredient -> ingredient.getUnit().getName(), (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
             return criteriaBuilder.like(criteriaBuilder.lower(path.get("name").as(String.class)), filterInput + "%");
-        });
+        }, (root, path, criteriaQuery, criteriaBuilder, parent, sortOrder) ->
+        {
+            Join<Object, Object> join = root.join("unit", JoinType.LEFT);
+            switch(sortOrder)
+            {
+                case ASCENDING:
+                    return criteriaBuilder.asc(join.get("name"));
+                case DESCENDING:
+                    return criteriaBuilder.desc(join.get("name"));
+                default:
+                    return null;
+            }
+        }, SortType.ALPHA);
 
         grid.addColumn("allergens", "Allergene", ingredient ->
         {
@@ -75,7 +89,8 @@ public class IngredientView extends Div
         {
             Join<Ingredient, Allergen> allergenJoin = root.join("allergens");
             return criteriaBuilder.like(criteriaBuilder.lower(allergenJoin.get("name")), filterInput.toLowerCase() + "%");
-        });
+
+        }).enableSorting(false);
 
         grid.addColumn("additives", "Zusatzstoffe", ingredient ->
         {
@@ -85,7 +100,7 @@ public class IngredientView extends Div
         {
             Join<Ingredient, Additive> additiveJoin = root.join("additives");
             return criteriaBuilder.like(criteriaBuilder.lower(additiveJoin.get("name")), filterInput.toLowerCase() + "%");
-        });
+        }).enableSorting(false);
 
 
 //        grid.addComponentColumn(item ->

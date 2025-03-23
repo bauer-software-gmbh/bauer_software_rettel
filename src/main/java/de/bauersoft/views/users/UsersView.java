@@ -11,6 +11,7 @@ import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
+import de.bauersoft.data.entities.role.Role;
 import de.bauersoft.data.entities.user.User;
 import de.bauersoft.data.providers.UserDataProvider;
 import de.bauersoft.security.AuthenticatedUser;
@@ -18,7 +19,14 @@ import de.bauersoft.services.UserService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @PageTitle("Benutzer")
 @Route(value = "user", layout = MainLayout.class)
