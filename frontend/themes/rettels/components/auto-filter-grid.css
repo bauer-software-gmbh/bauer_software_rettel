@@ -1,3 +1,7 @@
+.autofilter-grid vaadin-grid-cell-content
+{
+    padding: var(--lumo-space-s) !important;
+}
 /*[part~='cell']:not([part~='details-cell']) {*/
 /*    flex-shrink: 0;*/
 /*    flex-grow: 1;*/
@@ -20,14 +24,14 @@
 /*}*/
 
 /* Positionierung des Sortier-Indikators */
-:host([theme~="custom-grid"]) vaadin-grid-sorter::part(indicators) {
-    top: calc(var(--lumo-size-s) / 2);
-}
+/*:host([theme~="custom-grid"]) vaadin-grid-sorter::part(indicators) {*/
+/*    top: calc(var(--lumo-size-s) / 2);*/
+/*}*/
 
-/* Alternativ: die allgemeine Einstellung für alle Grids */
-vaadin-grid-sorter::part(indicators) {
-    top: calc(var(--lumo-size-s) / 2) !important;
-}
+/*!* Alternativ: die allgemeine Einstellung für alle Grids *!*/
+/*vaadin-grid-sorter::part(indicators) {*/
+/*    top: calc(var(--lumo-size-s) / 2) !important;*/
+/*}*/
 
 
 
