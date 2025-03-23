@@ -158,7 +158,7 @@ public class MainLayout extends AppLayout
             if(accessChecker.hasAccess(TourView.class))
                 tour.addItem(new SideNavItem("Touren Planung", TourView.class, LineAwesomeIcon.MAP_MARKED_ALT_SOLID.create()));
 
-            nav.addItem(tour);
+            //nav.addItem(tour);
         }
 
         if(accessChecker.hasAccess(UsersView.class) || accessChecker.hasAccess(FieldView.class)
