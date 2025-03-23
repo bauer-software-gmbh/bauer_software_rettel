@@ -97,7 +97,7 @@ public class InstitutionTab extends Div
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
         grid.setSizeFull();
 
-        grid.addFilter(new Filter<InstitutionClosingTime>("institution", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+        grid.addFilter(new Filter<InstitutionClosingTime>("institution", (Filter.FilterFunction<InstitutionClosingTime>) (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
             CriteriaBuilder.In<Long> inClause = criteriaBuilder.in(path.get("id"));
             inClause.value(institution.getId());
@@ -117,6 +117,18 @@ public class InstitutionTab extends Div
 
             return button;
         });
+
+//        grid.addFilter(new Filter<InstitutionClosingTime>("startDate", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+//        {
+//            criteriaQuery.orderBy(criteriaBuilder.asc(path));
+//            return criteriaBuilder.conjunction();
+//        }).setIgnoreFilterInput(true));
+
+//        grid.addFilter(new Filter<InstitutionClosingTime>("endDate", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+//        {
+//            criteriaQuery.orderBy(criteriaBuilder.asc(path));
+//            return criteriaBuilder.conjunction();
+//        }).setIgnoreFilterInput(true));
 
         grid.addColumn("header", "Beschreibung", InstitutionClosingTime::getHeader, s -> "%" + s + "%", false);
 

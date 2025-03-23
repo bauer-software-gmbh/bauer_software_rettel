@@ -1,22 +1,35 @@
 package de.bauersoft.views.unit;
 
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import de.bauersoft.components.autofilter.Filter;
 import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.autofilter.grid.AutofilterGrid;
+import de.bauersoft.components.autofilter.grid.SortType;
 import de.bauersoft.data.entities.unit.Unit;
 import de.bauersoft.services.IngredientService;
 import de.bauersoft.services.UnitService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.persistence.criteria.*;
+import org.vaadin.lineawesome.LineAwesomeIcon;
+
+import javax.swing.*;
+import java.util.Arrays;
+import java.util.Collections;
 
 @PageTitle("Einheiten")
 @Route(value = "unit", layout = MainLayout.class)
@@ -32,7 +45,7 @@ public class UnitView extends Div
     {
         setClassName("content");
 
-        filterDataProvider = new FilterDataProvider<>(unitService);
+        filterDataProvider = new FilterDataProvider<Unit, Long>(unitService);
 
         grid = new AutofilterGrid<>(filterDataProvider);
         grid.setWidthFull();
@@ -40,16 +53,27 @@ public class UnitView extends Div
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
         grid.addColumn("name", "Name", Unit::getName, false);
-        grid.addColumn("shorthand", "Abkürzung", Unit::getShorthand, s -> "%" + s + "%", false);
-
+        grid.addColumn("shorthand", "Abkürzung", Unit::getShorthand, false);
         grid.addColumn("parentUnit", "Parent", unit ->
         {
             return (unit.getParentUnit() == null) ? "" : unit.getParentUnit().getName();
 
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
-		{
-			return criteriaBuilder.like(path.get("name"), "%" + filterInput + "%");
-		});
+        {
+            return criteriaBuilder.like(path.get("name"), "%" + filterInput + "%");
+        }, (root, path, criteriaQuery, criteriaBuilder, parent, sortOrder) ->
+        {
+            Join<Object, Object> join = root.join("parentUnit", JoinType.LEFT);
+            switch(sortOrder)
+            {
+                case ASCENDING:
+                    return criteriaBuilder.asc(join.get("name"));
+                case DESCENDING:
+                    return criteriaBuilder.desc(join.get("name"));
+                default:
+                    return null;
+            }
+        }, SortType.ALPHA);
 
         grid.addColumn("parentFactor", "Faktor", unit ->
         {
@@ -57,8 +81,18 @@ public class UnitView extends Div
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
             return criteriaBuilder.like(path.as(String.class), filterInput + "%");
-        });
-
+        }, (root, path, criteriaQuery, cb, parent, sortOrder) ->
+        {
+            switch(sortOrder)
+            {
+                case ASCENDING:
+                    return cb.asc(path);
+                case DESCENDING:
+                    return cb.desc(path);
+                default:
+                    return null;
+            }
+        }, SortType.NUMERIC);
 
         grid.addItemDoubleClickListener(event ->
         {

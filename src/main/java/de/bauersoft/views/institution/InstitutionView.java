@@ -92,6 +92,7 @@ public class InstitutionView extends Div
 
 		grid.addColumn("name", "Name", Institution::getName, false);
 		grid.addColumn("description", "Beschreibung", Institution::getDescription, false);
+		grid.addColumn("customerId", "Kunden-Nummer", Institution::getCustomerId, false);
 		grid.addColumn("address", "Adresse", institution ->
 		{
 			Address address = institution.getAddress();
@@ -109,7 +110,7 @@ public class InstitutionView extends Div
 					criteriaBuilder.like(criteriaBuilder.lower(addressJoin.get("street")), filterInput.toLowerCase() + "%"),
 					criteriaBuilder.like(criteriaBuilder.lower(addressJoin.get("number")), filterInput.toLowerCase() + "%")
 			);
-		});
+		}).enableSorting(false);
 
 		grid.addColumn("users", "Benutzer", institution ->
 		{
@@ -122,7 +123,7 @@ public class InstitutionView extends Div
 					criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("name")), filterInput.toLowerCase() + "%"),
 					criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("surname")), filterInput.toLowerCase() + "%")
 			);
-		});
+		}).enableSorting(false);
 
         grid.addItemDoubleClickListener(event ->
 		{

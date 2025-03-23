@@ -1,11 +1,45 @@
-[part~='cell']:not([part~='details-cell']) {
-    flex-shrink: 0;
-    flex-grow: 1;
-    box-sizing: border-box;
-    display: flex;
-    width: 100%;
-    position: relative;
-    align-items: flex-start;
-    padding: 0;
-    white-space: nowrap;
+/*[part~='cell']:not([part~='details-cell']) {*/
+/*    flex-shrink: 0;*/
+/*    flex-grow: 1;*/
+/*    box-sizing: border-box;*/
+/*    display: flex;*/
+/*    width: 100%;*/
+/*    position: relative;*/
+/*    align-items: flex-start;*/
+/*    padding: 0;*/
+/*    white-space: nowrap;*/
+/*}*/
+
+/* Beispiel CSS für den vaadin-grid-sorter */
+/* Stile für den Sorter im Grid */
+/*vaadin-grid-sorter {*/
+/*    display: flex;*/
+/*    align-items: flex-end; !* Elemente nach unten ausrichten *!*/
+/*    justify-content: center; !* Optional: Zentrieren *!*/
+/*    height: 100%; !* Sicherstellen, dass der Sorter die volle Höhe nutzt *!*/
+/*}*/
+
+/* Positionierung des Sortier-Indikators */
+:host([theme~="custom-grid"]) vaadin-grid-sorter::part(indicators) {
+    top: calc(var(--lumo-size-s) / 2);
 }
+
+/* Alternativ: die allgemeine Einstellung für alle Grids */
+vaadin-grid-sorter::part(indicators) {
+    top: calc(var(--lumo-size-s) / 2) !important;
+}
+
+
+
+
+
+/* Sortier-Button spezifisch stylen (optional) */
+/*vaadin-grid-sorter::part(sorter-button) {*/
+/*    margin-bottom: 2px; !* Leichter Abstand nach unten *!*/
+/*}*/
+
+
+/* Wenn du ein spezifisches Grid ansprechen möchtest */
+/*vaadin-grid::part(header) vaadin-grid-column[sortable] vaadin-grid-sorter {*/
+/*    color: #00FF00; !* Textfarbe des Sortierers innerhalb eines bestimmten Grids *!*/
+/*}*/

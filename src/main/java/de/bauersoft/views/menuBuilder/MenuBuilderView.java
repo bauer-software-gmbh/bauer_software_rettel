@@ -86,6 +86,7 @@ public class MenuBuilderView extends Div
         {
             return criteriaBuilder.like(criteriaBuilder.lower(path.get("name").as(String.class)), filterInput.toLowerCase() + "%");
         });
+
         grid.addColumn("variants", "Ernährungsformen", menu ->
         {
             return menu.getVariants().stream().map(Variant::getPattern).map(Pattern::getName).collect(Collectors.joining(", "));
@@ -95,7 +96,7 @@ public class MenuBuilderView extends Div
             Join<Menu, Variant> variantJoin = root.join("variants", JoinType.LEFT);
             Join<Variant, Pattern> patternJoin = variantJoin.join("pattern", JoinType.LEFT);
             return criteriaBuilder.like(criteriaBuilder.lower(patternJoin.get("name")), filterInput.toLowerCase() + "%");
-        });
+        }).enableSorting(false);
 
         grid.AutofilterGridContextMenu()
                         .enableGridContextMenu()
