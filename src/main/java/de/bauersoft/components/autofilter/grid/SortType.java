@@ -2,6 +2,8 @@ package de.bauersoft.components.autofilter.grid;
 
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import javax.swing.SortOrder;
+
 public enum SortType
 {
     ALPHA(LineAwesomeIcon.SORT_ALPHA_UP_SOLID, LineAwesomeIcon.SORT_ALPHA_DOWN_SOLID),

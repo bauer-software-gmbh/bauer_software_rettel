@@ -1,6 +1,8 @@
 package de.bauersoft.components.autofilter;
 
-import com.vaadin.flow.data.provider.*;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
+import com.vaadin.flow.data.provider.Query;
 import de.bauersoft.services.ServiceBase;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
@@ -9,16 +11,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specification<T>>
 {
-    private ConfigurableFilterDataProvider<T, Void, Specification<T>> filterDataProvider;
-    private ServiceBase<T, ID> service;
+    private final ConfigurableFilterDataProvider<T, Void, Specification<T>> filterDataProvider;
+    private final ServiceBase<T, ID> service;
 
-    private List<Filter<T>> filters;
+    private final List<Filter<T>> filters;
 
     public FilterDataProvider(ServiceBase<T, ID> service)
     {
@@ -47,23 +51,6 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
         return filterDataProvider;
     }
 
-//    public DataProvider<T, String> getDataProvider()
-//    {
-//        return DataProvider.fromFilteringCallbacks(
-//                query ->
-//                {
-//                    Specification<T> filter = buildFilter();
-//                    Pageable pageable = PageRequest.of(query.getOffset() / query.getLimit(), query.getLimit());
-//                    return service.getRepository().findAll(filter, pageable).stream();
-//                },
-//                query ->
-//                {
-//                    Specification<T> filter = buildFilter();
-//                    return (int) service.getRepository().count(filter);
-//                }
-//        );
-//    }
-
     public ServiceBase<T, ID> getService()
     {
         return service;
@@ -82,34 +69,55 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
         return this;
     }
 
+    public FilterDataProvider<T, ID> removeFilter(Filter<T> filter)
+    {
+        if(filters.remove(filter))
+            callFilters();
+
+        return this;
+    }
+
     public FilterDataProvider<T, ID> callFilters()
     {
-        filterDataProvider.setFilter(buildFilter());
+        return callFilters(null, SortOrder.UNSORTED);
+    }
+
+    public FilterDataProvider<T, ID> callFilters(String sortAttributeName, SortOrder sortOrder)
+    {
+        filterDataProvider.setFilter(buildFilter(sortAttributeName, sortOrder));
         filterDataProvider.refreshAll();
         return this;
     }
 
-
     public Specification<T> buildFilter()
     {
+        return buildFilter(null, SortOrder.UNSORTED);
+    }
+
+    public Specification<T> buildFilter(String sortAttributeName, SortOrder sortOrder)
+    {
+        Objects.requireNonNull(sortOrder);
+
         return (root, query, criteriaBuilder) ->
         {
             Predicate predicate = criteriaBuilder.conjunction();
-            List<Order> orders = new ArrayList<>();
+            Order order = null;
             for(Filter<T> filter : filters)
             {
                 Path<?> path = root.get(filter.getAttributeName());
                 String filterInput = filter.getFilterInput();
 
-                if(filter.getAttributeName().equals("name"))
-                    orders.add(criteriaBuilder.asc(path));
+                if(sortAttributeName != null && filter.getAttributeName().equals(sortAttributeName))
+                    order = filter.getSortFunction().apply(root, path, query, criteriaBuilder, predicate, sortOrder);
+
 
                 if(!filter.ignoreFilterInput() && (filterInput == null || filterInput.isEmpty())) continue;
 
                 predicate = criteriaBuilder.and(predicate, filter.getFilterFunction().apply(root, path, query, criteriaBuilder, predicate, filterInput));
             }
 
-            //query.orderBy(orders);
+            if(order != null)
+                query.orderBy(order);
 
             return predicate;
         };
@@ -130,5 +138,23 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
         int limit = query.getLimit();
         return PageRequest.of(offset / limit, limit);
     }
+
+
+    //    public DataProvider<T, String> getDataProvider()
+//    {
+//        return DataProvider.fromFilteringCallbacks(
+//                query ->
+//                {
+//                    Specification<T> filter = buildFilter();
+//                    Pageable pageable = PageRequest.of(query.getOffset() / query.getLimit(), query.getLimit());
+//                    return service.getRepository().findAll(filter, pageable).stream();
+//                },
+//                query ->
+//                {
+//                    Specification<T> filter = buildFilter();
+//                    return (int) service.getRepository().count(filter);
+//                }
+//        );
+//    }
 
 }

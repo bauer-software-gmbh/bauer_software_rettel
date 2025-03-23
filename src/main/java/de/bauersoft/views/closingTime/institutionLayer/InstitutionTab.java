@@ -97,7 +97,7 @@ public class InstitutionTab extends Div
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
         grid.setSizeFull();
 
-        grid.addFilter(new Filter<InstitutionClosingTime>("institution", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+        grid.addFilter(new Filter<InstitutionClosingTime>("institution", (Filter.FilterFunction<InstitutionClosingTime>) (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
             CriteriaBuilder.In<Long> inClause = criteriaBuilder.in(path.get("id"));
             inClause.value(institution.getId());

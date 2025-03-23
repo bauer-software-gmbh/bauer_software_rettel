@@ -3,53 +3,45 @@ package de.bauersoft.components.autofilter;
 import com.vaadin.flow.function.ValueProvider;
 import jakarta.persistence.criteria.*;
 
+import javax.swing.SortOrder;
+
 public class Filter<T>
 {
     private String attributeName;
-    private ValueProvider<Root<?>, Path<?>> pathProvider;
+
+    private FilterFunction<T> filterFunction;
+    private SortFunction<T> sortFunction;
 
     private String filterInput;
-    private FilterFunction<T> filterFunction;
 
     private boolean ignoreFilterInput;
-
-    public Filter(ValueProvider<Root<?>, Path<?>> pathProvider)
-    {
-        this.pathProvider = pathProvider;
-
-        filterInput = "";
-        filterFunction = (root, path, criteriaQuery, criteriaBuilder, parent, input) ->
-        {
-            return criteriaBuilder.like(path.as(String.class), "%" + input + "%");
-        };
-    }
-
-    public Filter(ValueProvider<Root<?>, Path<?>> pathProvider, FilterFunction<T> filterFunction)
-    {
-        this.pathProvider = pathProvider;
-        this.filterFunction = filterFunction;
-
-        filterInput = "";
-    }
 
     public Filter(String attributeName)
     {
         this.attributeName = attributeName;
-
-        pathProvider = root -> root.get(attributeName);
+        filterFunction = getDefaultFilterFunction(s -> "%" + s + "%", true);
+        sortFunction = getDefaultSortFunction();
 
         filterInput = "";
-        filterFunction = (root, path, criteriaQuery, criteriaBuilder, parent, input) ->
-        {
-            return criteriaBuilder.like(path.as(String.class), "%" + input + "%");
-        };
     }
 
     public Filter(String attributeName, FilterFunction<T> filterFunction)
     {
         this.attributeName = attributeName;
-        pathProvider = root -> root.get(attributeName);
         this.filterFunction = filterFunction;
+        this.sortFunction = getDefaultSortFunction();
+
+        filterInput = "";;
+    }
+
+    public Filter(String attributeName, FilterFunction<T> filterFunction, SortFunction<T> sortFunction)
+    {
+        this.attributeName = attributeName;
+        this.filterFunction = filterFunction;
+        this.sortFunction = sortFunction;
+
+        filterInput = "";;
+
     }
 
     public String getAttributeName()
@@ -57,26 +49,7 @@ public class Filter<T>
         return attributeName;
     }
 
-    public String getFilterInput()
-    {
-        return filterInput;
-    }
 
-    public Filter<T> setFilterInput(String filterInput)
-    {
-        this.filterInput = filterInput;
-        return this;
-    }
-
-    public ValueProvider<Root<?>, Path<?>> getPathProvider()
-    {
-        return pathProvider;
-    }
-
-    public void setPathProvider(ValueProvider<Root<?>, Path<?>> pathProvider)
-    {
-        this.pathProvider = pathProvider;
-    }
 
     public FilterFunction<T> getFilterFunction()
     {
@@ -89,6 +62,30 @@ public class Filter<T>
         return this;
     }
 
+    public SortFunction<T> getSortFunction()
+    {
+        return sortFunction;
+    }
+
+    public void setSortFunction(SortFunction<T> sortFunction)
+    {
+        this.sortFunction = sortFunction;
+    }
+
+
+
+    public String getFilterInput()
+    {
+        return filterInput;
+    }
+
+    public void setFilterInput(String filterInput)
+    {
+        this.filterInput = filterInput;
+    }
+
+
+
     public boolean ignoreFilterInput()
     {
         return ignoreFilterInput;
@@ -100,8 +97,39 @@ public class Filter<T>
         return this;
     }
 
+    public static FilterFunction getDefaultFilterFunction(ValueProvider<String, String> patternProvider, boolean caseSensitive)
+    {
+        return (root, path, criteriaQuery, criteriaBuilder, parent, filter) ->
+        {
+            return (caseSensitive) ?
+                    criteriaBuilder.like(path.as(String.class), patternProvider.apply(filter)) :
+                    criteriaBuilder.like(criteriaBuilder.lower(path.as(String.class)), patternProvider.apply(filter).toLowerCase());
+        };
+    }
+
+    public static SortFunction getDefaultSortFunction()
+    {
+        return (root, path, criteriaQuery, criteriaBuilder, parent, sortOrder) ->
+        {
+            switch(sortOrder)
+            {
+                case ASCENDING:
+                    return criteriaBuilder.asc(path);
+                case DESCENDING:
+                    return criteriaBuilder.desc(path);
+                default:
+                    return null;
+            }
+        };
+    }
+
     public interface FilterFunction<T>
     {
         Predicate apply(Root<T> root, Path<?> path, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder, Predicate parent, String filterInput);
+    }
+
+    public interface SortFunction<T>
+    {
+        Order apply(Root<T> root, Path<?> path, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder, Predicate parent, SortOrder sortOrder);
     }
 }

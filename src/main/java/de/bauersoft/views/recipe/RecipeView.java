@@ -14,6 +14,7 @@ import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
 import de.bauersoft.data.entities.formulation.Formulation;
 import de.bauersoft.data.entities.ingredient.Ingredient;
+import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.data.entities.recipe.Recipe;
 import de.bauersoft.data.providers.RecipeDataProvider;
 import de.bauersoft.services.*;
@@ -21,6 +22,7 @@ import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 
 import java.util.stream.Collectors;
 
@@ -59,6 +61,15 @@ public class RecipeView extends Div
 
         grid.addColumn("name", "Name", Recipe::getName, false);
         grid.addColumn("description", "Beschreibung", Recipe::getDescription, false);
+        grid.addColumn("patterns", "Ernährungsformen", recipe ->
+        {
+            return recipe.getPatterns().stream().map(Pattern::getName).collect(Collectors.joining(", "));
+        }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+        {
+            Join<Recipe, Pattern> patternJoin = root.join("patterns", JoinType.LEFT);
+            return criteriaBuilder.like(criteriaBuilder.lower(patternJoin.get("name")), "%" + filterInput.toLowerCase() + "%");
+        }).enableSorting(false);
+
         grid.addColumn("formulations", "Zutaten", recipe ->
         {
             return recipe.getFormulations().stream().map(formulation -> formulation.getIngredient().getName()).collect(Collectors.joining(", "));
@@ -67,7 +78,7 @@ public class RecipeView extends Div
         {
             Join<Recipe, Ingredient> formulationJoin = root.join("formulations").join("ingredient");
             return criteriaBuilder.like(criteriaBuilder.lower(formulationJoin.get("name").as(String.class)), filterInput + "%");
-        });
+        }).enableSorting(false);
 
         grid.AutofilterGridContextMenu()
                         .enableGridContextMenu()
