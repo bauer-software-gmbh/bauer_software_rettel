@@ -128,4 +128,9 @@ public class InstitutionAllergenService implements ServiceBase<InstitutionAllerg
     {
         return repository.findAllByInstitutionField(institutionField);
     }
+
+    public List<InstitutionAllergen> findAllByInstitutionField_Id(Long institutionFieldId)
+    {
+        return repository.findAllByInstitutionField_Id(institutionFieldId);
+    }
 }

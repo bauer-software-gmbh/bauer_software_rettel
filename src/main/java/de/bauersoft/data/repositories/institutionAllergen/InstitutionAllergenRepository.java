@@ -14,6 +14,8 @@ public interface InstitutionAllergenRepository extends JpaRepository<Institution
 {
     List<InstitutionAllergen> findAllByInstitutionField(InstitutionField institutionField);
 
+    List<InstitutionAllergen> findAllByInstitutionField_Id(Long institutionFieldId);
+
     @Modifying
     @Transactional
     @Query("""
