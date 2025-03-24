@@ -29,4 +29,15 @@ public class VehicleDowntime extends AbstractEntity implements ContainerID<Long>
     private LocalDate startDate;
 
     private LocalDate endDate;
+
+    @Override
+    public String toString()
+    {
+        return "VehicleDowntime{" +
+                "vehicle=" + vehicle.getId() +
+                ", header='" + header + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                '}';
+    }
 }

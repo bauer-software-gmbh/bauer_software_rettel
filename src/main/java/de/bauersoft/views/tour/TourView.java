@@ -7,11 +7,12 @@ import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import de.bauersoft.data.entities.institution.Institution;
+import de.bauersoft.data.entities.tourPlanning.driver.Driver;
 import de.bauersoft.data.entities.tourPlanning.tour.Tour;
 import de.bauersoft.data.entities.tourPlanning.tour.TourInstitution;
 import de.bauersoft.data.entities.user.User;
-import de.bauersoft.services.tourPlanning.DriverService;
-import de.bauersoft.services.tourPlanning.TourService;
+import de.bauersoft.services.InstitutionService;
+import de.bauersoft.services.tourPlanning.*;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
@@ -26,14 +27,22 @@ public class TourView extends Div
 {
     private final TourService tourService;
     private final DriverService driverService;
+    private final VehicleDowntimeService vehicleDowntimeService;
+    private final VehicleService vehicleService;
+    private final InstitutionService institutionService;
+    private final TourInstitutionService tourInstitutionService;
 
     private final FilterDataProvider<Tour, Long> filterDataProvider;
     private final AutofilterGrid<Tour, Long> grid;
 
-    public TourView(TourService tourService, DriverService driverService)
+    public TourView(TourService tourService, DriverService driverService, VehicleDowntimeService vehicleDowntimeService, VehicleService vehicleService, InstitutionService institutionService, TourInstitutionService tourInstitutionService)
     {
         this.tourService = tourService;
         this.driverService = driverService;
+        this.vehicleDowntimeService = vehicleDowntimeService;
+        this.vehicleService = vehicleService;
+        this.institutionService = institutionService;
+        this.tourInstitutionService = tourInstitutionService;
 
         setClassName("content");
 
@@ -68,7 +77,10 @@ public class TourView extends Div
 
         grid.addColumn("coDriver", "Beifahrer", tour ->
         {
-            User user = tour.getCoDriver().getUser();
+            Driver coDriver = tour.getCoDriver();
+            if(coDriver == null) return "";
+
+            User user = coDriver.getUser();
             return (user == null) ? "" : user.getName() + " " + user.getSurname();
 
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
@@ -89,12 +101,12 @@ public class TourView extends Div
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
             return criteriaBuilder.like(criteriaBuilder.lower(path.get("institution").get("name")), filterInput.toLowerCase() + "%");
-        });
+        }).enableSorting(false);
 
         grid.AutofilterGridContextMenu().enableGridContextMenu()
                         .enableAddItem("Neue Tour", event ->
                         {
-                            new TourDialog(filterDataProvider, tourService, driverService, new Tour(), DialogState.NEW);
+                            new TourDialog(filterDataProvider, tourService, driverService, vehicleService, vehicleDowntimeService, institutionService, tourInstitutionService, new Tour(), DialogState.NEW);
                         }).enableDeleteItem("Löschen", event ->
                         {
 
@@ -102,7 +114,7 @@ public class TourView extends Div
 
         grid.addItemDoubleClickListener(event ->
         {
-            new TourDialog(filterDataProvider, tourService, driverService, event.getItem(), DialogState.EDIT);
+            new TourDialog(filterDataProvider, tourService, driverService, vehicleService, vehicleDowntimeService, institutionService, tourInstitutionService, event.getItem(), DialogState.EDIT);
         });
 
         this.add(grid);
