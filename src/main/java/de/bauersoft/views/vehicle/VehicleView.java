@@ -76,7 +76,7 @@ public class VehicleView extends Div
                     criteriaBuilder.function("DATE_FORMAT", String.class, path.get("startDate"), criteriaBuilder.literal("%d.%m.%Y")),
                     filterInput + "%"
             );
-        });
+        }).enableSorting(false);
 
         grid.addColumn("downtimes", "Ausfallzeit bis", vehicle ->
         {
@@ -96,7 +96,7 @@ public class VehicleView extends Div
                     criteriaBuilder.function("DATE_FORMAT", String.class, date, criteriaBuilder.literal("%d.%m.%Y")),
                     filterInput + "%"
             );
-        });
+        }).enableSorting(false);
 
         grid.AutofilterGridContextMenu().enableGridContextMenu()
                         .enableAddItem("Neues Fahrzeug", event ->

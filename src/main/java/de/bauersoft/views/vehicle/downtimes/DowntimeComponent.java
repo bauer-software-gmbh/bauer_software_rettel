@@ -115,6 +115,14 @@ public class DowntimeComponent extends VerticalLayout
             headerField.setMaxLength(64);
             headerField.setWidth("20em");
 
+            headerField.setValue(container.getEntity().getHeader());
+
+            headerField.addValueChangeListener(event ->
+            {
+                container.setTempState(ContainerState.UPDATE);
+                container.setTempHeader(event.getValue());
+            });
+
             dateRangePicker = new EnhancedDateRangePicker();
             dateRangePicker.setLocale(Locale.GERMAN);
             dateRangePicker.setPattern("dd.MM.yyyy");

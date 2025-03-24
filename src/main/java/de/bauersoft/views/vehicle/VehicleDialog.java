@@ -56,13 +56,9 @@ public class VehicleDialog extends Dialog
 
         Binder<Vehicle> binder = new Binder<>(Vehicle.class);
 
-        this.setWidth("60em");
-        this.setMaxWidth("50vw");
-        this.setHeight("54em");
-        this.setMaxHeight("80vh");
-
         FormLayout formLayout = new FormLayout();
-        formLayout.setWidthFull();
+        formLayout.setWidth("50em");
+        formLayout.setHeight("35em");
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
         TextField licencePlateField = new TextField();

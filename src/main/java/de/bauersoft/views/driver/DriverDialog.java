@@ -47,9 +47,13 @@ public class DriverDialog extends Dialog
         Binder<Driver> binder = new Binder<>(Driver.class);
 
         FormLayout formLayout = new FormLayout();
+        formLayout.setWidth("35em");
+        formLayout.setHeight("10em");
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
         ComboBox<User> userComboBox = new ComboBox<>();
+        userComboBox.setWidthFull();
+        userComboBox.setMaxWidth("100%");
         userComboBox.setItems(query ->
         {
             return FilterDataProvider.lazyStream(userService, query);
@@ -58,6 +62,7 @@ public class DriverDialog extends Dialog
         userComboBox.setWidth("20em");
 
         MultiSelectComboBox<Tour> tourMultiSelectComboBox = new MultiSelectComboBox<>();
+        tourMultiSelectComboBox.setWidthFull();
         tourMultiSelectComboBox.setItems(query ->
         {
             return FilterDataProvider.lazyStream(tourService, query);
@@ -68,9 +73,10 @@ public class DriverDialog extends Dialog
         formLayout.setColspan(formLayout.addFormItem(userComboBox, "Benutzer"), 1);
         formLayout.setColspan(formLayout.addFormItem(tourMultiSelectComboBox, "Fahrbare Touren"), 1);
 
-        binder.forField(userComboBox).withValidator((value, context) ->
+        binder.forField(userComboBox).asRequired("Benutzer muss angegeben werden")
+                .withValidator((value, context) ->
         {
-            return (item.getUser().getId() != value.getId() && driverService.existsDriverByUser_Id(value.getId())) ?
+            return ((item.getUser() == null || item.getUser().getId() != value.getId()) && driverService.existsDriverByUser_Id(value.getId())) ?
                     ValidationResult.error("Dieser Benutzer ist bereits vergeben.") :
                     ValidationResult.ok();
 

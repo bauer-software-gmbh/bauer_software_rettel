@@ -8,6 +8,7 @@ import java.time.LocalDate;
 
 public class DowntimeContainer extends Container<VehicleDowntime, Long>
 {
+    private String tempHeader;
     private LocalDate tempStartDate;
     private LocalDate tempEndDate;
 
@@ -21,6 +22,16 @@ public class DowntimeContainer extends Container<VehicleDowntime, Long>
     {
         super(entity, state);
         loadTemporaries();
+    }
+
+    public String getTempHeader()
+    {
+        return tempHeader;
+    }
+
+    public void setTempHeader(String tempHeader)
+    {
+        this.tempHeader = tempHeader;
     }
 
     public LocalDate getTempStartDate()
@@ -49,6 +60,7 @@ public class DowntimeContainer extends Container<VehicleDowntime, Long>
     public DowntimeContainer loadTemporaries()
     {
         setTempState(getState());
+        tempHeader = getEntity().getHeader();
         tempStartDate = getEntity().getStartDate();
         tempEndDate = getEntity().getEndDate();
         return this;
@@ -58,6 +70,7 @@ public class DowntimeContainer extends Container<VehicleDowntime, Long>
     public DowntimeContainer acceptTemporaries()
     {
         setState(getTempState());
+        getEntity().setHeader(tempHeader);
         getEntity().setStartDate(tempStartDate);
         getEntity().setEndDate(tempEndDate);
         return this;

@@ -117,6 +117,8 @@ public class AutofilterGrid<T, ID> extends Grid<T>
 
         columns.add(column);
 
+        setActiveSortColumn(columns.get(0), SortOrder.ASCENDING);
+
         return column;
     }
 
@@ -303,6 +305,23 @@ public class AutofilterGrid<T, ID> extends Grid<T>
             return SortOrder.UNSORTED;
         }
 
+    }
+
+    public AutofilterGrid<T, ID> setActiveSortColumn(Column sortColumn, SortOrder sortOrder)
+    {
+        this.sortColumn = sortColumn;
+
+        sortColumn.setSortOrder(sortOrder);
+
+        dataProvider.callFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+
+        for(Column column : columns)
+        {
+            if(column == sortColumn) continue;
+                column.setSortOrder(SortOrder.UNSORTED);
+        }
+
+        return this;
     }
 
 

@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -31,5 +32,5 @@ public class Driver extends AbstractEntity
             joinColumns = @JoinColumn(name = "driver_id"),
             inverseJoinColumns = @JoinColumn(name = "tour_id")
     )
-    private Set<Tour> driveableTours;
+    private Set<Tour> driveableTours = new HashSet<>();
 }

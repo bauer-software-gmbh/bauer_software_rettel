@@ -51,13 +51,9 @@ public class TourDialog extends Dialog
 
         Binder<Tour> binder = new Binder<>(Tour.class);
 
-        this.setWidth("60em");
-        this.setMaxWidth("50vw");
-        this.setHeight("54em");
-        this.setMaxHeight("80vh");
-
         FormLayout  formLayout = new FormLayout();
-        formLayout.setWidthFull();
+        formLayout.setWidth("50em");
+        formLayout.setHeight("75em");
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
         TextField nameField = new TextField();
@@ -69,33 +65,37 @@ public class TourDialog extends Dialog
         HorizontalLayout driverLayout = new HorizontalLayout();
         driverLayout.setWidthFull();
 
-        Filter<Driver> filter = new Filter<Driver>("driveableTours", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+//        Filter<Driver> filter = new Filter<Driver>("driveableTours", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+//        {
+//            return criteriaBuilder.equal(path.get("id").as(Long.class), item.getId());
+//        }).setIgnoreFilterInput(true);
+//
+//        driverFilterDataProvider.addFilter(filter);
+//
+//        Filter<Driver> filter2 = new Filter<Driver>("user", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+//        {
+//            return criteriaBuilder.like(path.get("name").as(String.class), filterInput + "%");
+//        });
+//
+//        driverFilterDataProvider.addFilter(filter2);
+
+        ComboBox<Driver> driverComboBox = new ComboBox<>("Hauptfahrer");
+//        driverComboBox.setDataProvider((filterText, offset, limit) ->
+//        {
+//            Notification.show("Filter: " + filterText);
+//            filter2.setFilterInput(filterText);
+//
+//            Pageable pageable = PageRequest.of(offset / limit, limit);
+//
+//            return driverService.getRepository().findAll(driverFilterDataProvider.buildFilter(), pageable).stream();
+//        }, query ->
+//        {
+//            return (int) driverService.getRepository().count(driverFilterDataProvider.buildFilter());
+//        });
+        driverComboBox.setItems(query ->
         {
-            return criteriaBuilder.equal(path.get("id").as(Long.class), item.getId());
-        }).setIgnoreFilterInput(true);
-
-        driverFilterDataProvider.addFilter(filter);
-
-        Filter<Driver> filter2 = new Filter<Driver>("user", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
-        {
-            return criteriaBuilder.like(path.get("name").as(String.class), filterInput + "%");
-        });
-
-        driverFilterDataProvider.addFilter(filter2);
-
-        ComboBox<Driver> driverComboBox = new ComboBox<>("Fahrer");
-        driverComboBox.setDataProvider((filterText, offset, limit) ->
-        {
-            Notification.show("Filter: " + filterText);
-            filter2.setFilterInput(filterText);
-
-            Pageable pageable = PageRequest.of(offset / limit, limit);
-
-            return driverService.getRepository().findAll(driverFilterDataProvider.buildFilter(), pageable).stream();
-        }, query ->
-        {
-            return (int) driverService.getRepository().count(driverFilterDataProvider.buildFilter());
-        });
+            return FilterDataProvider.lazyStream(driverService, query);
+        }, query -> (int) driverService.count());
 
         driverComboBox.setItemLabelGenerator(driver ->
         {
@@ -103,12 +103,25 @@ public class TourDialog extends Dialog
             return user.getName() + " " + user.getSurname();
         });
 
-        driverLayout.add(driverComboBox);
+        ComboBox<Driver> coDriverComboBox = new ComboBox<>("Beifahrer");
+        coDriverComboBox.setItems(query ->
+        {
+            return FilterDataProvider.lazyStream(driverService, query);
+        }, query -> (int) driverService.count());
+
+        coDriverComboBox.setItemLabelGenerator(driver ->
+        {
+            User user = driver.getUser();
+            return user.getName() + " " + user.getSurname();
+        });
+
+        driverLayout.add(driverComboBox, coDriverComboBox);
 
         formLayout.setColspan(formLayout.addFormItem(nameField, "Tour-Name"), 1);
-        formLayout.setColspan(formLayout.addFormItem(driverLayout, "Fahrer"), 1);
+        formLayout.setColspan(formLayout.addFormItem(driverLayout, "Insassen"), 1);
 
-        binder.forField(nameField).asRequired().bind(Tour::getName, Tour::setName);
+        binder.forField(nameField).asRequired("Die Tour braucht einen Namen").bind(Tour::getName, Tour::setName);
+        binder.forField(driverComboBox).asRequired("Die Tour braucht eine Fahrer").bind(Tour::getDriver, Tour::setDriver);
 
         binder.readBean(item);
 
