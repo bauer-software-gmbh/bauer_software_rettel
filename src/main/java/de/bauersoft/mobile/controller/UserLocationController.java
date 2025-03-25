@@ -20,9 +20,15 @@ public class UserLocationController {
     }
 
     @PostMapping
-    public ResponseEntity<UserLocationDTO> saveUserLocation(@RequestBody UserLocationDTO locationDTO) {
-        UserLocationDTO savedLocation = userLocationService.saveUserLocation(locationDTO);
-        return ResponseEntity.ok(savedLocation);
+    public ResponseEntity<Void> saveUserLocation(@RequestBody UserLocationDTO locationDTO) {
+        userLocationService.saveLocation(locationDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<Void> saveUserLocations(@RequestBody List<UserLocationDTO> locations) {
+        locations.forEach(userLocationService::saveLocation);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/today/{userId}")

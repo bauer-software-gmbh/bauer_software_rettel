@@ -4,6 +4,7 @@ import de.bauersoft.data.entities.user.User;
 import de.bauersoft.data.entities.user.UserLocation;
 import de.bauersoft.data.repositories.user.UserLocationRepository;
 import de.bauersoft.data.repositories.user.UserRepository;
+import de.bauersoft.mobile.broadcaster.LocationBroadcaster;
 import de.bauersoft.mobile.model.DTO.UserLocationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,28 +28,6 @@ public class UserLocationService {
         return userLocationRepository.findAllUserLocations();
     }
 
-    public UserLocationDTO saveUserLocation(UserLocationDTO locationDTO) {
-        User user = userRepository.findById(locationDTO.getUserId())
-                .orElseThrow(() -> new RuntimeException("❌ User mit ID " + locationDTO.getUserId() + " nicht gefunden!"));
-
-        // ✅ NEU: Jedes Mal ein neuer Standort speichern!
-        UserLocation location = new UserLocation();
-        location.setUser(user);
-        location.setLatitude(locationDTO.getLatitude());
-        location.setLongitude(locationDTO.getLongitude());
-        location.setTimestamp(locationDTO.getTimestamp());
-
-        UserLocation savedLocation = userLocationRepository.save(location);
-
-        return new UserLocationDTO(
-                savedLocation.getId(),
-                savedLocation.getLatitude(),
-                savedLocation.getLongitude(),
-                savedLocation.getTimestamp(),
-                savedLocation.getUser().getId()
-        );
-    }
-
     public List<UserLocationDTO> getUserLocationsToday(Long userId) {
         return userLocationRepository.findUserLocationsToday(userId);
     }
@@ -67,6 +46,22 @@ public class UserLocationService {
         return userRepository.findById(userId)
                 .map(user -> user.getName() + " " + user.getSurname())
                 .orElse("Unbekannt"); // Falls User nicht existiert
+    }
+
+    public void saveLocation(UserLocationDTO locationDTO) {
+        User user = userRepository.findById(locationDTO.getUserId())
+                .orElseThrow(() -> new RuntimeException("User mit ID " + locationDTO.getUserId() + " nicht gefunden"));
+
+        UserLocation location = new UserLocation();
+        location.setUser(user);
+        location.setLatitude(locationDTO.getLatitude());
+        location.setLongitude(locationDTO.getLongitude());
+        location.setTimestamp(locationDTO.getTimestamp());
+
+        userLocationRepository.save(location);
+
+        // Danach kannst du trotzdem den DTO broadcasten
+        LocationBroadcaster.broadcastNewLocation(locationDTO);
     }
 }
 
