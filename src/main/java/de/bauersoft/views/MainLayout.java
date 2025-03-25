@@ -15,7 +15,6 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.dom.Style.AlignItems;
 import com.vaadin.flow.dom.Style.Display;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import de.bauersoft.data.entities.user.User;
@@ -26,8 +25,9 @@ import de.bauersoft.views.allergen.AllergenView;
 import de.bauersoft.views.closingTime.ClosingTimeView;
 import de.bauersoft.views.component.ComponentView;
 import de.bauersoft.views.course.CourseView;
+import de.bauersoft.views.driver.DriverView;
 import de.bauersoft.views.field.FieldView;
-import de.bauersoft.views.incredient.IngredientView;
+import de.bauersoft.views.ingredient.IngredientView;
 import de.bauersoft.views.institution.InstitutionView;
 import de.bauersoft.views.kitchen.KitchenView;
 import de.bauersoft.views.menuBuilder.MenuBuilderView;
@@ -36,9 +36,10 @@ import de.bauersoft.views.offers.OffersView;
 import de.bauersoft.views.order.OrderView;
 import de.bauersoft.views.pattern.PatternView;
 import de.bauersoft.views.recipe.RecipeView;
-import de.bauersoft.views.touren.TourenView;
+import de.bauersoft.views.tour.TourView;
 import de.bauersoft.views.unit.UnitView;
 import de.bauersoft.views.users.UsersView;
+import de.bauersoft.views.vehicle.VehicleView;
 import de.bauersoft.views.welcome.WelcomeView;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -142,9 +143,23 @@ public class MainLayout extends AppLayout
         if(accessChecker.hasAccess(KitchenView.class))
             nav.addItem(new SideNavItem("Küche", KitchenView.class, LineAwesomeIcon.CHECK_CIRCLE_SOLID.create()));
 
-        if(accessChecker.hasAccess(TourenView.class))
-            nav.addItem(new SideNavItem("Touren", TourenView.class, LineAwesomeIcon.SHIPPING_FAST_SOLID.create()));
 
+        if(accessChecker.hasAccess(DriverView.class) || accessChecker.hasAccess(VehicleView.class)
+                || accessChecker.hasAccess(TourView.class))
+        {
+            SideNavItem tour = new SideNavItem("Touren-Planung");;
+
+            if(accessChecker.hasAccess(DriverView.class))
+                tour.addItem(new SideNavItem("Fahrer", DriverView.class, LineAwesomeIcon.HARD_HAT_SOLID.create()));
+
+            if(accessChecker.hasAccess(VehicleView.class))
+                tour.addItem(new SideNavItem("Fahrzeuge", VehicleView.class, LineAwesomeIcon.CAR_CRASH_SOLID.create()));
+
+            if(accessChecker.hasAccess(TourView.class))
+                tour.addItem(new SideNavItem("Touren Planung", TourView.class, LineAwesomeIcon.MAP_MARKED_ALT_SOLID.create()));
+
+            //nav.addItem(tour);
+        }
 
         if(accessChecker.hasAccess(UsersView.class) || accessChecker.hasAccess(FieldView.class)
                 || accessChecker.hasAccess(InstitutionView.class) || accessChecker.hasAccess(AddressView.class))

@@ -29,6 +29,7 @@ import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.address.Address;
 import de.bauersoft.data.providers.AddressDataProvider;
 import de.bauersoft.data.repositories.address.AddressRepository;
@@ -42,18 +43,12 @@ import java.util.Optional;
 public class AddressComboBox extends CustomField<Address>
 {
 	private final AddressService addressService;
-    private final AddressRepository addressRepository;
-
-	private final AddressDataProvider addressDataProvider;
 
 	private ComboBox<Address> addressComboBox;
 
-
-	public AddressComboBox(AddressService addressService, AddressDataProvider addressDataProvider)
+	public AddressComboBox(AddressService addressService)
     {
         this.addressService = addressService;
-		addressRepository = addressService.getRepository();
-        this.addressDataProvider = addressDataProvider;
 
         addressComboBox = new ComboBox<>();
         addressComboBox.setRequired(true);
@@ -63,7 +58,10 @@ public class AddressComboBox extends CustomField<Address>
 			return address.getStreet() + " " + address.getNumber() + ", " + address.getPostal() + " " + address.getCity();
 		});
 
-        addressComboBox.setItems(addressRepository.findAll());
+        addressComboBox.setItems(query ->
+        {
+           return FilterDataProvider.lazyStream(addressService, query);
+        }, query -> (int) addressService.count());
 
         addressComboBox.setWidth("calc(100% - 45px)");
 
@@ -75,10 +73,13 @@ public class AddressComboBox extends CustomField<Address>
 
         newAddressButton.addClickListener(event ->
 		{
-			new AddressDialog(addressService, addressDataProvider, new Address(), DialogState.NEW)
+			new AddressDialog(new FilterDataProvider<>(addressService), addressService, new Address(), DialogState.NEW)
 					.addOpenedChangeListener(openChangeEvent ->
 					{
-						addressComboBox.setItems(addressRepository.findAll());
+                        addressComboBox.setItems(query ->
+                        {
+                            return FilterDataProvider.lazyStream(addressService, query);
+                        }, query -> (int) addressService.count());
 					});
 		});
 

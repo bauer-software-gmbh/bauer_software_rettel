@@ -1,23 +1,35 @@
 package de.bauersoft.views.unit;
 
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import de.bauersoft.components.autofilter.Filter;
 import de.bauersoft.components.autofilter.FilterDataProvider;
+import de.bauersoft.components.autofilter.grid.AutofilterGrid;
+import de.bauersoft.components.autofilter.grid.SortType;
 import de.bauersoft.data.entities.unit.Unit;
-import de.bauersoft.data.providers.UnitDataProvider;
 import de.bauersoft.services.IngredientService;
 import de.bauersoft.services.UnitService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
-import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.persistence.criteria.*;
+import org.vaadin.lineawesome.LineAwesomeIcon;
+
+import javax.swing.*;
+import java.util.Arrays;
+import java.util.Collections;
 
 @PageTitle("Einheiten")
 @Route(value = "unit", layout = MainLayout.class)
@@ -29,30 +41,39 @@ public class UnitView extends Div
     private final AutofilterGrid<Unit, Long> grid;
 
     public UnitView(UnitService unitService,
-                    IngredientService ingredientService,
-                    UnitDataProvider unitDataProvider)
+                    IngredientService ingredientService)
     {
         setClassName("content");
 
-        filterDataProvider = new FilterDataProvider<>(unitService);
+        filterDataProvider = new FilterDataProvider<Unit, Long>(unitService);
 
         grid = new AutofilterGrid<>(filterDataProvider);
-
         grid.setWidthFull();
         grid.setHeightFull();
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-        grid.addColumn("name", "Name", Unit::getName);
-        grid.addColumn("shorthand", "Abkürzung", Unit::getShorthand);
-
+        grid.addColumn("name", "Name", Unit::getName, false);
+        grid.addColumn("shorthand", "Abkürzung", Unit::getShorthand, false);
         grid.addColumn("parentUnit", "Parent", unit ->
         {
             return (unit.getParentUnit() == null) ? "" : unit.getParentUnit().getName();
 
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
-		{
-			return criteriaBuilder.like(path.get("name"), "%" + filterInput + "%");
-		});
+        {
+            return criteriaBuilder.like(path.get("name"), "%" + filterInput + "%");
+        }, (root, path, criteriaQuery, criteriaBuilder, parent, sortOrder) ->
+        {
+            Join<Object, Object> join = root.join("parentUnit", JoinType.LEFT);
+            switch(sortOrder)
+            {
+                case ASCENDING:
+                    return criteriaBuilder.asc(join.get("name"));
+                case DESCENDING:
+                    return criteriaBuilder.desc(join.get("name"));
+                default:
+                    return null;
+            }
+        }, SortType.ALPHA);
 
         grid.addColumn("parentFactor", "Faktor", unit ->
         {
@@ -60,18 +81,28 @@ public class UnitView extends Div
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
             return criteriaBuilder.like(path.as(String.class), filterInput + "%");
-        });
-
+        }, (root, path, criteriaQuery, cb, parent, sortOrder) ->
+        {
+            switch(sortOrder)
+            {
+                case ASCENDING:
+                    return cb.asc(path);
+                case DESCENDING:
+                    return cb.desc(path);
+                default:
+                    return null;
+            }
+        }, SortType.NUMERIC);
 
         grid.addItemDoubleClickListener(event ->
         {
-            new UnitDialog(this, unitService, event.getItem(), DialogState.EDIT);
+            new UnitDialog(filterDataProvider, unitService, event.getItem(), DialogState.EDIT);
         });
 
         GridContextMenu<Unit> contextMenu = grid.addContextMenu();
         contextMenu.addItem("Neue Einheit", event ->
         {
-            new UnitDialog(this, unitService, new Unit(), DialogState.NEW);
+            new UnitDialog(filterDataProvider, unitService, new Unit(), DialogState.NEW);
         });
 
         GridMenuItem<Unit> deleteItem = contextMenu.addItem("Löschen", event ->
@@ -105,6 +136,7 @@ public class UnitView extends Div
         {
             deleteItem.setVisible(event.getItem().isPresent());
         });
+
         this.add(grid);
     }
 

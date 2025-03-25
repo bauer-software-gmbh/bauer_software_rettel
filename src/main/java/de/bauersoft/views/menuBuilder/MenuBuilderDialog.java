@@ -11,6 +11,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.flesh.DefaultFlesh;
 import de.bauersoft.data.entities.flesh.Flesh;
 import de.bauersoft.data.entities.menu.Menu;
@@ -23,10 +24,8 @@ import de.bauersoft.data.repositories.menuBuilder.MBMenuRepository;
 import de.bauersoft.data.repositories.menuBuilder.MBPatternRepository;
 import de.bauersoft.data.repositories.pattern.PatternRepository;
 import de.bauersoft.data.repositories.recipe.RecipeRepository;
-import de.bauersoft.services.FleshService;
-import de.bauersoft.services.MenuService;
-import de.bauersoft.services.OrderDataService;
-import de.bauersoft.services.VariantService;
+import de.bauersoft.services.*;
+import de.bauersoft.services.offer.OfferService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.menuBuilder.cluster.MenuBuilderClusterManager;
 import de.bauersoft.views.menuBuilder.cluster.PatternCluster;
@@ -37,43 +36,39 @@ import java.util.stream.Stream;
 
 public class MenuBuilderDialog extends Dialog
 {
-    private MenuService menuService;
+    private final FilterDataProvider<Menu, Long> filterDataProvider;
 
-    private MenuRepository menuRepository;
-    private CourseRepository courseRepository;
-    private ComponentRepository componentRepository;
-    private PatternRepository patternRepository;
-    private RecipeRepository recipeRepository;
-    private VariantService variantService;
-    private FleshService fleshService;
-
-    private MenuDataProvider menuDataProvider;
+    private final MenuService menuService;
+    private final CourseService courseService;
+    private final ComponentService componentService;
+    private final PatternService patternService;
+    private final RecipeService recipeService;
+    private final VariantService variantService;
+    private final FleshService fleshService;
+    private final OfferService offerService;
+    private final OrderDataService orderDataService;
 
     private Menu menu;
-    private DialogState dialogState;
+    private final DialogState dialogState;
 
     private MenuBuilderClusterManager menuBuilderClusterManager;
 
-    public MenuBuilderDialog(MenuService menuService, MenuRepository menuRepository, CourseRepository courseRepository,
-                             ComponentRepository componentRepository, PatternRepository patternRepository,
-                             MenuDataProvider menuDataProvider, Menu menu,
-                             DialogState dialogState,
-                             RecipeRepository recipeRepository, VariantService variantService, FleshService fleshService,
-                             OrderDataService orderDataService)
+    public MenuBuilderDialog(FilterDataProvider<Menu, Long> filterDataProvider, MenuService menuService, CourseService courseService, ComponentService componentService, PatternService patternService, RecipeService recipeService, VariantService variantService, FleshService fleshService, OfferService offerService, OrderDataService orderDataService, Menu menu, DialogState dialogState)
     {
+        this.filterDataProvider = filterDataProvider;
         this.menuService = menuService;
-        this.menuRepository = menuRepository;
-        this.courseRepository = courseRepository;
-        this.componentRepository = componentRepository;
-        this.patternRepository = patternRepository;
+        this.courseService = courseService;
+        this.componentService = componentService;
+        this.patternService = patternService;
+        this.recipeService = recipeService;
+        this.variantService = variantService;
+        this.fleshService = fleshService;
+        this.offerService = offerService;
+        this.orderDataService = orderDataService;
 
-        this.menuDataProvider = menuDataProvider;
         this.menu = menu;
         this.dialogState = dialogState;
 
-        this.recipeRepository = recipeRepository;
-        this.variantService = variantService;
-        this.fleshService = fleshService;
 
         this.setHeaderTitle(dialogState.toString());
 
@@ -100,7 +95,11 @@ public class MenuBuilderDialog extends Dialog
 
         Div menuBuilderDiv = new Div();
 
-        menuBuilderClusterManager = new MenuBuilderClusterManager(menu, menuService, variantService, componentRepository, courseRepository, patternRepository, orderDataService);
+        menuBuilderClusterManager = new MenuBuilderClusterManager(menu,
+                menuService,
+                variantService,
+                componentService.getRepository(),
+                courseService.getRepository(), patternService.getRepository(), orderDataService);
 
         menuBuilderDiv.add(menuBuilderClusterManager);
 
@@ -113,7 +112,7 @@ public class MenuBuilderDialog extends Dialog
 
         binder.forField(fleshComboBox).bind("flesh");
 
-        binder.setBean(menu);
+        binder.readBean(menu);
 
         Button saveButton = new Button("Speichern");
         saveButton.addClickShortcut(Key.ENTER);
@@ -121,10 +120,10 @@ public class MenuBuilderDialog extends Dialog
         saveButton.setMaxWidth("180px");
         saveButton.addClickListener(event ->
         {
-            binder.validate();
+            binder.writeBeanIfValid(menu);
             if(!binder.isValid()) return;
 
-            menuRepository.save(menu);
+            menuService.update(menu);
 
             menuBuilderClusterManager.getDefaultCluster().saveCertainlyExistingData();
             menuBuilderClusterManager.getPatternClusters().forEach(patternCluster -> patternCluster.saveCertainlyExistingData());
@@ -141,9 +140,7 @@ public class MenuBuilderDialog extends Dialog
                             .collect(Collectors.toList())
             );
 
-            //variantService.getRepository().deleteAllByMenuId(menu.getId());
-
-            menuDataProvider.refreshAll();
+            filterDataProvider.refreshAll();
             this.close();
         });
 
@@ -154,18 +151,14 @@ public class MenuBuilderDialog extends Dialog
         cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         cancelButton.addClickListener(event ->
         {
-            menuDataProvider.refreshAll();
+            binder.removeBean();
+            filterDataProvider.refreshAll();
             this.close();
         });
 
         inputLayout.add(menuBuilderDiv);
         this.add(inputLayout);
-        //this.add(menuBuilderDiv);
-
-//        this.setWidth("50vw");
-//        this.setMaxWidth("50vw");
-
-        this.getFooter().add(new HorizontalLayout(saveButton, cancelButton));
+        this.getFooter().add(saveButton, cancelButton);
         this.setCloseOnEsc(false);
         this.setCloseOnOutsideClick(false);
         this.setModal(true);

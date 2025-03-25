@@ -9,6 +9,8 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import de.bauersoft.components.autofilter.FilterDataProvider;
+import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.providers.FieldDataProvider;
@@ -24,7 +26,6 @@ import jakarta.annotation.security.RolesAllowed;
 public class FieldView extends Div
 {
 	private final FieldService fieldService;
-	private final FieldDataProvider fieldDataProvider;
 	private final OrderService orderService;
 	private final InstitutionService institutionService;
 	private final InstitutionFieldsService institutionFieldsService;
@@ -32,12 +33,12 @@ public class FieldView extends Div
 	private final CourseService courseService;
 	private final OfferService offerService;
 	
-    AutoFilterGrid<Field> grid = new AutoFilterGrid<>(Field.class, false, true);
+    private final FilterDataProvider<Field, Long> filterDataProvider;
+	private final AutofilterGrid<Field, Long> grid;
 
-    public FieldView(FieldService fieldService, FieldDataProvider fieldDataProvider, OrderService orderService, InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, FieldMultiplierService fieldMultiplierService, CourseService courseService, OfferService offerService)
+    public FieldView(FieldService fieldService, OrderService orderService, InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, FieldMultiplierService fieldMultiplierService, CourseService courseService, OfferService offerService)
     {
         this.fieldService = fieldService;
-        this.fieldDataProvider = fieldDataProvider;
         this.orderService = orderService;
         this.institutionService = institutionService;
         this.institutionFieldsService = institutionFieldsService;
@@ -47,95 +48,94 @@ public class FieldView extends Div
 		
         setClassName("content");
 
+		filterDataProvider = new FilterDataProvider<>(fieldService);
+		grid = new AutofilterGrid<>(filterDataProvider);
+
 		grid.setHeightFull();
 		grid.setWidthFull();
 		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-		grid.setDataProvider(fieldDataProvider);
+        grid.addColumn("name", "Name", Field::getName, false);
 
-        grid.addColumn("name");
-        grid.addItemDoubleClickListener(event ->
+		grid.AutofilterGridContextMenu()
+						.enableGridContextMenu()
+						.enableAddItem("Neue Einrichtungsart", event ->
+						{
+							new FieldDialog(filterDataProvider, fieldService, fieldMultiplierService, courseService, new Field(), DialogState.NEW);
+
+						}).enableDeleteItem("Löschen", event ->
+						{
+							event.getItem().ifPresent(item ->
+							{
+								boolean cancel = false;
+								if(orderService.getRepository().existsByFieldId(item.getId()))
+								{
+									Div div = new Div();
+									div.setMaxWidth("33vw");
+									div.getStyle().set("white-space", "normal");
+									div.getStyle().set("word-wrap", "break-word");
+
+									div.add(new Text("Die Einrichtung \"" + item.getName() + "\" kann nicht gelöscht werden, da sie noch von einigen Bestellungen verwendet wird."));
+
+									Notification notification = new Notification(div);
+									notification.setDuration(5000);
+									notification.setPosition(Notification.Position.MIDDLE);
+									notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+									notification.open();
+
+									cancel = true;
+								}
+
+								//TODO institutionFields
+		//				if(institutionFieldsService.getRepository().existsByFieldId(item.getId()))
+		//				{
+		//					Div div = new Div();
+		//					div.setMaxWidth("33vw");
+		//					div.getStyle().set("white-space", "normal");
+		//					div.getStyle().set("word-wrap", "break-word");
+		//
+		//					div.add(new Text("Das Field \"" + item.getName() + "\" kann nicht gelöscht werden da es noch von einigen Institutionen verwendet wird."));
+		//
+		//					Notification notification = new Notification(div);
+		//					notification.setDuration(5000);
+		//					notification.setPosition(Notification.Position.MIDDLE);
+		//					notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+		//					notification.open();
+		//
+		//					cancel = true;
+		//				}
+
+								if(offerService.existsByField(item))
+								{
+									Div div = new Div();
+									div.setMaxWidth("33vw");
+									div.getStyle().set("white-space", "normal");
+									div.getStyle().set("word-wrap", "break-word");
+
+									div.add(new Text("Die Einrichtung \"" + item.getName() + "\" kann nicht gelöscht werden, da sie noch von einigen Institutionen verwendet wird."));
+
+									Notification notification = new Notification(div);
+									notification.setDuration(5000);
+									notification.setPosition(Notification.Position.MIDDLE);
+									notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+									notification.open();
+
+									cancel = true;
+								}
+
+								if(cancel) return;
+
+								fieldMultiplierService.deleteAllByFieldId(item.getId());
+								fieldService.deleteById(item.getId());
+
+								filterDataProvider.refreshAll();
+							});
+						});
+
+
+		grid.addItemDoubleClickListener(event ->
 		{
-			new FieldDialog(fieldService, fieldDataProvider, fieldMultiplierService, courseService, event.getItem(), DialogState.EDIT);
-		});
-
-        GridContextMenu<Field> contextMenu = grid.addContextMenu();
-        contextMenu.addItem("Neue Einrichtung", event ->
-		{
-			new FieldDialog(fieldService, fieldDataProvider, fieldMultiplierService, courseService, new Field(), DialogState.NEW);
-		});
-
-		GridMenuItem<Field> deleteItem = contextMenu.addItem("Löschen", event ->
-		{
-			event.getItem().ifPresent(item ->
-			{
-				boolean cancel = false;
-				if(orderService.getRepository().existsByFieldId(item.getId()))
-				{
-					Div div = new Div();
-					div.setMaxWidth("33vw");
-					div.getStyle().set("white-space", "normal");
-					div.getStyle().set("word-wrap", "break-word");
-
-					div.add(new Text("Die Einrichtung \"" + item.getName() + "\" kann nicht gelöscht werden, da sie noch von einigen Bestellungen verwendet wird."));
-
-					Notification notification = new Notification(div);
-					notification.setDuration(5000);
-					notification.setPosition(Notification.Position.MIDDLE);
-					notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
-					notification.open();
-
-					cancel = true;
-				}
-
-				//TODO institutionFields
-//				if(institutionFieldsService.getRepository().existsByFieldId(item.getId()))
-//				{
-//					Div div = new Div();
-//					div.setMaxWidth("33vw");
-//					div.getStyle().set("white-space", "normal");
-//					div.getStyle().set("word-wrap", "break-word");
-//
-//					div.add(new Text("Das Field \"" + item.getName() + "\" kann nicht gelöscht werden da es noch von einigen Institutionen verwendet wird."));
-//
-//					Notification notification = new Notification(div);
-//					notification.setDuration(5000);
-//					notification.setPosition(Notification.Position.MIDDLE);
-//					notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
-//					notification.open();
-//
-//					cancel = true;
-//				}
-
-				if(offerService.existsByField(item))
-				{
-					Div div = new Div();
-					div.setMaxWidth("33vw");
-					div.getStyle().set("white-space", "normal");
-					div.getStyle().set("word-wrap", "break-word");
-
-					div.add(new Text("Die Einrichtung \"" + item.getName() + "\" kann nicht gelöscht werden, da sie noch von einigen Institutionen verwendet wird."));
-
-					Notification notification = new Notification(div);
-					notification.setDuration(5000);
-					notification.setPosition(Notification.Position.MIDDLE);
-					notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
-					notification.open();
-
-					cancel = true;
-				}
-
-				if(cancel) return;
-
-				fieldMultiplierService.deleteAllByFieldId(item.getId());
-				fieldService.deleteById(item.getId());
-				fieldDataProvider.refreshAll();
-			});
-		});
-
-		contextMenu.addGridContextMenuOpenedListener(event ->
-		{
-			deleteItem.setVisible(event.getItem().isPresent());
+			new FieldDialog(filterDataProvider, fieldService, fieldMultiplierService, courseService, event.getItem(), DialogState.EDIT);
 		});
 
         this.add(grid);

@@ -30,7 +30,7 @@ public class Institution extends AbstractEntity
     @Column(length = 1024)
     private String description;
 
-    @Column(length = 255)
+    @Column(length = 256)
     private String customerId;
 
     @Column(nullable = false, columnDefinition = "TIME default '00:00:05'")

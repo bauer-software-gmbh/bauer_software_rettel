@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.providers.CourseDataProvider;
 import de.bauersoft.services.CourseService;
@@ -21,15 +22,15 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 public class CourseDialog extends Dialog
 {
+	private final FilterDataProvider<Course, Long> filterDataProvider;
 	private final CourseService courseService;
-	private final CourseDataProvider courseDataProvider;
 	private final Course item;
 	private final DialogState state;
 
-	public CourseDialog(CourseService courseService, CourseDataProvider courseDataProvider, Course item, DialogState state)
+	public CourseDialog(FilterDataProvider<Course, Long> filterDataProvider, CourseService courseService, Course item, DialogState state)
 	{
+        this.filterDataProvider = filterDataProvider;
         this.courseService = courseService;
-        this.courseDataProvider = courseDataProvider;
         this.item = item;
         this.state = state;
 
@@ -61,7 +62,7 @@ public class CourseDialog extends Dialog
 
 		}).bind(Course::getName, Course::setName);
 
-		binder.setBean(item);
+		binder.readBean(item);
 
 		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
@@ -69,13 +70,13 @@ public class CourseDialog extends Dialog
 		saveButton.setMaxWidth("180px");
 		saveButton.addClickListener(e ->
 		{
-			binder.validate();
+			binder.writeBeanIfValid(item);
 			if(binder.isValid())
 			{
 				try
 				{
-					courseService.update(binder.getBean());
-					courseDataProvider.refreshAll();
+					courseService.update(item);
+					filterDataProvider.refreshAll();
 
 					Notification.show("Daten wurden aktualisiert");
 					this.close();
@@ -96,7 +97,7 @@ public class CourseDialog extends Dialog
 		cancelButton.addClickListener(e ->
 		{
 			binder.removeBean();
-			courseDataProvider.refreshAll();
+			filterDataProvider.refreshAll();
 			this.close();
 		});
 
@@ -107,6 +108,5 @@ public class CourseDialog extends Dialog
 		this.setCloseOnOutsideClick(false);
 		this.setModal(true);
 		this.open();
-
 	}
 }

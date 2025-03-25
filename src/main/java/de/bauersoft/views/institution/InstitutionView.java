@@ -11,14 +11,19 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import de.bauersoft.components.autofilter.FilterDataProvider;
+import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
+import de.bauersoft.data.entities.address.Address;
 import de.bauersoft.data.entities.institution.Institution;
+import de.bauersoft.data.entities.user.User;
 import de.bauersoft.data.providers.AddressDataProvider;
 import de.bauersoft.data.providers.InstitutionDataProvider;
 import de.bauersoft.services.*;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.persistence.criteria.Join;
 
 import java.util.stream.Collectors;
 
@@ -28,8 +33,6 @@ import java.util.stream.Collectors;
 @CssImport(value = "./themes/rettels/components/auto-filter-grid.css", themeFor = "vaadin-grid")
 public class InstitutionView extends Div
 {
-    private AutoFilterGrid<Institution> grid = new AutoFilterGrid<>(Institution.class, false, true);
-
 	private InstitutionService institutionService;
 	private InstitutionFieldsService institutionFieldsService;
 	private AddressService addressService;
@@ -45,10 +48,23 @@ public class InstitutionView extends Div
 	private InstitutionPatternService institutionPatternService;
 	private InstitutionClosingTimeService institutionClosingTimeService;
 
-	private InstitutionDataProvider institutionDataProvider;
-	private AddressDataProvider addressDataProvider;
+	private final FilterDataProvider<Institution, Long> filterDataProvider;
+	private final AutofilterGrid<Institution, Long> grid;
 
-	public InstitutionView(InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, AddressService addressService, FieldService fieldService, UserService userService, InstitutionMultiplierService institutionMultiplierService, CourseService courseService, FieldMultiplierService fieldMultiplierService, OrderService orderService, AllergenService allergenService, InstitutionAllergenService institutionAllergenService, PatternService patternService, InstitutionPatternService institutionPatternService, InstitutionClosingTimeService institutionClosingTimeService, InstitutionDataProvider institutionDataProvider, AddressDataProvider addressDataProvider)
+	public InstitutionView(InstitutionService institutionService,
+						   InstitutionFieldsService institutionFieldsService,
+						   AddressService addressService,
+						   FieldService fieldService,
+						   UserService userService,
+						   InstitutionMultiplierService institutionMultiplierService,
+						   CourseService courseService,
+						   FieldMultiplierService fieldMultiplierService,
+						   OrderService orderService,
+						   AllergenService allergenService,
+						   InstitutionAllergenService institutionAllergenService,
+						   PatternService patternService,
+						   InstitutionPatternService institutionPatternService,
+						   InstitutionClosingTimeService institutionClosingTimeService)
 	{
 		this.institutionService = institutionService;
 		this.institutionFieldsService = institutionFieldsService;
@@ -64,71 +80,60 @@ public class InstitutionView extends Div
         this.patternService = patternService;
         this.institutionPatternService = institutionPatternService;
         this.institutionClosingTimeService = institutionClosingTimeService;
-        this.institutionDataProvider = institutionDataProvider;
-        this.addressDataProvider = addressDataProvider;
 
         setClassName("content");
+
+		filterDataProvider = new FilterDataProvider<>(institutionService);
+		grid = new AutofilterGrid<>(filterDataProvider);
 
 		grid.setHeightFull();
 		grid.setWidthFull();
 		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-		grid.setDataProvider(institutionDataProvider);
-
-        grid.addColumn("name")
-				.setResizable(true).setHeader("Name");
-
-        grid.addColumn("description")
-						.setResizable(true).setHeader("Beschreibung");
-
-        grid.addColumn(item -> item.getAddress() != null
-                                ? item.getAddress().getStreet() + " " + item.getAddress().getNumber() + ", "
-                                + item.getAddress().getPostal() + " " + item.getAddress().getCity()
-                                : "")
-				.setHeader("Adresse")
-				.setResizable(true);
-		//TODO sorting geht nicht warum auch immer ._.
-
-//                .setKey("address").setHeader("Address").setResizable(true)
-//                .setSortOrderProvider(direction -> Stream.of(new QuerySortOrder("address.street", direction),
-//                        new QuerySortOrder("address.number", direction)));
-
-
-//		grid.addColumn(institution ->
-//		{
-//			Address address = institution.getAddress();
-//			return (address == null)
-//					? ""
-//					: address.getStreet() + " " + address.getNumber() + ", " + address.getPostal() + " " + address.getCity();
-//		}).setHeader("Adresse")
-//				.setResizable(true)
-//				.setKey("address")
-//				.setSortOrderProvider(sortDirection ->
-//				{
-//					return Stream.of(
-//							new QuerySortOrder("address.street", sortDirection),
-//							new QuerySortOrder("address.number", sortDirection)
-//					);
-//				});
-
-        grid.addColumn(item ->
+		grid.addColumn("name", "Name", Institution::getName, false);
+		grid.addColumn("description", "Beschreibung", Institution::getDescription, false);
+		grid.addColumn("customerId", "Kunden-Nummer", Institution::getCustomerId, false);
+		grid.addColumn("address", "Adresse", institution ->
 		{
-			return item.getUsers()
-					.stream()
-					.map(user -> user.getName() + " " + user.getSurname())
-					.collect(Collectors.joining(", "));
-		}).setHeader("Benutzer");
+			Address address = institution.getAddress();
+			if(address == null)
+				return "";
 
-        grid.setMultiSort(true, MultiSortPriority.APPEND);
+			return address.getPostal() + " " + address.getCity() + ", " + address.getStreet() + " " + address.getNumber();
+
+		}, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+		{
+			Join<Institution, Address> addressJoin = root.join("address");
+			return criteriaBuilder.or(
+					criteriaBuilder.like(criteriaBuilder.lower(addressJoin.get("postal")), filterInput.toLowerCase() + "%"),
+					criteriaBuilder.like(criteriaBuilder.lower(addressJoin.get("city")), filterInput.toLowerCase() + "%"),
+					criteriaBuilder.like(criteriaBuilder.lower(addressJoin.get("street")), filterInput.toLowerCase() + "%"),
+					criteriaBuilder.like(criteriaBuilder.lower(addressJoin.get("number")), filterInput.toLowerCase() + "%")
+			);
+		}).enableSorting(false);
+
+		grid.addColumn("users", "Benutzer", institution ->
+		{
+			return institution.getUsers().stream().map(user -> user.getName() + " " + user.getSurname()).collect(Collectors.joining(", "));
+
+		}, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+		{
+			Join<Institution, User> userJoin = root.join("users");
+			return criteriaBuilder.or(
+					criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("name")), filterInput.toLowerCase() + "%"),
+					criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("surname")), filterInput.toLowerCase() + "%")
+			);
+		}).enableSorting(false);
+
         grid.addItemDoubleClickListener(event ->
 		{
-			new InstitutionDialog(institutionService, institutionFieldsService, addressService, fieldService, userService, institutionMultiplierService, courseService, fieldMultiplierService, allergenService, institutionAllergenService, patternService, institutionPatternService, institutionClosingTimeService, institutionDataProvider, addressDataProvider, event.getItem(), DialogState.EDIT);
+			new InstitutionDialog(filterDataProvider, institutionService, institutionFieldsService, addressService, fieldService, userService, institutionMultiplierService, courseService, fieldMultiplierService, allergenService, institutionAllergenService, patternService, institutionPatternService, institutionClosingTimeService, event.getItem(), DialogState.EDIT);
 		});
 
         GridContextMenu<Institution> contextMenu = grid.addContextMenu();
         contextMenu.addItem("Neue Institution", event ->
 		{
-			new InstitutionDialog(institutionService, institutionFieldsService, addressService, fieldService, userService, institutionMultiplierService, courseService, fieldMultiplierService, allergenService, institutionAllergenService, patternService, institutionPatternService, institutionClosingTimeService, institutionDataProvider, addressDataProvider, new Institution(), DialogState.NEW);
+			new InstitutionDialog(filterDataProvider, institutionService, institutionFieldsService, addressService, fieldService, userService, institutionMultiplierService, courseService, fieldMultiplierService, allergenService, institutionAllergenService, patternService, institutionPatternService, institutionClosingTimeService, new Institution(), DialogState.NEW);
 		});
 
         GridMenuItem<Institution> deleteItem = contextMenu.addItem("Löschen", event ->
@@ -151,10 +156,8 @@ public class InstitutionView extends Div
 					notification.open();
 					return;
 				}
-//				institutionMultiplierService.getRepository().deleteAllByInstitutionId(item.getId());
-//				institutionFieldsService.getRepository().deleteAllByInstitutionId(item.getId());
 				institutionService.deleteById(item.getId());
-				institutionDataProvider.refreshAll();
+				filterDataProvider.refreshAll();
 			});
 		});
 

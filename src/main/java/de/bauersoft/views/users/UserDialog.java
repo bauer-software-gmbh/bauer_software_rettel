@@ -15,6 +15,7 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.role.Role;
 import de.bauersoft.data.entities.user.User;
 import de.bauersoft.data.providers.UserDataProvider;
@@ -38,23 +39,23 @@ public class UserDialog extends Dialog
         passwortRegex = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d])[A-Za-z\\d\\W]{8,}$");
     }
 
-    private UserService userService;
-    private UserDataProvider dataProvider;
-    private User item;
-    private DialogState state;
-    private PasswordEncoder encoder;
+    private final UserService userService;
+    private final UserDataProvider userDataProvider;
+    private final User item;
+    private final DialogState state;
+    private final PasswordEncoder encoder;
     private AuthenticatedUser authenticatedUser;
     private boolean isChangingPassword = false;
 
     public UserDialog(UserService userService,
-                      UserDataProvider dataProvider,
+                      UserDataProvider userDataProvider,
                       User item,
                       DialogState state,
                       PasswordEncoder encoder,
                       AuthenticatedUser authenticatedUser)
     {
         this.userService = userService;
-        this.dataProvider = dataProvider;
+        this.userDataProvider = userDataProvider;
         this.item = item;
         this.state = state;
         this.encoder = encoder;
@@ -134,8 +135,6 @@ public class UserDialog extends Dialog
             changePasswordButtonItem.setVisible(false);
         });
 
-        //passwordField.setRevealButtonVisible(DialogState.NEW.equals(state) || (authenticatedUser.get().isPresent() && authenticatedUser.get().get().equals(item)));
-        //confirmPasswordField.setRevealButtonVisible(DialogState.NEW.equals(state) || (authenticatedUser.get().isPresent() && authenticatedUser.get().get().equals(item)));
         passwordField.setRevealButtonVisible(true);
         confirmPasswordField.setRevealButtonVisible(true);
 
@@ -165,14 +164,18 @@ public class UserDialog extends Dialog
         binder.forField(passwordField).asRequired((value, context) ->
         {
             if(!isChangingPassword && !DialogState.NEW.equals(state))
+            {
                 return ValidationResult.ok();
+            }
             return (passwortRegex.matcher(value).matches())
                     ? ValidationResult.ok()
                     : ValidationResult.error("Das Passwort muss mindestens acht Zeichen lang sein, mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl und ein Sonderzeichen enthalten.");
 
         }).bind((user) -> null,
-                (user, value) -> {
-                    if(isChangingPassword || DialogState.NEW.equals(state)) {
+                (user, value) ->
+                {
+                    if(isChangingPassword || DialogState.NEW.equals(state))
+                    {
                         user.setPassword(encoder.encode(value));
                     }
                 });
@@ -180,19 +183,25 @@ public class UserDialog extends Dialog
         binder.forField(confirmPasswordField).asRequired((value, context) ->
         {
             if(!isChangingPassword)
+            {
                 return ValidationResult.ok();
+            }
             if(!confirmPasswordField.getValue().equals(passwordField.getValue()))
+            {
                 return ValidationResult.error("Die Passwörter stimmen nicht überein!");
+            }
 
             return (passwortRegex.matcher(value).matches())
                     ? ValidationResult.ok()
                     : ValidationResult.error("Das Passwort muss mindestens acht Zeichen lang sein, mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl und ein Sonderzeichen enthalten.");
         }).bind((user) -> null,
-                (user, value) -> {
-            if(isChangingPassword || DialogState.NEW.equals(state)) {
-                user.setPassword(encoder.encode(value));
-            }
-        });
+                (user, value) ->
+                {
+                    if(isChangingPassword || DialogState.NEW.equals(state))
+                    {
+                        user.setPassword(encoder.encode(value));
+                    }
+                });
 
         binder.setBean(item);
 
@@ -212,7 +221,7 @@ public class UserDialog extends Dialog
                 {
                     logger.info("Form is valid, saving...");
                     userService.update(binder.getBean());
-                    dataProvider.refreshAll();
+                    userDataProvider.refreshAll();
                     Notification.show("Daten wurden aktualisiert");
                     this.close();
 
@@ -222,7 +231,8 @@ public class UserDialog extends Dialog
                     Notification.show("Doppelter Eintrag", 5000, Notification.Position.MIDDLE)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
-            } else {
+            }else
+            {
                 logger.error("Form invalidation failed!");
             }
         });
@@ -235,6 +245,7 @@ public class UserDialog extends Dialog
         cancelButton.addClickListener(e ->
         {
             binder.removeBean();
+            userDataProvider.refreshAll();
             this.close();
         });
 

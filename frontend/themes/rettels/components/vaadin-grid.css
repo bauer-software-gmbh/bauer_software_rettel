@@ -1,0 +1,12 @@
+/* frontend/themes/rettels/components/vaadin-grid.css */
+
+:host([theme~="custom-grid"]) [part~="indicators"] {
+    top: calc(var(--lumo-size-s) / 2);
+}
+
+/* Optional: Style für den Sorter */
+:host([theme~="custom-grid"]) vaadin-grid-sorter::part(indicators) {
+    display: flex;
+    justify-content: center; /* oder flex-start, flex-end, etc. */
+    top: calc(var(--lumo-size-s) / 2);
+}

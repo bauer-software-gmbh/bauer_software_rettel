@@ -8,46 +8,45 @@ import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.component.Component;
 import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.recipe.Recipe;
 import de.bauersoft.data.entities.unit.Unit;
-import de.bauersoft.data.providers.ComponentDataProvider;
-import de.bauersoft.data.repositories.component.ComponentRepository;
 import de.bauersoft.data.repositories.course.CourseRepository;
 import de.bauersoft.data.repositories.recipe.RecipeRepository;
 import de.bauersoft.services.ComponentService;
+import de.bauersoft.services.CourseService;
+import de.bauersoft.services.RecipeService;
 import de.bauersoft.services.UnitService;
 import de.bauersoft.views.DialogState;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 public class ComponentDialog extends Dialog
 {
+	private final FilterDataProvider<Component, Long> filterDataProvider;
 	private final ComponentService componentService;
-	private final ComponentDataProvider componentDataProvider;
-	private final RecipeRepository recipeRepository;
-	private final CourseRepository courseRepository;
-	private final ComponentRepository componentRepository;
+	private final RecipeService recipeService;
+	private final CourseService courseService;
 	private final UnitService unitService;
 	private final Component item;
 	private final DialogState state;
 
-	public ComponentDialog(ComponentService componentService, ComponentDataProvider componentDataProvider, RecipeRepository recipeRepository, CourseRepository courseRepository, ComponentRepository componentRepository, UnitService unitService, Component item, DialogState state)
+	public ComponentDialog(FilterDataProvider<Component, Long> filterDataProvider, ComponentService componentService, RecipeService recipeService, CourseService courseService, UnitService unitService, Component item, DialogState state)
 	{
+		this.filterDataProvider = filterDataProvider;
         this.componentService = componentService;
-        this.componentDataProvider = componentDataProvider;
-        this.recipeRepository = recipeRepository;
-        this.courseRepository = courseRepository;
-        this.componentRepository = componentRepository;
+        this.recipeService = recipeService;
+		this.courseService = courseService;
         this.unitService = unitService;
         this.item = item;
         this.state = state;
@@ -75,48 +74,45 @@ public class ComponentDialog extends Dialog
 		descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 
 		ComboBox<Course> courseComboBox = new ComboBox<>("Menükomponente");
-		courseComboBox.setItemLabelGenerator(course -> course.getName());
-		courseComboBox.setItems(courseRepository.findAll());
-		courseComboBox.setWidthFull();
+		courseComboBox.setItems(query -> FilterDataProvider.lazyStream(courseService, query));
+		courseComboBox.setItemLabelGenerator(Course::getName);
 		courseComboBox.setRequired(true);
+		courseComboBox.setWidthFull();
 
 		ComboBox<Unit> unitComboBox = new ComboBox<>("Einheit");
-		unitComboBox.setItemLabelGenerator(unit -> unit.getName());
-		unitComboBox.setItems(unitService.findAll());
-		unitComboBox.setWidthFull();
+		unitComboBox.setItems(query -> FilterDataProvider.lazyStream(unitService, query));
+		unitComboBox.setItemLabelGenerator(Unit::getName);
 		unitComboBox.setRequired(true);
+		unitComboBox.setWidthFull();
 
-		HorizontalLayout comboBoxLayout = new HorizontalLayout();
+		HorizontalLayout comboBoxLayout = new HorizontalLayout(courseComboBox, unitComboBox);
 		comboBoxLayout.setWidthFull();
-		comboBoxLayout.add(courseComboBox, unitComboBox);
 
 		MultiSelectComboBox<Recipe> recipeMultiSelectComboBox = new MultiSelectComboBox<>();
+		recipeMultiSelectComboBox.setItems(query -> FilterDataProvider.lazyStream(recipeService, query));
+		recipeMultiSelectComboBox.setItemLabelGenerator(Recipe::getName);
 		recipeMultiSelectComboBox.setWidthFull();
-
-		recipeMultiSelectComboBox.setItems(recipeRepository.findAll());
-		recipeMultiSelectComboBox.setItemLabelGenerator(recipe -> recipe.getName());
-
 
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(comboBoxLayout, "Eigenschaften"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(recipeMultiSelectComboBox, "Rezept"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(recipeMultiSelectComboBox, "Rezepte"), 1);
 
 		binder.forField(nameTextField).asRequired((value, context) ->
 		{
 			return (value != null && !value.isBlank())
 					? ValidationResult.ok()
-					: ValidationResult.error("Name it erforderlich");
+					: ValidationResult.error("Name ist erforderlich!");
 
 		}).bind(Component::getName, Component::setName);
 
-		binder.bind(descriptionTextArea, "name");
+		binder.bind(descriptionTextArea, "description");
 
 		binder.forField(courseComboBox).asRequired((value, context) ->
 		{
 			return (value != null)
 					? ValidationResult.ok()
-					: ValidationResult.error("Gang ist erforderlich");
+					: ValidationResult.error("Menükomponente ist erforderlich!");
 
 		}).bind(Component::getCourse, Component::setCourse);
 
@@ -124,14 +120,13 @@ public class ComponentDialog extends Dialog
 		{
 			return (value != null)
 					? ValidationResult.ok()
-					: ValidationResult.error("Einheit ist erforderlich");
+					: ValidationResult.error("Einheit ist erforderlich!");
 
 		}).bind(Component::getUnit, Component::setUnit);
 
 		binder.bind(recipeMultiSelectComboBox, "recipes");
 
-
-		binder.setBean(item);
+		binder.readBean(item);
 
 		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
@@ -139,13 +134,13 @@ public class ComponentDialog extends Dialog
 		saveButton.setMaxWidth("180px");
 		saveButton.addClickListener(e ->
 		{
-			binder.validate();
+			binder.writeBeanIfValid(item);
 			if(binder.isValid())
 			{
 				try
 				{
-					componentService.update(binder.getBean());
-					componentDataProvider.refreshAll();
+					componentService.update(item);
+					filterDataProvider.refreshAll();
 
 					Notification.show("Daten wurden aktualisiert");
 					this.close();
@@ -166,7 +161,7 @@ public class ComponentDialog extends Dialog
 		cancelButton.addClickListener(e ->
 		{
 			binder.removeBean();
-			componentDataProvider.refreshAll();
+			filterDataProvider.refreshAll();
 			this.close();
 		});
 

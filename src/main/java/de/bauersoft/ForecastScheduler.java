@@ -1,13 +1,13 @@
 package de.bauersoft;
 
-import de.bauersoft.data.entities.allergen.Allergen;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
-import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPattern;
 import de.bauersoft.data.entities.offer.Offer;
-import de.bauersoft.data.entities.order.*;
+import de.bauersoft.data.entities.order.Order;
+import de.bauersoft.data.entities.order.OrderData;
+import de.bauersoft.data.entities.order.OrderDataKey;
 import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.data.entities.variant.Variant;
 import de.bauersoft.services.*;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
+//@Component
 public class ForecastScheduler
 {
 
@@ -47,7 +47,7 @@ public class ForecastScheduler
         this.fieldService = fieldService;
     }
 
-    @Scheduled(cron = "0 1 0 * * *")
+    //@Scheduled(cron = "0 1 0 * * *")
     public void loadForecast()
     {
         System.out.println("Forecast loaded");
@@ -105,19 +105,19 @@ public class ForecastScheduler
                 orderDataService.update(orderData);
             }
 
-            for(InstitutionAllergen institutionAllergen : institutionField.getInstitutionAllergens())
-            {
-                Allergen allergen = institutionAllergen.getAllergen();
-
-                OrderAllergen orderAllergen = new OrderAllergen();
-                orderAllergen.setId(new OrderAllergenKey(order.getId(), allergen.getId()));
-                orderAllergen.set_order(order);
-                orderAllergen.setAllergen(allergen);
-
-                orderAllergen.setAmount(institutionAllergen.getAmount());
-
-                orderAllergenService.update(orderAllergen);
-            }
+//            for(InstitutionAllergen institutionAllergen : institutionField.getInstitutionAllergens())
+//            {
+//                Allergen allergen = institutionAllergen.getAllergen();
+//
+//                OrderAllergen orderAllergen = new OrderAllergen();
+//                orderAllergen.setId(new OrderAllergenKey(order.getId(), allergen.getId()));
+//                orderAllergen.set_order(order);
+//                orderAllergen.setAllergen(allergen);
+//
+//                orderAllergen.setAmount(institutionAllergen.getAmount());
+//
+//                orderAllergenService.update(orderAllergen);
+//            }
         }
     }
 }

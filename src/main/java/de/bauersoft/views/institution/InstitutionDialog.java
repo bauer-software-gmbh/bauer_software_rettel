@@ -19,6 +19,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.dom.Style;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.user.User;
 import de.bauersoft.data.providers.AddressDataProvider;
@@ -37,22 +38,21 @@ import java.util.Objects;
 @Getter
 public class InstitutionDialog extends Dialog
 {
-	private InstitutionService institutionService;
-	private InstitutionFieldsService institutionFieldsService;
-	private AddressService addressService;
-	private FieldService fieldService;
-	private UserService userService;
-	private InstitutionMultiplierService institutionMultiplierService;
-	private CourseService courseService;
-	private FieldMultiplierService fieldMultiplierService;
-	private AllergenService allergenService;
-	private InstitutionAllergenService institutionAllergenService;
-	private PatternService patternService;
-	private InstitutionPatternService institutionPatternService;
-	private InstitutionClosingTimeService institutionClosingTimeService;
+	private final FilterDataProvider<Institution, Long> filterDataProvider;
 
-	private InstitutionDataProvider institutionDataProvider;
-	private AddressDataProvider addressDataProvider;
+	private final InstitutionService institutionService;
+	private final InstitutionFieldsService institutionFieldsService;
+	private final AddressService addressService;
+	private final FieldService fieldService;
+	private final UserService userService;
+	private final InstitutionMultiplierService institutionMultiplierService;
+	private final CourseService courseService;
+	private final FieldMultiplierService fieldMultiplierService;
+	private final AllergenService allergenService;
+	private final InstitutionAllergenService institutionAllergenService;
+	private final PatternService patternService;
+	private final InstitutionPatternService institutionPatternService;
+	private final InstitutionClosingTimeService institutionClosingTimeService;
 
 	private Institution item;
 
@@ -69,9 +69,10 @@ public class InstitutionDialog extends Dialog
 	private MultiSelectComboBox<User> userMultiSelectComboBox;
 	private FieldDragComponent fieldDragComponent;
 
-	public InstitutionDialog(InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, AddressService addressService, FieldService fieldService, UserService userService, InstitutionMultiplierService institutionMultiplierService, CourseService courseService, FieldMultiplierService fieldMultiplierService, AllergenService allergenService, InstitutionAllergenService institutionAllergenService, PatternService patternService, InstitutionPatternService institutionPatternService, InstitutionClosingTimeService institutionClosingTimeService, InstitutionDataProvider institutionDataProvider, AddressDataProvider addressDataProvider, Institution item, DialogState dialogState)
+	public InstitutionDialog(FilterDataProvider<Institution, Long> filterDataProvider, InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, AddressService addressService, FieldService fieldService, UserService userService, InstitutionMultiplierService institutionMultiplierService, CourseService courseService, FieldMultiplierService fieldMultiplierService, AllergenService allergenService, InstitutionAllergenService institutionAllergenService, PatternService patternService, InstitutionPatternService institutionPatternService, InstitutionClosingTimeService institutionClosingTimeService, Institution item, DialogState dialogState)
 	{
-		this.institutionService = institutionService;
+        this.filterDataProvider = filterDataProvider;
+        this.institutionService = institutionService;
 		this.institutionFieldsService = institutionFieldsService;
 		this.addressService = addressService;
 		this.fieldService = fieldService;
@@ -84,8 +85,6 @@ public class InstitutionDialog extends Dialog
         this.patternService = patternService;
         this.institutionPatternService = institutionPatternService;
         this.institutionClosingTimeService = institutionClosingTimeService;
-        this.institutionDataProvider = institutionDataProvider;
-        this.addressDataProvider = addressDataProvider;
         this.item = item;
 		this.dialogState = dialogState;
 
@@ -127,7 +126,7 @@ public class InstitutionDialog extends Dialog
 
 		datePickerLayout.add(orderStartSpan, orderStartTimePicker, orderEndSpan, orderEndTimePicker);
 
-		addressComboBox = new AddressComboBox(addressService, addressDataProvider);
+		addressComboBox = new AddressComboBox(addressService);
 		addressComboBox.setRequired(true);
 		addressComboBox.setItemLabelGenerator(address ->
 				{
@@ -207,26 +206,26 @@ public class InstitutionDialog extends Dialog
 		saveButton.setMaxWidth("180px");
 		saveButton.addClickListener(event ->
 		{
-			try
+			binder.writeBeanIfValid(item);
+			if(binder.isValid())
 			{
-				binder.writeBean(item);
+				try
+				{
+					institutionService.update(item);
 
-				institutionService.update(item);
+					fieldDragComponent.updateInstitutionFields(item.getInstitutionFields().stream().toList());
 
-				fieldDragComponent.updateInstitutionFields(item.getInstitutionFields().stream().toList());
+					filterDataProvider.refreshAll();
 
-				institutionDataProvider.refreshAll();
+					Notification.show("Daten wurden aktualisiert");
+					this.close();
 
-				Notification.show("Daten wurden aktualisiert");
-				this.close();
+				}catch(DataIntegrityViolationException error)
+				{
+					Notification.show("Doppelter Eintrag", 5000, Position.MIDDLE)
+							.addThemeVariants(NotificationVariant.LUMO_ERROR);
 
-			}catch(DataIntegrityViolationException error)
-			{
-				Notification.show("Doppelter Eintrag", 5000, Position.MIDDLE)
-						.addThemeVariants(NotificationVariant.LUMO_ERROR);
-
-			}catch(ValidationException err)
-			{
+				}
 			}
 		});
 
@@ -237,7 +236,9 @@ public class InstitutionDialog extends Dialog
 		cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		cancelButton.addClickListener(event ->
 		{
+			binder.removeBean();
 			fieldDragComponent.loadTemporaries();
+			filterDataProvider.refreshAll();
 			this.close();
 		});
 

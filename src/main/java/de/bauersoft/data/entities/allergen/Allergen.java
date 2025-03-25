@@ -26,6 +26,12 @@ public class Allergen extends AbstractEntity
     @ManyToMany(mappedBy = "allergens", fetch = FetchType.EAGER)
     private Set<Ingredient> ingredients = new HashSet<>();
 
-    @OneToMany(mappedBy = "allergen", fetch = FetchType.EAGER)
-    private Set<OrderAllergen> orderAllergens = new HashSet<>();
+    @Override
+    public String toString()
+    {
+        return "Allergen{" +
+                "description='" + description + '\'' +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

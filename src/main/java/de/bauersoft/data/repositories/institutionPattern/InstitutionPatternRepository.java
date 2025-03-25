@@ -7,9 +7,12 @@ import de.bauersoft.data.entities.pattern.Pattern;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface InstitutionPatternRepository extends JpaRepository<InstitutionPattern, InstitutionPatternKey>, JpaSpecificationExecutor<InstitutionPattern>
 {
     Optional<InstitutionPattern> findByInstitutionFieldAndPattern(InstitutionField institutionField, Pattern pattern);
+
+    List<InstitutionPattern> findAllByInstitutionField_Id(Long institutionFieldId);
 }

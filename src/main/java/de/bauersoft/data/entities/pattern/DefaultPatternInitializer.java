@@ -4,12 +4,14 @@ import de.bauersoft.data.repositories.pattern.PatternRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 
 @Configuration
 public class DefaultPatternInitializer
 {
     @Bean
+    @Primary
     public CommandLineRunner initializeDefaultPattern(PatternRepository patternRepository)
     {
         return args ->

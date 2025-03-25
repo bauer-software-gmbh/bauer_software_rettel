@@ -12,6 +12,7 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.address.Address;
 import de.bauersoft.data.providers.AddressDataProvider;
 import de.bauersoft.services.AddressService;
@@ -20,15 +21,15 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 public class AddressDialog extends Dialog
 {
+    private final FilterDataProvider<Address, Long> filterDataProvider;
     private final AddressService addressService;
-    private final AddressDataProvider addressDataProvider;
     private Address item;
     private DialogState state;
 
-    public AddressDialog(AddressService addressService, AddressDataProvider addressDataProvider, Address item, DialogState state)
+    public AddressDialog(FilterDataProvider<Address, Long> filterDataProvider, AddressService addressService, Address item, DialogState state)
     {
+        this.filterDataProvider = filterDataProvider;
         this.addressService = addressService;
-        this.addressDataProvider = addressDataProvider;
         this.item = item;
         this.state = state;
 
@@ -98,7 +99,7 @@ public class AddressDialog extends Dialog
 					: ValidationResult.error("Ort ist erforderlich");
 		}).bind(Address::getCity, Address::setCity);
 
-        binder.setBean(item);
+        binder.readBean(item);
 
         Button saveButton = new Button("Speichern");
         saveButton.addClickShortcut(Key.ENTER);
@@ -106,13 +107,13 @@ public class AddressDialog extends Dialog
         saveButton.setMaxWidth("180px");
         saveButton.addClickListener(event ->
         {
-			binder.validate();
+			binder.writeBeanIfValid(item);
             if(binder.isValid())
             {
                 try
                 {
-                    addressService.update(binder.getBean());
-					addressDataProvider.refreshAll();
+                    addressService.update(item);
+					filterDataProvider.refreshAll();
 
                     Notification.show("Daten wurden aktualisiert");
                     this.close();
@@ -133,7 +134,7 @@ public class AddressDialog extends Dialog
         cancelButton.addClickListener(e ->
         {
             binder.removeBean();
-            addressDataProvider.refreshAll();
+            filterDataProvider.refreshAll();
             this.close();
         });
 

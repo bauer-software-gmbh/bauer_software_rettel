@@ -126,6 +126,11 @@ public class FormulationService implements ServiceBase<Formulation, FormulationK
         return customRepository;
     }
 
+    public List<Formulation> findAllByRecipeId(Long recipeId)
+    {
+        return repository.findAllByRecipeId(recipeId);
+    }
+
     public void updateFormulations(List<Formulation> oldFormulations, List<Formulation> newFormulations)
     {
         if(oldFormulations == null)

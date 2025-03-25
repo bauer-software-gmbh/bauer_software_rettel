@@ -15,6 +15,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.allergen.Allergen;
 import de.bauersoft.data.providers.AllergenDataProvider;
 import de.bauersoft.services.AllergenService;
@@ -24,15 +25,15 @@ import org.springframework.dao.DataIntegrityViolationException;
 public class AllergenDialog extends Dialog
 {
 
+    private final FilterDataProvider<Allergen, Long> filterDataProvider;
     private final AllergenService allergenService;
-    private final AllergenDataProvider allergenDataProvider;
     private final Allergen item;
     private final DialogState state;
 
-    public AllergenDialog(AllergenService allergenService, AllergenDataProvider allergenDataProvider, Allergen item, DialogState state)
+    public AllergenDialog(FilterDataProvider<Allergen, Long> filterDataProvider, AllergenService allergenService, Allergen item, DialogState state)
     {
+        this.filterDataProvider = filterDataProvider;
         this.allergenService = allergenService;
-        this.allergenDataProvider = allergenDataProvider;
         this.item = item;
         this.state = state;
 
@@ -69,8 +70,10 @@ public class AllergenDialog extends Dialog
                     : ValidationResult.error("Name ist erforderlich");
 
         }).bind("name");
+
         binder.bind(descriptionTextArea, "description");
-        binder.setBean(item);
+
+        binder.readBean(item);
 
         Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);
@@ -78,13 +81,13 @@ public class AllergenDialog extends Dialog
         saveButton.setMaxWidth("180px");
         saveButton.addClickListener(event ->
         {
-            binder.validate();
+            binder.writeBeanIfValid(item);
             if(binder.isValid())
             {
                 try
                 {
-                    allergenService.update(binder.getBean());
-                    allergenDataProvider.refreshAll();
+                    allergenService.update(item);
+                    filterDataProvider.refreshAll();
 
                     Notification.show("Daten wurden aktualisiert");
                     this.close();
@@ -105,7 +108,7 @@ public class AllergenDialog extends Dialog
         cancelButton.addClickListener(e ->
         {
             binder.removeBean();
-            allergenDataProvider.refreshAll();
+            filterDataProvider.refreshAll();
             this.close();
         });
 

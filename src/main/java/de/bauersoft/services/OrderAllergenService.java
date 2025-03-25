@@ -2,7 +2,6 @@ package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import de.bauersoft.data.entities.order.OrderAllergen;
-import de.bauersoft.data.entities.order.OrderAllergenKey;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import de.bauersoft.data.repositories.order.OrderAllergenGridDataRepository;
@@ -17,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class OrderAllergenService implements ServiceBase<OrderAllergen, OrderAllergenKey>
+public class OrderAllergenService implements ServiceBase<OrderAllergen, Long>
 {
     private final OrderAllergenRepository repository;
     private final OrderAllergenGridDataRepository customRepository;
@@ -29,9 +28,9 @@ public class OrderAllergenService implements ServiceBase<OrderAllergen, OrderAll
     }
 
     @Override
-    public Optional<OrderAllergen> get(OrderAllergenKey orderAllergenKey)
+    public Optional<OrderAllergen> get(Long id)
     {
-        return repository.findById(orderAllergenKey);
+        return repository.findById(id);
     }
 
     @Override
@@ -53,9 +52,9 @@ public class OrderAllergenService implements ServiceBase<OrderAllergen, OrderAll
     }
 
     @Override
-    public void deleteById(OrderAllergenKey orderAllergenKey)
+    public void deleteById(Long id)
     {
-        repository.deleteById(orderAllergenKey);
+        repository.deleteById(id);
     }
 
     @Override
@@ -71,9 +70,9 @@ public class OrderAllergenService implements ServiceBase<OrderAllergen, OrderAll
     }
 
     @Override
-    public void deleteAllById(Collection<OrderAllergenKey> orderAllergenKeys)
+    public void deleteAllById(Collection<Long> ids)
     {
-        repository.deleteAllById(orderAllergenKeys);
+        repository.deleteAllById(ids);
     }
 
     @Override

@@ -15,19 +15,19 @@ public class FieldTabSheet extends TabSheet
     private final OrderManager orderManager;
     private final InstitutionTab institutionTab;
 
-    private final Map<InstitutionField, FieldTab> fieldTabMap;
+    private final Map<InstitutionField, FieldTab> fieldFieldTabMap;
 
     public FieldTabSheet(OrderManager orderManager, InstitutionTab institutionTab)
     {
         this.orderManager = orderManager;
         this.institutionTab = institutionTab;
 
-        fieldTabMap = new HashMap<>();
+        this.fieldFieldTabMap = new HashMap<>();
 
         for(InstitutionField institutionField : institutionTab.getInstitution().getInstitutionFields())
         {
             FieldTab fieldTab = new FieldTab(orderManager, this, institutionField);
-            fieldTabMap.put(institutionField, fieldTab);
+            fieldFieldTabMap.put(institutionField, fieldTab);
 
             this.add(fieldTab.getTab(), fieldTab);
         }

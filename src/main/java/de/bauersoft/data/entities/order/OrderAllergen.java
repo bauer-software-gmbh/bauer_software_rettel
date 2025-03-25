@@ -1,10 +1,15 @@
 package de.bauersoft.data.entities.order;
 
+import de.bauersoft.components.container.ContainerID;
+import de.bauersoft.data.entities.AbstractEntity;
 import de.bauersoft.data.entities.allergen.Allergen;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "order_allergen")
@@ -12,32 +17,23 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor
 @Getter
 @Setter
-public class OrderAllergen
+public class OrderAllergen extends AbstractEntity implements ContainerID<Long>
 {
-    @EmbeddedId
-    private OrderAllergenKey id;
-
     @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("orderId")
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order _order;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("allergenId")
-    @OnDelete(action = OnDeleteAction.RESTRICT)
-    private Allergen allergen;
-
-    @Column(nullable = false)
-    private int amount;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "order_allergens",
+            joinColumns = @JoinColumn(name = "order_allergen_id"),
+            inverseJoinColumns = @JoinColumn(name = "allergen_id"))
+    private Set<Allergen> allergens = new HashSet<>();
 
     @Override
     public String toString()
     {
         return "OrderAllergen{" +
-                "id=" + id +
-                ", _order=" + _order.getId() +
-                ", allergen=" + allergen +
-                ", amount=" + amount +
+                "allergens=" + allergens +
                 '}';
     }
 }
