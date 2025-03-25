@@ -142,8 +142,8 @@ public class MainLayout extends AppLayout
         if(accessChecker.hasAccess(KitchenView.class))
             nav.addItem(new SideNavItem("Küche", KitchenView.class, LineAwesomeIcon.CHECK_CIRCLE_SOLID.create()));
 
-//        if(accessChecker.hasAccess(TourenView.class))
-//            nav.addItem(new SideNavItem("Touren", TourenView.class, LineAwesomeIcon.SHIPPING_FAST_SOLID.create()));
+        if(accessChecker.hasAccess(TourenView.class))
+            nav.addItem(new SideNavItem("Touren", TourenView.class, LineAwesomeIcon.SHIPPING_FAST_SOLID.create()));
 
 
         if(accessChecker.hasAccess(UsersView.class) || accessChecker.hasAccess(FieldView.class)
