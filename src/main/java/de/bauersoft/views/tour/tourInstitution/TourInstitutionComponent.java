@@ -23,6 +23,7 @@ import de.bauersoft.services.tourPlanning.TourInstitutionService;
 import lombok.Getter;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -72,6 +73,7 @@ public class TourInstitutionComponent extends HorizontalLayout
         updateView();
 
         this.add(institutionGrid, institutionList);
+        this.setHeightFull();
         this.getStyle()
                 .setMarginTop("var(--lumo-space-m)");
     }
@@ -117,6 +119,8 @@ public class TourInstitutionComponent extends HorizontalLayout
                 {
                     container.setTempExpectedArrivalTime(event.getValue());
                     container.setTempState(ContainerState.UPDATE);
+
+                    updateView();
                 });
 
                 return timePicker;
@@ -130,6 +134,7 @@ public class TourInstitutionComponent extends HorizontalLayout
                 {
                     if(!(o instanceof TourInstitutionContainer container)) return;
 
+                    container.setTempExpectedArrivalTime(LocalTime.of(0, 0));
                     container.setTempState(ContainerState.UPDATE);
                     container.setGridItem(true);
 
@@ -139,6 +144,7 @@ public class TourInstitutionComponent extends HorizontalLayout
 
             this.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
             this.setWidth("99%");
+            this.setHeightFull();
         }
     }
 
@@ -186,6 +192,7 @@ public class TourInstitutionComponent extends HorizontalLayout
 
             this.add(filterField, virtualList);
             this.setWidthFull();
+            this.setHeightFull();
             this.setPadding(false);
         }
 
@@ -211,7 +218,12 @@ public class TourInstitutionComponent extends HorizontalLayout
     {
         Map<Boolean, List<TourInstitutionContainer>> items = getItems();
 
-        institutionGrid.setItems(items.get(true));
+        institutionGrid.setItems(
+                items.get(true)
+                        .stream()
+                        .sorted(Comparator.comparing(TourInstitutionContainer::getTempExpectedArrivalTime))
+                        .collect(Collectors.toList())
+        );
         institutionList.getVirtualList().setItems(items.get(false));
 
         institutionList.updateFilter();

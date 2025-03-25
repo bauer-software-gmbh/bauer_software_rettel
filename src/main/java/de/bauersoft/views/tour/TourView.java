@@ -1,7 +1,17 @@
 package de.bauersoft.views.tour;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofilter.FilterDataProvider;
@@ -18,6 +28,8 @@ import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.Getter;
 
+import javax.swing.*;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @PageTitle("Tourenplanung")
@@ -52,6 +64,11 @@ public class TourView extends Div
         grid.setHeightFull();
         grid.setWidthFull();
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
+//
+//        grid.addColumn(createToggleInstitutionDetailsRenderer(grid))
+//                        .setWidth("80px").setFlexGrow(0).setFrozen(true).setFrozen(true);
+//
+//        grid.setDetailsVisibleOnClick(false);
 
         grid.addColumn("name", "Name", Tour::getName, false);
         grid.addColumn("vehicle", "Fahrzeug", tour ->
@@ -93,15 +110,20 @@ public class TourView extends Div
 
         grid.addColumn("institutions", "Institutionen", tour ->
         {
-            return tour.getInstitutions().stream()
-                    .map(TourInstitution::getInstitution)
-                    .map(Institution::getName
-                    ).collect(Collectors.joining(", "));
+            return tour.getInstitutions().stream().map(TourInstitution::getInstitution).map(Institution::getName).collect(Collectors.joining(", "));
 
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
             return criteriaBuilder.like(criteriaBuilder.lower(path.get("institution").get("name")), filterInput.toLowerCase() + "%");
-        }).enableSorting(false);
+        }).enableSorting(false).getGridColumn().setKey("institutions");
+//
+//        grid.addColumnResizeListener(event ->
+//        {
+//            if(event.getResizedColumn().getKey() != "institutions") return;
+//
+//            grid.setItemDetailsRenderer(createDetailsRenderer(event.getResizedColumn().getWidth()));
+//        });
+
 
         grid.AutofilterGridContextMenu().enableGridContextMenu()
                         .enableAddItem("Neue Tour", event ->
@@ -118,5 +140,49 @@ public class TourView extends Div
         });
 
         this.add(grid);
+
+        //grid.setItemDetailsRenderer(createDetailsRenderer(grid.getColumnByKey("institutions").getWidth()));
+    }
+
+    private ComponentRenderer<Component, Tour> createDetailsRenderer(String width)
+    {
+        return new ComponentRenderer<Component, Tour>(tour ->
+        {
+            VerticalLayout layout = new VerticalLayout();
+            layout.setWidthFull();
+            layout.setPadding(false);
+            layout.setAlignItems(FlexComponent.Alignment.END);
+
+            for(TourInstitution tourInstitution : tour.getInstitutions())
+            {
+                TextField institutionField = new TextField();
+                institutionField.setReadOnly(true);
+                institutionField.setWidth(width);
+                institutionField.setValue(tourInstitution.getInstitution().getName());
+                layout.add(institutionField);
+            }
+
+            return layout;
+        });
+    }
+
+    private Renderer<Tour> createToggleInstitutionDetailsRenderer(Grid<Tour> grid)
+    {
+        return LitRenderer
+                .<Tour> of("""
+                <vaadin-button
+                    theme="tertiary icon"
+                    aria-label="Toggle details"
+                    aria-expanded="${model.detailsOpened ? 'true' : 'false'}"
+                    @click="${handleClick}"
+                >
+                    <vaadin-icon
+                    .icon="${model.detailsOpened ? 'lumo:angle-down' : 'lumo:angle-right'}"
+                    ></vaadin-icon>
+                </vaadin-button>
+            """)
+                .withFunction("handleClick",
+                        tour -> grid.setDetailsVisible(tour,
+                                !grid.isDetailsVisible(tour)));
     }
 }

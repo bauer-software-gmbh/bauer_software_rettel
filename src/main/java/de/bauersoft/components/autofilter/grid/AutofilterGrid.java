@@ -14,6 +14,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.ValueProvider;
 import de.bauersoft.components.autofilter.Filter;
@@ -189,6 +190,70 @@ public class AutofilterGrid<T, ID> extends Grid<T>
 
 
 
+//    public Column addRendererColumn(String attributeName, Renderer<T> renderer)
+//    {
+//        return addRendererColumn(attributeName, renderer, false);
+//    }
+//
+//    public Column addRendererColumn(String attributeName, Renderer<T> renderer)
+//    {
+//        return addRendererColumn(attributeName, header, renderer, caseSensitive, SortType.ALPHA);
+//    }
+//
+//    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, boolean caseSensitive, SortType sortType)
+//    {
+//        return addRendererColumn(attributeName, header, renderer, Filter.getDefaultFilterFunction(s -> "%" + s + "%", caseSensitive), Filter.getDefaultSortFunction(), sortType);
+//    }
+//
+//
+//    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, ValueProvider<String, String> patternProvider)
+//    {
+//        return addRendererColumn(attributeName, header, renderer, patternProvider, false);
+//    }
+//
+//    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, ValueProvider<String, String> patternProvider, boolean caseSensitive)
+//    {
+//        return addRendererColumn(attributeName, header, renderer, patternProvider, caseSensitive, SortType.ALPHA);
+//    }
+//
+//    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, ValueProvider<String, String> patternProvider, boolean caseSensitive, SortType sortType)
+//    {
+//        return addRendererColumn(attributeName, header, renderer, Filter.getDefaultFilterFunction(patternProvider, caseSensitive), Filter.getDefaultSortFunction(), sortType);
+//    }
+//
+//    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, Filter.FilterFunction<T> filterFunction)
+//    {
+//        return addRendererColumn(attributeName, header, renderer, filterFunction, SortType.ALPHA);
+//    }
+//
+//    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, Filter.FilterFunction<T> filterFunction, SortType sortType)
+//    {
+//        return addRendererColumn(attributeName, header, renderer, filterFunction, Filter.getDefaultSortFunction(), sortType);
+//    }
+//
+//    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, Filter.FilterFunction<T> filterFunction, Filter.SortFunction<T> sortFunction, SortType sortType)
+//    {
+//        Filter<T> filter = new Filter<>(attributeName, filterFunction, sortFunction);
+//        addFilter(filter);
+//
+//        Column column = new Column(attributeName, sortType, header, renderer, s ->
+//        {
+//            filter.setFilterInput(s);
+//            if(sortColumn == null)
+//                dataProvider.callFilters();
+//            else
+//                dataProvider.callFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+//        });
+//
+//        columns.add(column);
+//
+//        setActiveSortColumn(columns.get(0), SortOrder.ASCENDING);
+//
+//        return column;
+//    }
+
+
+
 //    public Column addColumn(String attributeName, String header, ValueProvider<T, Component> componentProvider, Filter.FilterFunction<T> filterFunction, Filter.SortFunction<T> sortFunction, SortType sortType)
 //    {
 //        Filter<T> filter = new Filter<>(attributeName, filterFunction, sortFunction);
@@ -280,6 +345,7 @@ public class AutofilterGrid<T, ID> extends Grid<T>
         private final String header;
         private final ValueProvider<T, String> valueProvider;
         private final ValueProvider<T, Component> componentProvider;
+        private final Renderer<T> renderer;
         private final Consumer<String> onFilterChangeConsumer;
 
         private Grid.Column<T> gridColumn;
@@ -297,6 +363,7 @@ public class AutofilterGrid<T, ID> extends Grid<T>
             this.header = header;
             this.valueProvider = valueProvider;
             this.componentProvider = null;
+            this.renderer = null;
             this.onFilterChangeConsumer = onFilterChangeConsumer;
 
             construct();
@@ -310,6 +377,21 @@ public class AutofilterGrid<T, ID> extends Grid<T>
             this.header = header;
             this.valueProvider = null;
             this.componentProvider = componentProvider;
+            this.renderer = null;
+            this.onFilterChangeConsumer = onFilterChangeConsumer;
+
+            construct();
+        }
+
+        public Column(String attributeName, SortType sortType, String header,Renderer<T> renderer, Consumer<String> onFilterChangeConsumer)
+        {
+            this.sortType = sortType;
+
+            this.attributeName = attributeName;
+            this.header = header;
+            this.valueProvider = null;
+            this.componentProvider = null;
+            this.renderer = renderer;
             this.onFilterChangeConsumer = onFilterChangeConsumer;
 
             construct();
@@ -317,9 +399,19 @@ public class AutofilterGrid<T, ID> extends Grid<T>
 
         private void construct()
         {
-            gridColumn = (valueProvider == null)
-                    ? AutofilterGrid.this.addComponentColumn(componentProvider)
-                    : AutofilterGrid.this.addColumn(valueProvider);
+            if(valueProvider != null)
+            {
+                gridColumn = AutofilterGrid.this.addColumn(valueProvider);
+
+            }else if(componentProvider != null)
+            {
+                gridColumn = AutofilterGrid.this.addComponentColumn(componentProvider);
+
+            }else if(renderer != null)
+            {
+                gridColumn = AutofilterGrid.this.addColumn(renderer);
+            }
+
 
             gridColumn.setResizable(true);
             headerRow.getCell(gridColumn).setComponent(this);

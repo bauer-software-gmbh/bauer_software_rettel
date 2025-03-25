@@ -44,14 +44,13 @@ public class TourInstitution implements ContainerID<TourInstitutionKey>
 
     @Lob
     @Basic(fetch = FetchType.LAZY)
-    @Column(nullable = false, length = 10485760) //10 MB
+    @Column(length = 10485760) //10 MB
     private byte[] temperatureImage;
 
     @Lob
     @Basic(fetch = FetchType.LAZY)
-    @Column(nullable = false, length = 10485760) //10 MB
+    @Column(length = 10485760) //10 MB
     private byte[] signature;
 
-    @Column(nullable = false)
     private LocalDateTime validationTime;
 }
