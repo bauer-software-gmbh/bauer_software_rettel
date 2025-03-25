@@ -1,14 +1,13 @@
-package de.bauersoft.views.touren;
+package de.bauersoft.views.tour;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import de.bauersoft.data.entities.driver.Driver;
-import de.bauersoft.data.repositories.driver.DriverRepository;
+import de.bauersoft.data.entities.tourPlanning.driver.Driver;
+import de.bauersoft.data.repositories.tourPlanning.DriverRepository;
 import de.bauersoft.mobile.model.DTO.UserLocationDTO;
 import de.bauersoft.services.UserLocationService;
 import de.bauersoft.views.MainLayout;
@@ -30,7 +29,7 @@ import java.util.Map;
 @PageTitle("Touren")
 @Route(value = "tours", layout = MainLayout.class)
 @RolesAllowed({"ADMIN", "KITCHEN", "KITCHEN_ADMIN", "OFFICE", "OFFICE_ADMIN"})
-public class TourenView extends VerticalLayout {
+public class TourenÜbersichtView extends VerticalLayout {
 
     private final LMap map;
     private final LComponentManagementRegistry registry;
@@ -41,7 +40,7 @@ public class TourenView extends VerticalLayout {
     private ComboBox<String> driverDropdown;
     private DatePicker datePicker;
 
-    public TourenView(UserLocationService userLocationService, DriverRepository driverRepository) {
+    public TourenÜbersichtView(UserLocationService userLocationService, DriverRepository driverRepository) {
         this.userLocationService = userLocationService;
         this.driverRepository = driverRepository;
         this.registry = new LDefaultComponentManagementRegistry(this);

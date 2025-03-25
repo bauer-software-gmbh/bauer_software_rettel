@@ -27,10 +27,8 @@ public class Tour extends AbstractEntity
     @Column(nullable = false, length = 64)
     private String name;
 
-    @Column(nullable = false)
     private LocalDateTime startDateTime;
 
-    @Column(nullable = false)
     private LocalDateTime endDateTime;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -50,7 +48,6 @@ public class Tour extends AbstractEntity
     @ManyToOne(fetch = FetchType.EAGER)
     private Driver coDriver;
 
-    @Column(nullable = false)
     private LocalDate coDrivesUntil;
 
     @OneToMany(mappedBy = "tour", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE, CascadeType.PERSIST})

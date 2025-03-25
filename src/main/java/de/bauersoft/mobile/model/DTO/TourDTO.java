@@ -1,9 +1,9 @@
 package de.bauersoft.mobile.model.DTO;
 
 import de.bauersoft.data.entities.address.Address;
-import de.bauersoft.data.entities.driver.Driver;
+import de.bauersoft.data.entities.tourPlanning.driver.Driver;
 import de.bauersoft.data.entities.institution.Institution;
-import de.bauersoft.data.entities.tour.Tour;
+import de.bauersoft.data.entities.tourPlanning.tour.Tour;
 import lombok.Getter;
 import lombok.Setter;
 

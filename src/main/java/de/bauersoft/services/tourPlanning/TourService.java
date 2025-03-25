@@ -1,9 +1,18 @@
 package de.bauersoft.services.tourPlanning;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import de.bauersoft.data.entities.address.Address;
+import de.bauersoft.data.entities.tourPlanning.driver.Driver;
+import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.tourPlanning.tour.Tour;
+import de.bauersoft.data.entities.tourPlanning.tour.TourInstitution;
 import de.bauersoft.data.filters.SerializableFilter;
+import de.bauersoft.mobile.model.DTO.TourDTO;
+import de.bauersoft.data.repositories.address.AddressRepository;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
+import de.bauersoft.data.repositories.institution.InstitutionRepository;
+import de.bauersoft.data.repositories.tourPlanning.DriverRepository;
+import de.bauersoft.data.repositories.tourPlanning.TourInstitutionRepository;
 import de.bauersoft.data.repositories.tourPlanning.TourRepository;
 import de.bauersoft.services.ServiceBase;
 import org.springframework.data.domain.Page;
@@ -11,18 +20,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 public class TourService implements ServiceBase<Tour, Long>
 {
     private final TourRepository repository;
+    private final TourInstitutionRepository tourInstitutionRepository;
 
-    public TourService(TourRepository repository)
+    public TourService(TourRepository repository, DriverRepository driverRepository,
+                       TourInstitutionRepository tourInstitutionRepository,
+                       InstitutionRepository institutionRepository, AddressRepository addressRepository)
     {
         this.repository = repository;
+        this.tourInstitutionRepository = tourInstitutionRepository;
     }
 
     @Override
@@ -119,5 +131,38 @@ public class TourService implements ServiceBase<Tour, Long>
     public GridDataRepository<Tour> getCustomRepository()
     {
         return null;
+    }
+
+    public List<TourDTO> getToursForDriverAndDate(Long userId, LocalDateTime start, LocalDateTime end) {
+        List<Tour> tours = repository.findToursByUserIdAndDate(userId, start, end);
+
+        System.out.println("🚀 Anzahl gefundener Touren: " + tours.size());
+
+        List<TourDTO> tourDTOs = new ArrayList<>();
+
+        for (Tour tour : tours) {
+            System.out.println("🔹 Tour gefunden: " + tour.getName() + " (ID: " + tour.getId() + ")");
+
+            Driver driver = tour.getDriver();
+            Driver coDriver = tour.getCoDriver();
+
+            // Institutionen abrufen
+            List<TourInstitution> tourInstitutions = tourInstitutionRepository.findByTourId(tour.getId());
+            List<Institution> institutions = tourInstitutions.stream()
+                    .map(TourInstitution::getInstitution)
+                    .toList();
+
+            // Adressen aus den Institutionen holen
+            List<Address> addresses = institutions.stream()
+                    .map(Institution::getAddress)
+                    .toList();
+
+            System.out.println("🏢 Institutionen gefunden: " + institutions.size());
+            System.out.println("📍 Adressen gefunden: " + addresses.size());
+
+            tourDTOs.add(new TourDTO(tour, driver, coDriver, institutions, addresses));
+        }
+
+        return tourDTOs;
     }
 }

@@ -4,7 +4,7 @@ import de.bauersoft.data.entities.user.User;
 import de.bauersoft.mobile.model.DummyTourData;
 import de.bauersoft.mobile.model.DTO.TourDTO;
 import de.bauersoft.mobile.security.JwtTokenProvider;
-import de.bauersoft.services.TourService;
+import de.bauersoft.services.tourPlanning.TourService;
 import de.bauersoft.mobile.utils.AESUtil;
 import de.bauersoft.services.UserService;
 import org.slf4j.Logger;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

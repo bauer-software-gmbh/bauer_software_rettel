@@ -1,14 +1,14 @@
 package de.bauersoft.mobile.model;
 
 import de.bauersoft.data.entities.address.Address;
-import de.bauersoft.data.entities.driver.Driver;
+import de.bauersoft.data.entities.tourPlanning.driver.Driver;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.role.Role;
-import de.bauersoft.data.entities.tour.Tour;
-import de.bauersoft.data.entities.tour.TourInstitution;
-import de.bauersoft.data.entities.tour.TourInstitutionKey;
+import de.bauersoft.data.entities.tourPlanning.tour.Tour;
+import de.bauersoft.data.entities.tourPlanning.tour.TourInstitution;
+import de.bauersoft.data.entities.tourPlanning.tour.TourInstitutionKey;
 import de.bauersoft.data.entities.user.User;
-import de.bauersoft.data.entities.vehicle.Vehicle;
+import de.bauersoft.data.entities.tourPlanning.vehicle.Vehicle;
 import de.bauersoft.mobile.model.DTO.TourDTO;
 
 import java.time.LocalDate;
