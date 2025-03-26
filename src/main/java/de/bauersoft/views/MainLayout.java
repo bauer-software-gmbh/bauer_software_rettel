@@ -36,6 +36,7 @@ import de.bauersoft.views.offers.OffersView;
 import de.bauersoft.views.order.OrderView;
 import de.bauersoft.views.pattern.PatternView;
 import de.bauersoft.views.recipe.RecipeView;
+import de.bauersoft.views.tour.TourPlanningView;
 import de.bauersoft.views.tour.TourView;
 import de.bauersoft.views.tour.TourenÜbersichtView;
 import de.bauersoft.views.unit.UnitView;
@@ -154,10 +155,13 @@ public class MainLayout extends AppLayout
                 tour.addItem(new SideNavItem("Fahrer", DriverView.class, LineAwesomeIcon.HARD_HAT_SOLID.create()));
 
             if(accessChecker.hasAccess(VehicleView.class))
-                tour.addItem(new SideNavItem("Fahrzeuge", VehicleView.class, LineAwesomeIcon.CAR_CRASH_SOLID.create()));
+                tour.addItem(new SideNavItem("Fahrzeuge", VehicleView.class, LineAwesomeIcon.CAR_SOLID.create()));
 
             if(accessChecker.hasAccess(TourView.class))
-                tour.addItem(new SideNavItem("Touren Planung", TourView.class, LineAwesomeIcon.SHIPPING_FAST_SOLID.create()));
+                tour.addItem(new SideNavItem("Touren Erstellung", TourView.class, LineAwesomeIcon.SHIPPING_FAST_SOLID.create()));
+
+            if(accessChecker.hasAccess(TourView.class))
+                tour.addItem(new SideNavItem("Touren Planung", TourPlanningView.class, LineAwesomeIcon.CALENDAR_ALT_SOLID.create()));
 
             if(accessChecker.hasAccess(TourView.class))
                 tour.addItem(new SideNavItem("Touren Übersicht", TourenÜbersichtView.class, LineAwesomeIcon.MAP_MARKED_ALT_SOLID.create()));

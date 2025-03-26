@@ -1,7 +1,7 @@
 package de.bauersoft.mobile.controller;
 
 import de.bauersoft.data.entities.user.User;
-import de.bauersoft.mobile.model.DummyTourData;
+//import de.bauersoft.mobile.model.DummyTourData;
 import de.bauersoft.mobile.model.DTO.TourDTO;
 import de.bauersoft.mobile.security.JwtTokenProvider;
 import de.bauersoft.services.tourPlanning.TourService;
@@ -69,12 +69,12 @@ public class TourController {
 
         //List<TourDTO> tours = new ArrayList<>();
 
-        TourDTO dummyTour = DummyTourData.getDummyTourDTO();
+        //TourDTO dummyTour = DummyTourData.getDummyTourDTO();
 
-        logger.info("🚚 Dummy-Tour: {} | Fahrzeug: {}", dummyTour.getName(), dummyTour.getVehicle().getLicensePlate());
-        logger.info("🏢 Institutionen: {}", dummyTour.getInstitutions().size());
-        logger.info("🏢 Institutionen - Index 0: {}", dummyTour.getInstitutions().getFirst().getName());
-        logger.info("🏠 Adressen: {}", dummyTour.getAddresses().size());
+//        logger.info("🚚 Dummy-Tour: {} | Fahrzeug: {}", dummyTour.getName(), dummyTour.getVehicle().getLicensePlate());
+//        logger.info("🏢 Institutionen: {}", dummyTour.getInstitutions().size());
+//        logger.info("🏢 Institutionen - Index 0: {}", dummyTour.getInstitutions().getFirst().getName());
+//        logger.info("🏠 Adressen: {}", dummyTour.getAddresses().size());
 
         //tours.add(dummyTour);
 

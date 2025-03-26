@@ -33,6 +33,9 @@ public class Institution extends AbstractEntity
     @Column(length = 256)
     private String customerId;
 
+    @Column(length = 1024)
+    private String information;
+
     @Column(nullable = false, columnDefinition = "TIME default '00:00:05'")
     private LocalTime orderStart = LocalTime.of(0, 5);
 

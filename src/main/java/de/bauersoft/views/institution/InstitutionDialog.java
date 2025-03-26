@@ -60,7 +60,7 @@ public class InstitutionDialog extends Dialog
 
 	private FormLayout inputLayout;
 	private TextField nameTextField;
-	private TextArea descriptionTextArea;
+	private TextArea descriptionTextArea,informationTextArea;
 	private TextField customerIdTextField;
 	private HorizontalLayout datePickerLayout;
 	private TimePicker orderStartTimePicker;
@@ -143,6 +143,12 @@ public class InstitutionDialog extends Dialog
 		userMultiSelectComboBox.setItems(userService.getRepository().findAll());
 		userMultiSelectComboBox.setWidthFull();
 
+		informationTextArea = new TextArea();
+		informationTextArea.setMaxLength(1024);
+		informationTextArea.setSizeFull();
+		informationTextArea.setHeight("calc(3* var(--lumo-text-field-size))");
+		informationTextArea.setMaxHeight("calc(3* var(--lumo-text-field-size))");
+
 		fieldDragComponent = new FieldDragComponent(this);
 		fieldDragComponent.setFieldPool(fieldService.getRepository().findAll());
 		fieldDragComponent.updateView();
@@ -153,6 +159,8 @@ public class InstitutionDialog extends Dialog
 		inputLayout.setColspan(inputLayout.addFormItem(datePickerLayout, "Bestellung"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(addressComboBox, "Adresse"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(userMultiSelectComboBox, "Benutzer"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(informationTextArea, "Information"), 1);
+
 
 
 
@@ -197,6 +205,8 @@ public class InstitutionDialog extends Dialog
 
 		binder.bind(addressComboBox, Institution::getAddress, Institution::setAddress);
 		binder.bind(userMultiSelectComboBox, Institution::getUsers, Institution::setUsers);
+		binder.bind(informationTextArea, Institution::getInformation, Institution::setInformation);
+
 
 		binder.readBean(item);
 

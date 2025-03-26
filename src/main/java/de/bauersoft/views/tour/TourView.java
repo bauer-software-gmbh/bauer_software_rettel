@@ -32,8 +32,8 @@ import javax.swing.*;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@PageTitle("Tourenplanung")
-@Route(value = "tour", layout = MainLayout.class)
+@PageTitle("Tourenerstellung")
+@Route(value = "createtour", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 public class TourView extends Div
 {

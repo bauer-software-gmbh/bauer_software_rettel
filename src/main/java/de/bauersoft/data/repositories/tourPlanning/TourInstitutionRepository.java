@@ -24,4 +24,6 @@ public interface TourInstitutionRepository extends JpaRepository<TourInstitution
             where ti.id = :id
     """)
     void deleteById(TourInstitutionKey id);
+
+    List<TourInstitution> findByTourId(Long id);
 }

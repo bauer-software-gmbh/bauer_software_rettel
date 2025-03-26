@@ -33,8 +33,8 @@ import java.util.*;
 import java.util.function.Consumer;
 
 @PageTitle("Touren")
-@Route(value = "tours", layout = MainLayout.class)
-@RolesAllowed({"ADMIN", "KITCHEN", "KITCHEN_ADMIN", "OFFICE", "OFFICE_ADMIN"})
+@Route(value = "touroverview", layout = MainLayout.class)
+@RolesAllowed({"ADMIN"})
 public class TourenÜbersichtView extends VerticalLayout {
 
     private final LMap map;
@@ -140,6 +140,7 @@ public class TourenÜbersichtView extends VerticalLayout {
         String selectedUser = driverDropdown.getValue();
         LocalDate selectedDate = datePicker.getValue();
 
+        // Bestehende Marker und Routen entfernen
         userMarkers.values().forEach(marker -> map.removeLayer(marker));
         userMarkers.clear();
 
@@ -152,70 +153,116 @@ public class TourenÜbersichtView extends VerticalLayout {
                 ? userLocationService.getLatestUserLocationsByDate(selectedDate)
                 : userLocationService.getUserLocationsByDate(Long.parseLong(selectedUser.split(" - ")[0]), selectedDate);
 
-        Map<Long, List<UserLocationDTO>> groupedByUser = new HashMap<>();
-        for (UserLocationDTO loc : locations) {
-            groupedByUser.computeIfAbsent(loc.getUserId(), k -> new ArrayList<>()).add(loc);
-        }
+        if ("ALLE".equals(selectedUser)) {
+            // 🔹 Marker clustern (z.B. innerhalb von 20 m)
+            List<List<UserLocationDTO>> clusters = new ArrayList<>();
 
-        for (Map.Entry<Long, List<UserLocationDTO>> entry : groupedByUser.entrySet()) {
-            List<UserLocationDTO> userLocs = entry.getValue();
-            userLocs.sort(Comparator.comparing(UserLocationDTO::getTimestamp));
-
-            List<LatLngPoint> latLngPoints = new ArrayList<>();
-            List<LLatLng> markerPoints = new ArrayList<>();
-            LatLngPoint lastAcceptedPoint = null;
-
-            for (UserLocationDTO loc : userLocs) {
-                LatLngPoint current = new LatLngPoint(loc.getLatitude(), loc.getLongitude());
-
-                if (lastAcceptedPoint == null ||
-                        calculateDistance(lastAcceptedPoint.lat, lastAcceptedPoint.lng, current.lat, current.lng) > 50) {
-
-                    LMarker newMarker = getLMarker(loc);
-                    newMarker.addTo(map);
-                    userMarkers.put(loc.getUserId() + "-" + loc.getTimestamp(), newMarker);
-
-                    lastAcceptedPoint = current;
-                    latLngPoints.add(current);
-                    markerPoints.add(new LLatLng(registry, current.lat, current.lng));
+            for (UserLocationDTO loc : locations) {
+                boolean added = false;
+                for (List<UserLocationDTO> cluster : clusters) {
+                    UserLocationDTO ref = cluster.get(0);
+                    if (calculateDistance(loc.getLatitude(), loc.getLongitude(), ref.getLatitude(), ref.getLongitude()) <= 20) {
+                        cluster.add(loc);
+                        added = true;
+                        break;
+                    }
+                }
+                if (!added) {
+                    List<UserLocationDTO> newCluster = new ArrayList<>();
+                    newCluster.add(loc);
+                    clusters.add(newCluster);
                 }
             }
 
-            if (latLngPoints.size() > 1) {
-                try {
-                    List<LLatLng> routedPath = RouteService.fetchRoute(latLngPoints, registry);
-                    LPolylineOptions options = new LPolylineOptions();
-                    options.setColor("#0077cc");
-                    options.setWeight(5);
+            for (List<UserLocationDTO> cluster : clusters) {
+                UserLocationDTO ref = cluster.get(0);
+                LLatLng pos = new LLatLng(registry, ref.getLatitude(), ref.getLongitude());
+                LMarker marker = new LMarker(registry, pos);
 
-                    LPolyline line = new LPolyline(registry, routedPath, options);
-                    line.addTo(map);
-                    routeLines.add(line);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    LPolyline fallbackLine = new LPolyline(registry, markerPoints);
-                    fallbackLine.addTo(map);
-                    routeLines.add(fallbackLine);
+                StringBuilder popup = new StringBuilder("<div style='font-size: 14px; line-height: 1.4em;'>");
+                for (UserLocationDTO loc : cluster) {
+                    popup.append(buildPopupHtml(loc)).append("<br>");
+                }
+                popup.append("</div>");
+
+                marker.bindPopup(popup.toString());
+                marker.addTo(map);
+                userMarkers.put("cluster-" + ref.getUserId() + "-" + ref.getTimestamp(), marker);
+            }
+        } else {
+            // 🔹 Einzelner Fahrer → Marker & Route
+            Map<Long, List<UserLocationDTO>> groupedByUser = new HashMap<>();
+            for (UserLocationDTO loc : locations) {
+                groupedByUser.computeIfAbsent(loc.getUserId(), k -> new ArrayList<>()).add(loc);
+            }
+
+            for (Map.Entry<Long, List<UserLocationDTO>> entry : groupedByUser.entrySet()) {
+                List<UserLocationDTO> userLocs = entry.getValue();
+                userLocs.sort(Comparator.comparing(UserLocationDTO::getTimestamp));
+
+                List<LatLngPoint> latLngPoints = new ArrayList<>();
+                List<LLatLng> markerPoints = new ArrayList<>();
+                LatLngPoint lastAcceptedPoint = null;
+
+                for (UserLocationDTO loc : userLocs) {
+                    LatLngPoint current = new LatLngPoint(loc.getLatitude(), loc.getLongitude());
+
+                    if (lastAcceptedPoint == null ||
+                            calculateDistance(lastAcceptedPoint.lat, lastAcceptedPoint.lng, current.lat, current.lng) > 50) {
+
+                        LMarker newMarker = getLMarker(loc);
+                        newMarker.addTo(map);
+                        userMarkers.put(loc.getUserId() + "-" + loc.getTimestamp(), newMarker);
+
+                        lastAcceptedPoint = current;
+                        latLngPoints.add(current);
+                        markerPoints.add(new LLatLng(registry, current.lat, current.lng));
+                    }
+                }
+
+                if (latLngPoints.size() > 1) {
+                    try {
+                        List<LLatLng> routedPath = RouteService.fetchRoute(latLngPoints, registry);
+                        LPolylineOptions options = new LPolylineOptions();
+                        options.setColor("#0077cc");
+                        options.setWeight(5);
+
+                        LPolyline line = new LPolyline(registry, routedPath, options);
+                        line.addTo(map);
+                        routeLines.add(line);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        LPolyline fallbackLine = new LPolyline(registry, markerPoints);
+                        fallbackLine.addTo(map);
+                        routeLines.add(fallbackLine);
+                    }
                 }
             }
         }
     }
 
-    private LMarker getLMarker(UserLocationDTO loc) {
-        LLatLng userPosition = new LLatLng(registry, loc.getLatitude(), loc.getLongitude());
-        LMarker newMarker = new LMarker(registry, userPosition);
+    private String buildPopupHtml(UserLocationDTO loc) {
         String fullname = userLocationService.getFullNameByUserId(loc.getUserId());
         String formattedDate = loc.getTimestamp().toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
         String formattedTime = loc.getTimestamp().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 
-        String popupHtml = """
-            <div style='line-height: 1.4em; font-size: 14px;'>
-            📍 <strong>Fahrer:</strong> %s (ID: %d)<br>
-            🗓 <strong>Datum:</strong> %s<br>
-            ⏰ <strong>Uhrzeit:</strong> %s
-            </div>
+        return """
+        <div style='line-height: 1.4em; font-size: 14px;'>
+        📍 <strong>%s (ID: %d)</strong><br>
+        📅 <strong>Datum:</strong> %s<br>
+        ⏰ <strong>Uhrzeit:</strong> %s
+        </div>
         """.formatted(fullname, loc.getUserId(), formattedDate, formattedTime);
+    }
+
+
+    private LMarker getLMarker(UserLocationDTO loc) {
+        LLatLng userPosition = new LLatLng(registry, loc.getLatitude(), loc.getLongitude());
+        LMarker newMarker = new LMarker(registry, userPosition);
+
+        String popupHtml = buildPopupHtml(loc);
         newMarker.bindPopup(popupHtml);
+
         return newMarker;
     }
 
