@@ -13,7 +13,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -126,5 +129,14 @@ public class VehicleDowntimeService implements ServiceBase<VehicleDowntime, Long
     public List<VehicleDowntime> findAllByVehicle_Id(Long vehicleId)
     {
         return repository.findAllByVehicle_Id(vehicleId);
+    }
+
+    public Optional<VehicleDowntime> getNextVehicleDowntime(Long vehicleId)
+    {
+        List<VehicleDowntime> downtimes = repository.findAllByVehicle_Id(vehicleId);
+        return downtimes.stream()
+                .filter(d -> d.getStartDate().isAfter(LocalDate.now()))
+                .sorted(Comparator.comparing(VehicleDowntime::getStartDate))
+                .findFirst();
     }
 }

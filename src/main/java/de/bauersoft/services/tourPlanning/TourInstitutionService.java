@@ -121,4 +121,14 @@ public class TourInstitutionService implements ServiceBase<TourInstitution, Tour
     {
         return null;
     }
+
+    public List<TourInstitution> findAllByTour_Id(Long id)
+    {
+        return repository.findAllByTour_Id(id);
+    }
+
+    public Optional<TourInstitution> findByTour_IdAndInstitution_Id(Long id, Long institutionId)
+    {
+        return repository.findByTour_IdAndInstitution_Id(id, institutionId);
+    }
 }

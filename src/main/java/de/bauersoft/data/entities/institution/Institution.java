@@ -39,6 +39,12 @@ public class Institution extends AbstractEntity
     @Column(nullable = false, columnDefinition = "TIME default '08:00:00'")
     private LocalTime orderEnd = LocalTime.of(8, 8);
 
+    @Column(columnDefinition = "DATE default '0000-01-01'")
+    private LocalDate contractStart;
+
+    @Column(columnDefinition = "DATE default '9999-12-31'")
+    private LocalDate contractEnd;
+
     @ManyToOne(fetch = FetchType.EAGER, targetEntity = Address.class)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
@@ -66,5 +72,6 @@ public class Institution extends AbstractEntity
             return LocalDate.now().isAfter(closing.getStartDate()) && LocalDate.now().isBefore(closing.getEndDate());
         });
     }
+
 
 }

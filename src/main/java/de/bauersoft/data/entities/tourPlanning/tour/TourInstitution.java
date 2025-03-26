@@ -1,5 +1,6 @@
 package de.bauersoft.data.entities.tourPlanning.tour;
 
+import de.bauersoft.components.container.ContainerID;
 import de.bauersoft.data.entities.institution.Institution;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @Getter
 @Setter
-public class TourInstitution
+public class TourInstitution implements ContainerID<TourInstitutionKey>
 {
     @EmbeddedId
     private TourInstitutionKey id;
@@ -32,25 +33,24 @@ public class TourInstitution
     @JoinColumn(name = "institution_id", referencedColumnName = "id")
     private Institution institution;
 
-    @Column(nullable = false)
-    private LocalDate contractStart;
-
-    @Column(nullable = true, columnDefinition = "DATE default '9999-12-31'")
-    private LocalDate contractEnd;
+//    @Column(nullable = false)
+//    private LocalDate contractStart;
+//
+//    @Column(nullable = true, columnDefinition = "DATE default '9999-12-31'")
+//    private LocalDate contractEnd;
 
     @Column(nullable = false)
     private LocalTime expectedArrivalTime;
 
     @Lob
     @Basic(fetch = FetchType.LAZY)
-    @Column(nullable = false, length = 10485760) //10 MB
+    @Column(length = 10485760) //10 MB
     private byte[] temperatureImage;
 
     @Lob
     @Basic(fetch = FetchType.LAZY)
-    @Column(nullable = false, length = 10485760) //10 MB
+    @Column(length = 10485760) //10 MB
     private byte[] signature;
 
-    @Column(nullable = false)
     private LocalDateTime validationTime;
 }

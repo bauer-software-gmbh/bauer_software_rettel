@@ -9,4 +9,6 @@ import java.util.List;
 public interface VehicleDowntimeRepository extends JpaRepository<VehicleDowntime, Long>, JpaSpecificationExecutor<VehicleDowntime>
 {
     List<VehicleDowntime> findAllByVehicle_Id(Long vehicleId);
+
+
 }
