@@ -40,17 +40,14 @@ public class AdditiveDialog extends Dialog
 		Binder<Additive> binder = new Binder<>(Additive.class);
 
 		FormLayout inputLayout = new FormLayout();
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
-		inputLayout.setHeight("50vh");
-		inputLayout.setMaxHeight("13em");
+		inputLayout.setWidth("30rem");
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
 		TextField nameTextField = new TextField();
 		nameTextField.setMaxLength(64);
 		nameTextField.setRequired(true);
 		nameTextField.setAutofocus(true);
-		nameTextField.setMinWidth("20em");
+		nameTextField.setWidthFull();
 
 		TextArea descriptionTextArea = new TextArea();
 		descriptionTextArea.setMaxLength(1024);

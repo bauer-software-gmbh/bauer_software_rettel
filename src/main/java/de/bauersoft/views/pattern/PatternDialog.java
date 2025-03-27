@@ -38,10 +38,7 @@ public class PatternDialog extends Dialog
         Binder<Pattern> binder = new Binder<>(Pattern.class);
 
         FormLayout inputLayout = new FormLayout();
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
-		inputLayout.setHeight("50vh");
-		inputLayout.setMaxHeight("18em");
+		inputLayout.setWidth("30rem");
 
         inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
@@ -49,7 +46,7 @@ public class PatternDialog extends Dialog
         nameTextField.setMaxLength(64);
         nameTextField.setAutofocus(true);
         nameTextField.setRequired(true);
-        nameTextField.setMinWidth("20em");
+        nameTextField.setWidthFull();
 
         TextArea descriptionTextArea = new TextArea();
         descriptionTextArea.setMaxLength(1024);
@@ -60,7 +57,7 @@ public class PatternDialog extends Dialog
 
         inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
         inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);
-        inputLayout.setColspan(inputLayout.addFormItem(religiousCheckbox, "Religion"), 1);
+        inputLayout.setColspan(inputLayout.addFormItem(religiousCheckbox, "Religiös"), 1);
 
         binder.forField(nameTextField).asRequired((value, context) ->
         {

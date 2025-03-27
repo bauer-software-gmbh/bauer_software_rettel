@@ -60,17 +60,14 @@ public class IngredientDialog extends Dialog
         binder.setBean(item);
 
         FormLayout inputLayout = new FormLayout();
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
-		inputLayout.setHeight("50vh");
-		inputLayout.setMaxHeight("20em");
+		inputLayout.setWidth("50em");
 
         inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
         TextField nameTextField = new TextField();
         nameTextField.setMaxLength(64);
         nameTextField.setRequired(true);
-        nameTextField.setMinWidth("20em");
+        nameTextField.setWidthFull();
 
         TextArea descriptionTextArea = new TextArea();
         descriptionTextArea.setMaxLength(512);
@@ -78,28 +75,29 @@ public class IngredientDialog extends Dialog
         descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 
         ComboBox<Unit> unitComboBox = new ComboBox<>();
+        unitComboBox.setWidthFull();
+        unitComboBox.setRequired(true);
+        unitComboBox.setItemLabelGenerator(Unit::getName);
         unitComboBox.setItems(query ->
         {
-            return FilterDataProvider.lazyStream(unitService, query);
-        }, query -> (int) unitService.count());
-        unitComboBox.setItemLabelGenerator(Unit::getName);
-        unitComboBox.setRequired(true);
+            return FilterDataProvider.lazyFilteredStream(unitService, query, "name");
+        });
 
         MultiSelectComboBox<Allergen> allergenMultiSelectComboBox = new MultiSelectComboBox<>();
+        allergenMultiSelectComboBox.setWidthFull();
+        allergenMultiSelectComboBox.setItemLabelGenerator(Allergen::getName);
         allergenMultiSelectComboBox.setItems(query ->
         {
-            return FilterDataProvider.lazyStream(allergenService, query);
-        }, query -> (int) allergenService.count());
-        allergenMultiSelectComboBox.setItemLabelGenerator(Allergen::getName);
-        allergenMultiSelectComboBox.setWidthFull();
+            return FilterDataProvider.lazyFilteredStream(allergenService, query, "name");
+        });
 
         MultiSelectComboBox<Additive> additiveMultiSelectComboBox = new MultiSelectComboBox<>();
+        additiveMultiSelectComboBox.setWidthFull();
+        additiveMultiSelectComboBox.setItemLabelGenerator(Additive::getName);
         additiveMultiSelectComboBox.setItems(query ->
         {
-            return  FilterDataProvider.lazyStream(additiveService, query);
-        }, query -> (int) additiveService.count());
-        additiveMultiSelectComboBox.setItemLabelGenerator(Additive::getName);
-        additiveMultiSelectComboBox.setWidthFull();
+            return FilterDataProvider.lazyFilteredStream(additiveService, query, "name");
+        });
 
         inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
         inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);

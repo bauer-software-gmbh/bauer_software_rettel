@@ -74,7 +74,7 @@ public class AutofilterGrid<T, ID> extends Grid<T>
 
     public Column addColumn(String attributeName, String header, ValueProvider<T, String> valueProvider, boolean caseSensitive, SortType sortType)
     {
-        return addColumn(attributeName, header, valueProvider, Filter.getDefaultFilterFunction(s -> s + "%", caseSensitive), Filter.getDefaultSortFunction(), sortType);
+        return addColumn(attributeName, header, valueProvider, Filter.getDefaultFilterFunction(s -> "%" + s + "%", caseSensitive), Filter.getDefaultSortFunction(), sortType);
     }
 
 
