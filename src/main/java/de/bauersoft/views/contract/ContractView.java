@@ -11,6 +11,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataChangeEvent;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -71,7 +72,7 @@ public class ContractView extends Div
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
         grid.addColumn("name", "Name", Institution::getName, false);
-        grid.addComponentColumn("contractStart", "Vertragsbeginn", institution ->
+        grid.addRendererColumn("contractStart", "Vertragsbeginn", new ComponentRenderer<>(institution ->
         {
             DatePicker datePicker = new DatePicker();
             datePicker.setI18n(datePickerI18n);
@@ -84,14 +85,14 @@ public class ContractView extends Div
             });
 
             return datePicker;
-        }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+        }), (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
             return criteriaBuilder.like(criteriaBuilder.function("DATE_FORMAT", String.class, path, criteriaBuilder.literal("%d.%m.%Y")),
                     "%" + filterInput + "%"
             );
         }, SortType.AMOUNT);
 
-        grid.addComponentColumn("contractEnd", "Vertragsende", institution ->
+        grid.addRendererColumn("contractEnd", "Vertragsende", new ComponentRenderer<>(institution ->
         {
             DatePicker datePicker = new DatePicker();
             datePicker.setI18n(datePickerI18n);
@@ -103,7 +104,7 @@ public class ContractView extends Div
             });
 
             return datePicker;
-        }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
+        }), (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
             return criteriaBuilder.like(criteriaBuilder.function("DATE_FORMAT", String.class, path, criteriaBuilder.literal("%d.%m.%Y")),
                     "%" + filterInput + "%"

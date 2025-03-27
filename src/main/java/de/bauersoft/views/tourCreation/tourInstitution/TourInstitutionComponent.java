@@ -111,7 +111,7 @@ public class TourInstitutionComponent extends HorizontalLayout
             timeFilter.setPlaceholder("vsl. ankunft");
             timeFilter.setValueChangeMode(ValueChangeMode.EAGER);
 
-            this.addComponentColumn(container ->
+            this.addColumn(new ComponentRenderer<>(container ->
             {
                 TimePicker timePicker = new TimePicker();
                 timePicker.setWidth("99%");
@@ -128,7 +128,7 @@ public class TourInstitutionComponent extends HorizontalLayout
 
                 return timePicker;
 
-            }).setHeader(timeFilter)
+            })).setHeader(timeFilter)
                     .setSortable(true)
                     .setComparator(Comparator.comparing(TourInstitutionContainer::getTempExpectedArrivalTime));
 
