@@ -272,13 +272,23 @@ public class AutofilterGrid<T, ID> extends Grid<T>
         Filter<T> filter = new Filter<>(attributeName, filterFunction, sortFunction);
         addFilter(filter);
 
+        //Wenn es fehler im AutoFilterGrid gibt dann den folgenden Code Block
+
+        //hier
+        if(sortColumn == null)
+            dataProvider.callFilters();
+        else
+            dataProvider.callFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+        //bis hier
+
+        //nach unten packen
+
         Column column = new Column(attributeName, sortType, header, renderer, s ->
         {
             filter.setFilterInput(s);
-            if(sortColumn == null)
-                dataProvider.callFilters();
-            else
-                dataProvider.callFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+            //hier unten hin
+
+            dataProvider.refreshAll(); //und das hier entfernen
         });
 
         columns.add(column);

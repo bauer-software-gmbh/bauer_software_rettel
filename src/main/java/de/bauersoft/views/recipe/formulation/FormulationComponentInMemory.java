@@ -1,12 +1,9 @@
 package de.bauersoft.views.recipe.formulation;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -16,8 +13,6 @@ import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import de.bauersoft.components.autofilter.Filter;
-import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.formulation.Formulation;
 import de.bauersoft.data.entities.formulation.FormulationKey;
@@ -26,76 +21,55 @@ import de.bauersoft.data.entities.recipe.Recipe;
 import de.bauersoft.services.FormulationService;
 import de.bauersoft.services.IngredientService;
 import de.bauersoft.services.RecipeService;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.Getter;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
-import javax.swing.*;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Getter
-public class FormulationComponent extends HorizontalLayout
+public class FormulationComponentInMemory extends HorizontalLayout
 {
+
     private final Recipe item;
 
     private final RecipeService recipeService;
     private final FormulationService formulationService;
     private final IngredientService ingredientService;
 
-    private final FilterDataProvider<Ingredient, Long> ingredientDataProvider;
-    private Filter<Ingredient> ingredientFilter;
-    private Filter<Ingredient> ingredientNameFilter;
-
     private final FormulationMapContainer mapContainer;
 
     private final FormulationGrid formulationGrid;
     private final FormulationList formulationList;
 
-    public FormulationComponent(Recipe item, RecipeService recipeService, FormulationService formulationService, IngredientService ingredientService)
+    public FormulationComponentInMemory(Recipe item, RecipeService recipeService, FormulationService formulationService, IngredientService ingredientService)
     {
         this.item = item;
         this.recipeService = recipeService;
         this.formulationService = formulationService;
         this.ingredientService = ingredientService;
 
-        ingredientDataProvider = new FilterDataProvider<>(ingredientService);
-        ingredientFilter = new Filter<Ingredient>("name", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
-        {
-            List<Ingredient> doNotShow = new ArrayList<>(
-                    getItems().get(true)
-                            .stream()
-                            .map(container -> container.getEntity().getIngredient())
-                            .collect(Collectors.toList())
-            );
-
-            if(!doNotShow.isEmpty())
-            {
-                CriteriaBuilder.In<Long> inClause = criteriaBuilder.in(root.get("id"));
-                for (Ingredient ingredient : doNotShow)
-                    inClause.value(ingredient.getId());
-
-                return criteriaBuilder.not(inClause);
-            }
-
-            return criteriaBuilder.conjunction();
-
-        }).setIgnoreFilterInput(true);
-
-        ingredientNameFilter = new Filter<Ingredient>("name", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
-        {
-            return criteriaBuilder.like(criteriaBuilder.lower(path.as(String.class)), filterInput + "%");
-        });
-
-        ingredientDataProvider.addFilter(ingredientFilter);
-        ingredientDataProvider.addFilter(ingredientNameFilter);
-
-        ingredientDataProvider.callFilters("name", SortOrder.ASCENDING);
-
         mapContainer = new FormulationMapContainer();
         for(Formulation formulation : formulationService.findAllByRecipe_Id(item.getId()))
             ((FormulationContainer) mapContainer.addContainer(formulation.getIngredient(), formulation, ContainerState.SHOW))
                     .setGridItem(true);
+
+        for(Ingredient ingredient : ingredientService.findAll())
+        {
+            mapContainer.addIfAbsent(ingredient, () ->
+            {
+                Formulation formulation = new Formulation();
+                formulation.setId(new FormulationKey(null, ingredient.getId()));
+                formulation.setRecipe(item);
+                formulation.setIngredient(ingredient);
+
+                return formulation;
+
+            }, ContainerState.NEW);
+        }
 
         formulationGrid = new FormulationGrid();
         formulationList = new FormulationList();
@@ -122,17 +96,7 @@ public class FormulationComponent extends HorizontalLayout
             {
                 event.getDragData().ifPresent(o ->
                 {
-                    if(!(o instanceof Ingredient ingredient)) return;
-
-                    FormulationContainer container = (FormulationContainer) mapContainer.addIfAbsent(ingredient, () ->
-                    {
-                        Formulation formulation = new Formulation();
-                        formulation.setId(new FormulationKey(null, ingredient.getId()));
-                        formulation.setRecipe(item);
-                        formulation.setIngredient(ingredient);
-
-                        return formulation;
-                    }, ContainerState.NEW);
+                    if(!(o instanceof FormulationContainer container)) return;
 
                     container.setTempState(ContainerState.UPDATE);
                     container.setGridItem(true);
@@ -164,9 +128,9 @@ public class FormulationComponent extends HorizontalLayout
             nameFilter.setValueChangeMode(ValueChangeMode.EAGER);
 
             this.addColumn(container ->
-                    {
-                        return container.getEntity().getIngredient().getName();
-                    }).setHeader(nameFilter)
+            {
+                return container.getEntity().getIngredient().getName();
+            }).setHeader(nameFilter)
                     .setSortable(true)
                     .setComparator(container -> container.getEntity().getIngredient().getName());
 
@@ -177,25 +141,25 @@ public class FormulationComponent extends HorizontalLayout
             quantityFilter.setValueChangeMode(ValueChangeMode.EAGER);
 
             this.addColumn(new ComponentRenderer<>(container ->
-                    {
-                        NumberField numberField = new NumberField();
-                        numberField.setWidth("99%");
-                        numberField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_CENTER);
-                        numberField.setAllowedCharPattern("[0-9,.]");
+            {
+                NumberField numberField = new NumberField();
+                numberField.setWidth("99%");
+                numberField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_CENTER);
+                numberField.setAllowedCharPattern("[0-9,.]");
 
-                        numberField.setValue(container.getTempQuantity());
+                numberField.setValue(container.getTempQuantity());
 
-                        numberField.addValueChangeListener(event ->
-                        {
-                            container.setTempQuantity(Objects.requireNonNullElse(event.getValue(), 0d));
-                            container.setTempState(ContainerState.UPDATE);
+                numberField.addValueChangeListener(event ->
+                {
+                    container.setTempQuantity(Objects.requireNonNullElse(event.getValue(), 0d));
+                    container.setTempState(ContainerState.UPDATE);
 
-                            updateView();
-                        });
+                    updateView();
+                });
 
-                        return numberField;
+                return numberField;
 
-                    })).setHeader(quantityFilter)
+            })).setHeader(quantityFilter)
                     .setSortable(true)
                     .setComparator(Comparator.comparing(FormulationContainer::getTempQuantity));
 
@@ -205,9 +169,9 @@ public class FormulationComponent extends HorizontalLayout
             unitFilter.setValueChangeMode(ValueChangeMode.EAGER);
 
             this.addColumn(container ->
-                    {
-                        return container.getEntity().getIngredient().getUnit().getName();
-                    }).setHeader(unitFilter)
+            {
+                return container.getEntity().getIngredient().getUnit().getName();
+            }).setHeader(unitFilter)
                     .setSortable(true)
                     .setComparator(Comparator.comparing(container -> container.getEntity().getIngredient().getUnit().getName()));
 
@@ -286,24 +250,23 @@ public class FormulationComponent extends HorizontalLayout
     @Getter
     private class FormulationList extends VerticalLayout
     {
-        private final VirtualList<Ingredient> virtualList;
+        private final VirtualList<FormulationContainer> virtualList;
         private final TextField filterField;
 
         public FormulationList()
         {
             virtualList = new VirtualList<>();
-            virtualList.setDataProvider(ingredientDataProvider.getFilterDataProvider());
-            virtualList.setRenderer(new ComponentRenderer<>(ingredient ->
+            virtualList.setRenderer(new ComponentRenderer<>(container ->
             {
                 TextField showField = new TextField();
                 showField.setWidth("99%");
-                showField.setValue(ingredient.getName());
+                showField.setValue(container.getEntity().getIngredient().getName());
                 showField.setReadOnly(true);
 
                 DragSource dragSource = DragSource.create(showField);
                 dragSource.addDragStartListener(event ->
                 {
-                    dragSource.setDragData(ingredient);
+                    dragSource.setDragData(container);
                 });
 
                 return showField;
@@ -318,14 +281,27 @@ public class FormulationComponent extends HorizontalLayout
 
             filterField.addValueChangeListener(event ->
             {
-                ingredientNameFilter.setFilterInput(event.getValue());
-                ingredientDataProvider.refreshAll();
+                virtualList.setItems(
+                        getItems().get(false)
+                                .stream()
+                                .filter(container -> container.getEntity().getIngredient().getName().toLowerCase().startsWith(event.getValue().toLowerCase()))
+                                .collect(Collectors.toList())
+                );
             });
 
             this.add(filterField, virtualList);
             this.setWidth("59%");
             this.setHeightFull();
             this.setPadding(false);
+        }
+
+        public FormulationList updateFilter()
+        {
+            String value = filterField.getValue();
+            filterField.setValue("");
+            filterField.setValue(Objects.requireNonNullElse(value, ""));
+
+            return this;
         }
     }
 
@@ -337,7 +313,7 @@ public class FormulationComponent extends HorizontalLayout
                 .collect(Collectors.partitioningBy(FormulationContainer::isGridItem));
     }
 
-    public FormulationComponent updateView()
+    public FormulationComponentInMemory updateView()
     {
         Map<Boolean, List<FormulationContainer>> items = getItems();
 
@@ -349,7 +325,9 @@ public class FormulationComponent extends HorizontalLayout
         );
 
         formulationGrid.updateFilters();
-        ingredientDataProvider.refreshAll();
+
+        formulationList.getVirtualList().setItems(items.get(false));
+        formulationList.updateFilter();
 
         return this;
     }

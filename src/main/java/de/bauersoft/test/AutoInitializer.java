@@ -3,6 +3,7 @@ package de.bauersoft.test;
 import de.bauersoft.data.entities.allergen.Allergen;
 import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.field.Field;
+import de.bauersoft.data.entities.ingredient.Ingredient;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
@@ -39,7 +40,7 @@ public class AutoInitializer
                                        OrderService orderService,
                                        OrderAllergenService orderAllergenService,
                                        OrderDataService orderDataService,
-                                       VariantService variantService)
+                                       VariantService variantService, IngredientService ingredientService)
     {
         return args ->
         {
@@ -62,8 +63,6 @@ public class AutoInitializer
 //                    });
 
             //new UnitCreator().createUnits(unitService);
-
-
 
             for(int i = courseService.findAll().size(); i < 5; i++)
             {
