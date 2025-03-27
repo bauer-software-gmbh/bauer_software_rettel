@@ -56,17 +56,14 @@ public class ComponentDialog extends Dialog
 		Binder<Component> binder = new Binder<>(Component.class);
 
 		FormLayout inputLayout = new FormLayout();
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
-		inputLayout.setHeight("50vh");
-		inputLayout.setMaxHeight("20em");
+		inputLayout.setWidth("30rem");
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
 		TextField nameTextField = new TextField();
 		nameTextField.setMaxLength(64);
 		nameTextField.setAutofocus(true);
 		nameTextField.setRequired(true);
-		nameTextField.setMinWidth("20em");
+		nameTextField.setWidthFull();
 
 		TextArea descriptionTextArea = new TextArea();
 		descriptionTextArea.setMaxLength(1024);
@@ -74,28 +71,37 @@ public class ComponentDialog extends Dialog
 		descriptionTextArea.setMinHeight("calc(4* var(--lumo-text-field-size))");
 
 		ComboBox<Course> courseComboBox = new ComboBox<>("Menükomponente");
-		courseComboBox.setItems(query -> FilterDataProvider.lazyStream(courseService, query));
-		courseComboBox.setItemLabelGenerator(Course::getName);
-		courseComboBox.setRequired(true);
 		courseComboBox.setWidthFull();
+		courseComboBox.setRequired(true);
+		courseComboBox.setItemLabelGenerator(Course::getName);
+		courseComboBox.setItems(query ->
+		{
+			return FilterDataProvider.lazyFilteredStream(courseService, query, "name");
+		});
 
 		ComboBox<Unit> unitComboBox = new ComboBox<>("Einheit");
-		unitComboBox.setItems(query -> FilterDataProvider.lazyStream(unitService, query));
-		unitComboBox.setItemLabelGenerator(Unit::getName);
-		unitComboBox.setRequired(true);
 		unitComboBox.setWidthFull();
+		unitComboBox.setRequired(true);
+		unitComboBox.setItemLabelGenerator(Unit::getName);
+		unitComboBox.setItems(query ->
+		{
+			return FilterDataProvider.lazyFilteredStream(unitService, query, "name");
+		});
 
-		HorizontalLayout comboBoxLayout = new HorizontalLayout(courseComboBox, unitComboBox);
-		comboBoxLayout.setWidthFull();
+		HorizontalLayout propertiesLayout = new HorizontalLayout(courseComboBox, unitComboBox);
+		propertiesLayout.setWidthFull();
 
 		MultiSelectComboBox<Recipe> recipeMultiSelectComboBox = new MultiSelectComboBox<>();
-		recipeMultiSelectComboBox.setItems(query -> FilterDataProvider.lazyStream(recipeService, query));
-		recipeMultiSelectComboBox.setItemLabelGenerator(Recipe::getName);
 		recipeMultiSelectComboBox.setWidthFull();
+		recipeMultiSelectComboBox.setItemLabelGenerator(Recipe::getName);
+		recipeMultiSelectComboBox.setItems(query ->
+		{
+			return FilterDataProvider.lazyFilteredStream(recipeService, query, "name");
+		});
 
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);
-		inputLayout.setColspan(inputLayout.addFormItem(comboBoxLayout, "Eigenschaften"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(propertiesLayout, "Eigenschaften"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(recipeMultiSelectComboBox, "Rezepte"), 1);
 
 		binder.forField(nameTextField).asRequired((value, context) ->

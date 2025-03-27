@@ -42,10 +42,7 @@ public class AllergenDialog extends Dialog
         Binder<Allergen> binder = new Binder<>(Allergen.class);
 
         FormLayout inputLayout = new FormLayout();
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
-		inputLayout.setHeight("50vh");
-		inputLayout.setMaxHeight("13em");
+        inputLayout.setWidth("30rem");
 
         inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
@@ -53,7 +50,7 @@ public class AllergenDialog extends Dialog
         nameTextField.setMaxLength(64);
         nameTextField.setRequired(true);
         nameTextField.setAutofocus(true);
-        nameTextField.setMinWidth("20em");
+        nameTextField.setWidthFull();
 
         TextArea descriptionTextArea = new TextArea();
         descriptionTextArea.setMaxLength(1024);

@@ -59,7 +59,6 @@ public class ComponentView extends Div
 		grid.addColumn("name", "Name", Component::getName, false);
 		grid.addColumn("description", "Beschreibung", Component::getDescription, false);
 
-
        	grid.AutofilterGridContextMenu()
 			   .enableGridContextMenu()
 			   .enableAddItem("Neue Menükomponente", event ->
@@ -70,27 +69,32 @@ public class ComponentView extends Div
 			   {
 				   event.getItem().ifPresent(item ->
 				   {
-					   if(variantService.getRepository().existsByComponentsId(item.getId()))
-					   {
-						   Div div = new Div();
-						   div.setMaxWidth("33vw");
-						   div.getStyle().set("white-space", "normal");
-						   div.getStyle().set("word-wrap", "break-word");
-
-						   div.add(new Text("Die Komponente \"" + item.getName() + "\" kann nicht gelöscht werden, da sie noch von einigen Menü-Varianten verwendet wird."));
-
-						   Notification notification = new Notification(div);
-						   notification.setDuration(5000);
-						   notification.setPosition(Notification.Position.MIDDLE);
-						   notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
-						   notification.open();
-						   return;
-					   }
+//					   if(variantService.getRepository().existsByComponentsId(item.getId()))
+//					   {
+//						   Div div = new Div();
+//						   div.setMaxWidth("33vw");
+//						   div.getStyle().set("white-space", "normal");
+//						   div.getStyle().set("word-wrap", "break-word");
+//
+//						   div.add(new Text("Die Komponente \"" + item.getName() + "\" kann nicht gelöscht werden, da sie noch von einigen Menü-Varianten verwendet wird."));
+//
+//						   Notification notification = new Notification(div);
+//						   notification.setDuration(5000);
+//						   notification.setPosition(Notification.Position.MIDDLE);
+//						   notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+//						   notification.open();
+//						   return;
+//					   }
 
 					   componentService.deleteById(item.getId());
 					   filterDataProvider.refreshAll();
 				   });
 			   });
+
+		   grid.addItemDoubleClickListener(event ->
+		   {
+			   new ComponentDialog(filterDataProvider, componentService, recipeService, courseService, unitService, event.getItem(), DialogState.EDIT);
+		   });
 
         this.add(grid);
     }

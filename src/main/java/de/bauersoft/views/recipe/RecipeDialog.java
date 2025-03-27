@@ -74,12 +74,12 @@ public class RecipeDialog extends Dialog
 		descriptionTextArea.setWidthFull();
 
 		MultiSelectComboBox<Pattern> patternMultiSelectComboBox = new MultiSelectComboBox<>();
+		patternMultiSelectComboBox.setWidthFull();
+		patternMultiSelectComboBox.setItemLabelGenerator(Pattern::getName);
 		patternMultiSelectComboBox.setItems(query ->
 		{
-			return FilterDataProvider.lazyStream(patternService, query);
-		}, query -> (int) patternService.count());
-		patternMultiSelectComboBox.setItemLabelGenerator(Pattern::getName);
-		patternMultiSelectComboBox.setWidthFull();
+			return FilterDataProvider.lazyFilteredStream(patternService, query, "name");
+		});
 
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);

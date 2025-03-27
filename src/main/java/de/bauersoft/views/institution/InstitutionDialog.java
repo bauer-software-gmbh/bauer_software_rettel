@@ -93,7 +93,8 @@ public class InstitutionDialog extends Dialog
 		Binder<Institution> binder = new Binder<>(Institution.class);
 
 		inputLayout = new FormLayout();
-		inputLayout.setWidthFull();
+		inputLayout.setWidth("50rem");
+
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
 		nameTextField = new TextField();

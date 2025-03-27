@@ -73,7 +73,7 @@ public class MenuBuilderView extends Div
 
         grid.setHeightFull();
         grid.setWidthFull();
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
         grid.addColumn("name", "Name", Menu::getName, false);
         grid.addColumn("flesh", "Fleischsorte", menu ->

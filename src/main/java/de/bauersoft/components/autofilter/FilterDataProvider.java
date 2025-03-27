@@ -4,6 +4,7 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.function.ValueProvider;
 import de.bauersoft.services.ServiceBase;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
@@ -133,6 +134,31 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
         return service.list(pageable).stream();
     }
 
+    public static <T> Stream<T> lazyFilteredStream(ServiceBase<T, ?> service, Query<T, String> query, String attributeName)
+    {
+        return lazyFilteredStream(service, query, s -> "%" + s + "%", attributeName);
+    }
+
+    public static <T> Stream<T> lazyFilteredStream(ServiceBase<T, ?> service, Query<T, String> query, ValueProvider<String, String> patternProvider, String attributeName)
+    {
+        return lazyFilteredStream(service, query, (root, criteriaQuery, criteriaBuilder, filterInput) ->
+        {
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get(attributeName)), patternProvider.apply(filterInput));
+        });
+    }
+
+    public static <T> Stream<T> lazyFilteredStream(ServiceBase<T, ?> service, Query<T, String> query, Filter.TinyFilterFunction<T> tinyFilterFunction)
+    {
+        int offset = query.getOffset();
+        int limit = query.getLimit();
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+
+        return service.list(pageable, (root, criteriaQuery, criteriaBuilder) ->
+        {
+            return tinyFilterFunction.apply(root, criteriaQuery, criteriaBuilder, query.getFilter().orElseGet(() -> ""));
+        }).stream();
+    }
+
     public static Pageable pageable(Query<?, ?> query)
     {
         int offset = query.getOffset();
@@ -141,6 +167,7 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
     }
 
 
+    @Deprecated
     public DataProvider<T, Specification<T>> getDataProvider()
     {
         return DataProvider.fromFilteringCallbacks(
