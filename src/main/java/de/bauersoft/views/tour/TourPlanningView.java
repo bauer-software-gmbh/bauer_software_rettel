@@ -198,7 +198,7 @@ public class TourPlanningView extends Div {
 
         Span infoText = new Span(entry.getInfo() != null
                 ? entry.getInfo().getTimeWindow()
-                : "(keine Information)");
+                : "(kein Zeitfenster)");
         infoText.getStyle().set("font-size", "smaller").set("color", "#666");
 
         content.add(name, infoText);
