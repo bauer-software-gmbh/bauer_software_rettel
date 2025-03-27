@@ -40,7 +40,6 @@ public class TourInstitutionComponent extends HorizontalLayout
     private final TourInstitutionMapContainer mapContainer;
 
     private final InstitutionGrid institutionGrid;
-    private DropTarget<Grid<TourInstitutionContainer>> dropTarget;
     private final InstitutionList institutionList;
 
     public TourInstitutionComponent(Tour item, InstitutionService institutionService, TourInstitutionService tourInstitutionService)
@@ -71,6 +70,21 @@ public class TourInstitutionComponent extends HorizontalLayout
     {
         public InstitutionGrid()
         {
+            DropTarget<Grid<TourInstitutionContainer>> dropTarget = DropTarget.create(this);
+            dropTarget.addDropListener(event ->
+            {
+                event.getDragData().ifPresent(o ->
+                {
+                    if(!(o instanceof TourInstitutionContainer container)) return;
+
+                    container.setTempExpectedArrivalTime(LocalTime.of(0, 0));
+                    container.setTempState(ContainerState.UPDATE);
+                    container.setGridItem(true);
+
+                    updateView();
+                });
+            });
+
             this.addComponentColumn(container ->
             {
                 SvgIcon trash = LineAwesomeIcon.TRASH_SOLID.create();
@@ -162,21 +176,6 @@ public class TourInstitutionComponent extends HorizontalLayout
                 );
             });
 
-
-            dropTarget = DropTarget.create(this);
-            dropTarget.addDropListener(event ->
-            {
-                event.getDragData().ifPresent(o ->
-                {
-                    if(!(o instanceof TourInstitutionContainer container)) return;
-
-                    container.setTempExpectedArrivalTime(LocalTime.of(0, 0));
-                    container.setTempState(ContainerState.UPDATE);
-                    container.setGridItem(true);
-
-                    updateView();
-                });
-            });
 
             this.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
             this.setWidth("99%");

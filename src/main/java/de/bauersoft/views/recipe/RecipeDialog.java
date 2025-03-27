@@ -8,27 +8,21 @@ import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import de.bauersoft.components.autofilter.FilterDataProvider;
-import de.bauersoft.data.entities.recipe.Recipe;
 import de.bauersoft.data.entities.pattern.Pattern;
-import de.bauersoft.data.providers.RecipeDataProvider;
-import de.bauersoft.data.repositories.formulation.FormulationRepository;
-import de.bauersoft.data.repositories.ingredient.IngredientRepository;
-import de.bauersoft.data.repositories.pattern.PatternRepository;
-import de.bauersoft.data.repositories.recipe.RecipeRepository;
+import de.bauersoft.data.entities.recipe.Recipe;
 import de.bauersoft.services.FormulationService;
 import de.bauersoft.services.IngredientService;
 import de.bauersoft.services.PatternService;
 import de.bauersoft.services.RecipeService;
 import de.bauersoft.views.DialogState;
+import de.bauersoft.views.recipe.formulation.FormulationComponent;
 import org.springframework.dao.DataIntegrityViolationException;
 
 public class RecipeDialog extends Dialog
@@ -61,11 +55,10 @@ public class RecipeDialog extends Dialog
 
 		Binder<Recipe> binder = new Binder<>(Recipe.class);
 
+		FormulationComponent formulationComponent = new FormulationComponent(item, recipeService, formulationService, ingredientService);
+
 		FormLayout inputLayout = new FormLayout();
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
-		inputLayout.setHeight("50vh");
-		inputLayout.setMaxHeight("16em");
+		inputLayout.setWidth("55rem");
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
 		TextField nameTextField = new TextField();
@@ -107,12 +100,6 @@ public class RecipeDialog extends Dialog
 					? ValidationResult.ok()
 					: ValidationResult.error("Eine Ernährungsform muss angegeben werden.");
 		}).bind(Recipe::getPatterns, Recipe::setPatterns);
-		
-		FormulationComponent formulationComponent = new FormulationComponent();
-		formulationComponent.setFormulations(formulationService.findAllByRecipeId(item.getId()));
-		formulationComponent.setIngredients(ingredientService.findAll());
-		formulationComponent.updateView();
-		formulationComponent.setHeight("50vh");
 
 		binder.readBean(item);
 
@@ -123,14 +110,18 @@ public class RecipeDialog extends Dialog
 		saveButton.addClickListener(e ->
 		{
 			binder.writeBeanIfValid(item);;
-			if(binder.isValid() && formulationComponent.isValid())
+			if(binder.isValid())
 			{
 				try
 				{
 					recipeService.update(item);
 
-					formulationComponent.accept(item);
-					formulationService.updateFormulations(item.getFormulations().stream().toList(), formulationComponent.getFormulationsMap().keySet().stream().toList());
+					formulationComponent.getMapContainer()
+									.acceptTemporaries()
+									.evaluate(container ->
+									{
+										container.getId().setRecipeId(item.getId());
+									}).run(formulationService);
 
 					filterDataProvider.refreshAll();
 

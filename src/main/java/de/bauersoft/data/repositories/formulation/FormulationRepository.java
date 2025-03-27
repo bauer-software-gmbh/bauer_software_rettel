@@ -4,6 +4,7 @@ import de.bauersoft.data.entities.formulation.Formulation;
 import de.bauersoft.data.entities.formulation.FormulationKey;
 import de.bauersoft.data.entities.recipe.Recipe;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -16,7 +17,7 @@ import java.util.Set;
 public interface FormulationRepository extends JpaRepository<Formulation, FormulationKey>, JpaSpecificationExecutor<Formulation>
 {
 
-    List<Formulation> findAllByRecipeId(Long recipeId);
+    List<Formulation> findAllByRecipe_Id(Long recipeId);
 
     @Transactional
     @Modifying
