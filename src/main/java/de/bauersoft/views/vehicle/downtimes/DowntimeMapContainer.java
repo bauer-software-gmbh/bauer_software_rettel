@@ -3,7 +3,7 @@ package de.bauersoft.views.vehicle.downtimes;
 import de.bauersoft.components.container.Container;
 import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.components.container.MapContainer;
-import de.bauersoft.data.entities.tourPlanning.vehicle.VehicleDowntime;
+import de.bauersoft.data.entities.tour.vehicle.VehicleDowntime;
 
 public class DowntimeMapContainer extends MapContainer<VehicleDowntime, Long, Integer>
 {

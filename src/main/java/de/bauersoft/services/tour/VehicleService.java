@@ -1,14 +1,15 @@
-package de.bauersoft.services.tourPlanning;
+package de.bauersoft.services.tour;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.tourPlanning.vehicle.Vehicle;
+import de.bauersoft.data.entities.tour.vehicle.Vehicle;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
-import de.bauersoft.data.repositories.tourPlanning.VehicleRepository;
+import de.bauersoft.data.repositories.tour.VehicleRepository;
 import de.bauersoft.services.ServiceBase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -119,5 +120,10 @@ public class VehicleService implements ServiceBase<Vehicle, Long>
     public GridDataRepository<Vehicle> getCustomRepository()
     {
         return null;
+    }
+
+    public List<Vehicle> findAllUnplannedVehicles(boolean holidayMode)
+    {
+        return repository.findAllUnplannedVehicles(holidayMode);
     }
 }

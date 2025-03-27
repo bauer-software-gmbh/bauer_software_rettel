@@ -1,16 +1,15 @@
-package de.bauersoft.services.tourPlanning;
+package de.bauersoft.services.tour;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.tourPlanning.vehicle.VehicleDowntime;
+import de.bauersoft.data.entities.tour.driver.Driver;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
-import de.bauersoft.data.repositories.tourPlanning.VehicleDowntimeRepository;
+import de.bauersoft.data.repositories.tour.DriverRepository;
 import de.bauersoft.services.ServiceBase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -18,35 +17,35 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class VehicleDowntimeService implements ServiceBase<VehicleDowntime, Long>
+public class DriverService implements ServiceBase<Driver, Long>
 {
-    private final VehicleDowntimeRepository repository;
+    private final DriverRepository repository;
 
-    public VehicleDowntimeService(VehicleDowntimeRepository repository)
+    public DriverService(DriverRepository repository)
     {
         this.repository = repository;
     }
 
     @Override
-    public Optional<VehicleDowntime> get(Long id)
+    public Optional<Driver> get(Long id)
     {
         return repository.findById(id);
     }
 
     @Override
-    public VehicleDowntime update(VehicleDowntime entity)
+    public Driver update(Driver entity)
     {
         return repository.save(entity);
     }
 
     @Override
-    public List<VehicleDowntime> updateAll(Collection<VehicleDowntime> entities)
+    public List<Driver> updateAll(Collection<Driver> entities)
     {
         return repository.saveAll(entities);
     }
 
     @Override
-    public void delete(VehicleDowntime entity)
+    public void delete(Driver entity)
     {
         repository.delete(entity);
     }
@@ -58,7 +57,7 @@ public class VehicleDowntimeService implements ServiceBase<VehicleDowntime, Long
     }
 
     @Override
-    public void deleteAll(Collection<VehicleDowntime> entities)
+    public void deleteAll(Collection<Driver> entities)
     {
         repository.deleteAll(entities);
     }
@@ -76,19 +75,19 @@ public class VehicleDowntimeService implements ServiceBase<VehicleDowntime, Long
     }
 
     @Override
-    public List<VehicleDowntime> findAll()
+    public List<Driver> findAll()
     {
         return repository.findAll();
     }
 
     @Override
-    public Page<VehicleDowntime> list(Pageable pageable)
+    public Page<Driver> list(Pageable pageable)
     {
         return repository.findAll(pageable);
     }
 
     @Override
-    public Page<VehicleDowntime> list(Pageable pageable, Specification<VehicleDowntime> filter)
+    public Page<Driver> list(Pageable pageable, Specification<Driver> filter)
     {
         return repository.findAll(filter, pageable);
     }
@@ -100,31 +99,46 @@ public class VehicleDowntimeService implements ServiceBase<VehicleDowntime, Long
     }
 
     @Override
-    public long count(List<SerializableFilter<VehicleDowntime, ?>> serializableFilters)
+    public long count(List<SerializableFilter<Driver, ?>> serializableFilters)
     {
         return 0;
     }
 
     @Override
-    public List<VehicleDowntime> fetchAll(List<SerializableFilter<VehicleDowntime, ?>> serializableFilters, List<QuerySortOrder> sortOrder)
+    public List<Driver> fetchAll(List<SerializableFilter<Driver, ?>> serializableFilters, List<QuerySortOrder> sortOrder)
     {
         return List.of();
     }
 
     @Override
-    public VehicleDowntimeRepository getRepository()
+    public DriverRepository getRepository()
     {
         return repository;
     }
 
     @Override
-    public GridDataRepository<VehicleDowntime> getCustomRepository()
+    public GridDataRepository<Driver> getCustomRepository()
     {
         return null;
     }
 
-    public List<VehicleDowntime> findAllByVehicle_Id(Long vehicleId)
+    public boolean existsDriverByUser_Id(Long userId)
     {
-        return repository.findAllByVehicle_Id(vehicleId);
+        return repository.existsDriverByUser_Id(userId);
+    }
+
+    public List<Driver> findAllUnplannedAllowedDrivers(Long tourId, boolean holidayMode)
+    {
+        return repository.findAllUnplannedAllowedDrivers(tourId, holidayMode);
+    }
+
+    public List<Driver> findAllUnplannedDrivers(boolean holidayMode)
+    {
+        return repository.findAllUnplannedDrivers(holidayMode);
+    }
+
+    public void deleteAllDriveableToursByTourId(Long tourId)
+    {
+        repository.deleteAllDriveableToursByTourId(tourId);
     }
 }

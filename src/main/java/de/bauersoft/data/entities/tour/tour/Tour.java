@@ -1,13 +1,15 @@
-package de.bauersoft.data.entities.tourPlanning.tour;
+package de.bauersoft.data.entities.tour.tour;
 
 import de.bauersoft.data.entities.AbstractEntity;
-import de.bauersoft.data.entities.tourPlanning.driver.Driver;
-import de.bauersoft.data.entities.tourPlanning.vehicle.Vehicle;
+import de.bauersoft.data.entities.tour.driver.Driver;
+import de.bauersoft.data.entities.tour.vehicle.Vehicle;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,10 +29,8 @@ public class Tour extends AbstractEntity
     @Column(nullable = false, length = 64)
     private String name;
 
-    @Column(nullable = false)
     private LocalDateTime startDateTime;
 
-    @Column(nullable = false)
     private LocalDateTime endDateTime;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -41,16 +41,14 @@ public class Tour extends AbstractEntity
     private int requiredDrivers;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "driver_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "driver_id", referencedColumnName = "id")
     private Driver driver;
 
-    @Column(nullable = false)
     private LocalDate drivesUntil;
 
     @ManyToOne(fetch = FetchType.EAGER)
     private Driver coDriver;
 
-    @Column(nullable = false)
     private LocalDate coDrivesUntil;
 
     @OneToMany(mappedBy = "tour", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
@@ -58,4 +56,7 @@ public class Tour extends AbstractEntity
 
     @ManyToMany(mappedBy = "driveableTours", fetch = FetchType.EAGER)
     private Set<Driver> possibleDrivers;
+
+    @Column(nullable = false, columnDefinition = "TINYINT default 0")
+    private boolean holidayMode = false;
 }

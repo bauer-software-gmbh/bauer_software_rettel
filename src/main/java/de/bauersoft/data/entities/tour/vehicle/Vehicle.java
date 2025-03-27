@@ -1,4 +1,4 @@
-package de.bauersoft.data.entities.tourPlanning.vehicle;
+package de.bauersoft.data.entities.tour.vehicle;
 
 import de.bauersoft.data.entities.AbstractEntity;
 import jakarta.persistence.*;
@@ -26,7 +26,16 @@ public class Vehicle extends AbstractEntity
     @Column(length = 1024)
     private String typeDescription;
 
-    @OneToMany(mappedBy = "vehicle", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "vehicle", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
     private Set<VehicleDowntime> downtimes;
 
+    @Override
+    public String toString()
+    {
+        return "Vehicle{" +
+                "licensePlate='" + licensePlate + '\'' +
+                ", typeDescription='" + typeDescription + '\'' +
+                ", downtimes=" + downtimes +
+                '}';
+    }
 }

@@ -14,6 +14,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.ValueProvider;
 import de.bauersoft.components.autofilter.Filter;
@@ -25,6 +26,7 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 import javax.swing.SortOrder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 @CssImport(value = "./themes/rettels/components/auto-filter-grid.css")
@@ -122,15 +124,204 @@ public class AutofilterGrid<T, ID> extends Grid<T>
         return column;
     }
 
+
+
+    /**
+     * @deprecated Use {@link AutofilterGrid#addRendererColumn} instead and use a {@link com.vaadin.flow.data.renderer.ComponentRenderer} as {@link Renderer}.
+     */
+    @Deprecated
+    public Column addComponentColumn(String attributeName, String header, ValueProvider<T, Component> componentProvider)
+    {
+        return addComponentColumn(attributeName, header, componentProvider, false);
+    }
+
+    /**
+     * @deprecated Use {@link AutofilterGrid#addRendererColumn} instead and use a {@link com.vaadin.flow.data.renderer.ComponentRenderer} as {@link Renderer}.
+     */
+    @Deprecated
+    public Column addComponentColumn(String attributeName, String header, ValueProvider<T, Component> componentProvider, boolean caseSensitive)
+    {
+        return addComponentColumn(attributeName, header, componentProvider, caseSensitive, SortType.ALPHA);
+    }
+
+    /**
+     * @deprecated Use {@link AutofilterGrid#addRendererColumn} instead and use a {@link com.vaadin.flow.data.renderer.ComponentRenderer} as {@link Renderer}.
+     */
+    @Deprecated
+    public Column addComponentColumn(String attributeName, String header, ValueProvider<T, Component> componentProvider, boolean caseSensitive, SortType sortType)
+    {
+        return addComponentColumn(attributeName, header, componentProvider, Filter.getDefaultFilterFunction(s -> "%" + s + "%", caseSensitive), Filter.getDefaultSortFunction(), sortType);
+    }
+
+
+    /**
+     * @deprecated Use {@link AutofilterGrid#addRendererColumn} instead and use a {@link com.vaadin.flow.data.renderer.ComponentRenderer} as {@link Renderer}.
+     */
+    @Deprecated
+    public Column addComponentColumn(String attributeName, String header, ValueProvider<T, Component> componentProvider, ValueProvider<String, String> patternProvider)
+    {
+        return addComponentColumn(attributeName, header, componentProvider, patternProvider, false);
+    }
+
+    /**
+     * @deprecated Use {@link AutofilterGrid#addRendererColumn} instead and use a {@link com.vaadin.flow.data.renderer.ComponentRenderer} as {@link Renderer}.
+     */
+    @Deprecated
+    public Column addComponentColumn(String attributeName, String header, ValueProvider<T, Component> componentProvider, ValueProvider<String, String> patternProvider, boolean caseSensitive)
+    {
+        return addComponentColumn(attributeName, header, componentProvider, patternProvider, caseSensitive, SortType.ALPHA);
+    }
+
+    /**
+     * @deprecated Use {@link AutofilterGrid#addRendererColumn} instead and use a {@link com.vaadin.flow.data.renderer.ComponentRenderer} as {@link Renderer}.
+     */
+    @Deprecated
+    public Column addComponentColumn(String attributeName, String header, ValueProvider<T, Component> componentProvider, ValueProvider<String, String> patternProvider, boolean caseSensitive, SortType sortType)
+    {
+        return addComponentColumn(attributeName, header, componentProvider, Filter.getDefaultFilterFunction(patternProvider, caseSensitive), Filter.getDefaultSortFunction(), sortType);
+    }
+
+    /**
+     * @deprecated Use {@link AutofilterGrid#addRendererColumn} instead and use a {@link com.vaadin.flow.data.renderer.ComponentRenderer} as {@link Renderer}.
+     */
+    @Deprecated
+    public Column addComponentColumn(String attributeName, String header, ValueProvider<T, Component> componentProvider, Filter.FilterFunction<T> filterFunction)
+    {
+        return addComponentColumn(attributeName, header, componentProvider, filterFunction, SortType.ALPHA);
+    }
+
+    /**
+     * @deprecated Use {@link AutofilterGrid#addRendererColumn} instead and use a {@link com.vaadin.flow.data.renderer.ComponentRenderer} as {@link Renderer}.
+     */
+    @Deprecated
+    public Column addComponentColumn(String attributeName, String header, ValueProvider<T, Component> componentProvider, Filter.FilterFunction<T> filterFunction, SortType sortType)
+    {
+        return addComponentColumn(attributeName, header, componentProvider, filterFunction, Filter.getDefaultSortFunction(), sortType);
+    }
+
+    /**
+     * @deprecated Use {@link AutofilterGrid#addRendererColumn} instead and use a {@link com.vaadin.flow.data.renderer.ComponentRenderer} as {@link Renderer}.
+     */
+    @Deprecated
+    public Column addComponentColumn(String attributeName, String header, ValueProvider<T, Component> componentProvider, Filter.FilterFunction<T> filterFunction, Filter.SortFunction<T> sortFunction, SortType sortType)
+    {
+        Filter<T> filter = new Filter<>(attributeName, filterFunction, sortFunction);
+        addFilter(filter);
+
+        Column column = new Column(attributeName, sortType, header, s ->
+        {
+            filter.setFilterInput(s);
+            if(sortColumn == null)
+                dataProvider.callFilters();
+            else
+                dataProvider.callFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+        }, componentProvider);
+
+        columns.add(column);
+
+        setActiveSortColumn(columns.get(0), SortOrder.ASCENDING);
+
+        return column;
+    }
+
+
+
+    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer)
+    {
+        return addRendererColumn(attributeName, header, renderer, false);
+    }
+
+    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, boolean caseSensitive)
+    {
+        return addRendererColumn(attributeName, header, renderer, caseSensitive, SortType.ALPHA);
+    }
+
+    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, boolean caseSensitive, SortType sortType)
+    {
+        return addRendererColumn(attributeName, header, renderer, Filter.getDefaultFilterFunction(s -> "%" + s + "%", caseSensitive), Filter.getDefaultSortFunction(), sortType);
+    }
+
+
+    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, ValueProvider<String, String> patternProvider)
+    {
+        return addRendererColumn(attributeName, header, renderer, patternProvider, false);
+    }
+
+    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, ValueProvider<String, String> patternProvider, boolean caseSensitive)
+    {
+        return addRendererColumn(attributeName, header, renderer, patternProvider, caseSensitive, SortType.ALPHA);
+    }
+
+    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, ValueProvider<String, String> patternProvider, boolean caseSensitive, SortType sortType)
+    {
+        return addRendererColumn(attributeName, header, renderer, Filter.getDefaultFilterFunction(patternProvider, caseSensitive), Filter.getDefaultSortFunction(), sortType);
+    }
+
+    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, Filter.FilterFunction<T> filterFunction)
+    {
+        return addRendererColumn(attributeName, header, renderer, filterFunction, SortType.ALPHA);
+    }
+
+    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, Filter.FilterFunction<T> filterFunction, SortType sortType)
+    {
+        return addRendererColumn(attributeName, header, renderer, filterFunction, Filter.getDefaultSortFunction(), sortType);
+    }
+
+    public Column addRendererColumn(String attributeName, String header, Renderer<T> renderer, Filter.FilterFunction<T> filterFunction, Filter.SortFunction<T> sortFunction, SortType sortType)
+    {
+        Filter<T> filter = new Filter<>(attributeName, filterFunction, sortFunction);
+        addFilter(filter);
+
+        Column column = new Column(attributeName, sortType, header, renderer, s ->
+        {
+            filter.setFilterInput(s);
+            if(sortColumn == null)
+                dataProvider.callFilters();
+            else
+                dataProvider.callFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+        });
+
+        columns.add(column);
+
+        setActiveSortColumn(columns.get(0), SortOrder.ASCENDING);
+
+        return column;
+    }
+
+
+
+//    public Column addColumn(String attributeName, String header, ValueProvider<T, Component> componentProvider, Filter.FilterFunction<T> filterFunction, Filter.SortFunction<T> sortFunction, SortType sortType)
+//    {
+//        Filter<T> filter = new Filter<>(attributeName, filterFunction, sortFunction);
+//        addFilter(filter);
+//
+//        Column column = new Column(attributeName, sortType, header, componentProvider, s ->
+//        {
+//            filter.setFilterInput(s);
+//            if(sortColumn == null)
+//                dataProvider.callFilters();
+//            else
+//                dataProvider.callFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+//        });
+//
+//        columns.add(column);
+//
+//        setActiveSortColumn(columns.get(0), SortOrder.ASCENDING);
+//
+//        return column;
+//    }
+
+
+
     @Override
     public <V extends Component> Grid.Column<T> addComponentColumn(ValueProvider<T, V> componentProvider)
     {
-        return addComponentColumn(null, null, componentProvider);
+        return addComponentColumn(null, componentProvider);
     }
 
-    public <V extends Component> Grid.Column<T> addComponentColumn(String header, String width, ValueProvider<T, V> componentProvider)
+    public <V extends Component> Grid.Column<T> addComponentColumn(String header, ValueProvider<T, V> componentProvider)
     {
-        Grid.Column<T> column = super.addComponentColumn(componentProvider).setWidth(width).setFlexGrow(0).setAutoWidth(true);
+        Grid.Column<T> column = super.addComponentColumn(componentProvider).setFlexGrow(0).setAutoWidth(true);
 
         NativeLabel label = new NativeLabel(header);
         label.getStyle()
@@ -138,7 +329,6 @@ public class AutofilterGrid<T, ID> extends Grid<T>
                 .set("font-size", "var(--lumo-font-size-m)");
 
         TextField textField = new TextField();
-        textField.setWidth(width);
         textField.setReadOnly(true);
 
         VerticalLayout layout = new VerticalLayout(label, textField);
@@ -183,34 +373,82 @@ public class AutofilterGrid<T, ID> extends Grid<T>
     @Getter
     public class Column extends VerticalLayout
     {
-        private SortOrder sortOrder;
+        private SortOrder sortOrder = SortOrder.UNSORTED;
         private SortType sortType;
-        private boolean enableSorting;
+        private boolean enableSorting = true;
 
         private final String attributeName;
         private final String header;
         private final ValueProvider<T, String> valueProvider;
+        private final ValueProvider<T, Component> componentProvider;
+        private final Renderer<T> renderer;
         private final Consumer<String> onFilterChangeConsumer;
 
-        private final Grid.Column<T> gridColumn;
+        private Grid.Column<T> gridColumn;
 
-        private final NativeLabel label;
-        private final HorizontalLayout inputLayout;
-        private final TextField inputField;
-        private final Button sortButton;
+        private NativeLabel label;
+        private HorizontalLayout inputLayout;
+        private TextField inputField;
+        private Button sortButton;
 
         public Column(String attributeName, SortType sortType, String header, ValueProvider<T, String> valueProvider, Consumer<String> onFilterChangeConsumer)
         {
-            sortOrder = SortOrder.UNSORTED;
             this.sortType = sortType;
-            enableSorting = true;
 
             this.attributeName = attributeName;
             this.header = header;
             this.valueProvider = valueProvider;
+            this.componentProvider = null;
+            this.renderer = null;
             this.onFilterChangeConsumer = onFilterChangeConsumer;
 
-            gridColumn = AutofilterGrid.super.addColumn(valueProvider);
+            construct();
+        }
+
+        public Column(String attributeName, SortType sortType, String header, Consumer<String> onFilterChangeConsumer, ValueProvider<T, Component> componentProvider)
+        {
+            this.sortType = sortType;
+
+            this.attributeName = attributeName;
+            this.header = header;
+            this.valueProvider = null;
+            this.componentProvider = componentProvider;
+            this.renderer = null;
+            this.onFilterChangeConsumer = onFilterChangeConsumer;
+
+            construct();
+        }
+
+        public Column(String attributeName, SortType sortType, String header,Renderer<T> renderer, Consumer<String> onFilterChangeConsumer)
+        {
+            this.sortType = sortType;
+
+            this.attributeName = attributeName;
+            this.header = header;
+            this.valueProvider = null;
+            this.componentProvider = null;
+            this.renderer = renderer;
+            this.onFilterChangeConsumer = onFilterChangeConsumer;
+
+            construct();
+        }
+
+        private void construct()
+        {
+            if(valueProvider != null)
+            {
+                gridColumn = AutofilterGrid.this.addColumn(valueProvider);
+
+            }else if(componentProvider != null)
+            {
+                gridColumn = AutofilterGrid.this.addComponentColumn(componentProvider);
+
+            }else if(renderer != null)
+            {
+                gridColumn = AutofilterGrid.this.addColumn(renderer);
+            }
+
+
             gridColumn.setResizable(true);
             headerRow.getCell(gridColumn).setComponent(this);
 

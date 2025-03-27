@@ -1,4 +1,4 @@
-package de.bauersoft.data.entities.tourPlanning.vehicle;
+package de.bauersoft.data.entities.tour.vehicle;
 
 import de.bauersoft.components.container.ContainerID;
 import de.bauersoft.data.entities.AbstractEntity;
@@ -29,4 +29,15 @@ public class VehicleDowntime extends AbstractEntity implements ContainerID<Long>
     private LocalDate startDate;
 
     private LocalDate endDate;
+
+    @Override
+    public String toString()
+    {
+        return "VehicleDowntime{" +
+                "vehicle=" + vehicle.getId() +
+                ", header='" + header + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                '}';
+    }
 }

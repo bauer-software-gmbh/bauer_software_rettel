@@ -6,22 +6,19 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.autofilter.grid.AutofilterGrid;
-import de.bauersoft.data.entities.tourPlanning.vehicle.Vehicle;
-import de.bauersoft.data.entities.tourPlanning.vehicle.VehicleDowntime;
-import de.bauersoft.services.tourPlanning.DriverService;
-import de.bauersoft.services.tourPlanning.VehicleDowntimeService;
-import de.bauersoft.services.tourPlanning.VehicleService;
+import de.bauersoft.data.entities.tour.vehicle.Vehicle;
+import de.bauersoft.data.entities.tour.vehicle.VehicleDowntime;
+import de.bauersoft.services.tour.DriverService;
+import de.bauersoft.services.tour.VehicleDowntimeService;
+import de.bauersoft.services.tour.VehicleService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import lombok.Getter;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @PageTitle("Fahrzeuge")
@@ -104,7 +101,11 @@ public class VehicleView extends Div
                             new VehicleDialog(filterDataProvider, vehicleService, driverService, vehicleDowntimeService, new Vehicle(), DialogState.NEW);
                         }).enableDeleteItem("Löschen", event ->
                         {
-
+                            event.getItem().ifPresent(vehicle ->
+                            {
+                                vehicleService.delete(vehicle);
+                                filterDataProvider.refreshAll();
+                            });
                         });
 
         grid.addItemDoubleClickListener(event ->

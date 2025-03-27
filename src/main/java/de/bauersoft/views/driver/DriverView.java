@@ -6,11 +6,10 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.autofilter.grid.AutofilterGrid;
-import de.bauersoft.data.entities.tourPlanning.driver.Driver;
-import de.bauersoft.services.FleshService;
+import de.bauersoft.data.entities.tour.driver.Driver;
 import de.bauersoft.services.UserService;
-import de.bauersoft.services.tourPlanning.DriverService;
-import de.bauersoft.services.tourPlanning.TourService;
+import de.bauersoft.services.tour.DriverService;
+import de.bauersoft.services.tour.TourService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
@@ -75,7 +74,11 @@ public class DriverView extends Div
 
                 }).enableDeleteItem("Löschen", event ->
                 {
-
+                    event.getItem().ifPresent(driver ->
+                    {
+                        driverService.delete(driver);
+                        filterDataProvider.refreshAll();
+                    });
                 });
 
         grid.addItemDoubleClickListener(event ->
