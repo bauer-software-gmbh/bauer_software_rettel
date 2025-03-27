@@ -28,9 +28,10 @@ public class FormulationContainer extends Container<Formulation, FormulationKey>
         return isGridItem;
     }
 
-    public void setGridItem(boolean gridItem)
+    public FormulationContainer setGridItem(boolean gridItem)
     {
         isGridItem = gridItem;
+        return this;
     }
 
     public double getTempQuantity()

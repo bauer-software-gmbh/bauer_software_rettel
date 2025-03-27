@@ -19,7 +19,7 @@ public class Filter<T>
     public Filter(String attributeName)
     {
         this.attributeName = attributeName;
-        filterFunction = getDefaultFilterFunction(s -> "%" + s + "%", true);
+        filterFunction = getDefaultFilterFunction(s -> "%" + s + "%", false);
         sortFunction = getDefaultSortFunction();
 
         filterInput = "";

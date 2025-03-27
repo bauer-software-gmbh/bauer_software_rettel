@@ -2,6 +2,7 @@ package de.bauersoft.components.autofilter;
 
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import de.bauersoft.services.ServiceBase;
 import jakarta.persistence.criteria.Order;
@@ -140,21 +141,22 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
     }
 
 
-    //    public DataProvider<T, String> getDataProvider()
-//    {
-//        return DataProvider.fromFilteringCallbacks(
-//                query ->
-//                {
-//                    Specification<T> filter = buildFilter();
-//                    Pageable pageable = PageRequest.of(query.getOffset() / query.getLimit(), query.getLimit());
-//                    return service.getRepository().findAll(filter, pageable).stream();
-//                },
-//                query ->
-//                {
-//                    Specification<T> filter = buildFilter();
-//                    return (int) service.getRepository().count(filter);
-//                }
-//        );
-//    }
+    public DataProvider<T, Specification<T>> getDataProvider()
+    {
+        return DataProvider.fromFilteringCallbacks(
+                query ->
+                {
+                    Pageable pageable = PageRequest.of(query.getOffset() / query.getLimit(), query.getLimit());
+                    Specification<T> filter = query.getFilter().orElse(Specification.where(null));
+
+                    return service.getRepository().findAll(filter, pageable).stream();
+                },
+                query ->
+                {
+                    Specification<T> filter = query.getFilter().orElse(Specification.where(null));
+                    return (int) service.getRepository().count(filter);
+                }
+        );
+    }
 
 }
