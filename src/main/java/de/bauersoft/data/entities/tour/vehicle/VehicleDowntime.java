@@ -1,4 +1,4 @@
-package de.bauersoft.data.entities.tourPlanning.vehicle;
+package de.bauersoft.data.entities.tour.vehicle;
 
 import de.bauersoft.components.container.ContainerID;
 import de.bauersoft.data.entities.AbstractEntity;

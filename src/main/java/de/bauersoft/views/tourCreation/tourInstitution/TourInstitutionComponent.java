@@ -1,4 +1,4 @@
-package de.bauersoft.views.tour.tourInstitution;
+package de.bauersoft.views.tourCreation.tourInstitution;
 
 import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.dnd.DropTarget;
@@ -15,16 +15,19 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.institution.Institution;
-import de.bauersoft.data.entities.tourPlanning.tour.Tour;
-import de.bauersoft.data.entities.tourPlanning.tour.TourInstitution;
-import de.bauersoft.data.entities.tourPlanning.tour.TourInstitutionKey;
+import de.bauersoft.data.entities.tour.tour.Tour;
+import de.bauersoft.data.entities.tour.tour.TourInstitution;
+import de.bauersoft.data.entities.tour.tour.TourInstitutionKey;
 import de.bauersoft.services.InstitutionService;
-import de.bauersoft.services.tourPlanning.TourInstitutionService;
+import de.bauersoft.services.tour.TourInstitutionService;
 import lombok.Getter;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.time.LocalTime;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Getter
@@ -53,27 +56,13 @@ public class TourInstitutionComponent extends HorizontalLayout
                     .setGridItem(true);
         }
 
-        for(Institution institution : institutionService.findAll())
-        {
-            mapContainer.addIfAbsent(institution, () ->
-            {
-                TourInstitution tourInstitution = new TourInstitution();
-                tourInstitution.setId(new TourInstitutionKey(null, institution.getId()));
-                tourInstitution.setTour(item);
-                tourInstitution.setInstitution(institution);
-
-                return tourInstitution;
-
-            }, ContainerState.NEW);
-        }
-
         institutionGrid = new InstitutionGrid();
         institutionList = new InstitutionList();
 
         updateView();
 
         this.add(institutionGrid, institutionList);
-        this.setHeightFull();
+        this.setHeight("30rem");
         this.getStyle()
                 .setMarginTop("var(--lumo-space-m)");
     }
@@ -88,7 +77,7 @@ public class TourInstitutionComponent extends HorizontalLayout
 
                 trash.addClickListener(event ->
                 {
-                    if(container.getTempState() == ContainerState.NEW)
+                    if(container.getState() == ContainerState.NEW)
                     {
                         container.setTempState(ContainerState.HIDE);
                     }else container.setTempState(ContainerState.DELETE);
@@ -100,18 +89,32 @@ public class TourInstitutionComponent extends HorizontalLayout
                 return trash;
             }).setHeader(LineAwesomeIcon.TRASH_SOLID.create()).setWidth("3em").setAutoWidth(false).setFlexGrow(0);
 
+
+            TextField institutionFilter = new TextField();
+            institutionFilter.setWidth("99%");
+            institutionFilter.setPlaceholder("Institution...");
+            institutionFilter.setValueChangeMode(ValueChangeMode.EAGER);
+
             this.addColumn(container ->
             {
                 return container.getEntity().getInstitution().getName();
             }).setTooltipGenerator(container ->
             {
                 return container.getEntity().getInstitution().getName();
-            }).setHeader("Institution");
+            }).setHeader(institutionFilter)
+                    .setKey("institution")
+                    .setSortable(true)
+                    .setComparator(Comparator.comparing(container -> container.getEntity().getInstitution().getName()));
+
+            TextField timeFilter = new TextField();
+            timeFilter.setWidth("99%");
+            timeFilter.setPlaceholder("vsl. ankunft");
+            timeFilter.setValueChangeMode(ValueChangeMode.EAGER);
 
             this.addComponentColumn(container ->
             {
                 TimePicker timePicker = new TimePicker();
-                timePicker.setWidth("5.5em");
+                timePicker.setWidth("99%");
                 timePicker.addThemeVariants(TimePickerVariant.LUMO_ALIGN_CENTER);
                 timePicker.setValue(container.getTempExpectedArrivalTime());
 
@@ -125,7 +128,40 @@ public class TourInstitutionComponent extends HorizontalLayout
 
                 return timePicker;
 
-            }).setHeader("vsl. ankunft");
+            }).setHeader(timeFilter)
+                    .setSortable(true)
+                    .setComparator(Comparator.comparing(TourInstitutionContainer::getTempExpectedArrivalTime));
+
+
+
+            institutionFilter.addValueChangeListener(event ->
+            {
+                this.setItems(
+                        getItems().get(true)
+                                .stream()
+                                .filter(container ->
+                                {
+                                    return container.getTempExpectedArrivalTime().toString().contains(timeFilter.getValue().toLowerCase())
+                                            && container.getEntity().getInstitution().getName().toLowerCase().startsWith(event.getValue().toLowerCase());
+
+                                }).collect(Collectors.toList())
+                );
+            });
+
+            timeFilter.addValueChangeListener(event ->
+            {
+                this.setItems(
+                        getItems().get(true)
+                                .stream()
+                                .filter(container ->
+                                {
+                                    return container.getTempExpectedArrivalTime().toString().contains(event.getValue().toLowerCase())
+                                            && container.getEntity().getInstitution().getName().toLowerCase().startsWith(institutionFilter.getValue().toLowerCase());
+
+                                }).collect(Collectors.toList())
+                );
+            });
+
 
             dropTarget = DropTarget.create(this);
             dropTarget.addDropListener(event ->
@@ -227,6 +263,36 @@ public class TourInstitutionComponent extends HorizontalLayout
         institutionList.getVirtualList().setItems(items.get(false));
 
         institutionList.updateFilter();
+
+        return this;
+    }
+
+    public TourInstitutionComponent setAvailableInstitutions(List<Institution> institutions)
+    {
+        mapContainer.getContainers()
+                .stream()
+                .map(container -> (TourInstitutionContainer) container)
+                .filter(tourInstitutionContainer -> tourInstitutionContainer.getState() != ContainerState.SHOW)
+                .forEach(tourInstitutionContainer ->
+                {
+                    mapContainer.removeContainer(tourInstitutionContainer.getEntity().getInstitution());
+                });
+
+        for(Institution institution : institutions)
+        {
+            mapContainer.addIfAbsent(institution, () ->
+            {
+                TourInstitution tourInstitution = new TourInstitution();
+                tourInstitution.setId(new TourInstitutionKey(null, institution.getId()));
+                tourInstitution.setTour(item);
+                tourInstitution.setInstitution(institution);
+
+                return tourInstitution;
+
+            }, ContainerState.NEW);
+        }
+
+        updateView();
 
         return this;
     }

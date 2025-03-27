@@ -1,4 +1,4 @@
-package de.bauersoft.data.entities.tourPlanning.tour;
+package de.bauersoft.data.entities.tour.tour;
 
 import de.bauersoft.components.container.ContainerID;
 import de.bauersoft.data.entities.institution.Institution;
@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 

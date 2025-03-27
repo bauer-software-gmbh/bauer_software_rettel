@@ -37,7 +37,7 @@ import de.bauersoft.views.offers.OffersView;
 import de.bauersoft.views.order.OrderView;
 import de.bauersoft.views.pattern.PatternView;
 import de.bauersoft.views.recipe.RecipeView;
-import de.bauersoft.views.tour.TourView;
+import de.bauersoft.views.tourCreation.TourView;
 import de.bauersoft.views.unit.UnitView;
 import de.bauersoft.views.users.UsersView;
 import de.bauersoft.views.vehicle.VehicleView;
@@ -157,7 +157,7 @@ public class MainLayout extends AppLayout
                 tour.addItem(new SideNavItem("Fahrzeuge", VehicleView.class, LineAwesomeIcon.CAR_CRASH_SOLID.create()));
 
             if(accessChecker.hasAccess(TourView.class))
-                tour.addItem(new SideNavItem("Touren Planung", TourView.class, LineAwesomeIcon.MAP_MARKED_ALT_SOLID.create()));
+                tour.addItem(new SideNavItem("Touren Erstellung", TourView.class, LineAwesomeIcon.MAP_MARKED_ALT_SOLID.create()));
 
             nav.addItem(tour);
         }

@@ -1,16 +1,26 @@
 package de;
 
+import com.sun.jna.platform.win32.OaIdl;
 import com.vaadin.flow.component.datepicker.DatePicker;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 public class DateTimeUtils
 {
-    public static final DatePicker.DatePickerI18n datePickerI18n;
+    public static final DateTimeFormatter DATE_FORMATTER;
+    public static final DateTimeFormatter TIME_FORMATTER;
+    public static final DateTimeFormatter DATE_TIME_FORMATTER;
+
+    public static final DatePicker.DatePickerI18n DATE_PICKER_I18N;
 
     static
     {
-        datePickerI18n = new DatePicker.DatePickerI18n()
+        DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+        DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+
+        DATE_PICKER_I18N = new DatePicker.DatePickerI18n()
                 .setDateFormat("dd.MM.yyyy")
                 .setToday("Heute")
                 .setCancel("Abbruch")

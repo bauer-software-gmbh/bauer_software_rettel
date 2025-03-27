@@ -1,14 +1,15 @@
-package de.bauersoft.services.tourPlanning;
+package de.bauersoft.services.tour;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.tourPlanning.driver.Driver;
+import de.bauersoft.data.entities.tour.driver.Driver;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
-import de.bauersoft.data.repositories.tourPlanning.DriverRepository;
+import de.bauersoft.data.repositories.tour.DriverRepository;
 import de.bauersoft.services.ServiceBase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -124,5 +125,20 @@ public class DriverService implements ServiceBase<Driver, Long>
     public boolean existsDriverByUser_Id(Long userId)
     {
         return repository.existsDriverByUser_Id(userId);
+    }
+
+    public List<Driver> findAllUnplannedAllowedDrivers(Long tourId, boolean holidayMode)
+    {
+        return repository.findAllUnplannedAllowedDrivers(tourId, holidayMode);
+    }
+
+    public List<Driver> findAllUnplannedDrivers(boolean holidayMode)
+    {
+        return repository.findAllUnplannedDrivers(holidayMode);
+    }
+
+    public void deleteAllDriveableToursByTourId(Long tourId)
+    {
+        repository.deleteAllDriveableToursByTourId(tourId);
     }
 }

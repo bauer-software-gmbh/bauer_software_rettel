@@ -1,4 +1,4 @@
-package de.bauersoft.data.entities.tourPlanning.tour;
+package de.bauersoft.data.entities.tour.tour;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

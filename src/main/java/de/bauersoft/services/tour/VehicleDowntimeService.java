@@ -1,20 +1,17 @@
-package de.bauersoft.services.tourPlanning;
+package de.bauersoft.services.tour;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.tourPlanning.vehicle.VehicleDowntime;
+import de.bauersoft.data.entities.tour.vehicle.VehicleDowntime;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
-import de.bauersoft.data.repositories.tourPlanning.VehicleDowntimeRepository;
+import de.bauersoft.data.repositories.tour.VehicleDowntimeRepository;
 import de.bauersoft.services.ServiceBase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -134,9 +131,19 @@ public class VehicleDowntimeService implements ServiceBase<VehicleDowntime, Long
     public Optional<VehicleDowntime> getNextVehicleDowntime(Long vehicleId)
     {
         List<VehicleDowntime> downtimes = repository.findAllByVehicle_Id(vehicleId);
+        LocalDate now = LocalDate.now();
         return downtimes.stream()
-                .filter(d -> d.getStartDate().isAfter(LocalDate.now()))
-                .sorted(Comparator.comparing(VehicleDowntime::getStartDate))
-                .findFirst();
+                .filter(d ->
+                {
+                    LocalDate startDate = d.getStartDate();
+                    if(startDate == null) return false;
+                    LocalDate endDate = (d.getEndDate() == null) ? startDate : d.getEndDate();
+
+                    return now.isEqual(startDate) ||
+                            now.isEqual(endDate) ||
+                            (now.isAfter(startDate) && now.isBefore(endDate)) ||
+                            now.isBefore(startDate);
+                })
+                .min(Comparator.comparing(VehicleDowntime::getStartDate));
     }
 }

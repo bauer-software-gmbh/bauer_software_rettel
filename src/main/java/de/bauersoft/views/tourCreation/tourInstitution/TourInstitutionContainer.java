@@ -1,9 +1,9 @@
-package de.bauersoft.views.tour.tourInstitution;
+package de.bauersoft.views.tourCreation.tourInstitution;
 
 import de.bauersoft.components.container.Container;
 import de.bauersoft.components.container.ContainerState;
-import de.bauersoft.data.entities.tourPlanning.tour.TourInstitution;
-import de.bauersoft.data.entities.tourPlanning.tour.TourInstitutionKey;
+import de.bauersoft.data.entities.tour.tour.TourInstitution;
+import de.bauersoft.data.entities.tour.tour.TourInstitutionKey;
 
 import java.time.LocalTime;
 
@@ -59,5 +59,17 @@ public class TourInstitutionContainer extends Container<TourInstitution, TourIns
         setState(getTempState());
         getEntity().setExpectedArrivalTime(tempExpectedArrivalTime);
         return this;
+    }
+
+    @Override
+    public ContainerState getState()
+    {
+        return super.getState();
+    }
+
+    @Override
+    public Container<TourInstitution, TourInstitutionKey> setState(ContainerState state)
+    {
+        return super.setState(state);
     }
 }

@@ -1,6 +1,6 @@
-package de.bauersoft.data.repositories.tourPlanning;
+package de.bauersoft.data.repositories.tour;
 
-import de.bauersoft.data.entities.tourPlanning.vehicle.VehicleDowntime;
+import de.bauersoft.data.entities.tour.vehicle.VehicleDowntime;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -10,5 +10,7 @@ public interface VehicleDowntimeRepository extends JpaRepository<VehicleDowntime
 {
     List<VehicleDowntime> findAllByVehicle_Id(Long vehicleId);
 
+
+    void deleteAllVehicleDowntimesById(Long vehicleId);
 
 }
