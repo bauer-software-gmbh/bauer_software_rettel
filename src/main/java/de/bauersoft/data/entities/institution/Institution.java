@@ -39,11 +39,11 @@ public class Institution extends AbstractEntity
     @Column(nullable = false, columnDefinition = "TIME default '08:00:00'")
     private LocalTime orderEnd = LocalTime.of(8, 8);
 
-    @Column(nullable = false, columnDefinition = "DATE default '0000-01-01'")
-    private LocalDate contractStart;
+    @Column(nullable = false, columnDefinition = "DATE default '0010-01-01'")
+    private LocalDate contractStart = LocalDate.of(10, 1, 1);
 
     @Column(nullable = false, columnDefinition = "DATE default '9999-12-31'")
-    private LocalDate contractEnd;
+    private LocalDate contractEnd = LocalDate.of(9999, 12, 31);
 
     @ManyToOne(fetch = FetchType.EAGER, targetEntity = Address.class)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
