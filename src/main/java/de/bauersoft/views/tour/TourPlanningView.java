@@ -1,6 +1,8 @@
 package de.bauersoft.views.tour;
 
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -11,6 +13,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -156,11 +159,18 @@ public class TourPlanningView extends Div {
         dropTarget.addDropListener(event -> event.getDragSourceComponent().ifPresent(source -> {
             if (source instanceof TourDiv tourDiv) {
                 Tour tour = tourDiv.getTour();
+
+                if (date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                    Notification.show("Touren können nur an Werktagen geplant werden.", 3000, Notification.Position.MIDDLE);
+                    return;
+                }
+
                 logger.info("🛬 Tour '{}' auf {} gedroppt", tour.getName(), date);
                 tourEntryService.saveEntry(tour, date);
                 updateDateRange(getSelectedWeekSelector());
             }
         }));
+
 
 
         container.add(dropZone);
@@ -188,7 +198,7 @@ public class TourPlanningView extends Div {
 
         Span infoText = new Span(entry.getInfo() != null
                 ? entry.getInfo().getTimeWindow()
-                : "(kein Zeitfenster)");
+                : "(keine Information)");
         infoText.getStyle().set("font-size", "smaller").set("color", "#666");
 
         content.add(name, infoText);
@@ -220,13 +230,85 @@ public class TourPlanningView extends Div {
         dialog.setHeaderTitle("Tour-Information bearbeiten");
 
         TextField timeField = new TextField("Zeitfenster");
+        timeField.setWidthFull();
         TextArea notesArea = new TextArea("Notiz");
+        notesArea.setWidthFull();
+        notesArea.setHeightFull();
 
         if (entry.getInfo() != null) {
             timeField.setValue(entry.getInfo().getTimeWindow() != null ? entry.getInfo().getTimeWindow() : "");
             notesArea.setValue(entry.getInfo().getNotes() != null ? entry.getInfo().getNotes() : "");
         }
 
+        // 💡 Kopier-Dialog
+        Button copyButton = new Button("Eintrag kopieren", e -> {
+            Dialog copyDialog = new Dialog();
+            copyDialog.setHeaderTitle("Tour kopieren");
+
+            DatePicker startDate = new DatePicker("Von");
+            startDate.setValue(entry.getDate().plusDays(1));
+            startDate.setWidthFull();
+
+            DatePicker endDate = new DatePicker("Bis");
+            endDate.setValue(startDate.getValue());
+            endDate.setWidthFull();
+
+            // Synchronisiere endDate mit startDate
+            startDate.addValueChangeListener(ev -> {
+                if (ev.getValue() != null) {
+                    endDate.setValue(ev.getValue());
+                }
+            });
+
+            Button saveCopyBtn = new Button("Speichern", saveEvent -> {
+                LocalDate from = startDate.getValue();
+                LocalDate to = endDate.getValue();
+
+                if (from == null || to == null) {
+                    Notification.show("Bitte beide Datumsfelder ausfüllen.", 3000, Notification.Position.MIDDLE);
+                    return;
+                }
+
+                if (from.isAfter(to)) {
+                    Notification.show("Das 'Von'-Datum darf nicht nach dem 'Bis'-Datum liegen.", 3000, Notification.Position.MIDDLE);
+                    return;
+                }
+
+                for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
+                    DayOfWeek dow = date.getDayOfWeek();
+                    if (dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY) continue;
+
+                    TourEntry newEntry = new TourEntry();
+                    newEntry.setDate(date);
+                    newEntry.setTour(entry.getTour());
+                    tourEntryService.save(newEntry);
+                }
+
+                copyDialog.close();
+                dialog.close();
+                updateDateRange(getSelectedWeekSelector());
+            });
+
+            Button cancelCopyBtn = new Button("Abbrechen", ev -> copyDialog.close());
+            cancelCopyBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+            HorizontalLayout footer = new HorizontalLayout(saveCopyBtn, cancelCopyBtn);
+            VerticalLayout layout = new VerticalLayout(startDate, endDate);
+            copyDialog.add(layout, footer);
+            copyDialog.open();
+        });
+        copyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        copyButton.getStyle()
+                .set("margin-top", "0.5rem")
+                .set("align-self", "start")
+                .set("background-color", "#E3F2FD")
+                .set("color", "#0D47A1")
+                .set("border-radius", "8px")
+                .set("box-shadow", "var(--lumo-box-shadow-s)")
+                .set("font-weight", "500");
+
+
+        // Standard Speichern
         Button saveButton = new Button("Speichern", e -> {
             String time = timeField.getValue();
             String notes = notesArea.getValue();
@@ -240,24 +322,31 @@ public class TourPlanningView extends Div {
             info.setNotes(notes);
 
             TourInformation savedInfo = tourInformationService.save(info);
-
             entry.setInfo(savedInfo);
             tourEntryService.update(entry);
 
             dialog.close();
-            updateDateRange(getSelectedWeekSelector()); // bleibt auf ausgewähltem Zeitraum
+            updateDateRange(getSelectedWeekSelector());
         });
+        saveButton.addClickShortcut(Key.ENTER);
+        saveButton.setMinWidth("150px");
+        saveButton.setMaxWidth("180px");
 
         Button cancelButton = new Button("Abbrechen", e -> dialog.close());
+        cancelButton.addClickShortcut(Key.ESCAPE);
+        cancelButton.setMinWidth("150px");
+        cancelButton.setMaxWidth("180px");
+        cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
-        dialog.getFooter().add(cancelButton, saveButton);
+        dialog.getFooter().add(saveButton, cancelButton);
 
-        VerticalLayout layout = new VerticalLayout(timeField, notesArea);
+        VerticalLayout layout = new VerticalLayout(timeField, notesArea, copyButton);
         layout.setSizeFull();
         dialog.add(layout);
 
         dialog.open();
     }
+
 
     private VirtualList<Tour> buildTourList() {
         List<Tour> tours = tourService.findAll();
@@ -269,6 +358,7 @@ public class TourPlanningView extends Div {
             DragSource.create(div);
             return div;
         }));
+
 
         tourList.setSizeFull();
         tourList.getStyle().set("border", "1px solid var(--lumo-shade-20pct)");

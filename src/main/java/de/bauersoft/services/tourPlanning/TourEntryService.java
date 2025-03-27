@@ -37,4 +37,8 @@ public class TourEntryService {
     public void deleteEntry(Long id) {
         repository.deleteById(id);
     }
+
+    public TourEntry save(TourEntry entry) {
+        return repository.save(entry);
+    }
 }

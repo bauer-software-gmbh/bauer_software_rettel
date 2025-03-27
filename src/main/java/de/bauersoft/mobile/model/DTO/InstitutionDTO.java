@@ -9,6 +9,9 @@ import lombok.Setter;
 public class InstitutionDTO {
     private Long id;
     private String name;
+    //hier adressen hinzufügen
+    //anzahl essen mitgeben
+    //allergene mitgeben
 
     public InstitutionDTO(Institution institution) {
         if (institution == null) {

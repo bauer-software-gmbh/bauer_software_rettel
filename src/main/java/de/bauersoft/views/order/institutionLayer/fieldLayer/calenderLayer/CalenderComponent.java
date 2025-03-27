@@ -97,6 +97,7 @@ public class CalenderComponent extends VerticalLayout
                 .set("tabindex", "-1");
         orderStartTimePicker.getElement()
                 .setAttribute("tabindex", "-1");
+        orderStartTimePicker.setVisible(false);
 
         orderEndTimePicker = new TimePicker(" bis ", institution.getOrderEnd());
         orderEndTimePicker.setReadOnly(true);
@@ -105,6 +106,7 @@ public class CalenderComponent extends VerticalLayout
                 .set("tabindex", "-1");
         orderEndTimePicker.getElement()
                 .setAttribute("tabindex", "-1");
+        orderEndTimePicker.setVisible(false);
 
         calenderRow.add(datePicker, orderStartTimePicker, orderEndTimePicker);
 
