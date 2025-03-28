@@ -2,8 +2,6 @@ package de.bauersoft.views.field;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
-import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -11,9 +9,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.autofilter.grid.AutofilterGrid;
-import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
 import de.bauersoft.data.entities.field.Field;
-import de.bauersoft.data.providers.FieldDataProvider;
 import de.bauersoft.services.*;
 import de.bauersoft.services.offer.OfferService;
 import de.bauersoft.views.DialogState;
@@ -28,7 +24,7 @@ public class FieldView extends Div
 	private final FieldService fieldService;
 	private final OrderService orderService;
 	private final InstitutionService institutionService;
-	private final InstitutionFieldsService institutionFieldsService;
+	private final InstitutionFieldService institutionFieldService;
 	private final FieldMultiplierService fieldMultiplierService;
 	private final CourseService courseService;
 	private final OfferService offerService;
@@ -36,12 +32,12 @@ public class FieldView extends Div
     private final FilterDataProvider<Field, Long> filterDataProvider;
 	private final AutofilterGrid<Field, Long> grid;
 
-    public FieldView(FieldService fieldService, OrderService orderService, InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, FieldMultiplierService fieldMultiplierService, CourseService courseService, OfferService offerService)
+    public FieldView(FieldService fieldService, OrderService orderService, InstitutionService institutionService, InstitutionFieldService institutionFieldService, FieldMultiplierService fieldMultiplierService, CourseService courseService, OfferService offerService)
     {
         this.fieldService = fieldService;
         this.orderService = orderService;
         this.institutionService = institutionService;
-        this.institutionFieldsService = institutionFieldsService;
+        this.institutionFieldService = institutionFieldService;
         this.fieldMultiplierService = fieldMultiplierService;
         this.courseService = courseService;
         this.offerService = offerService;

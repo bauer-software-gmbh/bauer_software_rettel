@@ -12,8 +12,6 @@ import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.data.entities.variant.Variant;
 import de.bauersoft.services.*;
 import de.bauersoft.services.offer.OfferService;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -27,19 +25,19 @@ public class ForecastScheduler
     private final OrderService orderService;
     private final  OrderDataService orderDataService;
     private final OrderAllergenService orderAllergenService;
-    private final InstitutionFieldsService institutionFieldsService;
+    private final InstitutionFieldService institutionFieldService;
     private final  InstitutionPatternService institutionPatternService;
     private final InstitutionAllergenService institutionAllergenService;
     private final  VariantService variantService;
     private final  OfferService offerService;
     private final FieldService fieldService;
 
-    public ForecastScheduler(OrderService orderService, OrderDataService orderDataService, OrderAllergenService orderAllergenService, InstitutionFieldsService institutionFieldsService, InstitutionPatternService institutionPatternService, InstitutionAllergenService institutionAllergenService, VariantService variantService, OfferService offerService, FieldService fieldService)
+    public ForecastScheduler(OrderService orderService, OrderDataService orderDataService, OrderAllergenService orderAllergenService, InstitutionFieldService institutionFieldService, InstitutionPatternService institutionPatternService, InstitutionAllergenService institutionAllergenService, VariantService variantService, OfferService offerService, FieldService fieldService)
     {
         this.orderService = orderService;
         this.orderDataService = orderDataService;
         this.orderAllergenService = orderAllergenService;
-        this.institutionFieldsService = institutionFieldsService;
+        this.institutionFieldService = institutionFieldService;
         this.institutionPatternService = institutionPatternService;
         this.institutionAllergenService = institutionAllergenService;
         this.variantService = variantService;
@@ -72,7 +70,7 @@ public class ForecastScheduler
                 ));
 
 
-        for(InstitutionField institutionField : institutionFieldsService.findAll())
+        for(InstitutionField institutionField : institutionFieldService.findAll())
         {
 //            if(institutionField.isClosed()) continue;
 
