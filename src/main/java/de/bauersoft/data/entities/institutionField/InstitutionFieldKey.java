@@ -15,6 +15,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Getter
 @Setter
+@Deprecated
 public class InstitutionFieldKey implements Serializable
 {
     @Column(nullable = false)

@@ -10,7 +10,7 @@ import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPattern;
 import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.data.entities.order.OrderData;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
-import de.bauersoft.services.InstitutionFieldsService;
+import de.bauersoft.services.InstitutionFieldService;
 import de.bauersoft.services.OrderService;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Setter
 public class KitchenDTO {
     private final OrderService orderService;
-    private final InstitutionFieldsService institutionFieldsService;
+    private final InstitutionFieldService institutionFieldService;
 
     private List<Order> localDateOrders;
     private final Map<Long, InstitutionField> institutionFieldsMap = new HashMap<>();
@@ -31,9 +31,9 @@ public class KitchenDTO {
     private final Map<Long, Map<Course, InstitutionMultiplier>> multipliersMap = new HashMap<>();
     private final Map<Long, Map<Course, Component>> componentMap = new HashMap<>();
 
-    public KitchenDTO(OrderService orderService, InstitutionFieldsService institutionFieldsService) {
+    public KitchenDTO(OrderService orderService, InstitutionFieldService institutionFieldService) {
         this.orderService = orderService;
-        this.institutionFieldsService = institutionFieldsService;
+        this.institutionFieldService = institutionFieldService;
         updateData(); // 🔥 Direkt beim Erstellen ausführen!
     }
 
@@ -116,7 +116,7 @@ public class KitchenDTO {
         multipliersMap.clear();
         componentMap.clear();
 
-        for (InstitutionField institutionField : institutionFieldsService.findAll()) {
+        for (InstitutionField institutionField : institutionFieldService.findAll()) {
             long institutionId = institutionField.getInstitution().getId();
             long fieldId = institutionField.getField().getId();
             long key = institutionId * 10000 + fieldId;

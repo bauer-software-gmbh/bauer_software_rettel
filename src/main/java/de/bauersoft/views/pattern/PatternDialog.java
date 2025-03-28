@@ -43,10 +43,11 @@ public class PatternDialog extends Dialog
         inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
         TextField nameTextField = new TextField();
+        nameTextField.setWidthFull();
         nameTextField.setMaxLength(64);
         nameTextField.setAutofocus(true);
         nameTextField.setRequired(true);
-        nameTextField.setWidthFull();
+        nameTextField.setEnabled(state == DialogState.NEW);
 
         TextArea descriptionTextArea = new TextArea();
         descriptionTextArea.setMaxLength(1024);

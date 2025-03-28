@@ -72,7 +72,7 @@ public class FormulationComponent extends HorizontalLayout
             if(!doNotShow.isEmpty())
             {
                 CriteriaBuilder.In<Long> inClause = criteriaBuilder.in(root.get("id"));
-                for (Ingredient ingredient : doNotShow)
+                for(Ingredient ingredient : doNotShow)
                     inClause.value(ingredient.getId());
 
                 return criteriaBuilder.not(inClause);
@@ -156,7 +156,8 @@ public class FormulationComponent extends HorizontalLayout
                 });
 
                 return trash;
-            }).setHeader(LineAwesomeIcon.TRASH_SOLID.create()).setWidth("50px").setAutoWidth(false).setFlexGrow(0);
+            }).setHeader(LineAwesomeIcon.TRASH_SOLID.create())
+                    .setWidth("50px").setAutoWidth(false).setFlexGrow(0);
 
             nameFilter = new TextField();
             nameFilter.setWidth("99%");

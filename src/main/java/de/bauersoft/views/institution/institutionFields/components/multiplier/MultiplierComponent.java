@@ -1,7 +1,10 @@
 package de.bauersoft.views.institution.institutionFields.components.multiplier;
 
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.dom.Style;
 import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.fieldMultiplier.FieldMultiplier;
@@ -9,6 +12,7 @@ import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.entities.institutionFieldMultiplier.InstitutionMultiplier;
 import de.bauersoft.data.entities.institutionFieldMultiplier.InstitutionMultiplierKey;
 import de.bauersoft.services.CourseService;
+import de.bauersoft.services.FieldMultiplierService;
 import de.bauersoft.views.institution.InstitutionDialog;
 import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.views.institution.institutionFields.InstitutionFieldDialog;
@@ -22,27 +26,38 @@ import java.util.Optional;
 @Getter
 public class MultiplierComponent extends FlexLayout
 {
-    private final InstitutionDialog institutionDialog;
-    private final InstitutionFieldDialog institutionFieldDialog;
-    private final InstitutionField institutionField;
+    private final FieldMultiplierService fieldMultiplierService;
+    private final CourseService courseService;
+    private final InstitutionField item;
 
     private final MultiplierMapContainer multiplierListContainer;
 
-    private final CourseService courseService;
-
     private final Map<Course, MultiplierField> multiplierFieldMap;
 
-    public MultiplierComponent(InstitutionDialog institutionDialog, InstitutionFieldDialog institutionFieldDialog, MultiplierMapContainer multiplierListContainer)
+    private final HorizontalLayout headerLayout;
+    private final TextField headerField;
+
+    public MultiplierComponent(FieldMultiplierService fieldMultiplierService, CourseService courseService, InstitutionField item, MultiplierMapContainer multiplierListContainer)
     {
-        this.institutionDialog = institutionDialog;
-        this.institutionFieldDialog = institutionFieldDialog;
-        this.institutionField = institutionFieldDialog.getInstitutionField();
+        this.fieldMultiplierService = fieldMultiplierService;
+        this.courseService = courseService;
+        this.item = item;
 
         this.multiplierListContainer = multiplierListContainer;
 
-        courseService = institutionDialog.getCourseService();
-
         multiplierFieldMap = new HashMap<>();
+
+        headerLayout = new HorizontalLayout();
+        headerLayout.setWidthFull();
+
+        headerField = new TextField();
+        headerField.setWidthFull();
+        headerField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_CENTER, TextFieldVariant.LUMO_SMALL);
+        headerField.setReadOnly(true);
+        headerField.setValue("Multiplikatoren");
+
+        headerLayout.add(headerField);
+        this.add(headerLayout);
 
         for(Course course : courseService.findAll())
         {
@@ -50,7 +65,7 @@ public class MultiplierComponent extends FlexLayout
             {
                 InstitutionMultiplier institutionMultiplier = new InstitutionMultiplier();
                 institutionMultiplier.setId(new InstitutionMultiplierKey(null, course.getId()));
-                institutionMultiplier.setInstitutionField(institutionField);
+                institutionMultiplier.setInstitutionField(item);
                 institutionMultiplier.setCourse(course);
 
                 return institutionMultiplier;
@@ -60,23 +75,14 @@ public class MultiplierComponent extends FlexLayout
 
             multiplierFieldMap.put(course, multiplierField);
             this.add(multiplierField);
-            this.setFlexBasis("20%", multiplierField); // Stellt sicher, dass nur 5 Elemente in einer Reihe sind
-            this.setFlexShrink(0, multiplierField);
-            multiplierField.getStyle()
-                    .set("padding", "10px")
-                    .set("text-align", "center")
-                    .setMaxWidth("calc(100% / 6)");
         }
 
-        this.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        // this.setFlexGrow(1);
         this.getStyle()
                 .setFlexWrap(Style.FlexWrap.WRAP)
+                .setDisplay(Style.Display.FLEX)
                 .set("padding", "var(--lumo-space-s)")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
                 .set("border-radius", "var(--lumo-border-radius-s)");
-
-        this.getStyle().set("gap", "0px").set("padding", "0px").set("margin", "0px");
     }
 
     public class MultiplierField extends NumberField
@@ -86,7 +92,6 @@ public class MultiplierComponent extends FlexLayout
 
         private Optional<FieldMultiplier> fieldMultiplier;
 
-
         public MultiplierField(MultiplierContainer multiplierContainer)
         {
             super(multiplierContainer.getEntity().getCourse().getName());
@@ -94,7 +99,7 @@ public class MultiplierComponent extends FlexLayout
 
             this.multiplierContainer = multiplierContainer;
 
-            fieldMultiplier = institutionDialog.getFieldMultiplierService().findByFieldAndCourse(institutionField.getField(), course);
+            fieldMultiplier = fieldMultiplierService.findByFieldAndCourse(item.getField(), course);
 
             this.setTooltipText(course.getName());
             this.setAllowedCharPattern("[0-9.,]");
@@ -117,6 +122,10 @@ public class MultiplierComponent extends FlexLayout
                 multiplierContainer.setTempMultiplier(Objects.requireNonNullElse(event.getValue(), 1d));
                 multiplierContainer.setTempState(ContainerState.UPDATE);
             });
+
+            this.setWidth("18.94%");
+            this.getStyle()
+                    .setPadding("var(--lumo-space-xs)");
         }
 
     }

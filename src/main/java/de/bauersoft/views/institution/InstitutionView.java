@@ -2,7 +2,6 @@ package de.bauersoft.views.institution;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.grid.Grid.MultiSortPriority;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
@@ -13,12 +12,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.autofilter.grid.AutofilterGrid;
-import de.bauersoft.components.autofiltergridOld.AutoFilterGrid;
 import de.bauersoft.data.entities.address.Address;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.user.User;
-import de.bauersoft.data.providers.AddressDataProvider;
-import de.bauersoft.data.providers.InstitutionDataProvider;
 import de.bauersoft.services.*;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
@@ -34,7 +30,7 @@ import java.util.stream.Collectors;
 public class InstitutionView extends Div
 {
 	private InstitutionService institutionService;
-	private InstitutionFieldsService institutionFieldsService;
+	private InstitutionFieldService institutionFieldService;
 	private AddressService addressService;
 	private FieldService fieldService;
 	private UserService userService;
@@ -52,7 +48,7 @@ public class InstitutionView extends Div
 	private final AutofilterGrid<Institution, Long> grid;
 
 	public InstitutionView(InstitutionService institutionService,
-						   InstitutionFieldsService institutionFieldsService,
+						   InstitutionFieldService institutionFieldService,
 						   AddressService addressService,
 						   FieldService fieldService,
 						   UserService userService,
@@ -67,7 +63,7 @@ public class InstitutionView extends Div
 						   InstitutionClosingTimeService institutionClosingTimeService)
 	{
 		this.institutionService = institutionService;
-		this.institutionFieldsService = institutionFieldsService;
+		this.institutionFieldService = institutionFieldService;
 		this.addressService = addressService;
 		this.fieldService = fieldService;
 		this.userService = userService;
@@ -127,13 +123,13 @@ public class InstitutionView extends Div
 
         grid.addItemDoubleClickListener(event ->
 		{
-			new InstitutionDialog(filterDataProvider, institutionService, institutionFieldsService, addressService, fieldService, userService, institutionMultiplierService, courseService, fieldMultiplierService, allergenService, institutionAllergenService, patternService, institutionPatternService, institutionClosingTimeService, event.getItem(), DialogState.EDIT);
+			new InstitutionDialog(filterDataProvider, institutionService, institutionFieldService, addressService, fieldService, userService, institutionMultiplierService, courseService, fieldMultiplierService, allergenService, institutionAllergenService, patternService, institutionPatternService, institutionClosingTimeService, event.getItem(), DialogState.EDIT);
 		});
 
         GridContextMenu<Institution> contextMenu = grid.addContextMenu();
         contextMenu.addItem("Neue Institution", event ->
 		{
-			new InstitutionDialog(filterDataProvider, institutionService, institutionFieldsService, addressService, fieldService, userService, institutionMultiplierService, courseService, fieldMultiplierService, allergenService, institutionAllergenService, patternService, institutionPatternService, institutionClosingTimeService, new Institution(), DialogState.NEW);
+			new InstitutionDialog(filterDataProvider, institutionService, institutionFieldService, addressService, fieldService, userService, institutionMultiplierService, courseService, fieldMultiplierService, allergenService, institutionAllergenService, patternService, institutionPatternService, institutionClosingTimeService, new Institution(), DialogState.NEW);
 		});
 
         GridMenuItem<Institution> deleteItem = contextMenu.addItem("Löschen", event ->
