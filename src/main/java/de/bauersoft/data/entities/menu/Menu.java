@@ -26,9 +26,6 @@ public class Menu extends AbstractEntity
     @OneToMany(mappedBy = "menu", fetch = FetchType.EAGER)
     private Set<Variant> variants;
 
-    @ManyToMany(mappedBy = "menus", fetch = FetchType.EAGER)
-    private Set<Offer> offers;
-
     @Transient
     private boolean confirmed = false;
 
@@ -39,7 +36,6 @@ public class Menu extends AbstractEntity
                 "name='" + name + '\'' +
                 ", flesh=" + flesh +
                 ", variants=" + variants +
-                ", offers(amount)=" + offers.size() +
                 '}';
     }
 }

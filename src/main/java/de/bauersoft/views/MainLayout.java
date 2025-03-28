@@ -201,6 +201,8 @@ public class MainLayout extends AppLayout
                 backend.addItem(sideNavItem);
             }
 
+            backend.addItem(new SideNavItem("Menü-Baukasten NEU", de.bauersoft.views.menuBuilderNew.MenuBuilderView.class, LineAwesomeIcon.COINS_SOLID.create()));
+
             if(accessChecker.hasAccess(ComponentView.class))
                 backend.addItem(new SideNavItem("Komponenten", ComponentView.class, LineAwesomeIcon.CARROT_SOLID.create()));
 
