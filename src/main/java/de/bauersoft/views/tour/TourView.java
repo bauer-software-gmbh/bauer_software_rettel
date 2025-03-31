@@ -1,12 +1,10 @@
 package de.bauersoft.views.tour;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -17,19 +15,16 @@ import com.vaadin.flow.router.Route;
 import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.autofilter.grid.AutofilterGrid;
 import de.bauersoft.data.entities.institution.Institution;
-import de.bauersoft.data.entities.tourPlanning.driver.Driver;
-import de.bauersoft.data.entities.tourPlanning.tour.Tour;
-import de.bauersoft.data.entities.tourPlanning.tour.TourInstitution;
+import de.bauersoft.data.entities.tour.driver.Driver;
+import de.bauersoft.data.entities.tour.tour.Tour;
+import de.bauersoft.data.entities.tour.tour.TourInstitution;
 import de.bauersoft.data.entities.user.User;
 import de.bauersoft.services.InstitutionService;
-import de.bauersoft.services.tourPlanning.*;
+import de.bauersoft.services.tour.*;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
-import lombok.Getter;
 
-import javax.swing.*;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @PageTitle("Tourenerstellung")

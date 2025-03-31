@@ -1,6 +1,6 @@
 package de.bauersoft.mobile.model.DTO;
 
-import de.bauersoft.data.entities.tourPlanning.driver.Driver;
+import de.bauersoft.data.entities.tour.driver.Driver;
 import lombok.Getter;
 import lombok.Setter;
 

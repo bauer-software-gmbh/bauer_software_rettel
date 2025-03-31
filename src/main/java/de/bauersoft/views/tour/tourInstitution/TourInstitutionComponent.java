@@ -15,11 +15,11 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.institution.Institution;
-import de.bauersoft.data.entities.tourPlanning.tour.Tour;
-import de.bauersoft.data.entities.tourPlanning.tour.TourInstitution;
-import de.bauersoft.data.entities.tourPlanning.tour.TourInstitutionKey;
+import de.bauersoft.data.entities.tour.tour.Tour;
+import de.bauersoft.data.entities.tour.tour.TourInstitution;
+import de.bauersoft.data.entities.tour.tour.TourInstitutionKey;
 import de.bauersoft.services.InstitutionService;
-import de.bauersoft.services.tourPlanning.TourInstitutionService;
+import de.bauersoft.services.tour.TourInstitutionService;
 import lombok.Getter;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 

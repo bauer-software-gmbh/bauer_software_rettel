@@ -2,8 +2,8 @@ package de.bauersoft.views.tour.tourInstitution;
 
 import de.bauersoft.components.container.Container;
 import de.bauersoft.components.container.ContainerState;
-import de.bauersoft.data.entities.tourPlanning.tour.TourInstitution;
-import de.bauersoft.data.entities.tourPlanning.tour.TourInstitutionKey;
+import de.bauersoft.data.entities.tour.tour.TourInstitution;
+import de.bauersoft.data.entities.tour.tour.TourInstitutionKey;
 
 import java.time.LocalTime;
 

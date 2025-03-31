@@ -8,9 +8,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import de.bauersoft.components.container.Container;
 import de.bauersoft.components.container.ContainerState;
-import de.bauersoft.data.entities.tourPlanning.vehicle.Vehicle;
-import de.bauersoft.data.entities.tourPlanning.vehicle.VehicleDowntime;
-import de.bauersoft.services.tourPlanning.VehicleDowntimeService;
+import de.bauersoft.data.entities.tour.vehicle.Vehicle;
+import de.bauersoft.data.entities.tour.vehicle.VehicleDowntime;
+import de.bauersoft.services.tour.VehicleDowntimeService;
 import lombok.Getter;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 

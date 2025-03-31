@@ -1,6 +1,6 @@
 package de.bauersoft.mobile.model.DTO;
 
-import de.bauersoft.data.entities.tourPlanning.vehicle.Vehicle;
+import de.bauersoft.data.entities.tour.vehicle.Vehicle;
 import lombok.Getter;
 import lombok.Setter;
 

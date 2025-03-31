@@ -1,7 +1,7 @@
 package de.bauersoft.services;
 
 import de.bauersoft.data.entities.user.User;
-import de.bauersoft.data.entities.user.UserLocation;
+import de.bauersoft.data.entities.tour.tour.TourLocation;
 import de.bauersoft.data.repositories.user.UserLocationRepository;
 import de.bauersoft.data.repositories.user.UserRepository;
 import de.bauersoft.mobile.broadcaster.LocationBroadcaster;
@@ -52,7 +52,7 @@ public class UserLocationService {
         User user = userRepository.findById(locationDTO.getUserId())
                 .orElseThrow(() -> new RuntimeException("User mit ID " + locationDTO.getUserId() + " nicht gefunden"));
 
-        UserLocation location = new UserLocation();
+        TourLocation location = new TourLocation();
         location.setUser(user);
         location.setLatitude(locationDTO.getLatitude());
         location.setLongitude(locationDTO.getLongitude());
