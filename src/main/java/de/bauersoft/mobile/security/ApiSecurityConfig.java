@@ -87,7 +87,7 @@ public class ApiSecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowPrivateNetwork(true);
-        config.setAllowedOrigins(List.of("https://localhost","http://localhost:8100"));
+        config.setAllowedOrigins(List.of("https://localhost","http://localhost","http://localhost:8100"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // Allowed HTTP methods
         config.setAllowedHeaders(List.of("*"));

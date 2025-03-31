@@ -1,5 +1,6 @@
 package de.bauersoft.data.entities.tourPlanning.tour;
 
+import de.bauersoft.data.entities.AbstractEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,12 +17,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Getter
 @Setter
-public class TourEntry {
-
-    @Id
-    @GeneratedValue
-    private Long id;
-
+public class TourEntry extends AbstractEntity
+{
     @Column(nullable = false)
     private LocalDate date;
 
