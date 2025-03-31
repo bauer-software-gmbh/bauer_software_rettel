@@ -33,7 +33,6 @@ public class TourDTO {
         this.driver = (driver != null) ? new DriverDTO(driver, tour.getDrivesUntil()) : null;
         this.coDriver = (coDriver != null) ? new DriverDTO(coDriver, tour.getCoDrivesUntil()) : null;
 
-        // **Hier wurden die Sets entfernt und überall auf `List<>` umgestellt**
         this.institutions = (institutions != null && !institutions.isEmpty())
                 ? institutions.stream().map(InstitutionDTO::new).collect(Collectors.toList())
                 : List.of();
