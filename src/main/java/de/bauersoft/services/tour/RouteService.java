@@ -26,8 +26,8 @@ public class RouteService
         for(LatLngPoint point : points)
         {
             JSONArray coord = new JSONArray();
-            coord.put(point.lng); // [lng, lat] → GeoJSON-Konvention
-            coord.put(point.lat);
+            coord.put(point.getLng()); // [lng, lat] → GeoJSON-Konvention
+            coord.put(point.getLat());
             coordinates.put(coord);
         }
 
