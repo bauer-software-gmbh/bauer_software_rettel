@@ -131,9 +131,19 @@ public class VehicleDowntimeService implements ServiceBase<VehicleDowntime, Long
     public Optional<VehicleDowntime> getNextVehicleDowntime(Long vehicleId)
     {
         List<VehicleDowntime> downtimes = repository.findAllByVehicle_Id(vehicleId);
+        LocalDate now = LocalDate.now();
         return downtimes.stream()
-                .filter(d -> d.getStartDate().isAfter(LocalDate.now()))
-                .sorted(Comparator.comparing(VehicleDowntime::getStartDate))
-                .findFirst();
+                .filter(d ->
+                {
+                    LocalDate startDate = d.getStartDate();
+                    if(startDate == null) return false;
+                    LocalDate endDate = (d.getEndDate() == null) ? startDate : d.getEndDate();
+
+                    return now.isEqual(startDate) ||
+                            now.isEqual(endDate) ||
+                            (now.isAfter(startDate) && now.isBefore(endDate)) ||
+                            now.isBefore(startDate);
+                })
+                .min(Comparator.comparing(VehicleDowntime::getStartDate));
     }
 }

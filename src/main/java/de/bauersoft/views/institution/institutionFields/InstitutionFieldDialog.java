@@ -4,7 +4,10 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
-import de.bauersoft.views.institution.InstitutionDialog;
+import de.bauersoft.services.AllergenService;
+import de.bauersoft.services.CourseService;
+import de.bauersoft.services.FieldMultiplierService;
+import de.bauersoft.services.PatternService;
 import de.bauersoft.views.institution.institutionFields.components.allergen.AllergenComponent;
 import de.bauersoft.views.institution.institutionFields.components.allergen.AllergenMapContainer;
 import de.bauersoft.views.institution.institutionFields.components.multiplier.MultiplierComponent;
@@ -16,9 +19,12 @@ import lombok.Getter;
 @Getter
 public class InstitutionFieldDialog extends Dialog
 {
-    private final InstitutionDialog institutionDialog;
-    private final FieldDragComponent fieldDragComponent;
-    private final InstitutionField institutionField;
+    private final PatternService patternService;
+    private final FieldMultiplierService fieldMultiplierService;
+    private final CourseService courseService;
+    private final AllergenService allergenService;
+
+    private final InstitutionField item;
 
     private final PatternMapContainer patternMapContainer;
     private final MultiplierMapContainer multiplierMapContainer;
@@ -31,26 +37,28 @@ public class InstitutionFieldDialog extends Dialog
     private final Button okButton;
     private final Button cancelButton;
 
-    public InstitutionFieldDialog(InstitutionDialog institutionDialog, FieldDragComponent fieldDragComponent, InstitutionField institutionField, PatternMapContainer patternMapContainer, MultiplierMapContainer multiplierMapContainer, AllergenMapContainer allergenMapContainer)
+    public InstitutionFieldDialog(PatternService patternService, FieldMultiplierService fieldMultiplierService, CourseService courseService, AllergenService allergenService, InstitutionField item, PatternMapContainer patternMapContainer, MultiplierMapContainer multiplierMapContainer, AllergenMapContainer allergenMapContainer)
     {
-        this.institutionDialog = institutionDialog;
-        this.fieldDragComponent = fieldDragComponent;
-        this.institutionField = institutionField;
+        this.patternService = patternService;
+        this.fieldMultiplierService = fieldMultiplierService;
+        this.courseService = courseService;
+        this.allergenService = allergenService;
+        this.item = item;
         this.patternMapContainer = patternMapContainer;
         this.multiplierMapContainer = multiplierMapContainer;
         this.allergenMapContainer = allergenMapContainer;
 
-        setHeaderTitle(institutionField.getInstitution().getName() + " - " + institutionField.getField().getName());
+        setHeaderTitle("Prognosen für " + item.getInstitution().getName() + " - " + item.getField().getName());
 
-        patternComponent = new PatternComponent(institutionDialog, this, patternMapContainer);
+        patternComponent = new PatternComponent(patternService, item, patternMapContainer);
         patternComponent.getStyle()
                 .setMarginBottom("var(--lumo-space-s)");
 
-        multiplierComponent = new MultiplierComponent(institutionDialog, this, multiplierMapContainer);
+        multiplierComponent = new MultiplierComponent(fieldMultiplierService, courseService, item, multiplierMapContainer);
         multiplierComponent.getStyle()
                 .setMarginBottom("var(--lumo-space-s)");
 
-        allergenComponent = new AllergenComponent(institutionDialog, this, allergenMapContainer);
+        allergenComponent = new AllergenComponent(allergenService, item, allergenMapContainer);
 
         okButton = new Button("Ok");
         okButton.setMinWidth("150px");
@@ -78,15 +86,14 @@ public class InstitutionFieldDialog extends Dialog
             this.close();
         });
 
-        this.setWidth("50rem");
-        this.setMaxWidth("65vw");
-        this.setHeight("59.375rem");
-        this.setMaxHeight("90vh");
+        this.setWidth("40rem");
+        this.setHeight("55rem");
 
         this.getFooter().add(okButton, cancelButton);
         this.add(patternComponent, multiplierComponent, allergenComponent);
         this.setCloseOnEsc(false);
         this.setCloseOnOutsideClick(false);
         this.setModal(true);
+        this.open();
     }
 }

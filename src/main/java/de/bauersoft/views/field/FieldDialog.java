@@ -52,8 +52,7 @@ public class FieldDialog extends Dialog
         Binder<Field> binder = new Binder<>(Field.class);
 
         FormLayout inputLayout = new FormLayout();
-        inputLayout.setWidth("50vw");
-        inputLayout.setMaxWidth("50em");
+        inputLayout.setWidth("35rem");
 
         inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
@@ -61,7 +60,7 @@ public class FieldDialog extends Dialog
         nameTextField.setMaxLength(64);
         nameTextField.setAutofocus(true);
         nameTextField.setRequired(true);
-        nameTextField.setMinWidth("20em");
+        nameTextField.setWidthFull();
 
         inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
 

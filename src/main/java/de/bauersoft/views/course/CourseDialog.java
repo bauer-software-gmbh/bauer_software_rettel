@@ -39,10 +39,7 @@ public class CourseDialog extends Dialog
 		Binder<Course> binder = new Binder<>(Course.class);
 
 		FormLayout inputLayout = new FormLayout();
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
-		inputLayout.setHeight("50vh");
-		inputLayout.setMaxHeight("18em");
+		inputLayout.setWidth("30rem");
 
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
@@ -50,7 +47,7 @@ public class CourseDialog extends Dialog
 		nameTextField.setMaxLength(64);
 		nameTextField.setAutofocus(true);
 		nameTextField.setRequired(true);
-		nameTextField.setMinWidth("20em");
+		nameTextField.setWidthFull();
 
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
 

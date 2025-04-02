@@ -7,7 +7,7 @@ import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import de.bauersoft.data.repositories.institutionfields.InstitutionFieldsGridDataRepository;
-import de.bauersoft.data.repositories.institutionfields.InstitutionFieldsRepository;
+import de.bauersoft.data.repositories.institutionfields.InstitutionFieldRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,12 +18,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class InstitutionFieldsService implements ServiceBase<InstitutionField, Long>
+public class InstitutionFieldService implements ServiceBase<InstitutionField, Long>
 {
-    private final InstitutionFieldsRepository repository;
+    private final InstitutionFieldRepository repository;
     private final InstitutionFieldsGridDataRepository customRepository;
 
-    public InstitutionFieldsService(InstitutionFieldsRepository repository, InstitutionFieldsGridDataRepository customRepository)
+    public InstitutionFieldService(InstitutionFieldRepository repository, InstitutionFieldsGridDataRepository customRepository)
     {
         this.repository = repository;
         this.customRepository = customRepository;
@@ -114,7 +114,7 @@ public class InstitutionFieldsService implements ServiceBase<InstitutionField, L
     }
 
     @Override
-    public InstitutionFieldsRepository getRepository()
+    public InstitutionFieldRepository getRepository()
     {
         return repository;
     }
@@ -128,5 +128,10 @@ public class InstitutionFieldsService implements ServiceBase<InstitutionField, L
     public Optional<InstitutionField> findByInstitutionAndField(Institution institution, Field field)
     {
         return repository.findByInstitutionAndField(institution, field);
+    }
+
+    public List<InstitutionField> findAllByInstitution_Id(Long institutionId)
+    {
+        return repository.findAllByInstitution_Id(institutionId);
     }
 }

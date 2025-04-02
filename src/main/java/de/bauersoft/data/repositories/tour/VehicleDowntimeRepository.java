@@ -11,4 +11,6 @@ public interface VehicleDowntimeRepository extends JpaRepository<VehicleDowntime
     List<VehicleDowntime> findAllByVehicle_Id(Long vehicleId);
 
 
+    void deleteAllVehicleDowntimesById(Long vehicleId);
+
 }

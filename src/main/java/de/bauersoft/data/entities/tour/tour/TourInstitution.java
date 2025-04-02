@@ -41,15 +41,17 @@ public class TourInstitution implements ContainerID<TourInstitutionKey>
     @Column(nullable = false)
     private LocalTime expectedArrivalTime;
 
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(length = 10485760) //10 MB
-    private byte[] temperatureImage;
+//    @Lob
+//    @Basic(fetch = FetchType.LAZY)
+//    @Column(length = 10485760) //10 MB
+//    private byte[] temperatureImage;
 
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(length = 10485760) //10 MB
-    private byte[] signature;
+    private String temperature;
 
-    private LocalDateTime validationTime;
+    private LocalDateTime validationDateTime;
+
+//    @Lob
+//    @Basic(fetch = FetchType.LAZY)
+//    @Column(length = 10485760) //10 MB
+//    private byte[] signature;
 }

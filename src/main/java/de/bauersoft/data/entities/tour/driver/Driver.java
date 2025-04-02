@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -33,4 +35,14 @@ public class Driver extends AbstractEntity
             inverseJoinColumns = @JoinColumn(name = "tour_id")
     )
     private Set<Tour> driveableTours = new HashSet<>();
+
+    public boolean canDriveTour(Tour tour)
+    {
+        return driveableTours.contains(tour);
+    }
+
+    public boolean canDriveTour(Long tourId)
+    {
+        return driveableTours.stream().anyMatch(tour -> tour.getId().equals(tourId));
+    }
 }

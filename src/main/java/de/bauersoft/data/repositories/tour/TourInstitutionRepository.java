@@ -1,5 +1,6 @@
 package de.bauersoft.data.repositories.tour;
 
+import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.tour.tour.TourInstitution;
 import de.bauersoft.data.entities.tour.tour.TourInstitutionKey;
 import jakarta.transaction.Transactional;
@@ -26,4 +27,13 @@ public interface TourInstitutionRepository extends JpaRepository<TourInstitution
     void deleteById(TourInstitutionKey id);
 
     List<TourInstitution> findByTourId(Long id);
+
+    @Query("""
+        select i from Institution i
+        where i.id not in (
+            select ti.institution.id from TourInstitution ti
+            where ti.tour.holidayMode = :holidayMode
+        )
+    """)
+    List<Institution> findAllUnplannedInstitutions(boolean holidayMode);
 }

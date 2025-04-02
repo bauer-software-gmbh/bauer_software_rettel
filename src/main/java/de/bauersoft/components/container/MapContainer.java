@@ -208,6 +208,8 @@ public abstract class MapContainer<T extends ContainerID<ID>, ID, M>
             Container<T, ID> container = entry.getValue();
             ContainerState state = container.getState();
 
+            System.out.println(container.getState() + " - " + container.getEntity().toString());
+
             try
             {
                 switch(state)

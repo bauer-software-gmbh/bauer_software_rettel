@@ -9,6 +9,7 @@ import de.bauersoft.services.ServiceBase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -119,5 +120,10 @@ public class VehicleService implements ServiceBase<Vehicle, Long>
     public GridDataRepository<Vehicle> getCustomRepository()
     {
         return null;
+    }
+
+    public List<Vehicle> findAllUnplannedVehicles(boolean holidayMode)
+    {
+        return repository.findAllUnplannedVehicles(holidayMode);
     }
 }

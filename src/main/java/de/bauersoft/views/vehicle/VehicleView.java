@@ -101,7 +101,11 @@ public class VehicleView extends Div
                             new VehicleDialog(filterDataProvider, vehicleService, driverService, vehicleDowntimeService, new Vehicle(), DialogState.NEW);
                         }).enableDeleteItem("Löschen", event ->
                         {
-
+                            event.getItem().ifPresent(vehicle ->
+                            {
+                                vehicleService.delete(vehicle);
+                                filterDataProvider.refreshAll();
+                            });
                         });
 
         grid.addItemDoubleClickListener(event ->

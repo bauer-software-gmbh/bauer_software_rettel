@@ -57,7 +57,7 @@ public class VehicleDialog extends Dialog
         Binder<Vehicle> binder = new Binder<>(Vehicle.class);
 
         FormLayout formLayout = new FormLayout();
-        formLayout.setWidth("50em");
+        formLayout.setWidth("30rem");
         formLayout.setHeight("35em");
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
@@ -65,7 +65,7 @@ public class VehicleDialog extends Dialog
         licencePlateField.setMaxLength(16);
         licencePlateField.setAutofocus(true);
         licencePlateField.setRequired(true);
-        licencePlateField.setWidth("20em");
+        licencePlateField.setWidthFull();
 
         TextArea typeDescriptionArea = new TextArea();
         typeDescriptionArea.setMaxLength(1024);

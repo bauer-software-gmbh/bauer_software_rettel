@@ -74,7 +74,11 @@ public class DriverView extends Div
 
                 }).enableDeleteItem("Löschen", event ->
                 {
-
+                    event.getItem().ifPresent(driver ->
+                    {
+                        driverService.delete(driver);
+                        filterDataProvider.refreshAll();
+                    });
                 });
 
         grid.addItemDoubleClickListener(event ->

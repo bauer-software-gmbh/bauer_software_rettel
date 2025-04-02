@@ -11,6 +11,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
+import de.bauersoft.components.autofilter.Filter;
 import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.data.entities.tour.driver.Driver;
 import de.bauersoft.data.entities.tour.tour.Tour;
@@ -21,6 +22,10 @@ import de.bauersoft.services.tour.TourService;
 import de.bauersoft.views.DialogState;
 import lombok.Getter;
 import org.springframework.dao.DataIntegrityViolationException;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @Getter
 public class DriverDialog extends Dialog
@@ -47,28 +52,31 @@ public class DriverDialog extends Dialog
         Binder<Driver> binder = new Binder<>(Driver.class);
 
         FormLayout formLayout = new FormLayout();
-        formLayout.setWidth("35em");
-        formLayout.setHeight("10em");
+        formLayout.setWidth("30rem");
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
         ComboBox<User> userComboBox = new ComboBox<>();
         userComboBox.setWidthFull();
-        userComboBox.setMaxWidth("100%");
+        userComboBox.setItemLabelGenerator(user -> user.getName() + " " + user.getSurname());
         userComboBox.setItems(query ->
         {
-            return FilterDataProvider.lazyStream(userService, query);
-        }, query -> (int) userService.count());
-        userComboBox.setItemLabelGenerator(User::getName);
-        userComboBox.setWidth("20em");
+            return FilterDataProvider.lazyFilteredStream(userService, query, (root, criteriaQuery, criteriaBuilder, filterInput) ->
+            {
+                return criteriaBuilder.or(
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), filterInput + "%"),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("surname")), filterInput + "%"),
+                        criteriaBuilder.like(criteriaBuilder.lower(criteriaBuilder.concat(criteriaBuilder.concat(root.get("name"), " "), root.get("surname"))), "%" + filterInput.toLowerCase() + "%")
+                );
+            });
+        });
 
         MultiSelectComboBox<Tour> tourMultiSelectComboBox = new MultiSelectComboBox<>();
         tourMultiSelectComboBox.setWidthFull();
+        tourMultiSelectComboBox.setItemLabelGenerator(Tour::getName);
         tourMultiSelectComboBox.setItems(query ->
         {
-            return FilterDataProvider.lazyStream(tourService, query);
-        },query -> (int) tourService.count());
-        tourMultiSelectComboBox.setItemLabelGenerator(Tour::getName);
-        tourMultiSelectComboBox.setWidth("20em");
+            return FilterDataProvider.lazyFilteredStream(tourService, query, "name");
+        });
 
         formLayout.setColspan(formLayout.addFormItem(userComboBox, "Benutzer"), 1);
         formLayout.setColspan(formLayout.addFormItem(tourMultiSelectComboBox, "Fahrbare Touren"), 1);
@@ -98,6 +106,24 @@ public class DriverDialog extends Dialog
                 try
                 {
                     driverService.update(item);
+
+                    List<Tour> tours = new ArrayList<>(tourService.findAll());
+                    tours.removeAll(item.getDriveableTours());
+
+                    List<Tour> updatedTours = new ArrayList<>();
+
+                    for(Iterator<Tour> iterator = tours.iterator(); iterator.hasNext(); )
+                    {
+                        Tour tour = iterator.next();
+                        if(item.equals(tour.getDriver()))
+                        {
+                            tour.setDriver(null);
+                            updatedTours.add(tour);
+                        }
+                    }
+
+                    tourService.updateAll(updatedTours);
+
                     filterDataProvider.refreshAll();
 
                     Notification.show("Daten wurden aktualisiert");

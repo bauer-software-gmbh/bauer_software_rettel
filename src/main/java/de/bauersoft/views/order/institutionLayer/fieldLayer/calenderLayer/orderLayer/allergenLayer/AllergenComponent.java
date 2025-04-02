@@ -5,6 +5,7 @@ import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.container.Container;
 import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.allergen.Allergen;
@@ -93,9 +94,6 @@ public class AllergenComponent extends VerticalLayout
     {
         private final AllergenContainer container;
 
-        private final List<Allergen> allergenPool;
-        private final ListDataProvider<Allergen> allergenListDataProvider;
-
         private Button removeButton;
         private MultiSelectComboBox<Allergen> comboBox;
 
@@ -103,16 +101,11 @@ public class AllergenComponent extends VerticalLayout
         {
             this.container = container;
 
-            allergenPool = new ArrayList<>(allergenService.findAll());
-            allergenListDataProvider = new ListDataProvider<>(allergenPool);
-
             removeButton = new Button(LineAwesomeIcon.MINUS_SOLID.create());
             removeButton.addClickListener(event ->
             {
                 AllergenComponent.this.remove(this);
                 allergenRows.remove(this);
-
-                updateAllergenPool(comboBox.getValue(), new HashSet<>());
 
                 container.setTempState((container.getState() == ContainerState.NEW) ? ContainerState.NEW : ContainerState.DELETE);
             });
@@ -120,30 +113,22 @@ public class AllergenComponent extends VerticalLayout
             comboBox = new MultiSelectComboBox<>();
             comboBox.setWidthFull();
             comboBox.setItemLabelGenerator(Allergen::getName);
-            comboBox.setItems(allergenListDataProvider);
+            comboBox.setItems(query ->
+            {
+                return FilterDataProvider.lazyFilteredStream(allergenService, query, "name");
+            });
 
             comboBox.setValue(container.getEntity().getAllergens());
-            updateAllergenPool(new HashSet<>(), container.getEntity().getAllergens());
 
             comboBox.addValueChangeListener(event ->
             {
                 container.setTempState(ContainerState.UPDATE);
                 container.setTempAllergens(event.getValue());
-
-                updateAllergenPool(event.getOldValue(), event.getValue());
             });
 
 
             this.add(removeButton, comboBox);
             this.setWidthFull();
-        }
-
-        private void updateAllergenPool(Set<Allergen> oldValue, Set<Allergen> newValue)
-        {
-            oldValue.forEach(allergen -> allergenPool.add(allergen));
-            newValue.forEach(allergen -> allergenPool.remove(allergen));
-
-            allergenListDataProvider.refreshAll();
         }
 
     }

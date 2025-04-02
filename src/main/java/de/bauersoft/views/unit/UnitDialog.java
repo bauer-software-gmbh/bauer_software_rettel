@@ -46,32 +46,30 @@ public class UnitDialog extends Dialog
 		Binder<Unit> binder = new Binder<>(Unit.class);
 
 		FormLayout inputLayout = new FormLayout();
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
-		inputLayout.setHeight("50vh");
-		inputLayout.setMaxHeight("13em");
+		inputLayout.setWidth("30rem");
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
 		TextField nameTextField = new TextField();
 		nameTextField.setMaxLength(64);
 		nameTextField.setRequired(true);
 		nameTextField.setAutofocus(true);
-		nameTextField.setMinWidth("20em");
+		nameTextField.setWidthFull();
 
 		TextField shorthandTextField = new TextField();
 		shorthandTextField.setMaxLength(8);
 		shorthandTextField.setRequired(true);
-		shorthandTextField.setMinWidth("20em");
+		shorthandTextField.setWidth("5em");
 
 		ComboBox<Unit> parentComboBox = new ComboBox<Unit>();
+		parentComboBox.setWidthFull();
+		parentComboBox.setItemLabelGenerator(Unit::getName);
 		parentComboBox.setItems(query ->
 		{
-			return FilterDataProvider.lazyStream(unitService, query);
-
-		},query -> (int) unitService.count());
-		parentComboBox.setItemLabelGenerator(Unit::getName);
+			return FilterDataProvider.lazyFilteredStream(unitService, query, "name");
+		});
 
 		NumberField parentFactorNumberField = new NumberField();
+		parentFactorNumberField.setWidthFull();
 		parentFactorNumberField.setMin(0);
 		parentFactorNumberField.setMax(Float.MAX_VALUE);
 

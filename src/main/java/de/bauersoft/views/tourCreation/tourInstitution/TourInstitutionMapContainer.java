@@ -1,4 +1,4 @@
-package de.bauersoft.views.tour.tourInstitution;
+package de.bauersoft.views.tourCreation.tourInstitution;
 
 import de.bauersoft.components.container.Container;
 import de.bauersoft.components.container.ContainerState;
