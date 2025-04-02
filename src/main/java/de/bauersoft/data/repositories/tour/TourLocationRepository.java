@@ -14,17 +14,17 @@ import java.util.List;
 @Repository
 public interface TourLocationRepository extends JpaRepository<TourLocation, Long> {
 
-    @Query("SELECT new de.bauersoft.mobile.model.DTO.TourLocationDTO(t.id, t.latitude, t.longitude, t.timestamp, t.tour.id) FROM TourLocation t")
+    @Query("SELECT new de.bauersoft.mobile.model.DTO.TourLocationDTO(t.id, t.latitude, t.longitude, t.timestamp, t.tour.id, t.markerIcon) FROM TourLocation t")
     List<TourLocationDTO> findAllTourLocations();
 
-    @Query("SELECT new de.bauersoft.mobile.model.DTO.TourLocationDTO(t.id, t.latitude, t.longitude, t.timestamp, t.tour.id) FROM TourLocation t WHERE t.tour.id = :tourId AND DATE(t.timestamp) = CURRENT_DATE")
+    @Query("SELECT new de.bauersoft.mobile.model.DTO.TourLocationDTO(t.id, t.latitude, t.longitude, t.timestamp, t.tour.id, t.markerIcon) FROM TourLocation t WHERE t.tour.id = :tourId AND DATE(t.timestamp) = CURRENT_DATE")
     List<TourLocationDTO> findTourLocationsToday(@Param("tourId") Long tourId);
 
-    @Query("SELECT new de.bauersoft.mobile.model.DTO.TourLocationDTO(t.id, t.latitude, t.longitude, t.timestamp, t.tour.id) FROM TourLocation t WHERE t.tour.id = :tourId AND t.timestamp BETWEEN :start AND :end")
+    @Query("SELECT new de.bauersoft.mobile.model.DTO.TourLocationDTO(t.id, t.latitude, t.longitude, t.timestamp, t.tour.id, t.markerIcon) FROM TourLocation t WHERE t.tour.id = :tourId AND t.timestamp BETWEEN :start AND :end")
     List<TourLocationDTO> findTourLocationsByDate(@Param("tourId") Long tourId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     @Query("""
-    SELECT new de.bauersoft.mobile.model.DTO.TourLocationDTO(t.id, t.latitude, t.longitude, t.timestamp, t.tour.id) FROM TourLocation t WHERE FUNCTION('DATE', t.timestamp) = :selectedDate AND t.timestamp = (SELECT MAX(t2.timestamp) FROM TourLocation t2 WHERE t2.tour.id = t.tour.id AND FUNCTION('DATE', t2.timestamp) = :selectedDate)""")
+    SELECT new de.bauersoft.mobile.model.DTO.TourLocationDTO(t.id, t.latitude, t.longitude, t.timestamp, t.tour.id, t.markerIcon) FROM TourLocation t WHERE FUNCTION('DATE', t.timestamp) = :selectedDate AND t.timestamp = (SELECT MAX(t2.timestamp) FROM TourLocation t2 WHERE t2.tour.id = t.tour.id AND FUNCTION('DATE', t2.timestamp) = :selectedDate)""")
     List<TourLocationDTO> findLatestTourLocationsByDate(@Param("selectedDate") LocalDate selectedDate);
 
 }

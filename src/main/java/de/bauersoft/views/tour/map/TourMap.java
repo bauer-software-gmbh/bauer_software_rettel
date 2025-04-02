@@ -14,6 +14,7 @@ import com.vaadin.flow.router.Route;
 import de.bauersoft.data.entities.tour.tour.LatLngPoint;
 import de.bauersoft.data.entities.tour.tour.Tour;
 import de.bauersoft.data.entities.tour.tour.TourInstitution;
+import de.bauersoft.data.entities.tour.tour.TourLocation;
 import de.bauersoft.data.repositories.tour.TourRepository;
 import de.bauersoft.mobile.broadcaster.LocationBroadcaster;
 import de.bauersoft.mobile.model.DTO.TourLocationDTO;
@@ -106,16 +107,13 @@ public class TourMap extends VerticalLayout {
         filterLayout.setJustifyContentMode(JustifyContentMode.CENTER);
 
         institutionGrid.addColumn(inst -> inst.getInstitution().getName()).setHeader("Institution").setAutoWidth(true);
-        institutionGrid.addColumn(inst -> inst.getTemperatureImage() != null ? "✓" : "✘").setHeader("Temperatur").setAutoWidth(true);
-        institutionGrid.addColumn(inst -> inst.getValidationTime()).setHeader("Validierung").setAutoWidth(true);
+        institutionGrid.addColumn(inst -> inst.getTemperature() != null ? "✓" : "✘").setHeader("Temperatur").setAutoWidth(true);
+        institutionGrid.addColumn(inst -> inst.getValidationDateTime()).setHeader("Validierung").setAutoWidth(true);
         institutionGrid.setVisible(false);
         institutionGrid.setHeightFull();
-        institutionGrid.setClassNameGenerator(
-                inst -> inst.getTemperatureImage() != null ? "validated-row" : "unvalidated-row"
+        institutionGrid.setPartNameGenerator(
+                inst -> inst.getTemperature() != null ? "validated-row" : "unvalidated-row"
         );
-
-
-
 
         MapLayout = new HorizontalLayout();
         MapLayout.setWidthFull();
@@ -138,8 +136,9 @@ public class TourMap extends VerticalLayout {
         updateUserLocations();
     }
 
-    private void adjustMapGridLayout()
-    {
+    private void switchFilterMode() {
+        userComboBox.setVisible(!filterByTourCheckbox.getValue());
+        tourComboBox.setVisible(filterByTourCheckbox.getValue());
         if (institutionGrid.isVisible()) {
             MapLayout.setWidth("70%");
             GridLayout.setWidth("30%");
@@ -147,11 +146,6 @@ public class TourMap extends VerticalLayout {
             MapLayout.setWidth("100%");
             GridLayout.setWidth("0px"); // Unsichtbar
         }
-    }
-
-    private void switchFilterMode() {
-        userComboBox.setVisible(!filterByTourCheckbox.getValue());
-        tourComboBox.setVisible(filterByTourCheckbox.getValue());
         userComboBox.clear();
         tourComboBox.clear();
 
@@ -208,6 +202,16 @@ public class TourMap extends VerticalLayout {
         adjustMapGridLayout(); // ⬅️ Auch hier
     }
 
+    private void adjustMapGridLayout()
+    {
+        if (institutionGrid.isVisible()) {
+            MapLayout.setWidth("70%");
+            GridLayout.setWidth("30%");
+        } else {
+            MapLayout.setWidth("100%");
+            GridLayout.setWidth("0px"); // Unsichtbar
+        }
+    }
 
     @Override
     protected void onAttach(AttachEvent event) {
@@ -303,30 +307,41 @@ public class TourMap extends VerticalLayout {
                 List<LLatLng> markerPoints = new ArrayList<>();
                 LatLngPoint lastAcceptedPoint = null;
 
+
+                List<LatLngPoint> shownPoints = new ArrayList<>();
+
                 for (int i = 0; i < tourLocs.size(); i++) {
                     TourLocationDTO loc = tourLocs.get(i);
                     LatLngPoint current = new LatLngPoint(loc.getLatitude(), loc.getLongitude());
+                    boolean isCheckpoint = "X".equalsIgnoreCase(loc.getMarkerIcon());
 
-                    if (lastAcceptedPoint == null ||
-                            calculateDistance(lastAcceptedPoint.getLat(), lastAcceptedPoint.getLng(), current.getLat(), current.getLng()) > 50) {
+                    String color;
+                    if (i == 0) {
+                        color = "#00cc00"; // Start
+                    } else if (i == tourLocs.size() - 1) {
+                        color = "#cc0000"; // Ende
+                    } else if (isCheckpoint) {
+                        color = "#ffcc00"; // Checkpoint
+                    } else {
+                        color = "#0077cc"; // Standard
+                    }
 
-                        // 🔸 Farbwahl je nach Position / Validierung
-                        String color;
-                        if (i == 0) {
-                            color = "#00cc00"; // Start
-                        } else if (i == tourLocs.size() - 1) {
-                            color = "#cc0000"; // Ende
-                        } else if (isValidatedLocation(loc)) {
-                            color = "#ffcc00"; // Validierung für diese Position
-                        } else {
-                            color = "#0077cc"; // Standard
-                        }
+                    boolean shouldShow = (i == 0 || i == tourLocs.size() - 1 || isCheckpoint);
 
+                    if (!shouldShow) {
+                        // Abstand prüfen: zu allen bereits angezeigten Punkten
+                        boolean isNearShownPoint = shownPoints.stream().anyMatch(p ->
+                                calculateDistance(p.getLat(), p.getLng(), current.getLat(), current.getLng()) < 50
+                        );
+                        shouldShow = !isNearShownPoint;
+                    }
+
+                    if (shouldShow) {
                         LMarker newMarker = createColoredMarker(loc, color);
                         newMarker.addTo(map);
                         userMarkers.put(loc.getTourId() + "-" + loc.getTimestamp(), newMarker);
 
-                        lastAcceptedPoint = current;
+                        shownPoints.add(current);
                         latLngPoints.add(current);
                         markerPoints.add(new LLatLng(registry, current.getLat(), current.getLng()));
                     }
@@ -446,11 +461,11 @@ public class TourMap extends VerticalLayout {
                 .orElse(Collections.emptySet())
                 .stream()
                 .anyMatch(inst -> {
-                    if (inst.getValidationTime() == null) {
+                    if (inst.getValidationDateTime() == null) {
                         return false;
                     }
                     long seconds = Math.abs(
-                            inst.getValidationTime().toEpochSecond(ZoneOffset.UTC) -
+                            inst.getValidationDateTime().toEpochSecond(ZoneOffset.UTC) -
                                     loc.getTimestamp().toEpochSecond(ZoneOffset.UTC)
                     );
                     return seconds < 180; // innerhalb von 3 Minuten

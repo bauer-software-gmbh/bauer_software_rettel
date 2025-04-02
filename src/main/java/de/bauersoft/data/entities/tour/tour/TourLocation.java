@@ -10,7 +10,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_locations")
+@Table(name = "tour_locations")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -30,6 +30,10 @@ public class TourLocation extends AbstractEntity
 
     @Column(nullable = false)
     private LocalDateTime timestamp; // Zeitpunkt der Standortaktualisierung
+
+    @Column(length = 2)
+    private String markerIcon; // Icon für den Marker auf der Karte
+
 
     @Override
     public String toString()

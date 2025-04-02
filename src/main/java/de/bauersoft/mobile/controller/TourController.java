@@ -1,7 +1,7 @@
 package de.bauersoft.mobile.controller;
 
 import de.bauersoft.data.entities.user.User;
-import de.bauersoft.mobile.model.DummyTourData;
+//import de.bauersoft.mobile.model.DummyTourData;
 import de.bauersoft.mobile.model.DTO.TourDTO;
 import de.bauersoft.mobile.security.JwtTokenProvider;
 import de.bauersoft.services.tour.TourService;

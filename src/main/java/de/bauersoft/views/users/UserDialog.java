@@ -88,7 +88,7 @@ public class UserDialog extends Dialog
 
         MultiSelectComboBox<Role> roleMultiSelectComboBox = new MultiSelectComboBox<>();
         roleMultiSelectComboBox.setWidthFull();
-        roleMultiSelectComboBox.setItemLabelGenerator(Role::getName);
+        //roleMultiSelectComboBox.setItemLabelGenerator(Role::getName);
         roleMultiSelectComboBox.setItems(Role.values());
 
         PasswordField passwordField = new PasswordField();
