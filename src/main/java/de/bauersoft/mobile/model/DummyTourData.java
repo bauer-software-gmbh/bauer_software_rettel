@@ -1,6 +1,11 @@
 package de.bauersoft.mobile.model;
 
 import de.bauersoft.data.entities.address.Address;
+import de.bauersoft.data.entities.order.Order;
+import de.bauersoft.data.entities.order.OrderAllergen;
+import de.bauersoft.data.entities.order.OrderData;
+import de.bauersoft.data.entities.order.OrderDataKey;
+import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.data.entities.tour.driver.Driver;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.role.Role;
@@ -9,6 +14,7 @@ import de.bauersoft.data.entities.tour.tour.TourInstitution;
 import de.bauersoft.data.entities.tour.tour.TourInstitutionKey;
 import de.bauersoft.data.entities.user.User;
 import de.bauersoft.data.entities.tour.vehicle.Vehicle;
+import de.bauersoft.data.entities.variant.Variant;
 import de.bauersoft.mobile.model.DTO.TourDTO;
 
 import java.time.LocalDate;
@@ -97,7 +103,54 @@ public class DummyTourData {
         driver.getDriveableTours().add(tour);
         coDriver.getDriveableTours().add(tour);
 
+        // Dummy Pattern für Mahlzeit
+        Pattern pattern1 = new Pattern();
+        pattern1.setName("Spaghetti Bolognese");
+
+        Pattern pattern2 = new Pattern();
+        pattern2.setName("Vegetarisches Curry");
+
+        // Variants (Gericht-Varianten)
+        Variant variant1 = new Variant();
+        variant1.setPattern(pattern1);
+
+        Variant variant2 = new Variant();
+        variant2.setPattern(pattern2);
+
+        // Dummy Orders
+        Order order1 = new Order();
+        order1.setInstitution(institution1);
+        order1.setOrderDate(LocalDate.now());
+
+        Order order2 = new Order();
+        order2.setInstitution(institution2);
+        order2.setOrderDate(LocalDate.now());
+
+        // Dummy OrderDataKey
+        OrderDataKey key1 = new OrderDataKey(1L, 1L);
+        OrderDataKey key2 = new OrderDataKey(2L, 2L);
+
+        // OrderData mit Mengen
+        OrderData data1 = new OrderData(key1, order1, variant1, 12);
+        OrderData data2 = new OrderData(key2, order2, variant2, 8);
+
+        // OrderAllergen als leer (du kannst später Dummy-Allergene dazufügen)
+        OrderAllergen allergen1 = new OrderAllergen();
+        allergen1.set_order(order1);
+
+        OrderAllergen allergen2 = new OrderAllergen();
+        allergen2.set_order(order2);
+
+        // Zuordnung
+        order1.setOrderData(Set.of(data1));
+        order1.setOrderAllergens(Set.of(allergen1));
+
+        order2.setOrderData(Set.of(data2));
+        order2.setOrderAllergens(Set.of(allergen2));
+
+        List<Order> orders = List.of(order1, order2);
+
         // **Hier wurde `Set<>` zu `List<>` geändert**
-        return new TourDTO(tour, driver, coDriver, List.of(institution1, institution2), List.of(address1, address2));
+        return new TourDTO(tour, driver, coDriver, List.of(institution1, institution2), List.of(address1, address2), orders);
     }
 }

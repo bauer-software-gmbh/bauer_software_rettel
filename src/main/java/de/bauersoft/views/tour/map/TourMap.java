@@ -1,10 +1,11 @@
-package de.bauersoft.oldMap;
+package de.bauersoft.views.tour.map;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -15,6 +16,8 @@ import de.bauersoft.data.entities.tour.tour.Tour;
 import de.bauersoft.data.entities.tour.tour.TourInstitution;
 import de.bauersoft.data.repositories.tour.TourRepository;
 import de.bauersoft.mobile.broadcaster.LocationBroadcaster;
+import de.bauersoft.mobile.model.DTO.TourLocationDTO;
+import de.bauersoft.services.tour.TourLocationService;
 import de.bauersoft.services.tour.RouteService;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
@@ -27,8 +30,11 @@ import software.xdev.vaadin.maps.leaflet.layer.vector.LPolylineOptions;
 import software.xdev.vaadin.maps.leaflet.map.LMap;
 import software.xdev.vaadin.maps.leaflet.registry.LComponentManagementRegistry;
 import software.xdev.vaadin.maps.leaflet.registry.LDefaultComponentManagementRegistry;
+import software.xdev.vaadin.maps.leaflet.basictypes.LPoint;
+
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
@@ -36,6 +42,7 @@ import java.util.function.Consumer;
 @PageTitle("Touren")
 @Route(value = "touroverview", layout = MainLayout.class)
 @RolesAllowed({"ADMIN"})
+@CssImport("./styles/shared-styles.css")
 public class TourMap extends VerticalLayout {
 
     private final LMap map;
@@ -103,6 +110,12 @@ public class TourMap extends VerticalLayout {
         institutionGrid.addColumn(inst -> inst.getValidationTime()).setHeader("Validierung").setAutoWidth(true);
         institutionGrid.setVisible(false);
         institutionGrid.setHeightFull();
+        institutionGrid.setClassNameGenerator(
+                inst -> inst.getTemperatureImage() != null ? "validated-row" : "unvalidated-row"
+        );
+
+
+
 
         MapLayout = new HorizontalLayout();
         MapLayout.setWidthFull();
@@ -234,8 +247,7 @@ public class TourMap extends VerticalLayout {
 
     private void updateUserLocations()
     {
-
-        clearMapLayers(); // 🧽 immer Karte leeren
+        clearMapLayers(); // 🧽 Karte leeren
 
         String selectedValue = filterByTourCheckbox.getValue()
                 ? tourComboBox.getValue()
@@ -291,12 +303,26 @@ public class TourMap extends VerticalLayout {
                 List<LLatLng> markerPoints = new ArrayList<>();
                 LatLngPoint lastAcceptedPoint = null;
 
-                for (TourLocationDTO loc : tourLocs) {
+                for (int i = 0; i < tourLocs.size(); i++) {
+                    TourLocationDTO loc = tourLocs.get(i);
                     LatLngPoint current = new LatLngPoint(loc.getLatitude(), loc.getLongitude());
 
                     if (lastAcceptedPoint == null ||
                             calculateDistance(lastAcceptedPoint.getLat(), lastAcceptedPoint.getLng(), current.getLat(), current.getLng()) > 50) {
-                        LMarker newMarker = getLMarker(loc);
+
+                        // 🔸 Farbwahl je nach Position / Validierung
+                        String color;
+                        if (i == 0) {
+                            color = "#00cc00"; // Start
+                        } else if (i == tourLocs.size() - 1) {
+                            color = "#cc0000"; // Ende
+                        } else if (isValidatedLocation(loc)) {
+                            color = "#ffcc00"; // Validierung für diese Position
+                        } else {
+                            color = "#0077cc"; // Standard
+                        }
+
+                        LMarker newMarker = createColoredMarker(loc, color);
                         newMarker.addTo(map);
                         userMarkers.put(loc.getTourId() + "-" + loc.getTimestamp(), newMarker);
 
@@ -306,6 +332,7 @@ public class TourMap extends VerticalLayout {
                     }
                 }
 
+                // Linie zeichnen
                 if (latLngPoints.size() > 1) {
                     try {
                         List<LLatLng> routedPath = RouteService.fetchRoute(latLngPoints, registry);
@@ -326,6 +353,7 @@ public class TourMap extends VerticalLayout {
             }
         }
     }
+
 
     private void clearMapLayers() {
         userMarkers.values().forEach(map::removeLayer);
@@ -384,5 +412,48 @@ public class TourMap extends VerticalLayout {
                 * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
+    }
+
+
+    private LMarker createColoredMarker(TourLocationDTO loc, String colorHex)
+    {
+        String svg = """
+        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'>
+            <circle cx='12' cy='12' r='10' fill='%s' stroke='white' stroke-width='2'/>
+        </svg>
+        """.formatted(colorHex);
+
+        String base64 = Base64.getEncoder().encodeToString(svg.getBytes());
+        String dataUri = "data:image/svg+xml;base64," + base64;
+
+        var iconOptions = new software.xdev.vaadin.maps.leaflet.basictypes.LIconOptions();
+        iconOptions.setIconUrl(dataUri);
+        iconOptions.setIconSize(new LPoint(registry, 24, 24));
+        iconOptions.setIconAnchor(new LPoint(registry, 12, 12));
+
+        var icon = new software.xdev.vaadin.maps.leaflet.basictypes.LIcon(registry, iconOptions);
+
+        var marker = new LMarker(registry, new LLatLng(registry, loc.getLatitude(), loc.getLongitude()));
+        marker.setIcon(icon);
+        marker.bindPopup(buildPopupHtml(loc));
+
+        return marker;
+    }
+
+    private boolean isValidatedLocation(TourLocationDTO loc) {
+        return tourRepository.findById(loc.getTourId())
+                .map(Tour::getInstitutions)
+                .orElse(Collections.emptySet())
+                .stream()
+                .anyMatch(inst -> {
+                    if (inst.getValidationTime() == null) {
+                        return false;
+                    }
+                    long seconds = Math.abs(
+                            inst.getValidationTime().toEpochSecond(ZoneOffset.UTC) -
+                                    loc.getTimestamp().toEpochSecond(ZoneOffset.UTC)
+                    );
+                    return seconds < 180; // innerhalb von 3 Minuten
+                });
     }
 }

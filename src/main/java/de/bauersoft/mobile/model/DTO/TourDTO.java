@@ -1,6 +1,7 @@
 package de.bauersoft.mobile.model.DTO;
 
 import de.bauersoft.data.entities.address.Address;
+import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.data.entities.tour.driver.Driver;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.tour.tour.Tour;
@@ -22,9 +23,8 @@ public class TourDTO {
     private DriverDTO driver;
     private DriverDTO coDriver;
     private List<InstitutionDTO> institutions;
-    private List<AddressDTO> addresses;
 
-    public TourDTO(Tour tour, Driver driver, Driver coDriver, List<Institution> institutions, List<Address> addresses) {
+    public TourDTO(Tour tour, Driver driver, Driver coDriver, List<Institution> institutions, List<Address> addresses, List<Order> orders) {
         this.id = tour.getId();
         this.name = tour.getName();
         this.startDateTime = tour.getStartDateTime();
@@ -34,8 +34,7 @@ public class TourDTO {
         this.coDriver = (coDriver != null) ? new DriverDTO(coDriver, tour.getCoDrivesUntil()) : null;
 
         this.institutions = (institutions != null && !institutions.isEmpty())
-                ? institutions.stream().map(InstitutionDTO::new).collect(Collectors.toList())
+                ? institutions.stream().map(i -> new InstitutionDTO(i, orders)).collect(Collectors.toList())
                 : List.of();
-        this.addresses = (addresses != null) ? addresses.stream().map(AddressDTO::new).collect(Collectors.toList()) : List.of();
     }
 }

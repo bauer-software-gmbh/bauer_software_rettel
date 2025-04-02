@@ -21,9 +21,8 @@ public interface TourRepository extends JpaRepository<Tour, Long>, JpaSpecificat
     LEFT JOIN FETCH t.institutions ti
     LEFT JOIN FETCH ti.institution i
     LEFT JOIN FETCH i.address a
-    WHERE (t.driver.user.id = :userId OR t.coDriver.user.id = :userId)
-    AND t.startDateTime BETWEEN :start AND :end
+    WHERE t.driver.user.id = :userId 
 """)
-    List<Tour> findToursByUserIdAndDate(@Param("userId") Long userId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+    List<Tour> findToursByUserId(@Param("userId") Long userId);
 
 }

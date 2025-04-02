@@ -1,0 +1,7 @@
+:host(.validated-row) {
+    background-color: #7ee3ae !important;
+}
+
+:host(.unvalidated-row) {
+    background-color: #595959 !important;
+}

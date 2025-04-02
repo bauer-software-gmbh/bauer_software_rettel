@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,10 +36,11 @@ public class TourController {
         this.aesUtil = aesUtil;
     }
 
-    @PostMapping("/today")
+    @GetMapping("/today")
     public ResponseEntity<List<TourDTO>> getTodayToursForDriver(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @RequestBody() String encryptedUsername) {
+            @RequestParam(value = "username", required = false) String encryptedUsername)
+    {
 
         String username = null;
 
@@ -48,7 +50,7 @@ public class TourController {
             logger.info("🔐 Benutzername aus Token extrahiert: {}", username);
         } else if (encryptedUsername != null) {
             try {
-                username = aesUtil.decrypt(encryptedUsername); // 🔓 Benutzername entschlüsseln
+                username = aesUtil.decrypt(encryptedUsername);
                 logger.info("📩 Entschlüsselter Benutzername aus Request: {}", username);
             } catch (Exception e) {
                 logger.error("❌ Fehler beim Entschlüsseln des Benutzernamens", e);
@@ -62,19 +64,11 @@ public class TourController {
         Long userId = tempUser.getId();
         logger.info("👤 User ID: {}", userId);
 
-        //List<TourDTO> tours = tourService.getToursForDriverAndDate(userId, start, end);
+        List<TourDTO> tours = tourService.getToursForDriverAndDate(userId);
 
-        List<TourDTO> tours = new ArrayList<>();
-
-        TourDTO dummyTour = DummyTourData.getDummyTourDTO();
-
-        logger.info("🚚 Dummy-Tour: {} | Fahrzeug: {}", dummyTour.getName(), dummyTour.getVehicle().getLicensePlate());
-        logger.info("🏢 Institutionen: {}", dummyTour.getInstitutions().size());
-        logger.info("🏢 Institutionen - Index 0: {}", dummyTour.getInstitutions().getFirst().getName());
-        logger.info("🏠 Adressen: {}", dummyTour.getAddresses().size());
-
-        tours.add(dummyTour);
+        logger.info("🚚 Gefundene Touren für {}: {}", username, tours.size());
 
         return ResponseEntity.ok(tours);
     }
+
 }

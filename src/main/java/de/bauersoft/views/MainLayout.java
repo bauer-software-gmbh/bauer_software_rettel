@@ -38,7 +38,7 @@ import de.bauersoft.views.pattern.PatternView;
 import de.bauersoft.views.recipe.RecipeView;
 import de.bauersoft.views.tour.planner.TourPlanningView;
 import de.bauersoft.views.tour.TourView;
-import de.bauersoft.oldMap.TourMap;
+import de.bauersoft.views.tour.map.TourMap;
 import de.bauersoft.views.unit.UnitView;
 import de.bauersoft.views.users.UsersView;
 import de.bauersoft.views.vehicle.VehicleView;

@@ -1,4 +1,4 @@
-package de.bauersoft.oldMap;
+package de.bauersoft.mobile.model.DTO;
 
 import java.time.LocalDateTime;
 

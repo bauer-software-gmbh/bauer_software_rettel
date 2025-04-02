@@ -19,4 +19,6 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     List<Order> findByOrderDate(LocalDate orderDate);
 
     Optional<Order> findByOrderDateAndInstitutionAndField(LocalDate orderDate, Institution institution, Field field);
+
+    List<Order> findByInstitutionIn(List<Institution> institutions);
 }

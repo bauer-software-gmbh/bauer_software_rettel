@@ -1,5 +1,7 @@
-package de.bauersoft.oldMap;
+package de.bauersoft.mobile.controller;
 
+import de.bauersoft.mobile.model.DTO.TourLocationDTO;
+import de.bauersoft.services.tour.TourLocationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

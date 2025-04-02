@@ -1,15 +1,15 @@
-package de.bauersoft.oldMap;
+package de.bauersoft.services.tour;
 
 import de.bauersoft.data.entities.tour.tour.Tour;
-import de.bauersoft.data.entities.user.User;
+import de.bauersoft.data.entities.tour.tour.TourLocation;
+import de.bauersoft.data.repositories.tour.TourLocationRepository;
 import de.bauersoft.data.repositories.tour.TourRepository;
-import de.bauersoft.data.repositories.user.UserRepository;
 import de.bauersoft.mobile.broadcaster.LocationBroadcaster;
+import de.bauersoft.mobile.model.DTO.TourLocationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service

@@ -1,6 +1,6 @@
 package de.bauersoft.mobile.broadcaster;
 
-import de.bauersoft.oldMap.TourLocationDTO;
+import de.bauersoft.mobile.model.DTO.TourLocationDTO;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

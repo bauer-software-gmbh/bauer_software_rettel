@@ -2,11 +2,13 @@ package de.bauersoft.services.tour;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import de.bauersoft.data.entities.address.Address;
+import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.data.entities.tour.driver.Driver;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.tour.tour.Tour;
 import de.bauersoft.data.entities.tour.tour.TourInstitution;
 import de.bauersoft.data.filters.SerializableFilter;
+import de.bauersoft.data.repositories.order.OrderRepository;
 import de.bauersoft.mobile.model.DTO.TourDTO;
 import de.bauersoft.data.repositories.address.AddressRepository;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
@@ -28,13 +30,16 @@ public class TourService implements ServiceBase<Tour, Long>
 {
     private final TourRepository repository;
     private final TourInstitutionRepository tourInstitutionRepository;
+    private final OrderRepository orderRepository;
+
 
     public TourService(TourRepository repository, DriverRepository driverRepository,
                        TourInstitutionRepository tourInstitutionRepository,
-                       InstitutionRepository institutionRepository, AddressRepository addressRepository)
+                       InstitutionRepository institutionRepository, AddressRepository addressRepository, OrderRepository orderRepository)
     {
         this.repository = repository;
         this.tourInstitutionRepository = tourInstitutionRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -133,8 +138,8 @@ public class TourService implements ServiceBase<Tour, Long>
         return null;
     }
 
-    public List<TourDTO> getToursForDriverAndDate(Long userId, LocalDateTime start, LocalDateTime end) {
-        List<Tour> tours = repository.findToursByUserIdAndDate(userId, start, end);
+    public List<TourDTO> getToursForDriverAndDate(Long userId) {
+        List<Tour> tours = repository.findToursByUserId(userId);
 
         System.out.println("🚀 Anzahl gefundener Touren: " + tours.size());
 
@@ -157,10 +162,13 @@ public class TourService implements ServiceBase<Tour, Long>
                     .map(Institution::getAddress)
                     .toList();
 
+            List<Order> orders = orderRepository.findByInstitutionIn(institutions);
+
+
             System.out.println("🏢 Institutionen gefunden: " + institutions.size());
             System.out.println("📍 Adressen gefunden: " + addresses.size());
 
-            tourDTOs.add(new TourDTO(tour, driver, coDriver, institutions, addresses));
+            tourDTOs.add(new TourDTO(tour, driver, coDriver, institutions, addresses, orders));
         }
 
         return tourDTOs;

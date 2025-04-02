@@ -1,7 +1,6 @@
-package de.bauersoft.oldMap;
+package de.bauersoft.data.entities.tour.tour;
 
 import de.bauersoft.data.entities.AbstractEntity;
-import de.bauersoft.data.entities.tour.tour.Tour;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
