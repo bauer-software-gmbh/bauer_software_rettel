@@ -1,19 +1,16 @@
 package de.bauersoft.views.recipe.formulation;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
-import com.vaadin.flow.component.virtuallist.VirtualList;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import de.bauersoft.components.autofilter.Filter;
@@ -50,7 +47,7 @@ public class FormulationComponent extends HorizontalLayout
     private final FormulationMapContainer mapContainer;
 
     private final FormulationGrid formulationGrid;
-    private final FormulationList formulationList;
+    private final IngredientGrid ingredientGrid;
 
     public FormulationComponent(Recipe item, RecipeService recipeService, FormulationService formulationService, IngredientService ingredientService)
     {
@@ -84,13 +81,13 @@ public class FormulationComponent extends HorizontalLayout
 
         ingredientNameFilter = new Filter<Ingredient>("name", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
-            return criteriaBuilder.like(criteriaBuilder.lower(path.as(String.class)), filterInput + "%");
+            return criteriaBuilder.like(criteriaBuilder.lower(path.as(String.class)), filterInput.toLowerCase() + "%");
         });
 
         ingredientDataProvider.addFilter(ingredientFilter);
         ingredientDataProvider.addFilter(ingredientNameFilter);
 
-        ingredientDataProvider.callFilters("name", SortOrder.ASCENDING);
+        ingredientDataProvider.applyFilters("name", SortOrder.ASCENDING);
 
         mapContainer = new FormulationMapContainer();
         for(Formulation formulation : formulationService.findAllByRecipe_Id(item.getId()))
@@ -98,11 +95,11 @@ public class FormulationComponent extends HorizontalLayout
                     .setGridItem(true);
 
         formulationGrid = new FormulationGrid();
-        formulationList = new FormulationList();
+        ingredientGrid = new IngredientGrid();
 
         updateView();
 
-        this.add(formulationGrid, formulationList);
+        this.add(formulationGrid, ingredientGrid);
         this.setHeight("30rem");
         this.getStyle()
                 .setMarginTop("var(--lumo-space-m)");
@@ -285,16 +282,30 @@ public class FormulationComponent extends HorizontalLayout
     }
 
     @Getter
-    private class FormulationList extends VerticalLayout
+    private class IngredientGrid extends VerticalLayout
     {
-        private final VirtualList<Ingredient> virtualList;
         private final TextField filterField;
+        private final Grid<Ingredient> ingredientGrid;
 
-        public FormulationList()
+        public IngredientGrid()
         {
-            virtualList = new VirtualList<>();
-            virtualList.setDataProvider(ingredientDataProvider.getFilterDataProvider());
-            virtualList.setRenderer(new ComponentRenderer<>(ingredient ->
+            filterField = new TextField();
+            ingredientGrid = new Grid<>();
+
+            filterField.setPlaceholder("Suchen...");
+            filterField.setValueChangeMode(ValueChangeMode.LAZY);
+            filterField.getStyle()
+                    .setWidth("99%")
+                    .setPaddingTop("0px");
+
+            filterField.addValueChangeListener(event ->
+            {
+                ingredientNameFilter.setFilterInput(event.getValue());
+                ingredientDataProvider.refreshAll();
+            });
+
+            ingredientGrid.setDataProvider(ingredientDataProvider.getFilterDataProvider());
+            ingredientGrid.addColumn(new ComponentRenderer<>(ingredient ->
             {
                 TextField showField = new TextField();
                 showField.setWidth("99%");
@@ -308,22 +319,9 @@ public class FormulationComponent extends HorizontalLayout
                 });
 
                 return showField;
-            }));
+            })).setHeader(filterField);
 
-            filterField = new TextField();
-            filterField.setPlaceholder("Suchen...");
-            filterField.setValueChangeMode(ValueChangeMode.EAGER);
-            filterField.getStyle()
-                    .setWidth("99%")
-                    .setPaddingTop("0px");
-
-            filterField.addValueChangeListener(event ->
-            {
-                ingredientNameFilter.setFilterInput(event.getValue());
-                ingredientDataProvider.refreshAll();
-            });
-
-            this.add(filterField, virtualList);
+            this.add(ingredientGrid);
             this.setWidth("59%");
             this.setHeightFull();
             this.setPadding(false);

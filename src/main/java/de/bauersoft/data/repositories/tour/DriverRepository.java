@@ -29,12 +29,9 @@ public interface DriverRepository extends JpaRepository<Driver, Long>, JpaSpecif
     List<Driver> findAllUnplannedAllowedDrivers(Long tourId, boolean holidayMode);
 
     @Query("""
-        SELECT driver FROM Driver driver
-        WHERE NOT EXISTS (
-            SELECT 1 FROM Tour tour 
-            WHERE (tour.driver = driver OR tour.coDriver = driver)
-            AND tour.holidayMode = :holidayMode
-        )
+        SELECT d FROM Driver d 
+        LEFT JOIN Tour t ON (t.driver = d OR t.coDriver = d) AND t.holidayMode = :holidayMode
+        WHERE t.id IS NULL
     """)
     List<Driver> findAllUnplannedDrivers(boolean holidayMode);
 
