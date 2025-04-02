@@ -18,10 +18,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specification<T>>
 {
+    private final ConcurrentHashMap<Integer, List<T>> cache;
+
     private final ConfigurableFilterDataProvider<T, Void, Specification<T>> filterDataProvider;
     private final ServiceBase<T, ID> service;
 
@@ -41,6 +44,8 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
             Specification<T> filter = query.getFilter().orElse(Specification.where(null));
             return (int) service.getRepository().count(filter);
         });
+
+        cache = new ConcurrentHashMap<>();
 
         this.filterDataProvider = this.withConfigurableFilter();
 
