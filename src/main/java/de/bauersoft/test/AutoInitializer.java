@@ -5,20 +5,12 @@ import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
-import de.bauersoft.data.entities.institutionFieldAllergen.InstitutionAllergen;
-import de.bauersoft.data.entities.order.Order;
-import de.bauersoft.data.entities.order.OrderAllergen;
-import de.bauersoft.data.entities.variant.Variant;
 import de.bauersoft.services.*;
-import de.bauersoft.views.order.OrderView;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Configuration
 public class AutoInitializer
@@ -26,7 +18,7 @@ public class AutoInitializer
 
     @Bean
     public CommandLineRunner testInits(InstitutionService institutionService,
-                                       InstitutionFieldsService institutionFieldsService,
+                                       InstitutionFieldService institutionFieldService,
                                        InstitutionAllergenService institutionAllergenService,
                                        InstitutionMultiplierService institutionMultiplierService,
                                        InstitutionPatternService institutionPatternService,
@@ -39,7 +31,7 @@ public class AutoInitializer
                                        OrderService orderService,
                                        OrderAllergenService orderAllergenService,
                                        OrderDataService orderDataService,
-                                       VariantService variantService)
+                                       VariantService variantService, IngredientService ingredientService)
     {
         return args ->
         {
@@ -62,8 +54,6 @@ public class AutoInitializer
 //                    });
 
             //new UnitCreator().createUnits(unitService);
-
-
 
             for(int i = courseService.findAll().size(); i < 5; i++)
             {
@@ -97,7 +87,7 @@ public class AutoInitializer
 
                 institutionService.update(institution);
 
-                institutionFieldsService.updateAll(institution.getInstitutionFields());
+                institutionFieldService.updateAll(institution.getInstitutionFields());
             }
 
 //            for(long i = variantService.count(); i < 5; i++)

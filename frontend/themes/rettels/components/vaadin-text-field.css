@@ -1,0 +1,9 @@
+:host(.vaadin-input-field-color-red)::part(input-field)
+{
+    color: red;
+}
+
+:host(.vaadin-input-field-color-default)::part(input-field)
+{
+    color: var(--lumo-body-text-color);
+}

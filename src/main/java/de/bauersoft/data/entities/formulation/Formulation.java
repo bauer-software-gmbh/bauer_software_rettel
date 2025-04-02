@@ -1,5 +1,6 @@
 package de.bauersoft.data.entities.formulation;
 
+import de.bauersoft.components.container.ContainerID;
 import de.bauersoft.data.entities.ingredient.Ingredient;
 import de.bauersoft.data.entities.recipe.Recipe;
 import jakarta.persistence.*;
@@ -16,13 +17,13 @@ import java.util.Objects;
 @Getter
 @Setter
 //Fragile angelegenheit aber works lol
-public class Formulation
+public class Formulation implements ContainerID<FormulationKey>
 {
     @EmbeddedId
     private FormulationKey id;
 
     @Column(nullable = false, columnDefinition = "float default 1.0")
-    private float quantity;
+    private double quantity = 1f;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("recipeId")

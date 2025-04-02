@@ -12,11 +12,11 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import de.bauersoft.components.autofilter.FilterDataProvider;
 import de.bauersoft.components.container.ContainerState;
-import de.bauersoft.data.entities.tourPlanning.vehicle.Vehicle;
-import de.bauersoft.data.entities.tourPlanning.vehicle.VehicleDowntime;
-import de.bauersoft.services.tourPlanning.DriverService;
-import de.bauersoft.services.tourPlanning.VehicleDowntimeService;
-import de.bauersoft.services.tourPlanning.VehicleService;
+import de.bauersoft.data.entities.tour.vehicle.Vehicle;
+import de.bauersoft.data.entities.tour.vehicle.VehicleDowntime;
+import de.bauersoft.services.tour.DriverService;
+import de.bauersoft.services.tour.VehicleDowntimeService;
+import de.bauersoft.services.tour.VehicleService;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.vehicle.downtimes.DowntimeComponent;
 import de.bauersoft.views.vehicle.downtimes.DowntimeMapContainer;
@@ -57,7 +57,7 @@ public class VehicleDialog extends Dialog
         Binder<Vehicle> binder = new Binder<>(Vehicle.class);
 
         FormLayout formLayout = new FormLayout();
-        formLayout.setWidth("50em");
+        formLayout.setWidth("30rem");
         formLayout.setHeight("35em");
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
@@ -65,7 +65,7 @@ public class VehicleDialog extends Dialog
         licencePlateField.setMaxLength(16);
         licencePlateField.setAutofocus(true);
         licencePlateField.setRequired(true);
-        licencePlateField.setWidth("20em");
+        licencePlateField.setWidthFull();
 
         TextArea typeDescriptionArea = new TextArea();
         typeDescriptionArea.setMaxLength(1024);

@@ -1,5 +1,6 @@
 package de.bauersoft.components.autofilter;
 
+import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.function.ValueProvider;
 import jakarta.persistence.criteria.*;
 
@@ -19,7 +20,7 @@ public class Filter<T>
     public Filter(String attributeName)
     {
         this.attributeName = attributeName;
-        filterFunction = getDefaultFilterFunction(s -> "%" + s + "%", true);
+        filterFunction = getDefaultFilterFunction(s -> "%" + s + "%", false);
         sortFunction = getDefaultSortFunction();
 
         filterInput = "";
@@ -126,6 +127,11 @@ public class Filter<T>
     public interface FilterFunction<T>
     {
         Predicate apply(Root<T> root, Path<?> path, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder, Predicate parent, String filterInput);
+    }
+
+    public interface TinyFilterFunction<T>
+    {
+        Predicate apply(Root<T> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder, String filterInput);
     }
 
     public interface SortFunction<T>

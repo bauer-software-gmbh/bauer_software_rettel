@@ -1,13 +1,11 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.recipe.Recipe;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import de.bauersoft.data.repositories.recipe.RecipeGridDataRepository;
 import de.bauersoft.data.repositories.recipe.RecipeRepository;
-import de.bauersoft.views.recipe.FormulationComponent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;

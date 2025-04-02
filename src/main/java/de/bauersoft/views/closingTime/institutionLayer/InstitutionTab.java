@@ -4,8 +4,11 @@ import com.vaadin.componentfactory.EnhancedDateRangePicker;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.dom.Style;
 import de.bauersoft.components.autofilter.Filter;
 import de.bauersoft.components.autofilter.FilterDataProvider;
@@ -105,7 +108,20 @@ public class InstitutionTab extends Div
             return inClause;
         }).setIgnoreFilterInput(true));
 
-        grid.addComponentColumn("Löschen", "4em", institutionClosingTime ->
+        NativeLabel label = new NativeLabel("Löschen");
+        label.getStyle()
+                .set("padding-top", "var(--lumo-space-m)")
+                .set("font-size", "var(--lumo-font-size-m)");
+
+        TextField textField = new TextField();
+        textField.setWidth("4em");
+        textField.setReadOnly(true);
+
+        VerticalLayout headerLayout = new VerticalLayout(label, textField);
+        headerLayout.getThemeList().clear();
+        headerLayout.getThemeList().add("spacing-xs");
+
+        grid.addComponentColumn(institutionClosingTime ->
         {
             Button button = new Button(LineAwesomeIcon.TRASH_SOLID.create());
             button.setWidth("4em");
@@ -116,19 +132,7 @@ public class InstitutionTab extends Div
             });
 
             return button;
-        });
-
-//        grid.addFilter(new Filter<InstitutionClosingTime>("startDate", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
-//        {
-//            criteriaQuery.orderBy(criteriaBuilder.asc(path));
-//            return criteriaBuilder.conjunction();
-//        }).setIgnoreFilterInput(true));
-
-//        grid.addFilter(new Filter<InstitutionClosingTime>("endDate", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
-//        {
-//            criteriaQuery.orderBy(criteriaBuilder.asc(path));
-//            return criteriaBuilder.conjunction();
-//        }).setIgnoreFilterInput(true));
+        }).setHeader(headerLayout);
 
         grid.addColumn("header", "Beschreibung", InstitutionClosingTime::getHeader, s -> "%" + s + "%", false);
 

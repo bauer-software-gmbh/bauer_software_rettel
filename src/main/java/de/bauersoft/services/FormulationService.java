@@ -1,7 +1,6 @@
 package de.bauersoft.services;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.additive.Additive;
 import de.bauersoft.data.entities.formulation.Formulation;
 import de.bauersoft.data.entities.formulation.FormulationKey;
 import de.bauersoft.data.filters.SerializableFilter;
@@ -126,9 +125,9 @@ public class FormulationService implements ServiceBase<Formulation, FormulationK
         return customRepository;
     }
 
-    public List<Formulation> findAllByRecipeId(Long recipeId)
+    public List<Formulation> findAllByRecipe_Id(Long recipeId)
     {
-        return repository.findAllByRecipeId(recipeId);
+        return repository.findAllByRecipe_Id(recipeId);
     }
 
     public void updateFormulations(List<Formulation> oldFormulations, List<Formulation> newFormulations)

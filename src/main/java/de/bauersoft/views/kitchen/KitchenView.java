@@ -30,7 +30,6 @@ import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @CssImport(
         themeFor = "vaadin-grid",
@@ -39,7 +38,7 @@ import java.util.stream.Collectors;
 @Route(value = "kitchen", layout = MainLayout.class)
 @RolesAllowed({"ADMIN", "KITCHEN", "KITCHEN_ADMIN", "OFFICE", "OFFICE_ADMIN"})
 public class KitchenView extends Div {
-    private final InstitutionFieldsService institutionFieldsService;
+    private final InstitutionFieldService institutionFieldService;
     private KitchenDTO kitchenDTO;
     private Registration pollRegistration;
     private final List<Grid<Order>> grids = new ArrayList<>(); // Liste für alle Grids
@@ -54,12 +53,12 @@ public class KitchenView extends Div {
     private final Map<Course, Double> multipliers = new HashMap<>();
 
     public KitchenView(OrderService orderService, CourseService courseService,
-                       InstitutionFieldsService institutionFieldsService,
+                       InstitutionFieldService institutionFieldService,
                        InstitutionMultiplierService institutionMultiplierService,
                        PatternService patternService) {
-        this.institutionFieldsService = institutionFieldsService;
+        this.institutionFieldService = institutionFieldService;
 
-        this.kitchenDTO = new KitchenDTO(orderService, institutionFieldsService);
+        this.kitchenDTO = new KitchenDTO(orderService, institutionFieldService);
 
         setClassName("content");
         VerticalLayout pageVerticalLayout = new VerticalLayout();
@@ -72,7 +71,7 @@ public class KitchenView extends Div {
         // Map mit Multiplikatoren für alle InstitutionFields
 
         // 🔥 Hole alle InstitutionFields und lade die Multiplikatoren
-        List<InstitutionField> institutionFields = institutionFieldsService.findAll();
+        List<InstitutionField> institutionFields = institutionFieldService.findAll();
         for (InstitutionField institutionField : institutionFields) {
             for (InstitutionMultiplier im : institutionField.getInstitutionMultipliers()) {
                 multipliers.put(im.getCourse(), im.getMultiplier());
@@ -177,7 +176,7 @@ public class KitchenView extends Div {
 
             // 1️⃣ Hole das InstitutionField für die Institution und das Feld
             Optional<InstitutionField> institutionFieldOpt =
-                    institutionFieldsService.findByInstitutionAndField(order.getInstitution(), order.getField());
+                    institutionFieldService.findByInstitutionAndField(order.getInstitution(), order.getField());
 
             if (institutionFieldOpt.isEmpty()) {
                 Notification.show("❌ Fehler: InstitutionField nicht gefunden!");
@@ -252,7 +251,7 @@ public class KitchenView extends Div {
             long fieldId = order.getField().getId();
 
             // Direkt die aktuellen Werte berechnen
-            int sollWert = institutionFieldsService.findByInstitutionAndField(order.getInstitution(), order.getField())
+            int sollWert = institutionFieldService.findByInstitutionAndField(order.getInstitution(), order.getField())
                     .map(institutionField -> institutionField.getInstitutionPatterns().stream()
                             .filter(pattern -> pattern.getPattern().getId() == 1)
                             .mapToInt(pattern -> {
@@ -405,7 +404,7 @@ public class KitchenView extends Div {
 
             // 1️⃣ Hole das InstitutionField für die Institution und das Feld
             Optional<InstitutionField> institutionFieldOptional =
-                    institutionFieldsService.findByInstitutionAndField(order.getInstitution(), order.getField());
+                    institutionFieldService.findByInstitutionAndField(order.getInstitution(), order.getField());
 
             if (institutionFieldOptional.isEmpty()) {
                 Notification.show("❌ Fehler: InstitutionField nicht gefunden!");
@@ -481,7 +480,7 @@ public class KitchenView extends Div {
             long fieldId = order.getField().getId();
 
             // Direkt die aktuellen Werte berechnen
-            int sollWert = institutionFieldsService.findByInstitutionAndField(order.getInstitution(), order.getField())
+            int sollWert = institutionFieldService.findByInstitutionAndField(order.getInstitution(), order.getField())
                     .map(institutionField -> institutionField.getInstitutionPatterns().stream()
                             .filter(institutionPattern -> institutionPattern.getPattern().equals(pattern))
                             .mapToInt(institutionPattern -> {

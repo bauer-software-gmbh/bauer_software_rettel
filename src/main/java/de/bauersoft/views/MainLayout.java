@@ -24,6 +24,7 @@ import de.bauersoft.views.address.AddressView;
 import de.bauersoft.views.allergen.AllergenView;
 import de.bauersoft.views.closingTime.ClosingTimeView;
 import de.bauersoft.views.component.ComponentView;
+import de.bauersoft.views.contract.ContractView;
 import de.bauersoft.views.course.CourseView;
 import de.bauersoft.views.driver.DriverView;
 import de.bauersoft.views.field.FieldView;
@@ -36,7 +37,7 @@ import de.bauersoft.views.offers.OffersView;
 import de.bauersoft.views.order.OrderView;
 import de.bauersoft.views.pattern.PatternView;
 import de.bauersoft.views.recipe.RecipeView;
-import de.bauersoft.views.tour.TourView;
+import de.bauersoft.views.tourCreation.TourView;
 import de.bauersoft.views.unit.UnitView;
 import de.bauersoft.views.users.UsersView;
 import de.bauersoft.views.vehicle.VehicleView;
@@ -156,13 +157,14 @@ public class MainLayout extends AppLayout
                 tour.addItem(new SideNavItem("Fahrzeuge", VehicleView.class, LineAwesomeIcon.CAR_CRASH_SOLID.create()));
 
             if(accessChecker.hasAccess(TourView.class))
-                tour.addItem(new SideNavItem("Touren Planung", TourView.class, LineAwesomeIcon.MAP_MARKED_ALT_SOLID.create()));
+                tour.addItem(new SideNavItem("Touren Erstellung", TourView.class, LineAwesomeIcon.MAP_MARKED_ALT_SOLID.create()));
 
-            //nav.addItem(tour);
+            nav.addItem(tour);
         }
 
         if(accessChecker.hasAccess(UsersView.class) || accessChecker.hasAccess(FieldView.class)
-                || accessChecker.hasAccess(InstitutionView.class) || accessChecker.hasAccess(AddressView.class))
+                || accessChecker.hasAccess(InstitutionView.class) || accessChecker.hasAccess(AddressView.class)
+                || accessChecker.hasAccess(ContractView.class))
         {
             SideNavItem accounting = new SideNavItem("Verwaltung");
             if(accessChecker.hasAccess(UsersView.class))
@@ -170,6 +172,9 @@ public class MainLayout extends AppLayout
 
             if(accessChecker.hasAccess(InstitutionView.class))
                 accounting.addItem(new SideNavItem("Institutionen", InstitutionView.class, LineAwesomeIcon.USERS_SOLID.create()));
+
+            if(accessChecker.hasAccess(ContractView.class))
+                accounting.addItem(new SideNavItem("Vertragslaufzeiten", ContractView.class, LineAwesomeIcon.FILE_SIGNATURE_SOLID.create()));
 
             if(accessChecker.hasAccess(AddressView.class))
                 accounting.addItem(new SideNavItem("Adressen", AddressView.class, LineAwesomeIcon.USERS_SOLID.create()));

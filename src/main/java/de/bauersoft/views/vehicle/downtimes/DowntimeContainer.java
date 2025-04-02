@@ -2,7 +2,7 @@ package de.bauersoft.views.vehicle.downtimes;
 
 import de.bauersoft.components.container.Container;
 import de.bauersoft.components.container.ContainerState;
-import de.bauersoft.data.entities.tourPlanning.vehicle.VehicleDowntime;
+import de.bauersoft.data.entities.tour.vehicle.VehicleDowntime;
 
 import java.time.LocalDate;
 

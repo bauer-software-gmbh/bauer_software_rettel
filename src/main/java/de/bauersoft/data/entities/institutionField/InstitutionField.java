@@ -1,5 +1,6 @@
 package de.bauersoft.data.entities.institutionField;
 
+import de.bauersoft.components.container.ContainerID;
 import de.bauersoft.data.entities.AbstractEntity;
 import de.bauersoft.data.entities.field.Field;
 import de.bauersoft.data.entities.institution.Institution;
@@ -24,7 +25,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-public class InstitutionField extends AbstractEntity
+public class InstitutionField extends AbstractEntity implements ContainerID<Long>
 {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "institution_id")

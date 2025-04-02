@@ -6,12 +6,15 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.dom.Style;
 import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPattern;
 import de.bauersoft.data.entities.institutionFieldPattern.InstitutionPatternKey;
 import de.bauersoft.data.entities.pattern.Pattern;
+import de.bauersoft.services.PatternService;
 import de.bauersoft.views.institution.InstitutionDialog;
 import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.views.institution.institutionFields.InstitutionFieldDialog;
@@ -24,30 +27,43 @@ import java.util.Objects;
 @Getter
 public class PatternComponent extends FlexLayout
 {
-    private final InstitutionDialog institutionDialog;
-    private final InstitutionFieldDialog institutionFieldDialog;
-    private final InstitutionField institutionField;
+    private final PatternService patternService;
+    private final InstitutionField item;
 
     private final PatternMapContainer patternMapContainer;
 
     private final Map<Pattern, PatternBox> patternBoxMap;
 
-    public PatternComponent(InstitutionDialog institutionDialog, InstitutionFieldDialog institutionFieldDialog, PatternMapContainer patternMapContainer)
+    private final HorizontalLayout headerLayout;
+    private final TextField headerField;
+
+    public PatternComponent(PatternService patternService, InstitutionField item, PatternMapContainer patternMapContainer)
     {
-        this.institutionDialog = institutionDialog;
-        this.institutionFieldDialog = institutionFieldDialog;
-        this.institutionField = institutionFieldDialog.getInstitutionField();
+        this.patternService = patternService;
+        this.item = item;
         this.patternMapContainer = patternMapContainer;
 
         patternBoxMap = new HashMap<>();
 
-        for(Pattern pattern : institutionDialog.getPatternService().findAll())
+        headerLayout = new HorizontalLayout();
+        headerLayout.setWidthFull();
+
+        headerField = new TextField();
+        headerField.setWidthFull();
+        headerField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_CENTER, TextFieldVariant.LUMO_SMALL);
+        headerField.setReadOnly(true);
+        headerField.setValue("Varianten");
+
+        headerLayout.add(headerField);
+        this.add(headerLayout);
+
+        for(Pattern pattern : patternService.findAll())
         {
             PatternContainer patternContainer = (PatternContainer) patternMapContainer.addIfAbsent(pattern, () ->
             {
                 InstitutionPattern institutionPattern = new InstitutionPattern();
                 institutionPattern.setId(new InstitutionPatternKey(null, pattern.getId()));
-                institutionPattern.setInstitutionField(institutionField);
+                institutionPattern.setInstitutionField(item);
                 institutionPattern.setPattern(pattern);
 
                 return institutionPattern;
@@ -62,7 +78,6 @@ public class PatternComponent extends FlexLayout
         this.getStyle()
                 .setFlexWrap(Style.FlexWrap.WRAP)
                 .setDisplay(Style.Display.FLEX)
-                .set("gap", "var(--lumo-space-m)")
                 .set("padding", "var(--lumo-space-s)")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
                 .set("border-radius", "var(--lumo-border-radius-s)");
@@ -140,11 +155,9 @@ public class PatternComponent extends FlexLayout
                     .bind(NumberField::getValue, NumberField::setValue);
 
             this.add(nameDiv, amountField);
-            this.setWidth("calc(100% / 3.3)");
+            this.setWidth("calc(32.28%)");
             this.getStyle()
-                    .set("border", "1px solid var(--lumo-contrast-20pct)")
-                    .set("border-radius", "var(--lumo-border-radius-m)")
-                    .set("padding", "var(--lumo-space-s)");
+                    .set("padding", "var(--lumo-space-xs)");
         }
 
         public boolean isValid()

@@ -16,22 +16,24 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.dom.Style;
 import de.bauersoft.components.autofilter.FilterDataProvider;
+import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.institution.Institution;
+import de.bauersoft.data.entities.institutionField.InstitutionField;
 import de.bauersoft.data.entities.user.User;
-import de.bauersoft.data.providers.AddressDataProvider;
-import de.bauersoft.data.providers.InstitutionDataProvider;
 import de.bauersoft.services.*;
 import de.bauersoft.views.DialogState;
 import de.bauersoft.views.address.AddressComboBox;
-import de.bauersoft.views.institution.institutionFields.FieldDragComponent;
+import de.bauersoft.views.institution.institutionFields.InstitutionFieldComponent;
+import de.bauersoft.views.institution.institutionFields.InstitutionFieldContainer;
+import de.bauersoft.views.institution.institutionFields.components.allergen.AllergenMapContainer;
+import de.bauersoft.views.institution.institutionFields.components.multiplier.MultiplierMapContainer;
+import de.bauersoft.views.institution.institutionFields.components.pattern.PatternMapContainer;
 import lombok.Getter;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import java.time.Duration;
 import java.time.LocalTime;
 import java.util.Objects;
 
@@ -41,7 +43,7 @@ public class InstitutionDialog extends Dialog
 	private final FilterDataProvider<Institution, Long> filterDataProvider;
 
 	private final InstitutionService institutionService;
-	private final InstitutionFieldsService institutionFieldsService;
+	private final InstitutionFieldService institutionFieldService;
 	private final AddressService addressService;
 	private final FieldService fieldService;
 	private final UserService userService;
@@ -67,13 +69,12 @@ public class InstitutionDialog extends Dialog
 	private TimePicker orderEndTimePicker;
 	private AddressComboBox addressComboBox;
 	private MultiSelectComboBox<User> userMultiSelectComboBox;
-	private FieldDragComponent fieldDragComponent;
 
-	public InstitutionDialog(FilterDataProvider<Institution, Long> filterDataProvider, InstitutionService institutionService, InstitutionFieldsService institutionFieldsService, AddressService addressService, FieldService fieldService, UserService userService, InstitutionMultiplierService institutionMultiplierService, CourseService courseService, FieldMultiplierService fieldMultiplierService, AllergenService allergenService, InstitutionAllergenService institutionAllergenService, PatternService patternService, InstitutionPatternService institutionPatternService, InstitutionClosingTimeService institutionClosingTimeService, Institution item, DialogState dialogState)
+	public InstitutionDialog(FilterDataProvider<Institution, Long> filterDataProvider, InstitutionService institutionService, InstitutionFieldService institutionFieldService, AddressService addressService, FieldService fieldService, UserService userService, InstitutionMultiplierService institutionMultiplierService, CourseService courseService, FieldMultiplierService fieldMultiplierService, AllergenService allergenService, InstitutionAllergenService institutionAllergenService, PatternService patternService, InstitutionPatternService institutionPatternService, InstitutionClosingTimeService institutionClosingTimeService, Institution item, DialogState dialogState)
 	{
         this.filterDataProvider = filterDataProvider;
         this.institutionService = institutionService;
-		this.institutionFieldsService = institutionFieldsService;
+		this.institutionFieldService = institutionFieldService;
 		this.addressService = addressService;
 		this.fieldService = fieldService;
 		this.userService = userService;
@@ -92,8 +93,11 @@ public class InstitutionDialog extends Dialog
 
 		Binder<Institution> binder = new Binder<>(Institution.class);
 
+		InstitutionFieldComponent institutionFieldComponent = new InstitutionFieldComponent(institutionService, fieldService, institutionFieldService, institutionPatternService, patternService, institutionMultiplierService, fieldMultiplierService, courseService, institutionAllergenService, allergenService, item);
+
 		inputLayout = new FormLayout();
-		inputLayout.setWidthFull();
+		inputLayout.setWidth("40rem");
+
 		inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
 		nameTextField = new TextField();
@@ -143,18 +147,12 @@ public class InstitutionDialog extends Dialog
 		userMultiSelectComboBox.setItems(userService.getRepository().findAll());
 		userMultiSelectComboBox.setWidthFull();
 
-		fieldDragComponent = new FieldDragComponent(this);
-		fieldDragComponent.setFieldPool(fieldService.getRepository().findAll());
-		fieldDragComponent.updateView();
-
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(customerIdTextField, "Kunden Nr. "), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(datePickerLayout, "Bestellung"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(addressComboBox, "Adresse"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(userMultiSelectComboBox, "Benutzer"), 1);
-
-
 
 		binder.forField(nameTextField).asRequired((value, context) ->
 		{
@@ -213,7 +211,45 @@ public class InstitutionDialog extends Dialog
 				{
 					institutionService.update(item);
 
-					fieldDragComponent.updateInstitutionFields(item.getInstitutionFields().stream().toList());
+					institutionFieldComponent.getMapContainer()
+							.acceptTemporaries()
+							.run(institutionFieldService);
+
+					for(InstitutionField institutionField : institutionFieldService.findAllByInstitution_Id(item.getId()))
+					{
+						InstitutionFieldContainer institutionFieldContainer = (InstitutionFieldContainer) institutionFieldComponent.getMapContainer().getContainer(institutionField.getField());
+						ContainerState state = institutionFieldContainer.getState();
+						if(state == ContainerState.DELETE || state == ContainerState.HIDE)
+							continue;
+
+						PatternMapContainer patternMapContainer = institutionFieldComponent.getPatternMapContainers().get(institutionField.getField());
+						if(patternMapContainer != null)
+						{
+							patternMapContainer.evaluate(container ->
+							{
+								container.getEntity().getId().setInstitutionFieldId(institutionField.getId());
+							}).run(institutionPatternService);
+						}
+
+						MultiplierMapContainer multiplierMapContainer = institutionFieldComponent.getMultiplierMapContainers().get(institutionField.getField());
+						if(multiplierMapContainer != null)
+						{
+							multiplierMapContainer.evaluate(container ->
+							{
+								container.getEntity().getId().setInstitutionFieldId(institutionField.getId());
+							}).run(institutionMultiplierService);
+						}
+
+						AllergenMapContainer allergenMapContainer = institutionFieldComponent.getAllergenMapContainers().get(institutionField.getField());
+						if(allergenMapContainer != null)
+						{
+							allergenMapContainer.evaluate(container ->
+							{
+								container.getEntity().setInstitutionField(institutionField);
+							}).run(institutionAllergenService);
+						}
+					}
+
 
 					filterDataProvider.refreshAll();
 
@@ -237,17 +273,11 @@ public class InstitutionDialog extends Dialog
 		cancelButton.addClickListener(event ->
 		{
 			binder.removeBean();
-			fieldDragComponent.loadTemporaries();
 			filterDataProvider.refreshAll();
 			this.close();
 		});
 
-		this.setWidth("50rem");
-		this.setMaxWidth("65vw");
-		this.setHeight("62.5rem");
-		this.setMaxHeight("100vh");
-
-		this.add(inputLayout, fieldDragComponent);
+		this.add(inputLayout, institutionFieldComponent);
 		this.getFooter().add(saveButton, cancelButton);
 		this.setCloseOnEsc(false);
 		this.setCloseOnOutsideClick(false);

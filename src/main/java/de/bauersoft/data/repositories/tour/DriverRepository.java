@@ -1,0 +1,48 @@
+package de.bauersoft.data.repositories.tour;
+
+import de.bauersoft.data.entities.tour.driver.Driver;
+import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+
+public interface DriverRepository extends JpaRepository<Driver, Long>, JpaSpecificationExecutor<Driver>
+{
+    boolean existsDriverByUser_Id(Long userId);
+
+
+    @Query("""
+        SELECT driver FROM Driver driver
+        WHERE NOT EXISTS (
+            SELECT 1 FROM Tour tour 
+            WHERE (tour.driver = driver OR tour.coDriver = driver)
+            AND tour.holidayMode = :holidayMode
+        )
+        AND EXISTS (
+            SELECT 1 FROM driver.driveableTours driveableTour 
+            WHERE driveableTour.id = :tourId
+        )
+    """)
+    List<Driver> findAllUnplannedAllowedDrivers(Long tourId, boolean holidayMode);
+
+    @Query("""
+        SELECT driver FROM Driver driver
+        WHERE NOT EXISTS (
+            SELECT 1 FROM Tour tour 
+            WHERE (tour.driver = driver OR tour.coDriver = driver)
+            AND tour.holidayMode = :holidayMode
+        )
+    """)
+    List<Driver> findAllUnplannedDrivers(boolean holidayMode);
+
+    @Transactional
+    @Modifying
+    @Query(value = """
+        DELETE FROM driveable_tours
+        WHERE tour_id = :tourId
+    """, nativeQuery = true)
+    void deleteAllDriveableToursByTourId(Long tourId);
+}

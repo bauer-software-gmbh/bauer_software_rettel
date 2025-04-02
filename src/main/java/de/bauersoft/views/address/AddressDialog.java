@@ -38,10 +38,7 @@ public class AddressDialog extends Dialog
         Binder<Address> binder = new Binder<Address>(Address.class);
 
         FormLayout inputLayout = new FormLayout();
-		inputLayout.setWidth("50vw");
-		inputLayout.setMaxWidth("50em");
-		inputLayout.setHeight("50vh");
-		inputLayout.setMaxHeight("20em");
+		inputLayout.setWidth("30rem");
 
         inputLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
@@ -49,22 +46,22 @@ public class AddressDialog extends Dialog
         streetTextField.setMaxLength(64);
         streetTextField.setAutofocus(true);
         streetTextField.setRequired(true);
-        streetTextField.setMinWidth("20em");
+        streetTextField.setWidthFull();
 
         TextField houseNumberTextField = new TextField();
         houseNumberTextField.setMaxLength(8);
         houseNumberTextField.setRequired(true);
-        houseNumberTextField.setMinWidth("20em");
+        houseNumberTextField.setWidthFull();
 
         TextField postalCodeTextField = new TextField();
         postalCodeTextField.setMaxLength(5);
         postalCodeTextField.setRequired(true);
-        postalCodeTextField.setMinWidth("20em");
+        postalCodeTextField.setWidthFull();
 
         TextField cityTextField = new TextField();
         cityTextField.setMaxLength(64);
         cityTextField.setRequired(true);
-        cityTextField.setMinWidth("20em");
+        cityTextField.setWidthFull();
 
         inputLayout.setColspan(inputLayout.addFormItem(streetTextField, "Straße"), 1);
         inputLayout.setColspan(inputLayout.addFormItem(houseNumberTextField, "Hausnummer"), 1);

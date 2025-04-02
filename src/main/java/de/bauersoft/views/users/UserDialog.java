@@ -65,10 +65,7 @@ public class UserDialog extends Dialog
         Binder<User> binder = new Binder<>(User.class);
 
         FormLayout inputLayout = new FormLayout();
-        inputLayout.setWidth("50vw");
-        inputLayout.setMaxWidth("50em");
-        inputLayout.setHeight("50vh");
-        inputLayout.setMaxHeight("18em");
+        inputLayout.setWidth("30rem");
         inputLayout.getElement().setAttribute("autocomplete", "off");
 
         inputLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
@@ -77,31 +74,32 @@ public class UserDialog extends Dialog
         nameTextField.setMaxLength(50);
         nameTextField.setAutofocus(true);
         nameTextField.setRequired(true);
-        nameTextField.setMinWidth("20em");
+        nameTextField.setWidthFull();
 
         TextField surnameTextField = new TextField();
         surnameTextField.setMaxLength(50);
         surnameTextField.setRequired(true);
-        surnameTextField.setMinWidth("20em");
+        surnameTextField.setWidthFull();
 
         EmailField emailField = new EmailField();
         emailField.setMaxLength(128);
         emailField.setRequired(true);
-        emailField.setMinWidth("20em");
+        emailField.setWidthFull();
 
         MultiSelectComboBox<Role> roleMultiSelectComboBox = new MultiSelectComboBox<>();
+        roleMultiSelectComboBox.setWidthFull();
+        roleMultiSelectComboBox.setItemLabelGenerator(Role::getName);
         roleMultiSelectComboBox.setItems(Role.values());
-        roleMultiSelectComboBox.setSizeFull();
 
         PasswordField passwordField = new PasswordField();
         passwordField.setMaxLength(60);
         passwordField.setRequired(true);
-        passwordField.setMinWidth("20em");
+        passwordField.setWidthFull();
 
         PasswordField confirmPasswordField = new PasswordField();
         confirmPasswordField.setMaxLength(60);
         confirmPasswordField.setRequired(true);
-        confirmPasswordField.setMinWidth("20em");
+        confirmPasswordField.setWidthFull();
 
         passwordField.getElement().setAttribute("autocomplete", "new-password");
         confirmPasswordField.getElement().setAttribute("autocomplete", "new-password");
