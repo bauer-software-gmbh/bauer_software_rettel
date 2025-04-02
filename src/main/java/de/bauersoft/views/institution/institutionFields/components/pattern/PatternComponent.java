@@ -146,7 +146,6 @@ public class PatternComponent extends FlexLayout
             {
                 patternContainer.setTempAmount(Objects.requireNonNullElse(event.getValue(), 0).intValue());
                 patternContainer.setTempState(ContainerState.UPDATE);
-                Notification.show("UPDATE");
             });
 
             amountBinder = new Binder<>();

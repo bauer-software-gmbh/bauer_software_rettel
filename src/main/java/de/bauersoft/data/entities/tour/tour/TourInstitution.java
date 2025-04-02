@@ -39,7 +39,7 @@ public class TourInstitution implements ContainerID<TourInstitutionKey>
 //    private LocalDate contractEnd;
 
     @Column(nullable = false)
-    private LocalTime expectedArrivalTime;
+    private LocalTime expectedArrivalTime = LocalTime.of(0, 0);
 
 //    @Lob
 //    @Basic(fetch = FetchType.LAZY)

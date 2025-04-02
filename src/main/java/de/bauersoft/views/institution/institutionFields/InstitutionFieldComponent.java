@@ -8,7 +8,6 @@ import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import de.bauersoft.components.autofilter.Filter;
@@ -26,7 +25,6 @@ import de.bauersoft.views.institution.institutionFields.components.multiplier.Mu
 import de.bauersoft.views.institution.institutionFields.components.pattern.PatternMapContainer;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.Getter;
-import org.atmosphere.config.service.Get;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import javax.swing.*;
@@ -56,7 +54,7 @@ public class InstitutionFieldComponent extends HorizontalLayout
     private final InstitutionFieldMapContainer mapContainer;
 
     private final InstitutionFieldGrid institutionFieldGrid;
-    private final InstitutionFieldList institutionFieldList;
+    private final FieldGrid fieldGrid;
 
     private final Map<Field, PatternMapContainer> patternMapContainers;
     private final Map<Field, MultiplierMapContainer> multiplierMapContainers;
@@ -100,13 +98,13 @@ public class InstitutionFieldComponent extends HorizontalLayout
 
         fieldNameFilter = new Filter<Field>("name", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
-            return criteriaBuilder.like(criteriaBuilder.lower(path.as(String.class)), filterInput + "%");
+            return criteriaBuilder.like(criteriaBuilder.lower(path.as(String.class)), filterInput.toLowerCase() + "%");
         });
 
         fieldDataProvider.addFilter(fieldFilter);
         fieldDataProvider.addFilter(fieldNameFilter);
 
-        fieldDataProvider.callFilters("name", SortOrder.ASCENDING);
+        fieldDataProvider.applyFilters("name", SortOrder.ASCENDING);
 
         mapContainer = new InstitutionFieldMapContainer();
         for(InstitutionField institutionField : institutionFieldService.findAllByInstitution_Id(item.getId()))
@@ -114,7 +112,7 @@ public class InstitutionFieldComponent extends HorizontalLayout
                     .setGridItem(true);
 
         institutionFieldGrid = new InstitutionFieldGrid();
-        institutionFieldList = new InstitutionFieldList();
+        fieldGrid = new FieldGrid();
 
         updateView();
 
@@ -122,8 +120,8 @@ public class InstitutionFieldComponent extends HorizontalLayout
         multiplierMapContainers = new HashMap<>();
         allergenMapContainers = new HashMap<>();
 
-        this.add(institutionFieldGrid, institutionFieldList);
-        this.setHeight("30rem");
+        this.add(institutionFieldGrid, fieldGrid);
+        this.setHeight("25rem");
         this.getStyle()
                 .setMarginTop("var(--lumo-space-m)");
     }
@@ -282,16 +280,30 @@ public class InstitutionFieldComponent extends HorizontalLayout
     }
 
     @Getter
-    private class InstitutionFieldList extends VerticalLayout
+    private class FieldGrid extends VerticalLayout
     {
-        private final VirtualList<Field> virtualList;
         private final TextField filterField;
+        private final Grid<Field> grid;
 
-        public InstitutionFieldList()
+        public FieldGrid()
         {
-            virtualList = new VirtualList<>();
-            virtualList.setDataProvider(fieldDataProvider.getFilterDataProvider());
-            virtualList.setRenderer(new ComponentRenderer<>(field ->
+            filterField = new TextField();
+            grid = new Grid<>();
+
+            filterField.setPlaceholder("Suchen...");
+            filterField.setValueChangeMode(ValueChangeMode.LAZY);
+            filterField.getStyle()
+                    .setWidth("99%")
+                    .setPaddingTop("0px");
+
+            filterField.addValueChangeListener(event ->
+            {
+                fieldNameFilter.setFilterInput(event.getValue());
+                fieldDataProvider.refreshAll();
+            });
+
+            grid.setDataProvider(fieldDataProvider.getFilterDataProvider());
+            grid.addColumn(new ComponentRenderer<>(field ->
             {
                 TextField showField = new TextField();
                 showField.setWidth("99%");
@@ -305,22 +317,9 @@ public class InstitutionFieldComponent extends HorizontalLayout
                 });
 
                 return showField;
-            }));
+            })).setHeader(filterField);
 
-            filterField = new TextField();
-            filterField.setPlaceholder("Suchen...");
-            filterField.setValueChangeMode(ValueChangeMode.EAGER);
-            filterField.getStyle()
-                    .setWidth("99%")
-                    .setPaddingTop("0px");
-
-            filterField.addValueChangeListener(event ->
-            {
-                fieldNameFilter.setFilterInput(event.getValue());
-                fieldDataProvider.refreshAll();
-            });
-
-            this.add(filterField, virtualList);
+            this.add(grid);
             this.setWidth("99%");
             this.setHeightFull();
             this.setPadding(false);

@@ -48,6 +48,8 @@ public class InstitutionFieldDialog extends Dialog
         this.multiplierMapContainer = multiplierMapContainer;
         this.allergenMapContainer = allergenMapContainer;
 
+        this.open();
+
         setHeaderTitle("Prognosen für " + item.getInstitution().getName() + " - " + item.getField().getName());
 
         patternComponent = new PatternComponent(patternService, item, patternMapContainer);
@@ -94,6 +96,5 @@ public class InstitutionFieldDialog extends Dialog
         this.setCloseOnEsc(false);
         this.setCloseOnOutsideClick(false);
         this.setModal(true);
-        this.open();
     }
 }

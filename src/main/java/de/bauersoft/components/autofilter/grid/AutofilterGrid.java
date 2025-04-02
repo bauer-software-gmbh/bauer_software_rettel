@@ -10,7 +10,6 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.NativeLabel;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -26,7 +25,6 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 import javax.swing.SortOrder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 @CssImport(value = "./themes/rettels/components/auto-filter-grid.css")
@@ -112,9 +110,9 @@ public class AutofilterGrid<T, ID> extends Grid<T>
         {
             filter.setFilterInput(s);
             if(sortColumn == null)
-                dataProvider.callFilters();
+                dataProvider.applyFilters();
             else
-                dataProvider.callFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+                dataProvider.applyFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
         });
 
         columns.add(column);
@@ -212,9 +210,9 @@ public class AutofilterGrid<T, ID> extends Grid<T>
         {
             filter.setFilterInput(s);
             if(sortColumn == null)
-                dataProvider.callFilters();
+                dataProvider.applyFilters();
             else
-                dataProvider.callFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+                dataProvider.applyFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
         }, componentProvider);
 
         columns.add(column);
@@ -276,9 +274,9 @@ public class AutofilterGrid<T, ID> extends Grid<T>
 
         //hier
         if(sortColumn == null)
-            dataProvider.callFilters();
+            dataProvider.applyFilters();
         else
-            dataProvider.callFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+            dataProvider.applyFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
         //bis hier
 
         //nach unten packen
@@ -491,7 +489,7 @@ public class AutofilterGrid<T, ID> extends Grid<T>
 
                 setSortOrder(nextSortOrder());
 
-                dataProvider.callFilters(attributeName, sortOrder);
+                dataProvider.applyFilters(attributeName, sortOrder);
 
                 for(Column column : columns)
                 {
@@ -561,7 +559,7 @@ public class AutofilterGrid<T, ID> extends Grid<T>
 
         sortColumn.setSortOrder(sortOrder);
 
-        dataProvider.callFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+        dataProvider.applyFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
 
         for(Column column : columns)
         {

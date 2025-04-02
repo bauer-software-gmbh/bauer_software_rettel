@@ -15,6 +15,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -63,28 +64,36 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
         return filters;
     }
 
+    public FilterDataProvider<T, ID> addFilters(Filter<T>... filters)
+    {
+        this.filters.addAll(Arrays.stream(filters).toList());
+
+        applyFilters();
+        return this;
+    }
+
     public FilterDataProvider<T, ID> addFilter(Filter<T> filter)
     {
         filters.add(filter);
 
-        callFilters();
+        applyFilters();
         return this;
     }
 
     public FilterDataProvider<T, ID> removeFilter(Filter<T> filter)
     {
         if(filters.remove(filter))
-            callFilters();
+            applyFilters();
 
         return this;
     }
 
-    public FilterDataProvider<T, ID> callFilters()
+    public FilterDataProvider<T, ID> applyFilters()
     {
-        return callFilters(null, SortOrder.UNSORTED);
+        return applyFilters(null, SortOrder.UNSORTED);
     }
 
-    public FilterDataProvider<T, ID> callFilters(String sortAttributeName, SortOrder sortOrder)
+    public FilterDataProvider<T, ID> applyFilters(String sortAttributeName, SortOrder sortOrder)
     {
         filterDataProvider.setFilter(buildFilter(sortAttributeName, sortOrder));
         filterDataProvider.refreshAll();

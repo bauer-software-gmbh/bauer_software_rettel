@@ -86,11 +86,9 @@ public class TourDialog extends Dialog
         Binder<Tour> binder = new Binder<>(Tour.class);
 
         TourInstitutionComponent tourInstitutionComponent = new TourInstitutionComponent(item, institutionService, tourInstitutionService);
-        tourInstitutionComponent.setAvailableInstitutions(tourInstitutionService.findAllUnplannedInstitutions(item.isHolidayMode()));
 
         FormLayout  formLayout = new FormLayout();
         formLayout.setWidth("50em");
-        //formLayout.setHeight("75em");
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
 
@@ -121,6 +119,7 @@ public class TourDialog extends Dialog
 
         ComboBox<Driver> driverComboBox = new ComboBox<>("Hauptfahrer");
         driverComboBox.setEnabled(state != DialogState.NEW);
+        driverComboBox.setRequired(state != DialogState.NEW);
         driverComboBox.setItems(unplannedAllowedDriversDataProvider);
         driverComboBox.setItemLabelGenerator(driver ->
         {
@@ -130,6 +129,7 @@ public class TourDialog extends Dialog
 
         DatePicker drivesUntilDatePicker = new DatePicker("Fährt bis");
         drivesUntilDatePicker.setEnabled(state != DialogState.NEW);
+        drivesUntilDatePicker.setRequired(state != DialogState.NEW);
         driverLayout.add(driverComboBox, drivesUntilDatePicker);
 
 
@@ -166,7 +166,8 @@ public class TourDialog extends Dialog
 
         holidayCheckbox.addValueChangeListener(event ->
         {
-            tourInstitutionComponent.setAvailableInstitutions(tourInstitutionService.findAllUnplannedInstitutions(event.getValue()));
+            if(event.getSource().isEnabled())
+                tourInstitutionComponent.setHolidayMode(event.getValue());
 
             vehicleComboBox.setItems(vehicleService.findAllUnplannedVehicles(event.getValue()));
         });

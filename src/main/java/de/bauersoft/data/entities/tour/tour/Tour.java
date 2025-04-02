@@ -13,6 +13,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -52,10 +53,10 @@ public class Tour extends AbstractEntity
     private LocalDate coDrivesUntil;
 
     @OneToMany(mappedBy = "tour", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    private Set<TourInstitution> institutions;
+    private Set<TourInstitution> institutions = new HashSet<>();
 
     @ManyToMany(mappedBy = "driveableTours", fetch = FetchType.EAGER)
-    private Set<Driver> possibleDrivers;
+    private Set<Driver> possibleDrivers = new HashSet<>();
 
     @Column(nullable = false, columnDefinition = "TINYINT default 0")
     private boolean holidayMode = false;
