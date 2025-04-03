@@ -106,13 +106,16 @@ public class AutofilterGrid<T, ID> extends Grid<T>
         Filter<T> filter = new Filter<>(attributeName, filterFunction, sortFunction);
         addFilter(filter);
 
+        if(sortColumn == null)
+            dataProvider.applyFilters();
+        else
+            dataProvider.applyFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+
         Column column = new Column(attributeName, sortType, header, valueProvider, s ->
         {
             filter.setFilterInput(s);
-            if(sortColumn == null)
-                dataProvider.applyFilters();
-            else
-                dataProvider.applyFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+
+            dataProvider.refreshAll();
         });
 
         columns.add(column);
@@ -277,6 +280,7 @@ public class AutofilterGrid<T, ID> extends Grid<T>
             dataProvider.applyFilters();
         else
             dataProvider.applyFilters(sortColumn.getAttributeName(), sortColumn.getSortOrder());
+
         //bis hier
 
         //nach unten packen
@@ -284,9 +288,9 @@ public class AutofilterGrid<T, ID> extends Grid<T>
         Column column = new Column(attributeName, sortType, header, renderer, s ->
         {
             filter.setFilterInput(s);
-            //hier unten hin
 
-            dataProvider.refreshAll(); //und das hier entfernen
+            dataProvider.refreshAll();
+            //und das hier entfernen
         });
 
         columns.add(column);
@@ -471,7 +475,7 @@ public class AutofilterGrid<T, ID> extends Grid<T>
             inputLayout.getStyle().set("gap", "var(--lumo-space-m)");
 
             inputField = new TextField();
-            inputField.setValueChangeMode(ValueChangeMode.EAGER);
+            inputField.setValueChangeMode(ValueChangeMode.LAZY);
             inputField.setClearButtonVisible(true);
             inputField.setWidth("100%");
             inputField.setMinWidth("1%");

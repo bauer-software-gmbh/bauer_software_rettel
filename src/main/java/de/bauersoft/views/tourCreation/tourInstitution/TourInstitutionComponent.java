@@ -253,30 +253,28 @@ public class TourInstitutionComponent extends HorizontalLayout
     }
 
     @Getter
-    private class InstitutionGrid extends VerticalLayout
+    private class InstitutionGrid extends Grid<Institution>
     {
-        private final TextField filterField;
-        private final Grid<Institution> institutionGrid;
+        private final TextField filterHeader;
 
         public InstitutionGrid()
         {
-            filterField = new TextField();
-            institutionGrid = new Grid<>();
+            filterHeader = new TextField();
 
-            filterField.setPlaceholder("Suchen...");
-            filterField.setValueChangeMode(ValueChangeMode.LAZY);
-            filterField.getStyle()
+            filterHeader.setPlaceholder("Suchen...");
+            filterHeader.setValueChangeMode(ValueChangeMode.LAZY);
+            filterHeader.getStyle()
                     .setWidth("99%")
                     .setPaddingTop("0px");
 
-            filterField.addValueChangeListener(event ->
+            filterHeader.addValueChangeListener(event ->
             {
                 institutionNameFilter.setFilterInput(event.getValue());
                 institutionDataProvider.refreshAll();
             });
 
-            institutionGrid.setDataProvider(institutionDataProvider.getFilterDataProvider());
-            institutionGrid.addColumn(new ComponentRenderer<>(institution ->
+            this.setDataProvider(institutionDataProvider.getFilterDataProvider());
+            this.addColumn(new ComponentRenderer<>(institution ->
             {
                 TextField showField = new TextField();
                 showField.setWidth("99%");
@@ -290,12 +288,10 @@ public class TourInstitutionComponent extends HorizontalLayout
                 });
 
                 return showField;
-            })).setHeader(filterField);
+            })).setHeader(filterHeader);
 
-            this.add(institutionGrid);
-            this.setWidthFull();
+            this.setWidth("99%");
             this.setHeightFull();
-            this.setPadding(false);
         }
     }
 
@@ -319,7 +315,7 @@ public class TourInstitutionComponent extends HorizontalLayout
         );
 
         tourInstitutionGrid.updateFilters();
-        CompletableFuture.runAsync(() -> institutionDataProvider.refreshAll());
+        institutionDataProvider.refreshAll();
 
         return this;
     }
