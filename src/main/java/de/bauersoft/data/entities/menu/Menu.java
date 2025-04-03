@@ -7,6 +7,7 @@ import de.bauersoft.data.entities.variant.Variant;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -24,7 +25,7 @@ public class Menu extends AbstractEntity
     private Flesh flesh;
 
     @OneToMany(mappedBy = "menu", fetch = FetchType.EAGER)
-    private Set<Variant> variants;
+    private Set<Variant> variants = new HashSet<>();
 
     @Transient
     private boolean confirmed = false;

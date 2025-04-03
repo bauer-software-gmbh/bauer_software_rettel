@@ -1,4 +1,4 @@
-package de.bauersoft.views.menuBuilderNew.cluster;
+package de.bauersoft.views.menuBuilderNew.components.clusters;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 

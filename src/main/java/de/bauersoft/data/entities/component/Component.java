@@ -39,4 +39,16 @@ public class Component extends AbstractEntity
             inverseJoinColumns = @JoinColumn(name = "recipe_id")
     )
     private Set<Recipe> recipes = new HashSet<>();
+
+    @Override
+    public String toString()
+    {
+        return "Component{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", course=" + course +
+                ", unit=" + unit +
+                ", recipeSize=" + recipes.size() +
+                '}';
+    }
 }

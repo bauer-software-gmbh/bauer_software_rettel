@@ -1,15 +1,21 @@
-package de.bauersoft.views.menuBuilderNew.cluster;
+package de.bauersoft.views.menuBuilderNew.components;
 
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.course.Course;
 import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.data.entities.pattern.DefaultPattern;
 import de.bauersoft.data.entities.pattern.Pattern;
+import de.bauersoft.data.entities.variant.Variant;
 import de.bauersoft.services.*;
 import de.bauersoft.services.offer.OfferService;
-import de.bauersoft.views.menuBuilderNew.cluster.dialog.DescriptionDialog;
-import de.bauersoft.views.menuBuilderNew.cluster.dialog.PatternDialog;
+import de.bauersoft.views.menuBuilderNew.components.clusters.CourseCluster;
+import de.bauersoft.views.menuBuilderNew.components.clusters.DefaultCluster;
+import de.bauersoft.views.menuBuilderNew.components.clusters.PatternCluster;
+import de.bauersoft.views.menuBuilderNew.components.container.VariantContainer;
+import de.bauersoft.views.menuBuilderNew.components.container.VariantMapContainer;
+import de.bauersoft.views.menuBuilderNew.components.dialog.PatternDialog;
 import lombok.Getter;
 
 import java.util.*;
@@ -32,6 +38,8 @@ public class ClusterManager extends HorizontalLayout
     private List<Course> coursePool;
     private List<Pattern> patternPool;
     private ListDataProvider<Pattern> patternDataProvider;
+
+    private final VariantMapContainer variantMapContainer;
 
     private final Map<Pattern, PatternCluster> patternClusters;
     private final DefaultCluster defaultCluster;
@@ -57,40 +65,69 @@ public class ClusterManager extends HorizontalLayout
         patternPool.removeIf(pattern -> DefaultPattern.DEFAULT.equalsDefault(pattern));
         patternDataProvider = new ListDataProvider<>(patternPool);
 
-        patternClusters = new HashMap<>();
+        variantMapContainer = new VariantMapContainer();
+        for(Variant variant : item.getVariants())
+            variantMapContainer.addContainer(variant.getPattern(), variant, ContainerState.SHOW);
 
-        defaultCluster = new DefaultCluster(this);
+
 
         courseCluster = new CourseCluster(this);
+        defaultCluster = new DefaultCluster(this);
+
+        this.add(courseCluster, defaultCluster);
+
+
+
+        patternClusters = new HashMap<>();
+        variantMapContainer.getContainerMap().entrySet()
+                .stream()
+                .filter(entry -> !entry.getKey().equals(defaultCluster.getPattern()))
+                .forEach(entry ->
+                {
+                    addPatternCluster(entry.getKey());
+                });
+
         courseCluster.getAddButton().addClickListener(event ->
         {
             new PatternDialog(patternDataProvider, pattern ->
             {
-                PatternCluster patternCluster = patternClusters.computeIfAbsent(pattern, p ->
-                {
-                    PatternCluster cluster = new PatternCluster(this, p);
-                    cluster.getRemoveButton().addClickListener(e ->
-                    {
-                        patternPool.add(p);
-                        patternDataProvider.refreshAll();
-
-                        this.remove(cluster);
-                    });
-
-                    return cluster;
-                });
-
-                this.add(patternCluster);
-
-                patternPool.remove(pattern);
-                patternDataProvider.refreshAll();
+                addPatternCluster(pattern);
             });
         });
 
-
-        this.add(courseCluster, defaultCluster);
         this.setWidthFull();
         this.getStyle()
                 .setPaddingTop("var(--lumo-space-s)");
+    }
+
+    private ClusterManager addPatternCluster(Pattern pattern)
+    {
+        Objects.requireNonNull(pattern);;
+
+        PatternCluster patternCluster = patternClusters.computeIfAbsent(pattern, p ->
+        {
+            PatternCluster cluster = new PatternCluster(this, p);
+            cluster.getRemoveButton().addClickListener(e ->
+            {
+                VariantContainer container = cluster.getContainer();
+                if(container.getState() == ContainerState.NEW)
+                    container.setTempState(ContainerState.HIDE);
+                else container.setTempState(ContainerState.DELETE);
+
+                patternPool.add(p);
+                patternDataProvider.refreshAll();
+
+                this.remove(cluster);
+            });
+
+            return cluster;
+        });
+
+        this.add(patternCluster);
+
+        patternPool.remove(pattern);
+        patternDataProvider.refreshAll();
+
+        return this;
     }
 }

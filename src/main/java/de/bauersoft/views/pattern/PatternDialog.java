@@ -14,6 +14,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import de.bauersoft.components.autofilter.FilterDataProvider;
+import de.bauersoft.data.entities.pattern.DefaultPattern;
 import de.bauersoft.data.entities.pattern.Pattern;
 import de.bauersoft.services.PatternService;
 import de.bauersoft.views.DialogState;
@@ -47,7 +48,7 @@ public class PatternDialog extends Dialog
         nameTextField.setMaxLength(64);
         nameTextField.setAutofocus(true);
         nameTextField.setRequired(true);
-        nameTextField.setEnabled(state == DialogState.NEW);
+        nameTextField.setEnabled((item == null) ? state == DialogState.NEW : !DefaultPattern.hasDefault(item));
 
         TextArea descriptionTextArea = new TextArea();
         descriptionTextArea.setMaxLength(1024);
