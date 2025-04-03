@@ -68,9 +68,15 @@ public class VehicleView extends Div
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
             criteriaQuery.distinct(true);
-            return criteriaBuilder.like(
-                    criteriaBuilder.function("DATE_FORMAT", String.class, path.get("startDate"), criteriaBuilder.literal("%d.%m.%Y")),
-                    filterInput + "%"
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(
+                            criteriaBuilder.function("DATE_FORMAT", String.class, path.get("startDate"), criteriaBuilder.literal("%d.%m.%Y")),
+                            filterInput + "%"
+                    ),
+                    criteriaBuilder.like(
+                            criteriaBuilder.lower(path.get("header")),
+                            filterInput.toLowerCase() + "%"
+                    )
             );
         }).enableSorting(false);
 
@@ -87,9 +93,15 @@ public class VehicleView extends Div
                     .when(criteriaBuilder.isNull(path.get("endDate")), path.get("startDate"))
                     .otherwise(path.get("endDate"));
 
-            return criteriaBuilder.like(
-                    criteriaBuilder.function("DATE_FORMAT", String.class, date, criteriaBuilder.literal("%d.%m.%Y")),
-                    filterInput + "%"
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(
+                            criteriaBuilder.function("DATE_FORMAT", String.class, date, criteriaBuilder.literal("%d.%m.%Y")),
+                            filterInput + "%"
+                    ),
+                    criteriaBuilder.like(
+                            criteriaBuilder.lower(path.get("header")),
+                            filterInput.toLowerCase() + "%"
+                    )
             );
         }).enableSorting(false);
 
