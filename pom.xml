@@ -24,6 +24,13 @@
 
 	<repositories>
 		<repository>
+			<id>central</id>
+			<url>https://repo.maven.apache.org/maven2</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
 			<id>Vaadin Directory</id>
 			<url>https://maven.vaadin.com/vaadin-addons</url>
 			<snapshots>
@@ -104,6 +111,19 @@
     		<version>5.1.0</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
 
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20230227</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>software.xdev</groupId>
+			<artifactId>vaadin-maps-leaflet-flow</artifactId>
+			<version>4.2.0</version>
+		</dependency>
+
 		<!-- APACHE PDF -->
 
 		<dependency>
@@ -122,6 +142,26 @@
 			<version>4.1.0</version>
 		</dependency>
 
+		<!-- API DEPENDENCIES-->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
 
 		<!-- TEST DEPENDENCIES-->
 		<dependency>

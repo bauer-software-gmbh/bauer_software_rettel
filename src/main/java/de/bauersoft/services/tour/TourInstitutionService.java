@@ -1,9 +1,10 @@
 package de.bauersoft.services.tour;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import de.bauersoft.data.entities.institution.Institution;
+import de.bauersoft.data.entities.tour.tour.Tour;
 import de.bauersoft.data.entities.tour.tour.TourInstitution;
 import de.bauersoft.data.entities.tour.tour.TourInstitutionKey;
+import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import de.bauersoft.data.repositories.tour.TourInstitutionRepository;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -128,13 +130,13 @@ public class TourInstitutionService implements ServiceBase<TourInstitution, Tour
         return repository.findAllByTour_Id(id);
     }
 
-    public Optional<TourInstitution> findByTour_IdAndInstitution_Id(Long id, Long institutionId)
-    {
-        return repository.findByTour_IdAndInstitution_Id(id, institutionId);
-    }
-
     public List<Institution> findAllUnplannedInstitutions(boolean holidayMode)
     {
         return repository.findAllUnplannedInstitutions(holidayMode);
+    }
+
+    public void updateTemperatureByTourIdAndInstitutionsId(Number temperature, LocalDateTime localDateTime, Long tourId, Long institutId)
+    {
+        repository.updateTemperatureByTourIdAndInstitutionsId(temperature, localDateTime, tourId, institutId);
     }
 }

@@ -11,6 +11,7 @@ import de.bauersoft.services.AddressService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -41,8 +42,11 @@ public class AddressDataProvider implements ConfigurableFilterDataProvider<Addre
 
 	@Override
 	public Stream<Address> fetch(Query<Address, Void> query) {
-		return this.service.fetchAll(filter,query.getSortOrders()).stream().skip(query.getOffset()).limit(query.getLimit());
-	}
+		return this.service.fetchAll(filter, query.getSortOrders())
+				.stream()
+				.sorted(Comparator.comparing(i -> i.getStreet().toLowerCase())) // Standard-Sortierung nach Straße
+				.skip(query.getOffset())
+				.limit(query.getLimit());	}
 	
 	@Override
 	public void refreshItem(Address item) {

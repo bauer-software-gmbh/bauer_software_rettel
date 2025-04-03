@@ -143,4 +143,8 @@ public class UserService implements ServiceBase<User, Long>
 
         return repository.save(user);
     }
+
+    public User findUserByEmail(String username){
+        return repository.findUserByEmail(username);
+    }
 }

@@ -33,6 +33,9 @@ public class Institution extends AbstractEntity
     @Column(length = 256)
     private String customerId;
 
+    @Column(length = 1024)
+    private String information;
+
     @Column(nullable = false, columnDefinition = "TIME default '00:00:05'")
     private LocalTime orderStart = LocalTime.of(0, 5);
 
@@ -60,6 +63,10 @@ public class Institution extends AbstractEntity
 
     @OneToMany(mappedBy = "institution", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
     private Set<InstitutionClosingTime> institutionClosingTimes = new HashSet<>();
+
+    public <E> Institution(long l, String institutionB, String beschreibungDerInstitutionB, String s, LocalTime of, LocalTime of1, Address address2, Set<E> es, Set<E> of2, Set<E> of3) {
+        super();
+    }
 
     public boolean isClosed()
     {

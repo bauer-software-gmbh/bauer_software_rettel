@@ -8,7 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +28,8 @@ public interface TourInstitutionRepository extends JpaRepository<TourInstitution
     """)
     void deleteById(TourInstitutionKey id);
 
+    List<TourInstitution> findByTourId(Long id);
+
     @Query("""
         select i from Institution i
         where i.id not in (
@@ -34,4 +38,19 @@ public interface TourInstitutionRepository extends JpaRepository<TourInstitution
         )
     """)
     List<Institution> findAllUnplannedInstitutions(boolean holidayMode);
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+        UPDATE tour_institutions 
+        SET temperature = :temperature, validation_date_time = :timestamp
+        WHERE tour_id = :tourId AND institution_id = :institutId
+    """, nativeQuery = true)
+    void updateTemperatureByTourIdAndInstitutionsId(
+            @Param("temperature") Number temperature,
+            @Param("timestamp") LocalDateTime timestamp,
+            @Param("tourId") Long tourId,
+            @Param("institutId") Long institutId);
+
+
 }

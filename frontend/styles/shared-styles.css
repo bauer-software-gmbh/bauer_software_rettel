@@ -1,0 +1,10 @@
+/* Add this to your global CSS, for example in: */
+/* frontend/theme/[my-theme]/styles.css */
+
+vaadin-grid::part(validated-row) {
+    background-color: var(--lumo-success-color-10pct);
+}
+
+vaadin-grid::part(unvalidated-row) {
+    background-color: var(--lumo-error-color-10pct);
+}

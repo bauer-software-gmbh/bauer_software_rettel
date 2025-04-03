@@ -21,7 +21,7 @@ public class GridTextFilter<T> extends TextFilter<T> implements GridFilter<T, St
         textField.setClearButtonVisible(true);
         textField.addValueChangeListener(valueChangeEvent ->
         {
-            super.setValue(valueChangeEvent.getValue());
+            super.setValue("%" + valueChangeEvent.getValue() + "%");
             FilterChangeEvent<T, String> filterChangeEvent = new FilterChangeEvent<T, String>(this, valueChangeEvent.getValue());
             listeners.forEach(consumer -> consumer.filterValueChanged(filterChangeEvent));
             valueChangeEvent.getSource().getStyle().setColor(valueChangeEvent.getValue() != null && !valueChangeEvent.getValue().isBlank() ? "var(--lumo-error-text-color)" : "inherit");

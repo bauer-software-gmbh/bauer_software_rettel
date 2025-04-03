@@ -62,7 +62,7 @@ public class InstitutionDialog extends Dialog
 
 	private FormLayout inputLayout;
 	private TextField nameTextField;
-	private TextArea descriptionTextArea;
+	private TextArea descriptionTextArea,informationTextArea;
 	private TextField customerIdTextField;
 	private HorizontalLayout datePickerLayout;
 	private TimePicker orderStartTimePicker;
@@ -147,12 +147,20 @@ public class InstitutionDialog extends Dialog
 		userMultiSelectComboBox.setItems(userService.getRepository().findAll());
 		userMultiSelectComboBox.setWidthFull();
 
+		informationTextArea = new TextArea();
+		informationTextArea.setMaxLength(1024);
+		informationTextArea.setSizeFull();
+		informationTextArea.setHeight("calc(3* var(--lumo-text-field-size))");
+		informationTextArea.setMaxHeight("calc(3* var(--lumo-text-field-size))");
+
 		inputLayout.setColspan(inputLayout.addFormItem(nameTextField, "Name"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(descriptionTextArea, "Beschreibung"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(customerIdTextField, "Kunden Nr. "), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(datePickerLayout, "Bestellung"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(addressComboBox, "Adresse"), 1);
 		inputLayout.setColspan(inputLayout.addFormItem(userMultiSelectComboBox, "Benutzer"), 1);
+		inputLayout.setColspan(inputLayout.addFormItem(informationTextArea, "Information"), 1);
+
 
 		binder.forField(nameTextField).asRequired((value, context) ->
 		{
@@ -195,6 +203,8 @@ public class InstitutionDialog extends Dialog
 
 		binder.bind(addressComboBox, Institution::getAddress, Institution::setAddress);
 		binder.bind(userMultiSelectComboBox, Institution::getUsers, Institution::setUsers);
+		binder.bind(informationTextArea, Institution::getInformation, Institution::setInformation);
+
 
 		binder.readBean(item);
 
