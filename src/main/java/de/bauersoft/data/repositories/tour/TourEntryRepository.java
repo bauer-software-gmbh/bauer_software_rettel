@@ -10,6 +10,7 @@ public interface TourEntryRepository extends JpaRepository<TourEntry, Long> {
 
     List<TourEntry> findByDate(LocalDate date);
 
+    TourEntry findByTourIdAndDate(Long tourId, LocalDate date);
 }
 
 

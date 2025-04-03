@@ -7,6 +7,7 @@ import de.bauersoft.data.entities.tour.driver.Driver;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.tour.tour.Tour;
 import de.bauersoft.data.entities.tour.tour.TourInstitution;
+import de.bauersoft.data.entities.tour.tour.TourEntry;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.order.OrderRepository;
 import de.bauersoft.mobile.model.DTO.TourDTO;
@@ -16,12 +17,15 @@ import de.bauersoft.data.repositories.institution.InstitutionRepository;
 import de.bauersoft.data.repositories.tour.DriverRepository;
 import de.bauersoft.data.repositories.tour.TourInstitutionRepository;
 import de.bauersoft.data.repositories.tour.TourRepository;
+import de.bauersoft.data.repositories.tour.TourEntryRepository;
 import de.bauersoft.services.ServiceBase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.Collection;
 import java.util.List;
@@ -33,15 +37,17 @@ public class TourService implements ServiceBase<Tour, Long>
     private final TourRepository repository;
     private final TourInstitutionRepository tourInstitutionRepository;
     private final OrderRepository orderRepository;
-
+    private final TourEntryRepository tourEntryRepository;
 
     public TourService(TourRepository repository, DriverRepository driverRepository,
                        TourInstitutionRepository tourInstitutionRepository,
-                       InstitutionRepository institutionRepository, AddressRepository addressRepository, OrderRepository orderRepository)
+                       InstitutionRepository institutionRepository, AddressRepository addressRepository, OrderRepository orderRepository,
+                       TourEntryRepository tourEntryRepository)
     {
         this.repository = repository;
         this.tourInstitutionRepository = tourInstitutionRepository;
         this.orderRepository = orderRepository;
+        this.tourEntryRepository = tourEntryRepository;
     }
 
     @Override
@@ -166,13 +172,41 @@ public class TourService implements ServiceBase<Tour, Long>
 
             List<Order> orders = orderRepository.findByInstitutionIn(institutions);
 
+            // Notizen abrufen
+            TourEntry tourEntry = tourEntryRepository.findByTourIdAndDate(tour.getId(), LocalDate.now());
 
             System.out.println("🏢 Institutionen gefunden: " + institutions.size());
             System.out.println("📍 Adressen gefunden: " + addresses.size());
 
-            tourDTOs.add(new TourDTO(tour, driver, coDriver, institutions, addresses, orders));
+            tourDTOs.add(new TourDTO(tour, driver, coDriver, institutions, addresses, orders, tourEntry));
         }
 
         return tourDTOs;
+    }
+
+    public void updateStartTourByDriverIdAndTourId(Long driverId, Long tourId, LocalDateTime localDateTime)
+    {
+        Tour tour = repository.findById(tourId)
+                .orElseThrow(() -> new RuntimeException("Tour mit ID " + tourId + " nicht gefunden"));
+
+        if (tour.getDriver() != null && tour.getDriver().getId().equals(driverId)) {
+            tour.setStartDateTime(localDateTime);
+            repository.save(tour);
+        } else {
+            throw new RuntimeException("Fahrer mit ID " + driverId + " ist nicht für die Tour mit ID " + tourId + " verantwortlich.");
+        }
+    }
+
+    public void updateEndTourByDriverIdAndTourId(Long userId, Long tourId, LocalDateTime localDateTime)
+    {
+        Tour tour = repository.findById(tourId)
+                .orElseThrow(() -> new RuntimeException("Tour mit ID " + tourId + " nicht gefunden"));
+
+        if (tour.getDriver() != null && tour.getDriver().getId().equals(userId)) {
+            tour.setEndDateTime(localDateTime);
+            repository.save(tour);
+        } else {
+            throw new RuntimeException("Fahrer mit ID " + userId + " ist nicht für die Tour mit ID " + tourId + " verantwortlich.");
+        }
     }
 }

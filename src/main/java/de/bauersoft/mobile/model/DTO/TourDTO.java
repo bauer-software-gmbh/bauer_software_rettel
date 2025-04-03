@@ -5,11 +5,14 @@ import de.bauersoft.data.entities.order.Order;
 import de.bauersoft.data.entities.tour.driver.Driver;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.tour.tour.Tour;
+import de.bauersoft.data.entities.tour.tour.TourEntry;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
@@ -23,8 +26,9 @@ public class TourDTO {
     private DriverDTO driver;
     private DriverDTO coDriver;
     private List<InstitutionDTO> institutions;
+    private String bemerkung; // Nur eine Notiz pro Tour/Tag
 
-    public TourDTO(Tour tour, Driver driver, Driver coDriver, List<Institution> institutions, List<Address> addresses, List<Order> orders) {
+    public TourDTO(Tour tour, Driver driver, Driver coDriver, List<Institution> institutions, List<Address> addresses, List<Order> orders, TourEntry tourEntry) {
         this.id = tour.getId();
         this.name = tour.getName();
         this.startDateTime = tour.getStartDateTime();
@@ -36,5 +40,7 @@ public class TourDTO {
         this.institutions = (institutions != null && !institutions.isEmpty())
                 ? institutions.stream().map(i -> new InstitutionDTO(i, orders)).collect(Collectors.toList())
                 : List.of();
+
+        this.bemerkung = tourEntry.getTimeWindow() + " " + tourEntry.getNote();
     }
 }

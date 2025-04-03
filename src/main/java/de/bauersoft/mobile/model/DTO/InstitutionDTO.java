@@ -7,7 +7,6 @@ import de.bauersoft.data.entities.order.Order;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,6 +20,7 @@ public class InstitutionDTO {
     private Long essenAnz;
     private List<OrderDataDTO> meals;
     private AllergenDTO allergene;
+    private String information;
 
     public InstitutionDTO(Institution institution, List<Order> orders) {
         if (institution == null) {
@@ -30,12 +30,14 @@ public class InstitutionDTO {
             this.address = null;
             this.essenAnz = 0L;
             this.allergene = null;
+            this.information = "";
             return;
         }
 
         this.id = (institution.getId() != null) ? institution.getId() : -1L;
         this.name = (institution.getName() != null) ? institution.getName() : "Unbenannt";
         this.address = new AddressDTO(institution.getAddress());
+        this.information = (institution.getInformation() != null) ? institution.getInformation() : "Unbekannte Institution";
 
         System.out.println("🚨 Straße: " + this.address );
 

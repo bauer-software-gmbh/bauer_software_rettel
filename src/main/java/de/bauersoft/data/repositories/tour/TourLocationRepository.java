@@ -1,5 +1,6 @@
 package de.bauersoft.data.repositories.tour;
 
+import de.bauersoft.data.entities.tour.tour.LatLngPoint;
 import de.bauersoft.data.entities.tour.tour.TourLocation;
 import de.bauersoft.mobile.model.DTO.TourLocationDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,6 +27,9 @@ public interface TourLocationRepository extends JpaRepository<TourLocation, Long
     @Query("""
     SELECT new de.bauersoft.mobile.model.DTO.TourLocationDTO(t.id, t.latitude, t.longitude, t.timestamp, t.tour.id, t.markerIcon) FROM TourLocation t WHERE FUNCTION('DATE', t.timestamp) = :selectedDate AND t.timestamp = (SELECT MAX(t2.timestamp) FROM TourLocation t2 WHERE t2.tour.id = t.tour.id AND FUNCTION('DATE', t2.timestamp) = :selectedDate)""")
     List<TourLocationDTO> findLatestTourLocationsByDate(@Param("selectedDate") LocalDate selectedDate);
-
+    @Query("""
+        Select t.institution.id from TourLocation t where t.latitude = :lat and t.longitude = :lon and t.tour.id = :tourId
+                """)
+    String findInstitutionIdByLonLatAndTourID(Double lon, Double lat, Long tourId);
 }
 

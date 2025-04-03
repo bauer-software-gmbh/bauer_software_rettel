@@ -249,8 +249,8 @@ public class TourPlanningView extends Div
         notesArea.setWidthFull();
         notesArea.setHeightFull();
 
-        timeField.setValue(entry.getTimeWindow() != null ? entry.getTimeWindow() : "");
-        notesArea.setValue(entry.getNote() != null ? entry.getNote() : "");
+        timeField.setValue(entry.getTimeWindow() != null ? entry.getTimeWindow().trim() : "");
+        notesArea.setValue(entry.getNote() != null ? entry.getNote().trim() : "");
 
         // 💡 Kopier-Dialog
         Button copyButton = new Button("Eintrag kopieren", e ->
@@ -344,7 +344,7 @@ public class TourPlanningView extends Div
             dialog.close();
             updateDateRange(getSelectedWeekSelector());
         });
-        saveButton.addClickShortcut(Key.ENTER);
+        //saveButton.addClickShortcut(Key.ENTER);
         saveButton.setMinWidth("150px");
         saveButton.setMaxWidth("180px");
 

@@ -20,9 +20,11 @@ import de.bauersoft.mobile.broadcaster.LocationBroadcaster;
 import de.bauersoft.mobile.model.DTO.TourLocationDTO;
 import de.bauersoft.services.tour.TourLocationService;
 import de.bauersoft.services.tour.RouteService;
+import de.bauersoft.tools.DatePickerLocaleGerman;
 import de.bauersoft.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 import software.xdev.vaadin.maps.leaflet.MapContainer;
+import software.xdev.vaadin.maps.leaflet.basictypes.LIconOptions;
 import software.xdev.vaadin.maps.leaflet.basictypes.LLatLng;
 import software.xdev.vaadin.maps.leaflet.layer.raster.LTileLayer;
 import software.xdev.vaadin.maps.leaflet.layer.ui.LMarker;
@@ -34,6 +36,7 @@ import software.xdev.vaadin.maps.leaflet.registry.LDefaultComponentManagementReg
 import software.xdev.vaadin.maps.leaflet.basictypes.LPoint;
 
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -89,6 +92,8 @@ public class TourMap extends VerticalLayout {
         tourComboBox.setPlaceholder("Bitte Tour auswählen");
         datePicker.setValue(LocalDate.now());
         datePicker.setPlaceholder("Datum auswählen");
+        datePicker.setI18n(new DatePickerLocaleGerman());
+
 
         filterByTourCheckbox.addValueChangeListener(event -> switchFilterMode());
         userComboBox.addValueChangeListener(event -> {
@@ -107,8 +112,12 @@ public class TourMap extends VerticalLayout {
         filterLayout.setJustifyContentMode(JustifyContentMode.CENTER);
 
         institutionGrid.addColumn(inst -> inst.getInstitution().getName()).setHeader("Institution").setAutoWidth(true);
-        institutionGrid.addColumn(inst -> inst.getTemperature() != null ? "✓" : "✘").setHeader("Temperatur").setAutoWidth(true);
-        institutionGrid.addColumn(inst -> inst.getValidationDateTime()).setHeader("Validierung").setAutoWidth(true);
+        institutionGrid.addColumn(inst -> inst.getTemperature() != null ? inst.getTemperature() + " °C" : "✘").setHeader("Temperatur").setAutoWidth(true);
+        institutionGrid.addColumn(inst ->
+                inst.getValidationDateTime() != null
+                        ? inst.getValidationDateTime().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"))
+                        : "✘"
+        ).setHeader("Abschluss").setAutoWidth(true);
         institutionGrid.setVisible(false);
         institutionGrid.setHeightFull();
         institutionGrid.setPartNameGenerator(
@@ -249,8 +258,7 @@ public class TourMap extends VerticalLayout {
         }
     }
 
-    private void updateUserLocations()
-    {
+    private void updateUserLocations() {
         clearMapLayers(); // 🧽 Karte leeren
 
         String selectedValue = filterByTourCheckbox.getValue()
@@ -262,7 +270,50 @@ public class TourMap extends VerticalLayout {
         List<TourLocationDTO> locations;
 
         if ("ALLE".equals(selectedValue)) {
-            locations = tourLocationService.getLatestTourLocationsByDate(selectedDate); // 🔄 Nur die letzten!
+            locations = tourLocationService.getLatestTourLocationsByDate(selectedDate);
+
+            // Gruppiere nach Position (gerundet auf 5 Nachkommastellen)
+            Map<String, List<TourLocationDTO>> grouped = new HashMap<>();
+
+            for (TourLocationDTO loc : locations) {
+                String key = String.format("%.5f_%.5f", loc.getLatitude(), loc.getLongitude());
+                grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(loc);
+            }
+
+            for (List<TourLocationDTO> group : grouped.values()) {
+                TourLocationDTO first = group.get(0);
+                LLatLng position = new LLatLng(registry, first.getLatitude(), first.getLongitude());
+
+                StringBuilder popupHtml = new StringBuilder("<div style='font-size: 14px;'>");
+
+                for (TourLocationDTO loc : group) {
+                    String time = loc.getTimestamp().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                    String date = loc.getTimestamp().toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+
+                    popupHtml.append("""
+                    📍 <strong>%s (ID: %d)</strong><br>
+                    🧑 Fahrer: %s<br>
+                    🧑 Beifahrer: %s<br>
+                    📅 Datum: %s<br>
+                    ⏰ %s<br><hr>
+                """.formatted(
+                            tourLocationService.getTourNameById(loc.getTourId()),
+                            loc.getTourId(),
+                            tourLocationService.getDriverNameByTourId(loc.getTourId()),
+                            tourLocationService.getCoDriverNameByTourId(loc.getTourId()),
+                            date,
+                            time
+                    ));
+                }
+
+                popupHtml.append("</div>");
+
+                LMarker marker = createColoredMarker(first, "#80cfff"); // Helles Blau
+                marker.bindPopup(popupHtml.toString());
+                marker.addTo(map);
+                userMarkers.put("grouped-" + first.getTourId() + "-" + first.getLatitude(), marker);
+            }
+
         } else {
             locations = tourLocationService.getAllTourLocations().stream()
                     .filter(loc -> loc.getTimestamp().toLocalDate().equals(selectedDate))
@@ -282,18 +333,7 @@ public class TourMap extends VerticalLayout {
                         }
                     })
                     .toList();
-        }
 
-        if ("ALLE".equals(selectedValue)) {
-            for (TourLocationDTO loc : locations) {
-                LLatLng pos = new LLatLng(registry, loc.getLatitude(), loc.getLongitude());
-                LMarker marker = new LMarker(registry, pos);
-
-                marker.bindPopup(buildPopupHtml(loc));
-                marker.addTo(map);
-                userMarkers.put("latest-" + loc.getTourId(), marker);
-            }
-        } else {
             Map<Long, List<TourLocationDTO>> groupedByTour = new HashMap<>();
             for (TourLocationDTO loc : locations) {
                 groupedByTour.computeIfAbsent(loc.getTourId(), k -> new ArrayList<>()).add(loc);
@@ -305,9 +345,6 @@ public class TourMap extends VerticalLayout {
 
                 List<LatLngPoint> latLngPoints = new ArrayList<>();
                 List<LLatLng> markerPoints = new ArrayList<>();
-                LatLngPoint lastAcceptedPoint = null;
-
-
                 List<LatLngPoint> shownPoints = new ArrayList<>();
 
                 for (int i = 0; i < tourLocs.size(); i++) {
@@ -323,13 +360,12 @@ public class TourMap extends VerticalLayout {
                     } else if (isCheckpoint) {
                         color = "#ffcc00"; // Checkpoint
                     } else {
-                        color = "#0077cc"; // Standard
+                        color = "#80cfff"; // Standard heller Blau
                     }
 
                     boolean shouldShow = (i == 0 || i == tourLocs.size() - 1 || isCheckpoint);
 
                     if (!shouldShow) {
-                        // Abstand prüfen: zu allen bereits angezeigten Punkten
                         boolean isNearShownPoint = shownPoints.stream().anyMatch(p ->
                                 calculateDistance(p.getLat(), p.getLng(), current.getLat(), current.getLng()) < 50
                         );
@@ -347,7 +383,6 @@ public class TourMap extends VerticalLayout {
                     }
                 }
 
-                // Linie zeichnen
                 if (latLngPoints.size() > 1) {
                     try {
                         List<LLatLng> routedPath = RouteService.fetchRoute(latLngPoints, registry);
@@ -385,7 +420,8 @@ public class TourMap extends VerticalLayout {
         String tourName = tourLocationService.getTourNameById(loc.getTourId());
         String formattedDate = loc.getTimestamp().toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
         String formattedTime = loc.getTimestamp().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-
+        String institutionID = tourLocationService.getInstitutionIdByLonLatAndTourID(loc.getLatitude(), loc.getLongitude(),loc.getTourId());
+        System.out.println(institutionID);
         return """
             <div style='line-height: 1.4em; font-size: 14px;'>
             📍 <strong>%s (Tour ID: %d)</strong><br>
@@ -404,19 +440,6 @@ public class TourMap extends VerticalLayout {
         );
     }
 
-
-
-    private LMarker getLMarker(TourLocationDTO loc)
-    {
-        LLatLng userPosition = new LLatLng(registry, loc.getLatitude(), loc.getLongitude());
-        LMarker newMarker = new LMarker(registry, userPosition);
-
-        String popupHtml = buildPopupHtml(loc);
-        newMarker.bindPopup(popupHtml);
-
-        return newMarker;
-    }
-
     public static double calculateDistance(double lat1, double lon1, double lat2, double lon2)
     {
         final int R = 6371000;
@@ -432,43 +455,35 @@ public class TourMap extends VerticalLayout {
 
     private LMarker createColoredMarker(TourLocationDTO loc, String colorHex)
     {
+        // SVG-Vorlage mit CSS-Variablen
         String svg = """
-        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'>
-            <circle cx='12' cy='12' r='10' fill='%s' stroke='white' stroke-width='2'/>
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'>
+            <g id='Layer_x0020_1'>
+                <path class='fil0 str0' d='M250 30c77 0 140 63 140 140 0 24-6 46-16 65l-111 227c-2 5-7 8-13 8s-11-3-13-8l-111-227c-10-19-16-41-16-65 0-77 63-140 140-140z' style='--color: red; fill: var(--color); stroke: #343424; stroke-width: 10'/>
+                <circle class='fil1 str1' cx='250' cy='170' r='100' style='--eye-color: lightblue; fill: var(--eye-color); stroke: #343424; stroke-width: 10'/>
+            </g>
         </svg>
-        """.formatted(colorHex);
+        """;
 
-        String base64 = Base64.getEncoder().encodeToString(svg.getBytes());
+        // CSS-Variablen ersetzen
+        svg = svg.replace("var(--color)", colorHex);
+        svg = svg.replace("var(--eye-color)", "background");
+
+        // In Base64 umwandeln
+        String base64 = Base64.getEncoder().encodeToString(svg.getBytes(StandardCharsets.UTF_8));
         String dataUri = "data:image/svg+xml;base64," + base64;
 
-        var iconOptions = new software.xdev.vaadin.maps.leaflet.basictypes.LIconOptions();
+        // Icon zusammenbauen
+        var iconOptions = new LIconOptions();
         iconOptions.setIconUrl(dataUri);
-        iconOptions.setIconSize(new LPoint(registry, 24, 24));
-        iconOptions.setIconAnchor(new LPoint(registry, 12, 12));
+        iconOptions.setIconSize(new LPoint(registry, 30, 40));      // ggf. anpassen
+        iconOptions.setIconAnchor(new LPoint(registry, 15, 40));    // Spitze zeigt auf Position
 
         var icon = new software.xdev.vaadin.maps.leaflet.basictypes.LIcon(registry, iconOptions);
-
         var marker = new LMarker(registry, new LLatLng(registry, loc.getLatitude(), loc.getLongitude()));
         marker.setIcon(icon);
         marker.bindPopup(buildPopupHtml(loc));
 
         return marker;
-    }
-
-    private boolean isValidatedLocation(TourLocationDTO loc) {
-        return tourRepository.findById(loc.getTourId())
-                .map(Tour::getInstitutions)
-                .orElse(Collections.emptySet())
-                .stream()
-                .anyMatch(inst -> {
-                    if (inst.getValidationDateTime() == null) {
-                        return false;
-                    }
-                    long seconds = Math.abs(
-                            inst.getValidationDateTime().toEpochSecond(ZoneOffset.UTC) -
-                                    loc.getTimestamp().toEpochSecond(ZoneOffset.UTC)
-                    );
-                    return seconds < 180; // innerhalb von 3 Minuten
-                });
     }
 }

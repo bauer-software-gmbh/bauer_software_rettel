@@ -1,6 +1,7 @@
 package de.bauersoft.data.entities.tour.tour;
 
 import de.bauersoft.data.entities.AbstractEntity;
+import de.bauersoft.data.entities.institution.Institution;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,6 +35,9 @@ public class TourLocation extends AbstractEntity
     @Column(length = 2)
     private String markerIcon; // Icon für den Marker auf der Karte
 
+    @ManyToOne
+    @JoinColumn(name = "institution_id", referencedColumnName = "id")
+    private Institution institution;
 
     @Override
     public String toString()
