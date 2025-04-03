@@ -195,14 +195,14 @@ public class TourInstitutionComponent extends HorizontalLayout
                     container.setTempExpectedArrivalTime(event.getValue());
                     container.setTempState(ContainerState.UPDATE);
 
-                    //updateView();
+                    updateFilters();
                 });
 
                 return timePicker;
 
             })).setHeader(timeFilter)
                     .setSortable(true)
-                    .setComparator(Comparator.comparing(TourInstitutionContainer::getTempExpectedArrivalTime));
+                    .setComparator(Comparator.comparing(TourInstitutionContainer::getTempExpectedArrivalTime).reversed());
 
 
 
@@ -341,7 +341,11 @@ public class TourInstitutionComponent extends HorizontalLayout
         return mapContainer.getContainers()
                 .stream()
                 .map(container -> (TourInstitutionContainer) container)
-                .collect(Collectors.partitioningBy(TourInstitutionContainer::isGridItem));
+                .collect(Collectors.partitioningBy(TourInstitutionContainer::isGridItem, Collectors.collectingAndThen(Collectors.toList(), list ->
+                {
+                    list.sort(Comparator.comparing(TourInstitutionContainer::getTempExpectedArrivalTime).reversed());
+                    return list;
+                })));
     }
 
     public TourInstitutionComponent updateView()
