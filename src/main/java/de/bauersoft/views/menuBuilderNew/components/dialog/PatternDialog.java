@@ -1,4 +1,4 @@
-package de.bauersoft.views.menuBuilderNew.cluster.dialog;
+package de.bauersoft.views.menuBuilderNew.components.dialog;
 
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;

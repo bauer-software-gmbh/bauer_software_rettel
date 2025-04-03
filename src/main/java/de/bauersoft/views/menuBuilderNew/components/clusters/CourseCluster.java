@@ -1,9 +1,9 @@
-package de.bauersoft.views.menuBuilderNew.cluster;
+package de.bauersoft.views.menuBuilderNew.components.clusters;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import de.bauersoft.data.entities.course.Course;
+import de.bauersoft.views.menuBuilderNew.components.ClusterManager;
 import lombok.Getter;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 

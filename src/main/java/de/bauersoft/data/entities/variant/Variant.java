@@ -1,5 +1,6 @@
 package de.bauersoft.data.entities.variant;
 
+import de.bauersoft.components.container.ContainerID;
 import de.bauersoft.data.entities.AbstractEntity;
 import de.bauersoft.data.entities.component.Component;
 import de.bauersoft.data.entities.pattern.Pattern;
@@ -18,7 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Variant extends AbstractEntity
+public class Variant extends AbstractEntity implements ContainerID<Long>
 {
     @Column(length = 10240)
     private String description;
@@ -40,6 +41,14 @@ public class Variant extends AbstractEntity
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Component> components = new HashSet<>();
 
-
-
+    @Override
+    public String toString()
+    {
+        return "Variant{" +
+                "description='" + description + '\'' +
+                ", pattern=" + pattern +
+                ", menu=" + menu.getId() +
+                ", components=" + components +
+                '}';
+    }
 }

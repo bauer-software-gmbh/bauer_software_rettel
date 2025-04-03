@@ -14,12 +14,7 @@ import de.bauersoft.data.entities.menu.Menu;
 import de.bauersoft.services.*;
 import de.bauersoft.services.offer.OfferService;
 import de.bauersoft.views.DialogState;
-import de.bauersoft.views.menuBuilder.cluster.PatternCluster;
-import de.bauersoft.views.menuBuilderNew.cluster.ClusterManager;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import de.bauersoft.views.menuBuilderNew.components.ClusterManager;
 
 public class MenuBuilderDialog extends Dialog
 {
@@ -96,6 +91,8 @@ public class MenuBuilderDialog extends Dialog
             if(binder.isValid())
             {
                 menuService.update(item);
+
+                clusterManager.getVariantMapContainer().acceptTemporaries().run(variantService);
 
                 filterDataProvider.refreshAll();
                 this.close();
