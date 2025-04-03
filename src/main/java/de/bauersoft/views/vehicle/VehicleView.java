@@ -62,8 +62,7 @@ public class VehicleView extends Div
         grid.addColumn("downtimes", "Ausfallzeit von", vehicle ->
         {
             return vehicle.getDowntimes().stream()
-                    .map(VehicleDowntime::getStartDate)
-                    .map(localDate -> dateTimeFormatter.format(localDate))
+                    .map(downtime -> dateTimeFormatter.format(downtime.getStartDate()) + " (" + downtime.getHeader() + ")")
                     .collect(Collectors.joining(", "));
 
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
@@ -78,8 +77,7 @@ public class VehicleView extends Div
         grid.addColumn("downtimes", "Ausfallzeit bis", vehicle ->
         {
             return vehicle.getDowntimes().stream()
-                    .map(downtime -> downtime.getEndDate() != null ? downtime.getEndDate() : downtime.getStartDate())
-                    .map(localDate -> dateTimeFormatter.format(localDate))
+                    .map(downtime -> downtime.getEndDate() != null ? dateTimeFormatter.format(downtime.getEndDate()) + " (" + downtime.getHeader() + ")" : dateTimeFormatter.format(downtime.getStartDate())  + " (" + downtime.getHeader() + ")")
                     .collect(Collectors.joining(", "));
 
         }, (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
