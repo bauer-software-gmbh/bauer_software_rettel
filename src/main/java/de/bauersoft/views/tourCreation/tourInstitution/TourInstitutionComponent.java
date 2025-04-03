@@ -1,5 +1,6 @@
 package de.bauersoft.views.tourCreation.tourInstitution;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.Grid;
@@ -16,6 +17,8 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import de.bauersoft.components.autofilter.Filter;
 import de.bauersoft.components.autofilter.FilterDataProvider;
+import de.bauersoft.components.autofilter.grid.AutofilterGrid;
+import de.bauersoft.components.autofilter.grid.SortType;
 import de.bauersoft.components.container.ContainerState;
 import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.entities.tour.tour.Tour;
@@ -29,6 +32,7 @@ import jakarta.persistence.criteria.Subquery;
 import lombok.Getter;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import javax.swing.*;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -91,7 +95,7 @@ public class TourInstitutionComponent extends HorizontalLayout
 
         institutionNameFilter = new Filter<>("name", (root, path, criteriaQuery, criteriaBuilder, parent, filterInput) ->
         {
-            return criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), filterInput.toLowerCase() + "%");
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + filterInput.toLowerCase() + "%");
         });
 
         institutionDataProvider.addFilters(tourInstitutionFilter, institutionFilter, institutionNameFilter);
@@ -191,7 +195,7 @@ public class TourInstitutionComponent extends HorizontalLayout
                     container.setTempExpectedArrivalTime(event.getValue());
                     container.setTempState(ContainerState.UPDATE);
 
-                    updateView();
+                    //updateView();
                 });
 
                 return timePicker;
@@ -212,7 +216,8 @@ public class TourInstitutionComponent extends HorizontalLayout
                                     return container.getTempExpectedArrivalTime().toString().contains(timeFilter.getValue().toLowerCase())
                                             && container.getEntity().getInstitution().getName().toLowerCase().startsWith(event.getValue().toLowerCase());
 
-                                }).collect(Collectors.toList())
+                                })
+                                .collect(Collectors.toList())
                 );
             });
 
@@ -226,7 +231,8 @@ public class TourInstitutionComponent extends HorizontalLayout
                                     return container.getTempExpectedArrivalTime().toString().contains(event.getValue().toLowerCase())
                                             && container.getEntity().getInstitution().getName().toLowerCase().startsWith(institutionFilter.getValue().toLowerCase());
 
-                                }).collect(Collectors.toList())
+                                })
+                                .collect(Collectors.toList())
                 );
             });
 
@@ -245,33 +251,51 @@ public class TourInstitutionComponent extends HorizontalLayout
                             {
                                 return container.getTempExpectedArrivalTime().toString().contains(timeFilter.getValue().toLowerCase())
                                         && container.getEntity().getInstitution().getName().toLowerCase().startsWith(institutionFilter.getValue().toLowerCase());
-                            }).collect(Collectors.toSet())
+                            })
+                            .collect(Collectors.toList())
             );
 
             return this;
         }
     }
 
-    @Getter
     private class InstitutionGrid extends Grid<Institution>
     {
+        private SortOrder sortOrder;
+
+        private final HorizontalLayout header;
         private final TextField filterHeader;
+        private final Button sortButton;
 
         public InstitutionGrid()
         {
-            filterHeader = new TextField();
+            sortOrder = SortOrder.UNSORTED;
 
+            header = new HorizontalLayout();
+
+            filterHeader = new TextField();
             filterHeader.setPlaceholder("Suchen...");
             filterHeader.setValueChangeMode(ValueChangeMode.LAZY);
-            filterHeader.getStyle()
-                    .setWidth("99%")
-                    .setPaddingTop("0px");
+            filterHeader.getStyle().setWidth("99%");
 
             filterHeader.addValueChangeListener(event ->
             {
                 institutionNameFilter.setFilterInput(event.getValue());
                 institutionDataProvider.refreshAll();
             });
+
+            sortButton = new Button(LineAwesomeIcon.SORT_SOLID.create());
+            sortButton.addClickListener(event ->
+            {
+                sortOrder = nextSortOrder(sortOrder);
+                sortButton.setIcon(SortType.ALPHA.get(sortOrder).create());
+
+                institutionDataProvider.applyFilters("name", sortOrder);
+            });
+
+            sortButton.click();
+
+            header.add(filterHeader, sortButton);
 
             this.setDataProvider(institutionDataProvider.getFilterDataProvider());
             this.addColumn(new ComponentRenderer<>(institution ->
@@ -288,10 +312,27 @@ public class TourInstitutionComponent extends HorizontalLayout
                 });
 
                 return showField;
-            })).setHeader(filterHeader);
+            })).setHeader(header);
 
             this.setWidth("99%");
             this.setHeightFull();
+        }
+
+        public static SortOrder nextSortOrder(SortOrder currentSortOrder)
+        {
+            switch(currentSortOrder)
+            {
+                case ASCENDING:
+                    return SortOrder.DESCENDING;
+
+                case DESCENDING:
+                    return SortOrder.UNSORTED;
+
+                case UNSORTED:
+                    return SortOrder.ASCENDING;
+            }
+
+            return SortOrder.UNSORTED;
         }
     }
 

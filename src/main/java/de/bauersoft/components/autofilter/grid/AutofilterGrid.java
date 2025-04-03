@@ -486,7 +486,6 @@ public class AutofilterGrid<T, ID> extends Grid<T>
 
 
             sortButton = new Button(LineAwesomeIcon.SORT_SOLID.create());
-            //sortButton.setWidth("20%");
             sortButton.addClickListener(event ->
             {
                 AutofilterGrid.this.sortColumn = this;

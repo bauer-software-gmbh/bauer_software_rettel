@@ -104,7 +104,7 @@ public class TourDialog extends Dialog
 
         tourLayout.add(nameField);
 
-        Checkbox holidayCheckbox = new Checkbox("Feiertagsmodus");
+        Checkbox holidayCheckbox = new Checkbox("Ferien-/Feiertagsmodus");
         holidayCheckbox.setEnabled(state == DialogState.NEW);
         holidayCheckbox.getStyle()
                 .setWidth("2em")
