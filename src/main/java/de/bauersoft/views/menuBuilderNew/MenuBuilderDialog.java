@@ -6,6 +6,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import de.bauersoft.components.autofilter.FilterDataProvider;
@@ -48,7 +49,7 @@ public class MenuBuilderDialog extends Dialog
         this.item = item;
         this.state = state;
 
-        this.setHeaderTitle(state.toString());
+        this.setHeaderTitle(state.titleCreator("Neues Menü anlegen", "Bestehendes Menü editieren"));
 
         Binder<Menu> binder = new Binder<>(Menu.class);
 
@@ -95,6 +96,7 @@ public class MenuBuilderDialog extends Dialog
                 clusterManager.getVariantMapContainer().acceptTemporaries().run(variantService);
 
                 filterDataProvider.refreshAll();
+                Notification.show("Daten wurden aktualisiert");
                 this.close();
             }
         });

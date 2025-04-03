@@ -35,9 +35,9 @@ import jakarta.persistence.criteria.JoinType;
 import java.util.stream.Collectors;
 
 
-@PageTitle("Menü-Baukasten")
-@Route(value = "menubuilder", layout = MainLayout.class)
-@RolesAllowed({"ADMIN", "KITCHEN_ADMIN", "OFFICE_ADMIN"})
+//@PageTitle("Menü-Baukasten")
+//@Route(value = "menubuilder", layout = MainLayout.class)
+//@RolesAllowed({"ADMIN", "KITCHEN_ADMIN", "OFFICE_ADMIN"})
 public class MenuBuilderView extends Div
 {
     private final MenuService menuService;

@@ -68,7 +68,7 @@ public class PatternCluster extends VerticalCluster
         descriptionButton = new Button("Beschreibung", LineAwesomeIcon.SCROLL_SOLID.create());
         descriptionButton.addClickListener(event ->
         {
-            new DescriptionDialog(s ->
+            new DescriptionDialog(container.getTempDescription(), s ->
             {
                 container.setTempDescription(s);
                 container.setTempState(ContainerState.UPDATE);
@@ -88,6 +88,7 @@ public class PatternCluster extends VerticalCluster
         {
             ComboBox<Component> comboBox = new ComboBox<>();
             comboBox.setWidthFull();
+            comboBox.setClearButtonVisible(true);
             comboBox.setItemLabelGenerator(Component::getName);
             comboBox.setItems(query ->
             {

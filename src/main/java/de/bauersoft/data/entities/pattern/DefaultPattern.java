@@ -36,6 +36,11 @@ public enum DefaultPattern
         return religious;
     }
 
+    public static boolean hasDefault(Pattern pattern)
+    {
+        return Arrays.stream(values()).anyMatch(p -> p.getName().equals(pattern.getName()));
+    }
+
     public Optional<DefaultPattern> fromName(String name)
     {
         return Optional.ofNullable

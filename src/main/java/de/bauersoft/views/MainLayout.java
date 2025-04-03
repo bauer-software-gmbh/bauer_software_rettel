@@ -31,7 +31,7 @@ import de.bauersoft.views.field.FieldView;
 import de.bauersoft.views.ingredient.IngredientView;
 import de.bauersoft.views.institution.InstitutionView;
 import de.bauersoft.views.kitchen.KitchenView;
-import de.bauersoft.views.menuBuilder.MenuBuilderView;
+import de.bauersoft.views.menuBuilderNew.MenuBuilderView;
 import de.bauersoft.views.menue.MenueView;
 import de.bauersoft.views.offers.OffersView;
 import de.bauersoft.views.order.OrderView;
@@ -197,11 +197,9 @@ public class MainLayout extends AppLayout
             if(accessChecker.hasAccess(MenuBuilderView.class))
             {
                 SideNavItem sideNavItem = new SideNavItem("Menü-Baukasten", MenuBuilderView.class, LineAwesomeIcon.BACON_SOLID.create());
-                sideNavItem.getElement().setAttribute("title", "Funktionales interaktives Menü Baukasten Entwicklungssystem 1.0");
+                sideNavItem.getElement().setAttribute("title", "Funktionales interaktives Menü Baukasten Entwicklungssystem 1.2");
                 backend.addItem(sideNavItem);
             }
-
-            backend.addItem(new SideNavItem("Menü-Baukasten NEU", de.bauersoft.views.menuBuilderNew.MenuBuilderView.class, LineAwesomeIcon.COINS_SOLID.create()));
 
             if(accessChecker.hasAccess(ComponentView.class))
                 backend.addItem(new SideNavItem("Komponenten", ComponentView.class, LineAwesomeIcon.CARROT_SOLID.create()));
