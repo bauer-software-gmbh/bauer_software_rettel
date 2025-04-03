@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specification<T>>
@@ -52,6 +53,21 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
         this.service = service;
 
         this.filters = new ArrayList<>();
+    }
+
+    @Override
+    public Stream<T> fetchFromBackEnd(Query<T, Specification<T>> query)
+    {
+        int page = query.getOffset() / query.getLimit();
+        List<T> cachedItems = cache.computeIfAbsent(page, p ->
+        {
+            List<T> items = super.fetchFromBackEnd(query).collect(Collectors.toList());
+            System.out.println("cached");
+            return items;
+        });
+
+        Specification<T> filter = query.getFilter().orElse(Specification.where(null));
+        return null;
     }
 
     public ConfigurableFilterDataProvider<T, Void, Specification<T>> getFilterDataProvider()
