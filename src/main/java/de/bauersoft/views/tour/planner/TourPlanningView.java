@@ -119,7 +119,7 @@ public class TourPlanningView extends Div
     private Grid<LocalDate> buildWeekGrid()
     {
         Grid<LocalDate> grid = new Grid<>(LocalDate.class, false);
-        grid.addColumn(Week::getKw).setHeader("KW");
+        grid.addColumn(Week::getKw).setHeader("KW").setWidth("50px").setFlexGrow(0).setFrozen(true);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
@@ -128,8 +128,8 @@ public class TourPlanningView extends Div
         grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item, DayOfWeek.WEDNESDAY, formatter))).setHeader("Mittwoch");
         grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item, DayOfWeek.THURSDAY, formatter))).setHeader("Donnerstag");
         grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item, DayOfWeek.FRIDAY, formatter))).setHeader("Freitag");
-        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item, DayOfWeek.SATURDAY, formatter))).setHeader("Samstag");
-        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item, DayOfWeek.SUNDAY, formatter))).setHeader("Sonntag");
+        //grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item, DayOfWeek.SATURDAY, formatter))).setHeader("Samstag");
+        //grid.addColumn(new ComponentRenderer<>(item -> createDayCell(item, DayOfWeek.SUNDAY, formatter))).setHeader("Sonntag");
 
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setSizeFull();

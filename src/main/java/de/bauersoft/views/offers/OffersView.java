@@ -123,14 +123,14 @@ public class OffersView extends Div
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
         Grid<LocalDate> grid = new Grid<>(LocalDate.class, false);
-        grid.addColumn(Week::getKw).setHeader("KW");
+        grid.addColumn(Week::getKw).setHeader("KW").setWidth("50px").setFlexGrow(0).setFrozen(true);
         grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.MONDAY, item), formatter))).setHeader("Montag");
         grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.TUESDAY, item), formatter))).setHeader("Dienstag");
         grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.WEDNESDAY, item), formatter))).setHeader("Mittwoch");
         grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.THURSDAY, item), formatter))).setHeader("Donnerstag");
         grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.FRIDAY, item), formatter))).setHeader("Freitag");
-        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.SATURDAY, item), formatter))).setHeader("Samstag");
-        grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.SUNDAY, item), formatter))).setHeader("Sonntag");
+        //grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.SATURDAY, item), formatter))).setHeader("Samstag");
+        //grid.addColumn(new ComponentRenderer<>(item -> createDayCell(Week.getDate(DayOfWeek.SUNDAY, item), formatter))).setHeader("Sonntag");
 
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setDataProvider(this.dataProvider);
