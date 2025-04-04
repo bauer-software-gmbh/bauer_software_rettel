@@ -21,6 +21,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 @RestController
 @RequestMapping("/api/mobile/tours")
@@ -34,6 +35,7 @@ public class TourController {
     private final AESUtil aesUtil;
     private final TourInstitutionService tourInstitutionService;
     private final TourLocationService tourLocationService;
+    private Random random;
 
     public TourController(TourService tourService, UserService userService, JwtTokenProvider jwtTokenProvider, AESUtil aesUtil, TourInstitutionService tourInstitutionService, TourLocationService tourLocationService) {
         this.tourService = tourService;
@@ -42,6 +44,7 @@ public class TourController {
         this.aesUtil = aesUtil;
         this.tourInstitutionService = tourInstitutionService;
         this.tourLocationService = tourLocationService;
+        this.random = new Random();
     }
 
     @GetMapping("/today")
@@ -162,7 +165,12 @@ public class TourController {
         LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault()); // oder ZoneId.of("Europe/Berlin")
 
         logger.info("🔍 Latidude : " + latitude + ", Longitude : " + longitude + ", UserID : " + userId + ", TourID : " + tourId + ", InstitutID : " + institutId);
-
+        if(latitude == 0.0){
+            latitude = 47.3 + (55.1 - 47.3) * random.nextDouble();
+        }
+        if(longitude == 0.0){
+            longitude = 5.9 + (15.0 - 5.9) * random.nextDouble();
+        }
         tourInstitutionService.updateTemperatureByTourIdAndInstitutionsId(temperature, localDateTime, tourId, institutId);
         tourLocationService.insertTourLocation(latitude, longitude, localDateTime, tourId, institutId);
         logger.info("✅ Temperatur und Standort für Tour " + tourId + " geupdatet");
