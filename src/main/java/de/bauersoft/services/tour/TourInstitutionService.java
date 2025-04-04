@@ -8,6 +8,7 @@ import de.bauersoft.data.entities.institution.Institution;
 import de.bauersoft.data.filters.SerializableFilter;
 import de.bauersoft.data.repositories.griddata.GridDataRepository;
 import de.bauersoft.data.repositories.tour.TourInstitutionRepository;
+import de.bauersoft.mobile.broadcaster.InstitutionUpdateBroadcaster;
 import de.bauersoft.services.ServiceBase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -135,8 +136,11 @@ public class TourInstitutionService implements ServiceBase<TourInstitution, Tour
         return repository.findAllUnplannedInstitutions(holidayMode);
     }
 
-    public void updateTemperatureByTourIdAndInstitutionsId(Number temperature, LocalDateTime localDateTime, Long tourId, Long institutId)
-    {
+    public void updateTemperatureByTourIdAndInstitutionsId(Number temperature, LocalDateTime localDateTime, Long tourId, Long institutId) {
         repository.updateTemperatureByTourIdAndInstitutionsId(temperature, localDateTime, tourId, institutId);
+
+        // ⬇️ Hole aktualisiertes Objekt (optional)
+        repository.findById(new TourInstitutionKey(tourId, institutId))
+                .ifPresent(InstitutionUpdateBroadcaster::broadcast);
     }
 }

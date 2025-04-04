@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TourService implements ServiceBase<Tour, Long>
@@ -159,11 +160,19 @@ public class TourService implements ServiceBase<Tour, Long>
             Driver driver = tour.getDriver();
             Driver coDriver = tour.getCoDriver();
 
-            // Institutionen abrufen
             List<TourInstitution> tourInstitutions = tourInstitutionRepository.findByTourId(tour.getId());
             List<Institution> institutions = tourInstitutions.stream()
                     .map(TourInstitution::getInstitution)
                     .toList();
+
+            Map<Long, TourInstitution> institutionToTIMap = tourInstitutions.stream()
+                    .filter(ti -> ti.getInstitution() != null && ti.getInstitution().getId() != null)
+                    .collect(Collectors.toMap(
+                            ti -> ti.getInstitution().getId(),
+                            ti -> ti,
+                            (existing, replacement) -> existing // Duplikate ignorieren
+                    ));
+
 
             // Adressen aus den Institutionen holen
             List<Address> addresses = institutions.stream()
@@ -178,7 +187,7 @@ public class TourService implements ServiceBase<Tour, Long>
             System.out.println("🏢 Institutionen gefunden: " + institutions.size());
             System.out.println("📍 Adressen gefunden: " + addresses.size());
 
-            tourDTOs.add(new TourDTO(tour, driver, coDriver, institutions, addresses, orders, tourEntry));
+            tourDTOs.add(new TourDTO(tour, driver, coDriver, institutions, addresses, orders, institutionToTIMap, tourEntry));
         }
 
         return tourDTOs;

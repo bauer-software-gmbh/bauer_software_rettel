@@ -2,6 +2,7 @@ package de.bauersoft.views.tour.map;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -16,6 +17,7 @@ import de.bauersoft.data.entities.tour.tour.Tour;
 import de.bauersoft.data.entities.tour.tour.TourInstitution;
 import de.bauersoft.data.entities.tour.tour.TourLocation;
 import de.bauersoft.data.repositories.tour.TourRepository;
+import de.bauersoft.mobile.broadcaster.InstitutionUpdateBroadcaster;
 import de.bauersoft.mobile.broadcaster.LocationBroadcaster;
 import de.bauersoft.mobile.model.DTO.TourLocationDTO;
 import de.bauersoft.services.tour.TourLocationService;
@@ -38,6 +40,7 @@ import software.xdev.vaadin.maps.leaflet.basictypes.LPoint;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -52,6 +55,9 @@ public class TourMap extends VerticalLayout {
     private final LMap map;
     private final LComponentManagementRegistry registry;
     private final TourRepository tourRepository;
+
+    private UI currentUI;
+    private Consumer<TourInstitution> institutionListener;
 
     private final Checkbox filterByTourCheckbox = new Checkbox("Nach Tour filtern");
     private final ComboBox<String> userComboBox = new ComboBox<>("Fahrer auswählen");
@@ -197,13 +203,21 @@ public class TourMap extends VerticalLayout {
             Long tourId = Long.parseLong(selectedValue.split(" - ")[0]);
             Optional<Tour> tour = tourRepository.findById(tourId);
             if (tour.isPresent()) {
-                List<TourInstitution> institutions = tour.get().getInstitutions().stream().toList();
-                institutionGrid.setItems(institutions);
+                List<TourInstitution> sortedInstitutions = tour.get().getInstitutions().stream()
+                        .sorted(Comparator.comparing(
+                                TourInstitution::getValidationDateTime,
+                                Comparator.nullsLast(Comparator.naturalOrder()) // Früheste Uhrzeit oben, nulls unten
+                        ))
+                        .toList();
+
+                institutionGrid.setItems(sortedInstitutions);
+
                 institutionGrid.setVisible(true);
 
                 adjustMapGridLayout(); // ⬅️ Hier hinzufügen
                 return;
             }
+
         }
 
         institutionGrid.setItems();
@@ -224,27 +238,54 @@ public class TourMap extends VerticalLayout {
 
     @Override
     protected void onAttach(AttachEvent event) {
+        this.currentUI = event.getUI(); // ⬅️ UI sichern
+
         this.locationListener = location -> {
             boolean isSameDate = location.getTimestamp().toLocalDate().equals(datePicker.getValue());
-            if (isSameDate) {
-                getUI().ifPresent(ui -> ui.access(this::updateUserLocations));
+
+            if (isSameDate && currentUI != null && currentUI.isAttached()) {
+                currentUI.access(() -> {
+                    System.out.println("[DEBUG] Neuer Standort -> updateUserLocations()");
+                    updateUserLocations();
+                });
             }
         };
         LocationBroadcaster.register(locationListener);
 
+        this.institutionListener = inst -> {
+            getUI().ifPresent(ui -> {
+                if (ui.isAttached()) {
+                    ui.access(() -> {
+                        System.out.println("[DEBUG] Neue Temperatur für Tour " + inst.getTour().getId());
+                        updateInstitutionGrid();
+                    });
+                }
+            });
+        };
+        InstitutionUpdateBroadcaster.register(this.institutionListener);
+
+
         this.removalListener = removed -> {
             boolean isSameDate = removed.getTimestamp().toLocalDate().equals(datePicker.getValue());
+
             if (isSameDate) {
                 String key = removed.getTourId() + "-" + removed.getTimestamp();
                 LMarker marker = userMarkers.remove(key);
                 if (marker != null) {
                     map.removeLayer(marker);
                 }
-                getUI().ifPresent(ui -> ui.access(this::updateUserLocations));
+
+                if (currentUI != null && currentUI.isAttached()) {
+                    currentUI.access(() -> {
+                        System.out.println("[DEBUG] Standort entfernt -> updateUserLocations()");
+                        updateUserLocations();
+                    });
+                }
             }
         };
         LocationBroadcaster.registerRemovalListener(removalListener);
     }
+
 
     @Override
     protected void onDetach(DetachEvent event) {
@@ -256,6 +297,13 @@ public class TourMap extends VerticalLayout {
             LocationBroadcaster.unregisterRemovalListener(this.removalListener);
             this.removalListener = null;
         }
+        if (institutionListener != null) {
+            InstitutionUpdateBroadcaster.unregister(institutionListener);
+            institutionListener = null;
+        }
+
+
+        this.currentUI = null;
     }
 
     private void updateUserLocations() {
@@ -420,7 +468,8 @@ public class TourMap extends VerticalLayout {
         String tourName = tourLocationService.getTourNameById(loc.getTourId());
         String formattedDate = loc.getTimestamp().toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
         String formattedTime = loc.getTimestamp().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-        String institutionID = tourLocationService.getInstitutionIdByLonLatAndTourID(loc.getLatitude(), loc.getLongitude(),loc.getTourId());
+        LocalDateTime timestamp = loc.getTimestamp().atZone(ZoneOffset.UTC).toLocalDateTime();
+        String institutionID = tourLocationService.getInstitutionIdByLonLatAndTourID(loc.getLatitude(), loc.getLongitude(),loc.getTourId(), timestamp);
         System.out.println(institutionID);
         return """
             <div style='line-height: 1.4em; font-size: 14px;'>

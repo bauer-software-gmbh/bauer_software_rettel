@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.lang.ScopedValue;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,4 +45,6 @@ public interface DriverRepository extends JpaRepository<Driver, Long>, JpaSpecif
         WHERE tour_id = :tourId
     """, nativeQuery = true)
     void deleteAllDriveableToursByTourId(Long tourId);
+
+    Optional<Driver> findByUser_Id(Long userId);
 }

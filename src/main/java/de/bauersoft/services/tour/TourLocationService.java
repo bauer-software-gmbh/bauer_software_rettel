@@ -79,9 +79,9 @@ public class TourLocationService {
                 .orElse("Unbekannt");
     }
 
-    public String getInstitutionIdByLonLatAndTourID(Double lon, Double lat, Long tourId)
+    public String getInstitutionIdByLonLatAndTourID(Double lon, Double lat, Long tourId, LocalDateTime time)
     {
-        return tourLocationRepository.findInstitutionIdByLonLatAndTourID(lon, lat, tourId);
+        return tourLocationRepository.findInstitutionIdByLonLatAndTourID(lon, lat, tourId, time);
     }
 
     public void insertTourLocation(Double latitude, Double longitude, LocalDateTime localDateTime, Long tourId, Long institutId)
@@ -97,9 +97,20 @@ public class TourLocationService {
         location.setLatitude(latitude);
         location.setLongitude(longitude);
         location.setTimestamp(localDateTime);
-        location.setMarkerIcon("X");
         location.setInstitution(institution);
+        location.setMarkerIcon("X"); // ✅ nicht vergessen!
 
         tourLocationRepository.save(location);
+
+        // Broadcast vorbereiten
+        TourLocationDTO dto = new TourLocationDTO();
+        dto.setId(location.getId());
+        dto.setTourId(tourId);
+        dto.setLatitude(latitude);
+        dto.setLongitude(longitude);
+        dto.setTimestamp(localDateTime);
+        dto.setMarkerIcon("X"); // ✅ für farbige Marker
+
+        LocationBroadcaster.broadcastNewLocation(dto);
     }
 }

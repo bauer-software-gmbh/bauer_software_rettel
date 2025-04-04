@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
+import java.lang.ScopedValue;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -140,5 +141,9 @@ public class DriverService implements ServiceBase<Driver, Long>
     public void deleteAllDriveableToursByTourId(Long tourId)
     {
         repository.deleteAllDriveableToursByTourId(tourId);
+    }
+
+    public Optional<Driver> findDriverByUserId(Long userId) {
+        return repository.findByUser_Id(userId);
     }
 }

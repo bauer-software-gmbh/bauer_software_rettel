@@ -28,8 +28,8 @@ public interface TourLocationRepository extends JpaRepository<TourLocation, Long
     SELECT new de.bauersoft.mobile.model.DTO.TourLocationDTO(t.id, t.latitude, t.longitude, t.timestamp, t.tour.id, t.markerIcon) FROM TourLocation t WHERE FUNCTION('DATE', t.timestamp) = :selectedDate AND t.timestamp = (SELECT MAX(t2.timestamp) FROM TourLocation t2 WHERE t2.tour.id = t.tour.id AND FUNCTION('DATE', t2.timestamp) = :selectedDate)""")
     List<TourLocationDTO> findLatestTourLocationsByDate(@Param("selectedDate") LocalDate selectedDate);
     @Query("""
-        Select t.institution.id from TourLocation t where t.latitude = :lat and t.longitude = :lon and t.tour.id = :tourId
+        Select t.institution.id from TourLocation t where t.latitude = :lat and t.longitude = :lon and t.tour.id = :tourId and t.timestamp = :time
                 """)
-    String findInstitutionIdByLonLatAndTourID(Double lon, Double lat, Long tourId);
+    String findInstitutionIdByLonLatAndTourID(Double lon, Double lat, Long tourId, LocalDateTime time);
 }
 

@@ -1,9 +1,11 @@
 package de.bauersoft.mobile.controller;
 
+import de.bauersoft.data.entities.tour.driver.Driver;
 import de.bauersoft.data.entities.user.User;
 //import de.bauersoft.mobile.model.DummyTourData;
 import de.bauersoft.mobile.model.DTO.TourDTO;
 import de.bauersoft.mobile.security.JwtTokenProvider;
+import de.bauersoft.services.tour.DriverService;
 import de.bauersoft.services.tour.TourInstitutionService;
 import de.bauersoft.services.tour.TourLocationService;
 import de.bauersoft.services.tour.TourService;
@@ -21,7 +23,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 @RestController
 @RequestMapping("/api/mobile/tours")
@@ -35,16 +36,16 @@ public class TourController {
     private final AESUtil aesUtil;
     private final TourInstitutionService tourInstitutionService;
     private final TourLocationService tourLocationService;
-    private Random random;
+    private final DriverService driverService;
 
-    public TourController(TourService tourService, UserService userService, JwtTokenProvider jwtTokenProvider, AESUtil aesUtil, TourInstitutionService tourInstitutionService, TourLocationService tourLocationService) {
+    public TourController(TourService tourService, UserService userService, JwtTokenProvider jwtTokenProvider, AESUtil aesUtil, TourInstitutionService tourInstitutionService, TourLocationService tourLocationService, DriverService driverService) {
         this.tourService = tourService;
         this.userService = userService;
         this.jwtTokenProvider = jwtTokenProvider;
         this.aesUtil = aesUtil;
         this.tourInstitutionService = tourInstitutionService;
         this.tourLocationService = tourLocationService;
-        this.random = new Random();
+        this.driverService = driverService;
     }
 
     @GetMapping("/today")
@@ -113,14 +114,19 @@ public class TourController {
         Long userId = tempUser.getId();
         logger.info("🔍 Timestamp : " + timestamp + ", UserID : " + userId + ", TourID : " + tourId + ", Start : " + start);
 
+        Driver DriverId = driverService.findDriverByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Fahrer mit User-ID " + userId + " nicht gefunden."));
+
+
+
         Instant instant = Instant.ofEpochMilli(timestamp);
         LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault()); // oder ZoneId.of("Europe/Berlin")
 
         if (start) {
-            tourService.updateStartTourByDriverIdAndTourId(userId, tourId, localDateTime);
+            tourService.updateStartTourByDriverIdAndTourId(DriverId.getId(), tourId, localDateTime);
             logger.info("✅ StartDateTime für Tour " + tourId + " geupdatet");
         } else {
-            tourService.updateEndTourByDriverIdAndTourId(userId, tourId, localDateTime);
+            tourService.updateEndTourByDriverIdAndTourId(DriverId.getId(), tourId, localDateTime);
             logger.info("✅ EndDateTime für Tour " + tourId + " geupdatet");
         }
 
@@ -165,12 +171,7 @@ public class TourController {
         LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault()); // oder ZoneId.of("Europe/Berlin")
 
         logger.info("🔍 Latidude : " + latitude + ", Longitude : " + longitude + ", UserID : " + userId + ", TourID : " + tourId + ", InstitutID : " + institutId);
-        if(latitude == 0.0){
-            latitude = 47.3 + (55.1 - 47.3) * random.nextDouble();
-        }
-        if(longitude == 0.0){
-            longitude = 5.9 + (15.0 - 5.9) * random.nextDouble();
-        }
+
         tourInstitutionService.updateTemperatureByTourIdAndInstitutionsId(temperature, localDateTime, tourId, institutId);
         tourLocationService.insertTourLocation(latitude, longitude, localDateTime, tourId, institutId);
         logger.info("✅ Temperatur und Standort für Tour " + tourId + " geupdatet");
