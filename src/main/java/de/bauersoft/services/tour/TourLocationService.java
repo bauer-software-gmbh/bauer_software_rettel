@@ -79,9 +79,9 @@ public class TourLocationService {
                 .orElse("Unbekannt");
     }
 
-    public String getInstitutionIdByLonLatAndTourID(Double lon, Double lat, Long tourId)
+    public String getInstitutionIdByLonLatAndTourID(Double lon, Double lat, Long tourId, LocalDateTime time)
     {
-        return tourLocationRepository.findInstitutionIdByLonLatAndTourID(lon, lat, tourId);
+        return tourLocationRepository.findInstitutionIdByLonLatAndTourID(lon, lat, tourId, time);
     }
 
     public void insertTourLocation(Double latitude, Double longitude, LocalDateTime localDateTime, Long tourId, Long institutId)

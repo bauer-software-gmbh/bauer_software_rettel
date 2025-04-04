@@ -23,13 +23,17 @@ public class RouteService
     {
         JSONArray coordinates = new JSONArray();
 
-        for(LatLngPoint point : points)
-        {
-            JSONArray coord = new JSONArray();
-            coord.put(point.getLng()); // [lng, lat] → GeoJSON-Konvention
-            coord.put(point.getLat());
-            coordinates.put(coord);
+        LatLngPoint previous = null;
+        for (LatLngPoint point : points) {
+            if (previous == null || !isSamePoint(previous, point)) {
+                JSONArray coord = new JSONArray();
+                coord.put(point.getLng());
+                coord.put(point.getLat());
+                coordinates.put(coord);
+                previous = point;
+            }
         }
+
 
         JSONObject body = new JSONObject();
         body.put("coordinates", coordinates);
@@ -68,5 +72,11 @@ public class RouteService
 
         return routePoints;
     }
+
+    private static boolean isSamePoint(LatLngPoint p1, LatLngPoint p2) {
+        return Double.compare(p1.getLat(), p2.getLat()) == 0 &&
+                Double.compare(p1.getLng(), p2.getLng()) == 0;
+    }
+
 }
 

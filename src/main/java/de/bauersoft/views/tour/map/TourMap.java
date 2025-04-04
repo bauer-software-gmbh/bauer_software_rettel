@@ -40,6 +40,7 @@ import software.xdev.vaadin.maps.leaflet.basictypes.LPoint;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -467,7 +468,8 @@ public class TourMap extends VerticalLayout {
         String tourName = tourLocationService.getTourNameById(loc.getTourId());
         String formattedDate = loc.getTimestamp().toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
         String formattedTime = loc.getTimestamp().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-        String institutionID = tourLocationService.getInstitutionIdByLonLatAndTourID(loc.getLatitude(), loc.getLongitude(),loc.getTourId());
+        LocalDateTime timestamp = loc.getTimestamp().atZone(ZoneOffset.UTC).toLocalDateTime();
+        String institutionID = tourLocationService.getInstitutionIdByLonLatAndTourID(loc.getLatitude(), loc.getLongitude(),loc.getTourId(), timestamp);
         System.out.println(institutionID);
         return """
             <div style='line-height: 1.4em; font-size: 14px;'>
