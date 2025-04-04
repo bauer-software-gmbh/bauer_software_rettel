@@ -97,9 +97,20 @@ public class TourLocationService {
         location.setLatitude(latitude);
         location.setLongitude(longitude);
         location.setTimestamp(localDateTime);
-        location.setMarkerIcon("X");
         location.setInstitution(institution);
+        location.setMarkerIcon("X"); // ✅ nicht vergessen!
 
         tourLocationRepository.save(location);
+
+        // Broadcast vorbereiten
+        TourLocationDTO dto = new TourLocationDTO();
+        dto.setId(location.getId());
+        dto.setTourId(tourId);
+        dto.setLatitude(latitude);
+        dto.setLongitude(longitude);
+        dto.setTimestamp(localDateTime);
+        dto.setMarkerIcon("X"); // ✅ für farbige Marker
+
+        LocationBroadcaster.broadcastNewLocation(dto);
     }
 }
