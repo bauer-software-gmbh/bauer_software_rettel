@@ -74,19 +74,13 @@ public class ComponentDialog extends Dialog
 		courseComboBox.setWidthFull();
 		courseComboBox.setRequired(true);
 		courseComboBox.setItemLabelGenerator(Course::getName);
-		courseComboBox.setItems(query ->
-		{
-			return FilterDataProvider.lazyFilteredStream(courseService, query, "name");
-		});
+		courseComboBox.setItems(courseService.findAll());
 
 		ComboBox<Unit> unitComboBox = new ComboBox<>("Einheit");
 		unitComboBox.setWidthFull();
 		unitComboBox.setRequired(true);
 		unitComboBox.setItemLabelGenerator(Unit::getName);
-		unitComboBox.setItems(query ->
-		{
-			return FilterDataProvider.lazyFilteredStream(unitService, query, "name");
-		});
+		unitComboBox.setItems(unitService.findAll());
 
 		HorizontalLayout propertiesLayout = new HorizontalLayout(courseComboBox, unitComboBox);
 		propertiesLayout.setWidthFull();

@@ -164,7 +164,7 @@ public class FilterDataProvider<T, ID> extends CallbackDataProvider<T, Specifica
 
         return service.list(pageable, (root, criteriaQuery, criteriaBuilder) ->
         {
-            return tinyFilterFunction.apply(root, criteriaQuery, criteriaBuilder, query.getFilter().orElseGet(() -> ""));
+            return tinyFilterFunction.apply(root, criteriaQuery, criteriaBuilder, query.getFilter().orElseGet(() -> "").toLowerCase());
         }).stream();
     }
 

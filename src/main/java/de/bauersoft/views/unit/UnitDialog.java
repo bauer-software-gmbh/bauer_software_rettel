@@ -63,10 +63,7 @@ public class UnitDialog extends Dialog
 		ComboBox<Unit> parentComboBox = new ComboBox<Unit>();
 		parentComboBox.setWidthFull();
 		parentComboBox.setItemLabelGenerator(Unit::getName);
-		parentComboBox.setItems(query ->
-		{
-			return FilterDataProvider.lazyFilteredStream(unitService, query, "name");
-		});
+		parentComboBox.setItems(unitService.findAll());
 
 		NumberField parentFactorNumberField = new NumberField();
 		parentFactorNumberField.setWidthFull();

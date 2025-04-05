@@ -78,22 +78,16 @@ public class IngredientDialog extends Dialog
         unitComboBox.setWidthFull();
         unitComboBox.setRequired(true);
         unitComboBox.setItemLabelGenerator(Unit::getName);
-        unitComboBox.setItems(query ->
-        {
-            return FilterDataProvider.lazyFilteredStream(unitService, query, "name");
-        });
+        unitComboBox.setItems(unitService.findAll());
 
         MultiSelectComboBox<Allergen> allergenMultiSelectComboBox = new MultiSelectComboBox<>();
         allergenMultiSelectComboBox.setWidthFull();
         allergenMultiSelectComboBox.setItemLabelGenerator(Allergen::getName);
-        allergenMultiSelectComboBox.setItems(query ->
-        {
-            return FilterDataProvider.lazyFilteredStream(allergenService, query, "name");
-        });
+        allergenMultiSelectComboBox.setItems(allergenService.findAll());
 
         MultiSelectComboBox<Additive> additiveMultiSelectComboBox = new MultiSelectComboBox<>();
         additiveMultiSelectComboBox.setWidthFull();
-        additiveMultiSelectComboBox.setItemLabelGenerator(Additive::getName);
+        additiveMultiSelectComboBox.setItemLabelGenerator(additive -> additive.getName() + " (" + additive.getDescription() + ")");
         additiveMultiSelectComboBox.setItems(query ->
         {
             return FilterDataProvider.lazyFilteredStream(additiveService, query, "name");

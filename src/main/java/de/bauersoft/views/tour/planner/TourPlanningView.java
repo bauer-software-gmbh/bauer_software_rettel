@@ -259,10 +259,12 @@ public class TourPlanningView extends Div
             copyDialog.setHeaderTitle("Tour kopieren");
 
             DatePicker startDate = new DatePicker("Von");
+            startDate.setI18n(new DatePickerLocaleGerman());
             startDate.setValue(entry.getDate().plusDays(1));
             startDate.setWidthFull();
 
             DatePicker endDate = new DatePicker("Bis");
+            endDate.setI18n(new DatePickerLocaleGerman());
             endDate.setValue(startDate.getValue());
             endDate.setWidthFull();
 

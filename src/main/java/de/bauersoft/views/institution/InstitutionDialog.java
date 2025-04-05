@@ -136,7 +136,7 @@ public class InstitutionDialog extends Dialog
 				{
 					return address.getStreet() + " " + address.getNumber() + " " + address.getPostal() + " " + address.getCity();
 				});
-		addressComboBox.setItems(addressService.getRepository().findAll());
+		addressComboBox.setItems(addressService.findAll());
 		addressComboBox.setWidthFull();
 
 		userMultiSelectComboBox = new MultiSelectComboBox<>();
@@ -144,7 +144,7 @@ public class InstitutionDialog extends Dialog
 				{
 					return user.getName() + " " + user.getSurname() + " [" + user.getEmail() + "]";
 				});
-		userMultiSelectComboBox.setItems(userService.getRepository().findAll());
+		userMultiSelectComboBox.setItems(userService.findAll());
 		userMultiSelectComboBox.setWidthFull();
 
 		informationTextArea = new TextArea();
@@ -183,21 +183,21 @@ public class InstitutionDialog extends Dialog
 
 		binder.forField(orderStartTimePicker).withValidator((value, context) ->
 		{
-			if(value == null || value.isAfter(orderEndTimePicker.getValue()))
-				return ValidationResult.error("Startzeit muss vor Endzeit liegen!");
-
-			if(value == null || value.isBefore(LocalTime.of(0, 5)))
-				return ValidationResult.error("Startzeit darf frühestens um 00:05 Uhr beginnen!");
-
-			return ValidationResult.ok();
+			return (value == null)
+					? ValidationResult.error("Startzeit ist erforderlich")
+					: (value.isAfter(orderEndTimePicker.getValue()))
+					? ValidationResult.error("Startzeit muss vor Endzeit liegen!")
+					: ValidationResult.ok();
 
 		}).bind(Institution::getOrderStart, Institution::setOrderStart);
 
 		binder.forField(orderEndTimePicker).withValidator((value, context) ->
 		{
-			return (value != null && value.isAfter(orderStartTimePicker.getValue())) ?
-					ValidationResult.ok() :
-					ValidationResult.error("Endzeit muss nach Startzeit liegen!");
+			return (value == null)
+					? ValidationResult.error("Endzeit ist erforderlich")
+					: (value.isBefore(orderStartTimePicker.getValue()))
+					? ValidationResult.error("Endzeit muss nach Startzeit liegen!")
+					: ValidationResult.ok();
 
 		}).bind(Institution::getOrderEnd, Institution::setOrderEnd);
 
@@ -207,6 +207,9 @@ public class InstitutionDialog extends Dialog
 
 
 		binder.readBean(item);
+
+		orderStartTimePicker.addValueChangeListener(event -> binder.validate());
+		orderEndTimePicker.addValueChangeListener(event -> binder.validate());
 
 		Button saveButton = new Button("Speichern");
 		saveButton.addClickShortcut(Key.ENTER);

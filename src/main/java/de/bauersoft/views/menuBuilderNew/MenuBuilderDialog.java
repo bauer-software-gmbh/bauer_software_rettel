@@ -67,10 +67,7 @@ public class MenuBuilderDialog extends Dialog
         ComboBox<Flesh> fleshComboBox = new ComboBox<>();
         fleshComboBox.setClearButtonVisible(true);
         fleshComboBox.setItemLabelGenerator(Flesh::getName);
-        fleshComboBox.setItems(query ->
-        {
-            return FilterDataProvider.lazyFilteredStream(fleshService, query, "name");
-        });
+        fleshComboBox.setItems(fleshService.findAll());
 
         formLayout.setColspan(formLayout.addFormItem(nameField, "Name"), 1);
         formLayout.setColspan(formLayout.addFormItem(fleshComboBox, "Fleischsorte"), 1);

@@ -36,11 +36,11 @@ public class Institution extends AbstractEntity
     @Column(length = 1024)
     private String information;
 
-    @Column(nullable = false, columnDefinition = "TIME default '00:00:05'")
-    private LocalTime orderStart = LocalTime.of(0, 5);
+    @Column(nullable = false, columnDefinition = "TIME default '00:00:00'")
+    private LocalTime orderStart = LocalTime.of(0, 0);
 
     @Column(nullable = false, columnDefinition = "TIME default '08:00:00'")
-    private LocalTime orderEnd = LocalTime.of(8, 8);
+    private LocalTime orderEnd = LocalTime.of(8, 0);
 
     @Column(nullable = false, columnDefinition = "DATE default '0010-01-01'")
     private LocalDate contractStart = LocalDate.of(10, 1, 1);

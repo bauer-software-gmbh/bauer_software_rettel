@@ -24,6 +24,7 @@ import de.bauersoft.views.address.AddressView;
 import de.bauersoft.views.allergen.AllergenView;
 import de.bauersoft.views.closingTime.ClosingTimeView;
 import de.bauersoft.views.component.ComponentView;
+import de.bauersoft.views.contract.ContractView;
 import de.bauersoft.views.course.CourseView;
 import de.bauersoft.views.driver.DriverView;
 import de.bauersoft.views.field.FieldView;
@@ -151,20 +152,20 @@ public class MainLayout extends AppLayout
         {
             SideNavItem tour = new SideNavItem("Touren-Planung");;
 
-            if(accessChecker.hasAccess(DriverView.class))
-                tour.addItem(new SideNavItem("Fahrer", DriverView.class, LineAwesomeIcon.HARD_HAT_SOLID.create()));
-
-            if(accessChecker.hasAccess(VehicleView.class))
-                tour.addItem(new SideNavItem("Fahrzeuge", VehicleView.class, LineAwesomeIcon.CAR_SOLID.create()));
-
             if(accessChecker.hasAccess(TourView.class))
-                tour.addItem(new SideNavItem("Touren Erstellung", TourView.class, LineAwesomeIcon.SHIPPING_FAST_SOLID.create()));
+                tour.addItem(new SideNavItem("Touren Übersicht", TourMap.class, LineAwesomeIcon.MAP_MARKED_ALT_SOLID.create()));
 
             if(accessChecker.hasAccess(TourView.class))
                 tour.addItem(new SideNavItem("Touren Planung", TourPlanningView.class, LineAwesomeIcon.CALENDAR_ALT_SOLID.create()));
 
             if(accessChecker.hasAccess(TourView.class))
-                tour.addItem(new SideNavItem("Touren Übersicht", TourMap.class, LineAwesomeIcon.MAP_MARKED_ALT_SOLID.create()));
+                tour.addItem(new SideNavItem("Touren Erstellung", TourView.class, LineAwesomeIcon.SHIPPING_FAST_SOLID.create()));
+
+            if(accessChecker.hasAccess(DriverView.class))
+                tour.addItem(new SideNavItem("Fahrer", DriverView.class, LineAwesomeIcon.HARD_HAT_SOLID.create()));
+
+            if(accessChecker.hasAccess(VehicleView.class))
+                tour.addItem(new SideNavItem("Fahrzeuge", VehicleView.class, LineAwesomeIcon.CAR_SOLID.create()));
 
             nav.addItem(tour);
         }
@@ -178,6 +179,9 @@ public class MainLayout extends AppLayout
 
             if(accessChecker.hasAccess(InstitutionView.class))
                 accounting.addItem(new SideNavItem("Institutionen", InstitutionView.class, LineAwesomeIcon.USERS_SOLID.create()));
+
+            if(accessChecker.hasAccess(ContractView.class))
+                accounting.addItem(new SideNavItem("Vertragslaufzeiten", ContractView.class, LineAwesomeIcon.SCROLL_SOLID.create()));
 
             if(accessChecker.hasAccess(AddressView.class))
                 accounting.addItem(new SideNavItem("Adressen", AddressView.class, LineAwesomeIcon.USERS_SOLID.create()));
